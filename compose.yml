@@ -1,0 +1,129 @@
+# MeeGame trên VPS. Chạy cạnh các app khác, không mở cổng nào ra Internet:
+# Cloudflare → Traefik (coolify-proxy, TLS letsencrypt) → mạng `coolify`:
+#   meegame.shop, www.meegame.shop → meegame-web:8080 (trang tĩnh, /srv/meegame/web)
+#   api.meegame.shop/api/*        → meegame-api:8787
+# Cài: xem HUONG-DAN.md. Chạy lại sau khi sửa: docker compose -f /srv/meegame/compose.yml up -d
+name: meegame
+
+services:
+  api:
+    image: python:3.12-slim
+    container_name: meegame-api
+    restart: unless-stopped
+    command: ["python3", "/app/meegame_api.py", "serve"]
+    # JEV_API_KEY nằm trong file này (chmod 600, chỉ root đọc). Không đưa lên GitHub.
+    env_file:
+      - /etc/meegame/env
+    environment:
+      MEEGAME_DB: /data/meegame.db
+      # Nghe mọi giao diện TRONG container là an toàn: không publish cổng, chỉ mạng coolify thấy nó.
+      MEEGAME_HOST: 0.0.0.0
+      MEEGAME_PORT: "8787"
+      MEEGAME_ORIGINS: https://meegame.shop,https://www.meegame.shop,https://hyenni151.github.io
+      # Traefik nằm trong 10.0.1.0/24 và chỉ thấy IP của Cloudflare → IP thật của khách ở CF-Connecting-IP.
+      MEEGAME_TRUSTED_PROXIES: 10.0.1.0/24
+      MEEGAME_REAL_IP_HEADER: CF-Connecting-IP
+      PYTHONUNBUFFERED: "1"
+    volumes:
+      - /srv/meegame/app:/app:ro
+      # File SQLite + WAL. Chủ 10002:10002 trên máy.
+      - /var/lib/meegame:/data
+    networks:
+      - coolify
+    init: true
+    stop_grace_period: 10s
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request;urllib.request.urlopen('http://127.0.0.1:8787/api/health',timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    # --- Thu hẹp quyền ---
+    user: "10002:10002"
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m,mode=1777
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 256m
+    cpus: 0.5
+    pids_limit: 64
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      # Chỉ /api/* có router; đường khác Traefik trả 404.
+      - "traefik.http.routers.meegame.rule=Host(`api.meegame.shop`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.meegame.entrypoints=https"
+      - "traefik.http.routers.meegame.tls=true"
+      - "traefik.http.routers.meegame.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.meegame.service=meegame"
+      - "traefik.http.routers.meegame-http.rule=Host(`api.meegame.shop`) && PathPrefix(`/api/`)"
+      - "traefik.http.routers.meegame-http.entrypoints=http"
+      - "traefik.http.routers.meegame-http.middlewares=meegame-https"
+      - "traefik.http.routers.meegame-http.service=meegame"
+      - "traefik.http.middlewares.meegame-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.meegame-https.redirectscheme.permanent=true"
+      - "traefik.http.services.meegame.loadbalancer.server.port=8787"
+
+  web:
+    image: nginxinc/nginx-unprivileged:1.27-alpine
+    container_name: meegame-web
+    restart: unless-stopped
+    volumes:
+      # Chép index.html, admin.html, *.js và assets/ vào đây là trang đổi ngay, không cần khởi động lại.
+      - /srv/meegame/web:/usr/share/nginx/html:ro
+      - /srv/meegame/web.conf:/etc/nginx/conf.d/default.conf:ro
+    networks:
+      - coolify
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://127.0.0.1:8080/"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+    read_only: true
+    tmpfs:
+      - /tmp:size=16m
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+    mem_limit: 64m
+    cpus: 0.25
+    pids_limit: 32
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+    labels:
+      - "traefik.enable=true"
+      - "traefik.docker.network=coolify"
+      - "traefik.http.routers.meegame-web.rule=Host(`meegame.shop`) || Host(`www.meegame.shop`)"
+      - "traefik.http.routers.meegame-web.entrypoints=https"
+      - "traefik.http.routers.meegame-web.tls=true"
+      - "traefik.http.routers.meegame-web.tls.certresolver=letsencrypt"
+      - "traefik.http.routers.meegame-web.middlewares=meegame-www"
+      - "traefik.http.routers.meegame-web.service=meegame-web"
+      - "traefik.http.routers.meegame-web-http.rule=Host(`meegame.shop`) || Host(`www.meegame.shop`)"
+      - "traefik.http.routers.meegame-web-http.entrypoints=http"
+      - "traefik.http.routers.meegame-web-http.middlewares=meegame-web-https"
+      - "traefik.http.middlewares.meegame-web-https.redirectscheme.scheme=https"
+      - "traefik.http.middlewares.meegame-web-https.redirectscheme.permanent=true"
+      - "traefik.http.routers.meegame-web-http.service=meegame-web"
+      # www.meegame.shop → meegame.shop (một địa chỉ duy nhất).
+      - "traefik.http.middlewares.meegame-www.redirectregex.regex=^https://www\\.meegame\\.shop/(.*)"
+      - "traefik.http.middlewares.meegame-www.redirectregex.replacement=https://meegame.shop/$${1}"
+      - "traefik.http.middlewares.meegame-www.redirectregex.permanent=true"
+      - "traefik.http.services.meegame-web.loadbalancer.server.port=8080"
+
+networks:
+  coolify:
+    external: true

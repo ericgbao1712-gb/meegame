@@ -1,0 +1,166 @@
+// Scene layouts per tier — PURE DATA, no DOM (the headless balance sim imports this).
+// Owned by the scene artist (Art-B). Initial version by the designer; Art-B may move any
+// coordinate to match the art, but must keep the schema and the counts (tables = TIERS.maxTables,
+// stoves = TIERS.maxStoves, waitSpots ≥ TIERS.waitSpots).
+//
+// Coordinates: world pixels, origin = top-left of the scene core (w × h). Characters are anchored
+// at their FEET (bottom-centre). Every drawable is y-sorted by its `y` (or `sortY` when given).
+//
+// Schema (see TECH_SPEC.md §Layout):
+// {
+//   scene, w, h,
+//   lane: { y },                         // pedestrians walk along this line, off-screen to on-screen
+//   aisles: [x…],                        // vertical walkways between table columns (routing, see TECH_SPEC §Routing)
+//   serviceY: y,                         // horizontal walkway between kitchen and dining area (per floor: serviceY2 on floor 2)
+//   spawn: [{x,y}],                      // off-screen entry/exit points (left, right)
+//   waitSpots: [{x,y,facing}],           // groups waiting for a free table (door queue)
+//   tables: [{x,y,floor, seats:[{x,y,facing}]×4 }],  // tabletop centre; seat order = fill order
+//   kitchen: { stoves:[{x,y,sortY}], chefSpots:[{x,y,facing}], pickup:{x,y}, ownerHome:{x,y} },
+//   staffSpots: { waiter:[{x,y}], cashier:{x,y}|null, quankho:{x,y}|null, manager:{x,y} },
+//   props: [{id,x,y}],                   // static y-sorted props art draws via drawProp(id,…)
+//   deco: { den:[…], cay:[…], tuong:[…], dacbiet:[…] },  // where equipped deco is drawn
+//   equip: { cooler, cooling, speaker, pos, tarp },       // where upgrade props are drawn
+//   sign: {x,y,w,h},                     // shop-name text box (overlay text drawn by renderer)
+//   street: { y } | null,                // vehicles drive along this y
+//   floors: [{id,y0,y1}], stairs: {bottom:{x,y}, top:{x,y}} | null
+// }
+
+// Stools stand at these spots; a seated guest is drawn SIT_LIFT px higher so they sit ON the stool (feet off the ground).
+export const SEAT = [
+  { dx: -16, dy: 3, facing: 'right' }, // left of table, looking right
+  { dx: 16, dy: 3, facing: 'left' },   // right of table
+  { dx: 0, dy: -8, facing: 'down' },   // behind the table, faces the camera
+  { dx: 0, dy: 13, facing: 'up' },     // in front, back to the camera
+];
+export const SIT_LIFT = 3.5;
+const table = (x, y, floor = 1) => ({ x, y, floor, seats: SEAT.map((s) => ({ x: x + s.dx, y: y + s.dy, facing: s.facing })) });
+
+const LAYOUTS = {
+  // ── Tier 1: quán lẩu vỉa hè ─────────────────────────────────────────
+  // Art: scene PNG assets/scenes/vihe.png (see data/scenes.js). Kitchen counters stand in the shop doorway.
+  vihe: {
+    scene: 'vihe', w: 144, h: 168,
+    lane: { y: 141 },
+    aisles: [50, 95, 140], serviceY: 84,
+    spawn: [{ x: -16, y: 141 }, { x: 160, y: 141 }],
+    waitSpots: [{ x: 14, y: 116, facing: 'right' }, { x: 14, y: 132, facing: 'right' }],
+    tables: [table(72, 96), table(118, 96), table(72, 126), table(118, 126)],
+    canopy: { x0: 26, x1: 143, yTop: 26, yFront: 100, ground: 146 },   // rain tarp pulled out over the tables
+    kitchen: {
+      stoves: [{ x: 50, y: 62, sortY: 74.5 }, { x: 72, y: 62, sortY: 74.5 }],
+      chefSpots: [{ x: 50, y: 60, facing: 'down' }, { x: 72, y: 60, facing: 'down' }],
+      pickup: { x: 61, y: 82 },
+      ownerHome: { x: 61, y: 60 },
+    },
+    staffSpots: { waiter: [{ x: 40, y: 88 }, { x: 40, y: 112 }], cashier: null, quankho: null, manager: { x: 96, y: 80 } },
+    props: [{ id: 'vihe_counter', x: 61, y: 74 }],
+    deco: { den: [{ x: 34, y: 22, w: 78 }], cay: [{ x: 126, y: 72 }], tuong: [{ x: 98, y: 32 }], dacbiet: [{ x: 22, y: 82 }] },
+    equip: { cooler: { x: 104, y: 76 }, cooling: { x: 134, y: 98 }, speaker: { x: 14, y: 72 }, pos: null, tarp: { x: 28, y: 20, w: 92 }, kho: { x: 92, y: 74 } },
+    sign: { x: 32, y: 5, w: 82, h: 12 },
+    street: { y: 160 },
+    floors: [{ id: 1, y0: 0, y1: 168 }], stairs: null,
+  },
+
+  // ── Tier 2: quán lẩu trong hẻm ──────────────────────────────────────
+  hem: {
+    scene: 'hem', w: 176, h: 204,
+    lane: { y: 196 },
+    aisles: [64, 112, 162], serviceY: 91,
+    spawn: [{ x: -16, y: 196 }, { x: 192, y: 196 }],
+    waitSpots: [{ x: 154, y: 156, facing: 'left' }, { x: 154, y: 170, facing: 'left' }, { x: 138, y: 184, facing: 'up' }],
+    tables: [table(88, 102), table(136, 102), table(40, 130), table(88, 130), table(136, 130), table(40, 158), table(88, 158)],
+    kitchen: {
+      stoves: [{ x: 34, y: 72, sortY: 84.5 }, { x: 56, y: 72, sortY: 84.5 }, { x: 78, y: 72, sortY: 84.5 }],
+      chefSpots: [{ x: 34, y: 70, facing: 'down' }, { x: 56, y: 70, facing: 'down' }, { x: 78, y: 70, facing: 'down' }],
+      pickup: { x: 56, y: 90 },
+      ownerHome: { x: 45, y: 70 },
+    },
+    staffSpots: { waiter: [{ x: 64, y: 91 }, { x: 112, y: 118 }, { x: 64, y: 146 }], cashier: { x: 156, y: 79 }, quankho: null, manager: { x: 112, y: 91 } },
+    props: [{ id: 'hem_counter', x: 56, y: 84 }, { id: 'hem_cashier_desk', x: 156, y: 85 }],
+    deco: { den: [{ x: 24, y: 27, w: 64 }], cay: [{ x: 10, y: 118 }], tuong: [{ x: 129, y: 40 }], dacbiet: [{ x: 168, y: 118 }] },
+    equip: { cooler: { x: 10, y: 92 }, cooling: { x: 166, y: 104 }, speaker: { x: 104, y: 86 }, pos: { x: 155, y: 79 }, tarp: null, kho: { x: 14, y: 142 } },
+    sign: { x: 77, y: 6, w: 62, h: 16 },
+    street: null,
+    floors: [{ id: 1, y0: 0, y1: 204 }], stairs: null,
+  },
+
+  // ── Tier 3: nhà hàng lẩu mặt phố ────────────────────────────────────
+  mapho: {
+    scene: 'mapho', w: 192, h: 236,
+    lane: { y: 196 },
+    aisles: [53, 99, 145], serviceY: 92,
+    spawn: [{ x: -16, y: 196 }, { x: 208, y: 196 }],
+    waitSpots: [{ x: 92, y: 192, facing: 'up' }, { x: 106, y: 192, facing: 'up' }, { x: 120, y: 192, facing: 'up' }, { x: 78, y: 192, facing: 'up' }],
+    tables: [table(76, 104), table(122, 104), table(168, 104), table(76, 135), table(122, 135), table(168, 135),
+      table(30, 135), table(76, 166), table(122, 166), table(30, 104)],
+    kitchen: {
+      stoves: [{ x: 38, y: 68, sortY: 80.5 }, { x: 60, y: 68, sortY: 80.5 }, { x: 82, y: 68, sortY: 80.5 }, { x: 104, y: 68, sortY: 80.5 }],
+      chefSpots: [{ x: 38, y: 66, facing: 'down' }, { x: 60, y: 66, facing: 'down' }, { x: 82, y: 66, facing: 'down' }, { x: 104, y: 66, facing: 'down' }],
+      pickup: { x: 71, y: 90 },
+      ownerHome: { x: 49, y: 66 },
+    },
+    staffSpots: { waiter: [{ x: 140, y: 92 }, { x: 53, y: 120 }, { x: 99, y: 152 }, { x: 145, y: 152 }], cashier: { x: 160, y: 79 }, quankho: { x: 18, y: 94 }, manager: { x: 150, y: 184 } },
+    props: [{ id: 'mapho_counter', x: 71, y: 80 }, { id: 'mapho_cashier_desk', x: 160, y: 86 }],
+    deco: { den: [{ x: 14, y: 31, w: 164 }], cay: [{ x: 184, y: 118 }, { x: 8, y: 158 }], tuong: [{ x: 148, y: 38 }], dacbiet: [{ x: 18, y: 112 }] },
+    equip: { cooler: { x: 134, y: 86 }, cooling: { x: 182, y: 150 }, speaker: { x: 186, y: 74 }, pos: { x: 160, y: 80 }, tarp: null, kho: { x: 14, y: 84 } },
+    sign: { x: 20, y: 3, w: 152, h: 15 },
+    street: { y: 222 },
+    floors: [{ id: 1, y0: 0, y1: 236 }], stairs: null,
+  },
+
+  // ── Tier 4 (and 5): nhà hàng lẩu 2 tầng ─────────────────────────────
+  haitang: {
+    scene: 'haitang', w: 192, h: 360,
+    lane: { y: 326 },
+    aisles: [59, 105, 151], serviceY: 232, serviceY2: 72,
+    spawn: [{ x: -16, y: 326 }, { x: 208, y: 326 }],
+    waitSpots: [{ x: 80, y: 322, facing: 'up' }, { x: 94, y: 322, facing: 'up' }, { x: 108, y: 322, facing: 'up' }, { x: 122, y: 322, facing: 'up' }, { x: 66, y: 322, facing: 'up' }],
+    tables: [
+      table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280), table(174, 280),
+      table(36, 88, 2), table(82, 88, 2), table(128, 88, 2), table(36, 116, 2), table(82, 116, 2), table(128, 116, 2),
+      table(105, 304),
+    ],
+    kitchen: {
+      stoves: [{ x: 36, y: 212, sortY: 224.5 }, { x: 58, y: 212, sortY: 224.5 }, { x: 80, y: 212, sortY: 224.5 }, { x: 102, y: 212, sortY: 224.5 }, { x: 124, y: 212, sortY: 224.5 }],
+      chefSpots: [{ x: 36, y: 210, facing: 'down' }, { x: 58, y: 210, facing: 'down' }, { x: 80, y: 210, facing: 'down' }, { x: 102, y: 210, facing: 'down' }, { x: 124, y: 210, facing: 'down' }],
+      pickup: { x: 80, y: 231 },
+      ownerHome: { x: 47, y: 210 },
+    },
+    staffSpots: {
+      waiter: [{ x: 150, y: 234 }, { x: 59, y: 265 }, { x: 105, y: 265 }, { x: 59, y: 102 }, { x: 105, y: 102 }],
+      cashier: { x: 152, y: 290 }, quankho: { x: 10, y: 228 }, manager: { x: 140, y: 240 },
+    },
+    props: [{ id: 'haitang_counter', x: 80, y: 224 }, { id: 'haitang_cashier_desk', x: 152, y: 296 }, { id: 'haitang_balcony', x: 96, y: 148 }],
+    deco: {
+      den: [{ x: 16, y: 192, w: 140 }, { x: 24, y: 34, w: 140 }],
+      cay: [{ x: 10, y: 262 }, { x: 22, y: 130 }],
+      tuong: [{ x: 146, y: 198 }, { x: 70, y: 40 }],
+      dacbiet: [{ x: 14, y: 244 }],
+    },
+    equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 152, y: 289 }, tarp: null, kho: { x: 14, y: 222 } },
+    sign: { x: 28, y: 157, w: 136, h: 13 },
+    street: { y: 346 },
+    floors: [{ id: 2, y0: 0, y1: 160 }, { id: 1, y0: 160, y1: 360 }],
+    stairs: { bottom: { x: 178, y: 258 }, top: { x: 178, y: 70 } },
+  },
+};
+
+const SCENE_BY_TIER = { 1: 'vihe', 2: 'hem', 3: 'mapho', 4: 'haitang', 5: 'haitang' };
+
+// Returns the layout for a tier. `tables`/`stoves` = how many are currently built;
+// the returned arrays are sliced to those counts (order = build order).
+export function getLayout(tier, { tables = Infinity, stoves = Infinity } = {}) {
+  const base = LAYOUTS[SCENE_BY_TIER[tier]];
+  return {
+    ...base,
+    tables: base.tables.slice(0, tables),
+    kitchen: {
+      ...base.kitchen,
+      stoves: base.kitchen.stoves.slice(0, stoves),
+      chefSpots: base.kitchen.chefSpots.slice(0, Math.max(1, Math.min(stoves, base.kitchen.chefSpots.length))),
+    },
+  };
+}
+
+export function sceneForTier(tier) { return SCENE_BY_TIER[tier]; }
+export const SCENES = Object.keys(LAYOUTS);

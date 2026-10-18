@@ -1,0 +1,5 @@
+.DS_Store
+# Ảnh bìa do covers-sync tự tải về trên VPS (không phải source)
+web/covers/
+*.db
+*.env
