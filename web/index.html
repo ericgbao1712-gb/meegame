@@ -1,0 +1,1144 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>MeeGame · Update Mã - Link</title>
+<meta name="description" content="Link game web gom từ nhiều nguồn, Team MeeGame tuyển chọn. Bấm là chơi.">
+<meta property="og:title" content="MeeGame · Update Mã - Link">
+<meta property="og:description" content="Link game web gom từ nhiều nguồn, Team MeeGame tuyển chọn. Bấm là chơi.">
+<meta property="og:image" content="https://meegame.shop/assets/logo-256.png">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://meegame.shop/">
+<meta name="theme-color" content="#FFF6F8">
+<link rel="icon" href="assets/logo-256.png">
+<link rel="apple-touch-icon" href="assets/logo-256.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://s.wordpress.com">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  // Chọn giao diện sáng/tối trước khi vẽ trang để không bị nháy.
+  (() => {
+    try {
+      const saved = localStorage.getItem('meegame_theme');
+      const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark-mode');
+    } catch (_) {}
+  })();
+</script>
+<style>
+:root {
+  --bg: #FFF6F8;
+  --raised: #FFFFFF;
+  --fill: #FCEAF0;
+  --fill-2: #F8DCE6;
+  --line: #F4DEE5;
+  --ink: #2B1820;
+  --ink-2: #7A5864;
+  --accent: #C21E5C;
+  --on-accent: #FFFFFF;
+  --tint: #FDE1EB;
+  --on-tint: #9A1747;
+  --scrim: rgba(43, 24, 32, .42);
+  --lift: 0 10px 30px rgba(120, 30, 64, .14), 0 1px 3px rgba(120, 30, 64, .08);
+  --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --gutter: 16px;
+  --bar-h: 112px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: light;
+}
+html.dark-mode {
+  --bg: #170F13;
+  --raised: #22181D;
+  --fill: #2B1F25;
+  --fill-2: #382930;
+  --line: #34262D;
+  --ink: #FBF0F4;
+  --ink-2: #C9A9B5;
+  --accent: #FF8DB4;
+  --on-accent: #3B0A1D;
+  --tint: #3F1F2C;
+  --on-tint: #FFB6CF;
+  --scrim: rgba(0, 0, 0, .6);
+  --lift: 0 12px 34px rgba(0, 0, 0, .55);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 400 16px/1.5 var(--font);
+  caret-color: var(--accent);
+  -webkit-tap-highlight-color: transparent;
+}
+html { scrollbar-color: var(--fill-2) transparent; }
+::selection { background: var(--tint); color: var(--on-tint); }
+h1, h2, h3 { text-wrap: balance; }
+p { text-wrap: pretty; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+button, input { font: inherit; color: inherit; }
+button { cursor: pointer; border: 0; background: none; padding: 0; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { width: 100%; max-width: 1080px; margin: 0 auto; padding: 0 var(--gutter); }
+.num { font-variant-numeric: tabular-nums; }
+.icon { width: 20px; height: 20px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Đầu trang: như trang giới thiệu một ứng dụng ---------- */
+.hero { display: grid; grid-template-columns: auto 1fr; gap: 14px; align-items: center; padding-top: calc(58px + env(safe-area-inset-top)); padding-bottom: 14px; position: relative; }
+.hero-logo { width: 84px; height: 84px; border-radius: 22px; background: var(--fill); box-shadow: 0 0 0 1px var(--line); object-fit: cover; }
+.hero h1 { margin: 0; font-size: 28px; line-height: 1.1; font-weight: 700; letter-spacing: -.02em; }
+.hero-sub { margin: 2px 0 0; font-size: 15px; font-weight: 600; color: var(--accent); }
+.hero-tag { margin: 4px 0 0; font-size: 14px; line-height: 1.4; color: var(--ink-2); max-width: 36ch; }
+.tools { position: absolute; top: calc(10px + env(safe-area-inset-top)); right: var(--gutter); display: flex; gap: 6px; }
+.tool { min-width: 40px; height: 40px; padding: 0 11px; border-radius: 999px; background: var(--fill); display: inline-grid; place-items: center; font-size: 13px; font-weight: 600; transition: background .15s; }
+.tool:hover { background: var(--fill-2); }
+.tool .icon { width: 18px; height: 18px; }
+.hero-text { padding-right: 0; }
+html:not(.dark-mode) .when-dark, html.dark-mode .when-light { display: none; }
+
+/* ---------- Nhóm Zalo: nằm trên cùng, xanh Zalo cho người từ Zalo nhận ra ngay ---------- */
+.zalo-top { padding-top: calc(10px + env(safe-area-inset-top)); }
+.zalo-top + .hero { padding-top: 56px; }
+.zalo-top + .hero .tools { top: 10px; }
+.zalo-cta { position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; min-height: 62px; padding: 10px 10px 10px 10px; border-radius: 18px; color: #fff;
+  background: linear-gradient(120deg, #0062F5 0%, #1E7BFF 55%, #4B9BFF 100%); box-shadow: 0 8px 22px rgba(0, 98, 245, .32); animation: zalo-glow 1.6s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
+.zalo-cta::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; pointer-events: none;
+  background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, .55) 50%, transparent 100%); transform: translateX(-130%) skewX(-18deg); animation: zalo-shine 2.4s ease-in-out infinite; }
+.zalo-cta:active { transform: scale(.985); }
+.zalo-ico { position: relative; width: 42px; height: 42px; border-radius: 13px; background: #fff; color: #0062F5; display: grid; place-items: center; flex: none; }
+.zalo-ico .icon { width: 22px; height: 22px; stroke-width: 2.1; }
+.zalo-ico::after { content: ''; position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: #FF4D8D; box-shadow: 0 0 0 2px #1E7BFF; animation: zalo-blink 1s steps(2, jump-none) infinite; }
+.zalo-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
+.zalo-text b { font-size: 16px; font-weight: 700; letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.zalo-text small { font-size: 13px; line-height: 1.3; opacity: .92; }
+.zalo-go { flex: none; height: 38px; padding: 0 10px 0 14px; border-radius: 999px; background: #fff; color: #0062F5; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.zalo-go .icon { width: 16px; height: 16px; stroke-width: 2.4; }
+/* Điện thoại hẹp: nút chỉ còn mũi tên để tên nhóm không bị cắt. */
+@media (max-width: 420px) { .zalo-go { width: 38px; padding: 0; justify-content: center; } .zalo-go > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .zalo-go .icon { width: 18px; height: 18px; } }
+@keyframes zalo-glow { 0%, 100% { box-shadow: 0 8px 22px rgba(0, 98, 245, .32), 0 0 0 0 rgba(30, 123, 255, .55); } 50% { box-shadow: 0 8px 26px rgba(0, 98, 245, .45), 0 0 0 7px rgba(30, 123, 255, 0); } }
+@keyframes zalo-shine { 0% { transform: translateX(-130%) skewX(-18deg); } 55%, 100% { transform: translateX(260%) skewX(-18deg); } }
+@keyframes zalo-blink { 0% { opacity: 1; } 100% { opacity: .15; } }
+
+/* ---------- Ô mô tả: người chơi kể game mình muốn ---------- */
+.ask { padding-top: 6px; padding-bottom: 4px; }
+.ask-box { display: grid; gap: 4px; padding: 14px 14px 12px; border-radius: 22px; background: var(--fill); transition: box-shadow .2s var(--ease), background .2s; }
+.ask-box:focus-within { background: var(--raised); box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(10, 122, 79, .12); }
+html.dark-mode .ask-box:focus-within { box-shadow: 0 0 0 2px var(--accent), 0 8px 24px rgba(0, 0, 0, .45); }
+.ask-title { font-size: 17px; font-weight: 700; letter-spacing: -.01em; }
+.ask-field { position: relative; }
+.ask-field textarea { display: block; width: 100%; min-height: 52px; max-height: 140px; padding: 2px 30px 0 0; border: 0; background: none; resize: none; font: inherit; font-size: 17px; line-height: 1.45; color: var(--ink); outline: none; field-sizing: content; }
+.ask-field textarea::placeholder { color: var(--ink-2); }
+.ask-clear { position: absolute; top: -6px; right: -8px; width: 40px; height: 40px; display: grid; place-items: center; color: var(--ink-2); border-radius: 999px; }
+.ask-clear .icon { width: 16px; height: 16px; padding: 3px; box-sizing: content-box; border-radius: 999px; background: var(--fill-2); }
+.ask-clear[hidden] { display: none; }
+.ask-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 6px; }
+.ask-random { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 12px 0 8px; margin-left: -6px; border-radius: 999px; font-size: 15px; font-weight: 600; color: var(--ink-2); white-space: nowrap; transition: background .15s, color .15s; }
+.ask-random:hover { background: var(--fill-2); color: var(--ink); }
+.ask-go { display: inline-flex; align-items: center; gap: 8px; height: 44px; padding: 0 18px 0 16px; border-radius: 999px; background: var(--accent); color: var(--on-accent); font-size: 16px; font-weight: 700; white-space: nowrap; transition: transform .15s var(--ease), filter .15s; }
+.ask-go:hover { filter: brightness(1.08); }
+.ask-go:active { transform: scale(.96); }
+.ask-go .icon { width: 18px; height: 18px; }
+.ask-go[aria-busy="true"] { pointer-events: none; }
+.ask-go[aria-busy="true"] .icon { animation: ask-pulse .9s var(--ease) infinite alternate; }
+@keyframes ask-pulse { to { opacity: .3; transform: scale(.85); } }
+@media (prefers-reduced-motion: reduce) { .ask-go[aria-busy="true"] .icon { animation: none; opacity: .5; } }
+.ideas { display: flex; gap: 8px; margin: 10px calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) 2px; overflow-x: auto; scrollbar-width: none; }
+.ideas::-webkit-scrollbar { display: none; }
+.idea { flex: none; height: 36px; padding: 0 14px; border-radius: 999px; box-shadow: inset 0 0 0 1px var(--line); font-size: 14px; font-weight: 500; color: var(--ink); white-space: nowrap; transition: background .15s, box-shadow .15s; }
+.idea:hover { background: var(--fill); box-shadow: inset 0 0 0 1px var(--fill-2); }
+
+/* ---------- Hàng chọn mục (dính trên cùng) ---------- */
+.bar { position: sticky; top: 0; z-index: 20; background: var(--bg); padding: 10px 0; }
+.bar.stuck { box-shadow: 0 1px 0 var(--line); }
+.bar .wrap { display: flex; align-items: center; gap: 8px; }
+.jump { flex: none; width: 40px; height: 36px; border-radius: 999px; background: var(--tint); color: var(--on-tint); display: none; place-items: center; }
+.bar.stuck .jump { display: grid; }
+.bar.stuck .cats { margin-left: 0; padding-left: 0; }
+.jump .icon { width: 18px; height: 18px; }
+.cats-sep { flex: none; width: 1px; height: 20px; background: var(--fill-2); align-self: center; }
+
+/* ---------- Khối mục ---------- */
+main { padding-bottom: 8px; }
+.block { padding-top: 20px; }
+.sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
+.sec-head h2 { margin: 0; font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; }
+.see-all { font-size: 15px; font-weight: 600; color: var(--accent); padding: 10px 0 10px 12px; margin: -10px 0; }
+.see-all:hover { text-decoration: underline; text-underline-offset: 3px; }
+.sec-note { margin: 2px 0 0; font-size: 14px; color: var(--ink-2); }
+
+/* Dải game mới, vuốt ngang: 3 thẻ một màn hình */
+.carousel { list-style: none; margin: 12px calc(-1 * var(--gutter)) 0; padding: 0 var(--gutter) 6px; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 2 * 10px) / 3); gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; scroll-padding: 0 var(--gutter); scrollbar-width: none; }
+.carousel::-webkit-scrollbar { display: none; }
+.card { scroll-snap-align: start; min-width: 0; }
+.card-shot { position: relative; display: block; aspect-ratio: 600 / 420; border-radius: 16px; overflow: hidden; background: var(--fill); box-shadow: inset 0 0 0 1px var(--line); transition: transform .2s var(--ease); }
+.card-shot:active { transform: scale(.98); }
+.card-shot img, .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top; opacity: 0; transition: opacity .3s var(--ease); }
+.card-shot img.on, .thumb img.on { opacity: 1; }
+.card-body { display: flex; align-items: center; gap: 10px; padding-top: 10px; }
+.card-text { flex: 1; min-width: 0; }
+.card-date { margin: 0; font-size: 12px; font-weight: 600; color: var(--accent); }
+.card-name { margin: 1px 0 0; font-size: 16px; line-height: 1.3; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.carousel .card-shot { border-radius: 12px; }
+.carousel .card-body { flex-direction: column; align-items: stretch; gap: 8px; padding-top: 8px; }
+.carousel .card-date { font-size: 11px; }
+.carousel .card-name { font-size: 14px; line-height: 1.25; white-space: normal; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; min-height: 2.5em; overflow-wrap: anywhere; }
+.carousel .get { width: 100%; min-width: 0; height: 32px; padding: 0 8px; font-size: 13px; }
+.letter { width: 100%; height: 100%; display: grid; place-items: center; font-size: 28px; font-weight: 700; color: var(--ink-2); background: var(--fill); }
+
+/* Nút Chơi kiểu "Nhận" của kho ứng dụng */
+.get { position: relative; flex: none; min-width: 64px; height: 32px; padding: 0 14px; border-radius: 999px; display: inline-grid; place-items: center; background: var(--tint); color: var(--on-tint); font-size: 14px; font-weight: 700; transition: transform .15s var(--ease), background .15s; }
+.get:hover { background: var(--accent); color: var(--on-accent); }
+.get:active { transform: scale(.94); }
+.get::before { content: ''; position: absolute; inset: -6px -4px; }
+.get.again { background: var(--fill); color: var(--ink); }
+.get.again:hover { background: var(--fill-2); color: var(--ink); }
+.get.fresh { animation: pop .45s var(--ease); }
+@keyframes pop { 0% { transform: scale(.85); } 60% { transform: scale(1.06); } 100% { transform: scale(1); } }
+
+/* Hàng game */
+.entries { list-style: none; margin: 0; padding: 0; }
+.entry { position: relative; display: grid; grid-template-columns: 80px auto minmax(0, 1fr) auto; align-items: center; gap: 0 12px; padding: 10px 0; }
+.entry::after { content: ''; position: absolute; left: 92px; right: 0; bottom: 0; border-bottom: 1px solid var(--line); }
+.entry:last-child::after { display: none; }
+.entry.ranked::after { left: 124px; }
+.thumb { display: block; width: 80px; aspect-ratio: 600 / 420; border-radius: 12px; overflow: hidden; background: var(--fill); box-shadow: inset 0 0 0 1px var(--line); }
+.thumb .letter { font-size: 20px; }
+.rank { width: 20px; text-align: center; font-size: 17px; font-weight: 700; }
+.entry:not(.ranked) .rank { display: none; }
+.entry:not(.ranked) { grid-template-columns: 80px minmax(0, 1fr) auto; }
+.entry-name { margin: 0; font-size: 16px; line-height: 1.3; font-weight: 600; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.entry-name a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.entry-meta { margin: 3px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 2px 6px; font-size: 13px; color: var(--ink-2); }
+.entry-meta .cat { flex-basis: 100%; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mark { padding: 1px 7px; border-radius: 6px; font-size: 12px; font-weight: 600; }
+.mark.new { background: var(--tint); color: var(--on-tint); }
+.mark.hot { background: var(--fill); color: var(--ink); }
+
+/* Đang hot: bảng xếp hạng */
+.hot-list { list-style: none; margin: 8px 0 0; padding: 0; }
+.chart-note { margin: 12px 0; padding: 14px; border-radius: 14px; background: var(--fill); color: var(--ink-2); font-size: 14px; }
+.foot-note { margin: 6px 0 0; font-size: 13px; color: var(--ink-2); }
+.foot-note b { color: var(--ink); font-weight: 600; }
+
+/* Danh sách theo chữ cái */
+.contents { padding-top: 26px; }
+.list-wrap { margin-top: 6px; }
+/* Hàng chip thể loại trong thanh dính */
+.cats { flex: 1; min-width: 0; display: flex; gap: 8px; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); overflow-x: auto; scrollbar-width: none; scroll-padding: 0 var(--gutter);
+  --fade-l: 0px; --fade-r: 0px;
+  -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent);
+          mask-image: linear-gradient(to right, transparent 0, #000 var(--fade-l), #000 calc(100% - var(--fade-r)), transparent); }
+.cats.more-l { --fade-l: 32px; }
+.cats.more-r { --fade-r: 40px; }
+.cats::-webkit-scrollbar { display: none; }
+.cats[hidden] { display: none; }
+.chip { flex: none; height: 36px; padding: 0 14px; border-radius: 999px; background: var(--fill); font-size: 14px; font-weight: 600; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px; transition: background .15s, color .15s; }
+.chip small { font-size: 12px; font-weight: 500; color: var(--ink-2); }
+.chip:hover { background: var(--fill-2); }
+.chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
+.chip[aria-pressed="true"] small { color: var(--on-accent); color: color-mix(in srgb, var(--on-accent) 80%, var(--accent)); }
+.chip:active { transform: scale(.96); }
+.chip { transition: background .15s, color .15s, transform .15s var(--ease); }
+/* Đầu mỗi thể loại: ô biểu tượng + tên + số game, mỗi thể loại một màu */
+.group { --c: var(--accent); }
+.group[data-cat="food"]  { --c: #DD5A2E; }
+.group[data-cat="drink"] { --c: #B5730F; }
+.group[data-cat="shop"]  { --c: #D23A70; }
+.group[data-cat="farm"]  { --c: #2E8A44; }
+.group[data-cat="life"]  { --c: #7A4ECF; }
+.group[data-cat="brain"] { --c: #2E6ECB; }
+.group[data-cat="other"] { --c: var(--ink-2); }
+html.dark-mode .group[data-cat="food"]  { --c: #FF9C78; }
+html.dark-mode .group[data-cat="drink"] { --c: #F3B95C; }
+html.dark-mode .group[data-cat="shop"]  { --c: #FF8DB4; }
+html.dark-mode .group[data-cat="farm"]  { --c: #7FD08F; }
+html.dark-mode .group[data-cat="life"]  { --c: #B99DFF; }
+html.dark-mode .group[data-cat="brain"] { --c: #86B5FF; }
+.group + .group { margin-top: 16px; }
+.group-head { position: sticky; top: var(--bar-h); z-index: 5; display: flex; align-items: center; gap: 12px; padding: 18px 0 12px; background: var(--bg); }
+.group-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--c), transparent 80%); }
+.gh-ico { flex: none; width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #fff; background: var(--c); box-shadow: 0 4px 12px -4px var(--c); }
+html.dark-mode .gh-ico { color: var(--bg); }
+.gh-ico .icon { width: 22px; height: 22px; stroke-width: 2; }
+.group-head h3 { flex: 1; min-width: 0; margin: 0; font-size: 19px; line-height: 1.25; font-weight: 800; letter-spacing: -.01em; }
+.group-head p { flex: none; margin: 0; padding: 4px 10px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--ink); color: color-mix(in srgb, var(--c) 72%, var(--ink)); background: var(--fill); background: color-mix(in srgb, var(--c) 18%, var(--bg)); }
+.empty { padding: 28px 16px 36px; text-align: center; }
+.empty img { width: 200px; margin: 0 auto 8px; }
+.empty p { margin: 0 auto 14px; max-width: 32ch; color: var(--ink-2); }
+.empty button { height: 40px; padding: 0 18px; border-radius: 999px; background: var(--tint); color: var(--on-tint); font-weight: 700; }
+
+/* ---------- Chân trang ---------- */
+.about { padding-top: 36px; padding-bottom: calc(40px + env(safe-area-inset-bottom)); }
+.about h2 { margin: 0 0 12px; font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+.about-grid { display: grid; gap: 14px; }
+.facts { margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); border-radius: 16px; background: var(--fill); }
+.facts div { padding: 14px 12px; text-align: center; }
+.facts div + div { box-shadow: -1px 0 0 var(--line); }
+.facts dt { font-size: 12px; color: var(--ink-2); }
+.facts dd { margin: 2px 0 0; font-size: 20px; font-weight: 700; }
+.stats-note { margin: -6px 0 0; font-size: 13px; color: var(--ink-2); text-align: center; }
+.group-list { list-style: none; margin: 0; padding: 0; border-radius: 16px; background: var(--fill); overflow: hidden; }
+.group-list li + li .row { box-shadow: inset 0 1px 0 var(--line); }
+.row { width: 100%; min-height: 52px; display: flex; align-items: center; gap: 12px; padding: 10px 14px; text-align: left; font-size: 15px; transition: background .15s; }
+.row:hover { background: var(--fill-2); }
+.row > span { flex: 1; min-width: 0; }
+.row small { display: block; font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
+.row .ico { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; background: var(--tint); color: var(--on-tint); flex: none; }
+.row .ico .icon { width: 17px; height: 17px; }
+.row .chev { width: 16px; height: 16px; color: var(--ink-2); }
+
+/* ---------- Bảng cài đặt ---------- */
+.sheet-backdrop { position: fixed; inset: 0; z-index: 40; background: var(--scrim); opacity: 0; pointer-events: none; transition: opacity .25s; }
+.sheet { position: fixed; z-index: 41; left: 0; right: 0; bottom: 0; margin: 0 auto; max-width: 520px; max-height: 88vh; overflow: auto; background: var(--bg); border-radius: 22px 22px 0 0; padding: 8px 16px calc(20px + env(safe-area-inset-bottom)); transform: translateY(105%); transition: transform .32s var(--ease); box-shadow: var(--lift); visibility: hidden; }
+.sheet::before { content: ''; display: block; width: 38px; height: 5px; border-radius: 3px; background: var(--fill-2); margin: 0 auto 8px; }
+body.settings-open .sheet { transform: none; visibility: visible; }
+body.settings-open .sheet-backdrop { opacity: 1; pointer-events: auto; }
+body.settings-open { overflow: hidden; }
+.sheet-head { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+.sheet-head img { width: 52px; }
+.sheet-head h2 { flex: 1; margin: 0; font-size: 20px; font-weight: 700; }
+.close { width: 40px; height: 40px; border-radius: 999px; background: var(--fill); display: grid; place-items: center; }
+.close .icon { width: 16px; height: 16px; }
+.switch { width: 46px; height: 28px; border-radius: 999px; background: var(--fill-2); position: relative; flex: none; transition: background .2s; }
+.switch::after { content: ''; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .25); transition: transform .22s var(--ease); }
+[aria-pressed="true"] > .switch { background: var(--accent); }
+[aria-pressed="true"] > .switch::after { transform: translateX(18px); }
+.seg { display: inline-flex; padding: 2px; border-radius: 8px; background: var(--fill-2); flex: none; }
+.seg span { padding: 3px 10px; border-radius: 6px; font-size: 13px; font-weight: 600; color: var(--ink-2); }
+.seg span.on { background: var(--raised); color: var(--ink); box-shadow: 0 1px 2px rgba(0, 0, 0, .15); }
+.sheet .group-list { background: var(--fill); }
+.toast { position: fixed; z-index: 50; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); transform: translate(-50%, 20px); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .25s var(--ease); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ---------- Màn rộng ---------- */
+@media (min-width: 720px) {
+  :root { --gutter: 28px; }
+  .hero { grid-template-columns: auto 1fr auto; gap: 20px; padding-top: 32px; padding-bottom: 20px; }
+  .zalo-top { padding-top: 20px; }
+  .zalo-top + .hero { padding-top: 24px; }
+  .zalo-cta { min-height: 72px; padding: 12px 14px 12px 14px; }
+  .zalo-text b { font-size: 18px; }
+  .zalo-text small { font-size: 14px; }
+  .hero-logo { width: 112px; height: 112px; border-radius: 26px; }
+  .hero h1 { font-size: 36px; }
+  .tools { position: static; align-self: start; }
+  .ask-box { padding: 18px 18px 14px; }
+  .ask-title { font-size: 19px; }
+  .carousel { grid-auto-columns: calc((100% - 2 * 14px) / 3); gap: 14px; }
+  .carousel .card-name { font-size: 15px; }
+  .hot-list, .entries { display: grid; grid-template-columns: 1fr 1fr; column-gap: 36px; }
+  .entry:last-child::after { display: block; }
+}
+@media (min-width: 1000px) {
+  .carousel { margin: 12px 0 0; padding: 0 0 6px; grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); grid-auto-columns: auto; overflow: visible; }
+  .card:nth-child(n+9) { display: none; }
+}
+@media (hover: hover) { .card-shot:hover { transform: translateY(-2px); } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; scroll-behavior: auto !important; }
+  .sheet { transform: none; opacity: 0; transition: opacity .2s, visibility .2s; }
+  body.settings-open .sheet { opacity: 1; }
+  .toast { transform: translate(-50%, 0); }
+  .get:active, .ask-go:active, .chip:active, .card-shot:active, .card-shot:hover { transform: none !important; }
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-dice" viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="4"/><circle cx="9" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="15" r="1.1" fill="currentColor" stroke="none"/><circle cx="15" cy="9" r="1.1" fill="currentColor" stroke="none"/><circle cx="9" cy="15" r="1.1" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 3v1.5M12 19.5V21M3 12h1.5M19.5 12H21M5.6 5.6l1.1 1.1M17.3 17.3l1.1 1.1M5.6 18.4l1.1-1.1M17.3 6.7l1.1-1.1"/></symbol>
+  <symbol id="i-moon" viewBox="0 0 24 24"><path d="M19.5 14.5A8 8 0 0 1 9.5 4.5a8 8 0 1 0 10 10z"/></symbol>
+  <symbol id="i-gear" viewBox="0 0 24 24"><path d="M4 8h9M17 8h3M4 16h3M11 16h9"/><circle cx="15" cy="8" r="2"/><circle cx="9" cy="16" r="2"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+  <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3"/><path d="M19.5 4.5v4.5H15"/></symbol>
+  <symbol id="i-chat" viewBox="0 0 24 24"><path d="M5 5h14a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1h-8l-4.5 3.5V16H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z"/></symbol>
+  <symbol id="i-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M4 12h16M12 4c2.5 2.6 2.5 13.4 0 16M12 4c-2.5 2.6-2.5 13.4 0 16"/></symbol>
+  <symbol id="i-chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></symbol>
+  <symbol id="c-food" viewBox="0 0 24 24"><path d="M4 11h16a8 7 0 0 1-16 0z"/><path d="M9 3.5c-.9 1.1.9 2.4 0 3.5M13 3.5c-.9 1.1.9 2.4 0 3.5"/><path d="M9 20.5h6"/></symbol>
+  <symbol id="c-drink" viewBox="0 0 24 24"><path d="M5 8h14"/><path d="M6.5 8l1.4 11.2a1.5 1.5 0 0 0 1.5 1.3h5.2a1.5 1.5 0 0 0 1.5-1.3L17.5 8"/><path d="M12.5 8 14 3h3"/><circle cx="10" cy="17" r=".9" fill="currentColor" stroke="none"/><circle cx="13.5" cy="16" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="c-shop" viewBox="0 0 24 24"><path d="M4 9l1.5-4.5h13L20 9"/><path d="M4 9a2.67 2.67 0 0 0 5.33 0 2.67 2.67 0 0 0 5.34 0A2.67 2.67 0 0 0 20 9"/><path d="M5.5 12v8h13v-8"/><path d="M10 20v-4.5h4V20"/></symbol>
+  <symbol id="c-farm" viewBox="0 0 24 24"><path d="M12 20v-8"/><path d="M12 12c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5z"/><path d="M12 10.5c0-3.5 2.5-6 6.5-6 0 3.5-2.5 6-6.5 6z"/><path d="M6.5 20.5h11"/></symbol>
+  <symbol id="c-life" viewBox="0 0 24 24"><path d="M12 19.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.4-7.5 10-7.5 10z"/></symbol>
+  <symbol id="c-brain" viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="2.6"/><path d="M9.5 11h5M10.6 11l-.9 5.8h4.6l-.9-5.8"/><path d="M7 20.5h10l-1-3.7H8z"/></symbol>
+  <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
+</svg>
+
+<div class="zalo-top wrap">
+  <a class="zalo-cta" href="https://zalo.me/g/bgbs9qknlnznjoegfjxp" target="_blank" rel="noopener noreferrer">
+    <span class="zalo-ico" aria-hidden="true"><svg class="icon"><use href="#i-chat"/></svg></span>
+    <span class="zalo-text"><b data-i18n="zalo">Nhóm Zalo MeeGame</b><small data-i18n="zaloHint">Nhận mã &amp; link game mới</small></span>
+    <span class="zalo-go"><span data-i18n="zaloGo">Vào nhóm</span><svg class="icon" aria-hidden="true"><use href="#i-chev"/></svg></span>
+  </a>
+</div>
+
+<header class="hero wrap">
+  <img class="hero-logo" src="assets/logo.webp" width="168" height="168" alt="Logo MeeGame: mèo chơi game">
+  <div class="hero-text">
+    <h1>MeeGame</h1>
+    <p class="hero-sub">Update Mã – Link</p>
+    <p class="hero-tag" data-i18n="tagline">Link game gom từ nhiều nguồn, Team MeeGame tuyển chọn.</p>
+  </div>
+  <div class="tools">
+    <button class="tool" type="button" id="lang-quick" data-i18n-label="langLabel">EN</button>
+    <button class="tool" type="button" id="theme-quick" data-i18n-label="darkLabel" aria-pressed="false">
+      <svg class="icon when-light"><use href="#i-moon"/></svg><svg class="icon when-dark"><use href="#i-sun"/></svg>
+    </button>
+    <button class="tool" type="button" id="settings-open" aria-expanded="false" aria-controls="settings" data-i18n-label="settings">
+      <svg class="icon"><use href="#i-gear"/></svg>
+    </button>
+  </div>
+</header>
+
+<section class="ask wrap" aria-labelledby="ask-title">
+  <form class="ask-box" id="ask" role="search">
+    <label class="ask-title" id="ask-title" for="q" data-i18n="askTitle">Hôm nay muốn chơi gì?</label>
+    <div class="ask-field">
+      <textarea id="q" rows="2" enterkeyhint="search" autocomplete="off" spellcheck="false"></textarea>
+      <button class="ask-clear" type="button" id="ask-clear" data-i18n-label="askClear" hidden><svg class="icon"><use href="#i-close"/></svg></button>
+    </div>
+    <div class="ask-foot">
+      <button class="ask-random" type="button" id="random"><svg class="icon"><use href="#i-dice"/></svg><span data-i18n="random">Chơi đại</span></button>
+      <button class="ask-go" type="submit"><svg class="icon"><use href="#i-search"/></svg><span data-i18n="askGo">Tìm game</span></button>
+    </div>
+  </form>
+  <div class="ideas" id="ideas" role="group" data-i18n-label="ideasLabel"></div>
+</section>
+
+<div id="bar-anchor"></div>
+<nav class="bar" id="bar" data-i18n-label="barLabel">
+  <div class="wrap">
+    <button class="jump" type="button" id="jump" data-i18n-label="jumpAsk"><svg class="icon"><use href="#i-search"/></svg></button>
+    <div class="cats" id="cats" role="group" data-i18n-label="catsLabel"></div>
+  </div>
+</nav>
+
+<main class="wrap">
+  <div id="home">
+    <section class="block" aria-labelledby="chart-title">
+      <div class="sec-head">
+        <h2 id="chart-title" data-i18n="headHot">Đang hot</h2>
+        <button class="see-all" type="button" id="see-hot" data-i18n="seeAll">Xem hết</button>
+      </div>
+      <p class="sec-note" data-i18n="chartNote">Game được cả nhóm bấm chơi nhiều nhất</p>
+      <ol class="hot-list" id="chart-list"></ol>
+      <p class="foot-note num" id="chart-foot"></p>
+    </section>
+    <section class="block" aria-labelledby="shelf-title">
+      <div class="sec-head">
+        <h2 id="shelf-title" data-i18n="headNew">Mới lên kệ</h2>
+        <button class="see-all" type="button" id="see-new" data-i18n="seeAll">Xem hết</button>
+      </div>
+      <p class="sec-note" id="shelf-note"></p>
+      <ul class="carousel" id="carousel"></ul>
+    </section>
+  </div>
+
+  <section class="contents" id="contents" aria-labelledby="section-title">
+    <div class="sec-head">
+      <h2 id="section-title">Tất cả game</h2>
+    </div>
+    <p class="sec-note num" id="section-meta"></p>
+    <div class="list-wrap" id="groups" aria-live="polite"></div>
+  </section>
+</main>
+
+<footer class="about wrap">
+  <h2 data-i18n="about">Về MeeGame</h2>
+  <div class="about-grid">
+    <div style="display:grid;gap:12px">
+      <dl class="facts num">
+        <div><dt data-i18n="factGames">Game</dt><dd id="f-games">–</dd></div>
+        <div><dt data-i18n="factPlays">Lượt bấm</dt><dd id="f-plays">–</dd></div>
+        <div><dt data-i18n="factVisitors">Người ghé</dt><dd id="f-visitors">–</dd></div>
+      </dl>
+      <p class="stats-note" id="stats-note"></p>
+    </div>
+  </div>
+</footer>
+
+<div class="sheet-backdrop" id="sheet-backdrop"></div>
+<aside class="sheet" id="settings" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+  <div class="sheet-head">
+    <img src="assets/cat-settings.webp" width="160" height="180" alt="">
+    <h2 id="settings-title" data-i18n="settings">Cài đặt</h2>
+    <button class="close" type="button" id="settings-close" data-i18n-label="close"><svg class="icon"><use href="#i-close"/></svg></button>
+  </div>
+  <ul class="group-list">
+    <li><button class="row" type="button" id="update"><span class="ico"><svg class="icon"><use href="#i-refresh"/></svg></span><span><span id="update-label" data-i18n="update">Tải phiên bản mới nhất</span><small data-i18n="updateHint">Khi danh sách có game mới mà máy chưa hiện</small></span></button></li>
+    <li><button class="row" type="button" id="theme" aria-pressed="false"><span class="ico"><svg class="icon"><use href="#i-moon"/></svg></span><span data-i18n="dark">Giao diện tối</span><span class="switch" aria-hidden="true"></span></button></li>
+    <li><button class="row" type="button" id="lang"><span class="ico"><svg class="icon"><use href="#i-globe"/></svg></span><span data-i18n="language">Ngôn ngữ / Language</span><span class="seg" aria-hidden="true"><span data-lang="vi">VI</span><span data-lang="en">EN</span></span></button></li>
+    <li><a class="row" href="https://zalo.me/g/bgbs9qknlnznjoegfjxp" target="_blank" rel="noopener noreferrer"><span class="ico"><svg class="icon"><use href="#i-chat"/></svg></span><span data-i18n="zalo">Nhóm Zalo MeeGame</span><svg class="icon chev"><use href="#i-chev"/></svg></a></li>
+  </ul>
+</aside>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="games-seed.js"></script>
+<script src="titles-en.js"></script>
+<script src="categories.js"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+  // Máy chủ MeeGame (SQLite trên VPS), đặt trong config.js. Không có thì chạy bằng danh sách dự phòng.
+  const API = String(window.MEEGAME_API || '').trim().replace(/\/+$/, '');
+  const apiReady = /^https:\/\/[^\s/]+/.test(API) || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(API);
+
+  const store = {
+    get(k) { try { return localStorage.getItem(k); } catch (_) { return null; } },
+    set(k, v) { try { localStorage.setItem(k, v); } catch (_) {} }
+  };
+  const TITLE_EN = window.MEEGAME_TITLE_EN || {};
+  const CATS = window.MEEGAME_CATEGORIES || [];
+  const CAT_KEYS = new Set(CATS.map(c => c.key));
+  const WORD_EN = window.MEEGAME_WORD_EN || {};
+
+  const T = {
+    vi: {
+      tagline: 'Link game gom từ nhiều nguồn, Team MeeGame tuyển chọn.',
+      shelved: d => `Lên kệ ${d}`,
+      shelfNote: n => `${n} game thêm trong 5 ngày qua`, shelfLatest: 'Những game thêm gần đây nhất',
+      seeAll: 'Xem hết',
+      chartNote: 'Game được cả nhóm bấm chơi nhiều nhất',
+      chartLoading: 'Đang đếm lượt chơi của cả nhóm…',
+      chartEmpty: 'Chưa có lượt chơi nào được ghi nhận. Bấm Chơi để mở hàng!',
+      chartError: 'Chưa tải được lượt chơi. Kiểm tra mạng rồi mở lại trang.',
+      chartFoot: (p, v) => `Tổng ${p} lượt bấm · ${v} người ghé trang`,
+      plays: n => `${n} lượt chơi`,
+      random: 'Chơi đại', askTitle: 'Hôm nay muốn chơi gì?', askPh: 'Ví dụ: game nấu ăn nhẹ nhàng, hay tên một game',
+      askGo: 'Tìm game', askClear: 'Xoá mô tả', jumpAsk: 'Mô tả game bạn muốn', ideasLabel: 'Gợi ý nhanh',
+      ideas: ['Nấu ăn nhẹ nhàng', 'Mở tiệm bán hàng', 'Pha trà, cà phê', 'Trồng trọt, xây làng', 'Đấu trí, chơi cờ', 'Game mới ra', 'Đang được chơi nhiều'],
+      headAsk: 'Gợi ý cho bạn', noteAsk: (n, q) => `${n} game hợp với “${q}”`,
+      emptyAsk: q => `Chưa tìm ra game hợp với “${q}”. Thử kể khác đi, ví dụ “bán hàng” hay “trồng rau”.`,
+      tabAll: 'Tất cả', tabNew: 'Mới', tabHot: 'Hot', tabsLabel: 'Chọn mục', barLabel: 'Tìm và lọc game',
+      headAll: 'Tất cả game', headNew: 'Mới lên kệ', headHot: 'Đang hot',
+      noteAll: n => `${n} game · chia theo thể loại`, noteCat: n => `${n} game · xếp A → Z`,
+      catAll: 'Tất cả', catOther: 'Khác', catsLabel: 'Chọn thể loại', noteNew: n => `${n} game · thêm trong 5 ngày qua`, noteHot: n => `${n} game · top 8 theo lượt bấm`,
+      noteSearch: (n, q) => `${n} game khớp “${q}”`,
+      groupCount: n => `${n} game`,
+      play: 'Chơi', playAgain: 'Chơi lại', playLabel: name => `Chơi ${name} (mở tab mới)`, markNew: 'Mới', markHot: 'Hot',
+      emptySearch: q => `Không có game nào khớp “${q}”. Thử gõ ngắn hơn hoặc không dấu.`,
+      emptyNew: 'Chưa có game nào lên kệ trong 5 ngày qua.', emptyHot: 'Chưa có lượt chơi để xếp hạng.',
+      clearSearch: 'Xoá tìm kiếm', backToAll: 'Xem tất cả game',
+      settings: 'Cài đặt', close: 'Đóng', update: 'Tải phiên bản mới nhất', updateHint: 'Khi danh sách có game mới mà máy chưa hiện',
+      checking: 'Đang kiểm tra bản mới…', reloading: 'Đang tải bản mới…', checkFail: 'Chưa kiểm tra được. Thử lại sau nhé.',
+      dark: 'Giao diện tối', darkLabel: 'Đổi giao diện sáng / tối', language: 'Ngôn ngữ / Language', langLabel: 'Switch to English',
+      zalo: 'Nhóm Zalo MeeGame', zaloHint: 'Nhận mã & link game mới', zaloGo: 'Vào nhóm',
+      about: 'Về MeeGame',
+      factGames: 'Game', factPlays: 'Lượt bấm', factVisitors: 'Người ghé',
+      statsOk: 'Số liệu chung của mọi người, cập nhật mỗi 30 giây.', statsLoading: 'Đang tải số liệu…',
+      statsError: 'Chưa tải được số liệu thống kê. Kiểm tra mạng rồi mở lại trang.',
+      opening: name => `Đang mở: ${name}`
+    },
+    en: {
+      tagline: 'Web game links gathered from many sources, picked by Team MeeGame.',
+      shelved: d => `Added ${d}`,
+      shelfNote: n => `${n} games added in the last 5 days`, shelfLatest: 'The most recently added games',
+      seeAll: 'See all',
+      chartNote: 'Games the group plays the most',
+      chartLoading: 'Counting everyone’s plays…',
+      chartEmpty: 'No plays recorded yet. Tap Play to start the chart!',
+      chartError: 'Could not load play counts. Check your connection and reopen the page.',
+      chartFoot: (p, v) => `${p} plays in total · ${v} visitors`,
+      plays: n => `${n} plays`,
+      random: 'Surprise me', askTitle: 'What do you feel like playing?', askPh: 'E.g. a calm cooking game, or a game name',
+      askGo: 'Find games', askClear: 'Clear', jumpAsk: 'Describe a game', ideasLabel: 'Quick ideas',
+      ideas: ['Calm cooking', 'Run a shop', 'Tea & coffee', 'Farm & build a town', 'Brain games & chess', 'Just released', 'Most played'],
+      headAsk: 'Picked for you', noteAsk: (n, q) => `${n} games for “${q}”`,
+      emptyAsk: q => `Nothing fits “${q}” yet. Try other words, like “shop” or “farm”.`,
+      tabAll: 'All', tabNew: 'New', tabHot: 'Hot', tabsLabel: 'Choose a section', barLabel: 'Search and filter games',
+      headAll: 'All games', headNew: 'Just added', headHot: 'Trending',
+      noteAll: n => `${n} games · by category`, noteCat: n => `${n} games · A → Z`,
+      catAll: 'All', catOther: 'Other', catsLabel: 'Choose a category', noteNew: n => `${n} games · added in the last 5 days`, noteHot: n => `${n} games · top 8 by plays`,
+      noteSearch: (n, q) => `${n} games match “${q}”`,
+      groupCount: n => `${n} ${n === 1 ? 'game' : 'games'}`,
+      play: 'Play', playAgain: 'Replay', playLabel: name => `Play ${name} (opens a new tab)`, markNew: 'New', markHot: 'Hot',
+      emptySearch: q => `No game matches “${q}”. Try a shorter word.`,
+      emptyNew: 'No games were added in the last 5 days.', emptyHot: 'No plays yet to rank.',
+      clearSearch: 'Clear search', backToAll: 'See all games',
+      settings: 'Settings', close: 'Close', update: 'Load the latest version', updateHint: 'When new games are not showing on your phone yet',
+      checking: 'Checking for updates…', reloading: 'Loading the latest version…', checkFail: 'Could not check. Please try again later.',
+      dark: 'Dark theme', darkLabel: 'Toggle light / dark theme', language: 'Language / Ngôn ngữ', langLabel: 'Chuyển sang tiếng Việt',
+      zalo: 'MeeGame Zalo group', zaloHint: 'New game codes & links', zaloGo: 'Join',
+      about: 'About MeeGame',
+      factGames: 'Games', factPlays: 'Plays', factVisitors: 'Visitors',
+      statsOk: 'Shared counts for everyone, refreshed every 30 seconds.', statsLoading: 'Loading stats…',
+      statsError: 'Could not load stats. Check your connection and reopen the page.',
+      opening: name => `Opening: ${name}`
+    }
+  };
+  let lang = store.get('meegame_language') === 'en' ? 'en' : 'vi';
+  const t = (k, ...a) => { const v = T[lang][k] ?? T.vi[k] ?? k; return typeof v === 'function' ? v(...a) : v; };
+  const locale = () => lang === 'en' ? 'en-US' : 'vi-VN';
+  const fmt = n => Number(n || 0).toLocaleString(locale());
+  // Gỡ dấu để tìm "banh mi" vẫn ra "Bánh mì".
+  const fold = s => (s || '').toLocaleLowerCase('vi-VN').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+
+  // Dịch tên game: ưu tiên title_en, rồi bảng tên, rồi dịch theo từng từ.
+  const phrases = Object.keys(WORD_EN).filter(k => k.includes(' ')).sort((a, b) => b.length - a.length);
+  function englishTitle(g) {
+    if (g.titleEn) return g.titleEn;
+    const title = g.name.replace(/\s+/g, ' ').trim();
+    if (TITLE_EN[title]) return TITLE_EN[title];
+    const normalized = title.toLocaleLowerCase('vi');
+    if (WORD_EN[normalized]) return WORD_EN[normalized];
+    let out = normalized;
+    for (const p of phrases) out = out.replace(new RegExp(p.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'gi'), WORD_EN[p]);
+    out = out.split(/(\s+|[-–—])/).map(part => WORD_EN[part.toLocaleLowerCase('vi')] || part).join('');
+    return out.replace(/\s+/g, ' ').trim().replace(/^./, c => c.toUpperCase());
+  }
+  const titleOf = g => lang === 'en' ? englishTitle(g) : g.name;
+
+  // ---------- Dữ liệu game ----------
+  const CACHE_KEY = 'meegame_games_cache_v1';
+  const PLAYED_KEY = 'meegame_played_v1';
+  const RECENT_START = new Date('2026-09-06T00:00:00');
+  const today = new Date(); today.setHours(0, 0, 0, 0);
+
+  function safeHttp(u) {
+    try { const x = new URL(String(u || '').trim()); return /^https?:$/.test(x.protocol) ? x.href : null; }
+    catch (_) { return null; }
+  }
+  function parseDay(raw) {
+    if (!raw || !/^\d{4}-\d{2}-\d{2}/.test(raw)) return null;
+    const d = new Date(raw.slice(0, 10) + 'T00:00:00');
+    return Number.isNaN(d.getTime()) ? null : d;
+  }
+  // Game chưa có ảnh bìa riêng: chụp tự động, khung 1200x840 đúng tỉ lệ thẻ nên không bị cắt.
+  const autoShot = url => 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(url) + '?w=720&h=504&vpw=1200&vph=840';
+  // Ảnh bìa tự làm (meegame.shop/covers/x.webp) có thêm bản nhỏ x-s.webp cho hàng danh sách.
+  const smallOf = src => /\/covers\/[\w-]+\.webp$/.test(src) ? src.replace(/\.webp$/, '-s.webp') : src;
+  function normalize(rows) {
+    const seen = new Set();
+    return (rows || []).map(r => {
+      const url = safeHttp(r.url);
+      const name = String(r.name || '').trim();
+      if (!url || !name || seen.has(url)) return null;
+      seen.add(url);
+      return {
+        name, url, key: url,
+        cover: safeHttp(r.cover_url) || autoShot(r.url.trim()),
+        shot: autoShot(r.url.trim()),
+        titleEn: (r.title_en || '').trim(),
+        aliases: r.aliases || '',
+        added: parseDay(r.added_at),
+        cat: CAT_KEYS.has(r.category) ? r.category : (SEED_CAT[url] || null)
+      };
+    }).filter(Boolean);
+  }
+  // Thể loại dự phòng theo link, cho game trên máy chủ chưa được xếp loại.
+  const SEED_CAT = {};
+  (window.MEEGAME_SEED || []).forEach(r => { const u = safeHttp(r.url); if (u && r.category) SEED_CAT[u] = r.category; });
+  function readCache() { try { const v = JSON.parse(store.get(CACHE_KEY) || 'null'); return Array.isArray(v) && v.length ? v : null; } catch (_) { return null; } }
+
+  let games = normalize(readCache() || window.MEEGAME_SEED || []);
+  let counts = {};
+  let countsState = apiReady ? 'loading' : 'error';
+  let visitorCount = null;
+  let statsState = apiReady ? 'loading' : 'error';
+  let played = new Set();
+  try { played = new Set(JSON.parse(store.get(PLAYED_KEY) || '[]')); } catch (_) {}
+  let freshPlay = null;
+  // view: 'all' | 'new' | 'hot' | mã thể loại | 'other'. ask: kết quả của ô mô tả (null = chưa hỏi).
+  let view = 'all';
+  let ask = null;
+  const catLabel = key => { const c = CATS.find(x => x.key === key); return c ? c[lang] : t('catOther'); };
+  const catOrder = key => { const i = CATS.findIndex(x => x.key === key); return i < 0 ? CATS.length : i; };
+
+  const countFor = g => Number(counts[g.key] || 0);
+  function isRecent(g) {
+    if (!g.added) return false;
+    const win = new Date(today); win.setDate(win.getDate() - 4);
+    return g.added >= new Date(Math.max(RECENT_START.getTime(), win.getTime())) && g.added <= today;
+  }
+  const byName = (a, b) => a.name.localeCompare(b.name, 'vi', { sensitivity: 'base', numeric: true });
+  const byNewest = (a, b) => (b.added - a.added) || (countFor(b) - countFor(a)) || byName(a, b);
+  const recentList = () => games.filter(isRecent).sort(byNewest);
+  const hotList = () => games.filter(g => countFor(g) > 0).sort((a, b) => countFor(b) - countFor(a) || byName(a, b)).slice(0, 8);
+  const dayLabel = d => String(d.getDate()).padStart(2, '0') + '.' + String(d.getMonth() + 1).padStart(2, '0');
+
+  // ---------- Dựng phần tử ----------
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v;
+      else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v);
+      else el.setAttribute(k, v === true ? '' : v);
+    }
+    for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
+    return el;
+  }
+  const outLink = (g, attrs, ...kids) => h('a', { href: g.url, target: '_blank', rel: 'noopener noreferrer', onclick: () => onPlay(g), ...attrs }, ...kids);
+  // Ảnh lỗi thì thử lần lượt: ảnh nhỏ -> ảnh lớn -> ảnh tự chụp -> chữ cái đầu.
+  function shot(g, eager, small) {
+    const srcs = [...new Set([small && smallOf(g.cover), g.cover, g.shot].filter(Boolean))];
+    const img = h('img', { src: srcs.shift(), alt: '', loading: eager ? 'eager' : 'lazy', decoding: 'async', referrerpolicy: 'no-referrer', width: 600, height: 420 });
+    img.addEventListener('load', () => img.classList.add('on'), { once: true });
+    img.addEventListener('error', () => {
+      if (srcs.length) img.src = srcs.shift();
+      else img.replaceWith(h('span', { class: 'letter', 'aria-hidden': 'true', text: g.name.charAt(0) }));
+    });
+    return img;
+  }
+  // Nút Chơi: game đã chơi trên máy này đổi thành "Chơi lại".
+  function getButton(g) {
+    const again = played.has(g.key);
+    return outLink(g, { class: 'get' + (again ? ' again' : '') + (freshPlay === g.key ? ' fresh' : ''), tabindex: '-1', 'aria-hidden': 'true' }, t(again ? 'playAgain' : 'play'));
+  }
+
+  // ---------- Dải game mới ----------
+  function renderShelf() {
+    const recent = recentList();
+    const list = recent.length ? recent : games.filter(g => g.added && g.added <= today).sort(byNewest).slice(0, 8);
+    document.getElementById('shelf-note').textContent = recent.length ? t('shelfNote', recent.length) : t('shelfLatest');
+    document.getElementById('see-new').hidden = !recent.length;
+    document.getElementById('carousel').replaceChildren(...list.map((g, i) => h('li', { class: 'card' },
+      outLink(g, { class: 'card-shot', tabindex: '-1', 'aria-hidden': 'true' }, shot(g, i < 3)),
+      h('div', { class: 'card-body' },
+        h('div', { class: 'card-text' },
+          g.added ? h('p', { class: 'card-date num', text: t('shelved', dayLabel(g.added)) }) : null,
+          h('h3', { class: 'card-name' }, outLink(g, { 'aria-label': t('playLabel', titleOf(g)) }, titleOf(g)))),
+        getButton(g)))));
+  }
+
+  // ---------- Đang hot ----------
+  function renderChart() {
+    const list = document.getElementById('chart-list');
+    const hot = hotList();
+    const note = text => h('li', null, h('p', { class: 'chart-note', text }));
+    if (countsState === 'loading') list.replaceChildren(note(t('chartLoading')));
+    else if (countsState === 'error' && !hot.length) list.replaceChildren(note(t('chartError')));
+    else if (!hot.length) list.replaceChildren(note(t('chartEmpty')));
+    else list.replaceChildren(...hot.map((g, i) => entry(g, { rank: i + 1, showCat: true })));
+    document.getElementById('see-hot').hidden = !hot.length;
+    const foot = document.getElementById('chart-foot');
+    foot.hidden = countsState !== 'ok';
+    const total = games.reduce((s, g) => s + countFor(g), 0);
+    foot.replaceChildren(...String(t('chartFoot', '\u0001', '\u0002')).split(/(\u0001|\u0002)/).map(part =>
+      part === '\u0001' ? h('b', { text: fmt(total) }) : part === '\u0002' ? h('b', { text: visitorCount == null ? '–' : fmt(visitorCount) }) : part));
+  }
+
+  // ---------- Danh sách ----------
+  function entry(g, opts = {}) {
+    const name = titleOf(g);
+    const marks = [];
+    if (isRecent(g)) marks.push(h('span', { class: 'mark new', text: t('markNew') }));
+    if (!opts.rank && opts.hotSet?.has(g)) marks.push(h('span', { class: 'mark hot', text: t('markHot') }));
+    const plays = countsState === 'ok' ? h('span', { class: 'num', text: t('plays', fmt(countFor(g))) }) : null;
+    const cat = opts.showCat ? h('span', { class: 'cat', text: catLabel(g.cat) }) : null;
+    return h('li', { class: 'entry' + (opts.rank ? ' ranked' : '') },
+      outLink(g, { class: 'thumb', tabindex: '-1', 'aria-hidden': 'true' }, shot(g, false, true)),
+      h('span', { class: 'rank num', 'aria-hidden': 'true', text: opts.rank || '' }),
+      h('div', null,
+        h('h3', { class: 'entry-name' }, outLink(g, { 'aria-label': t('playLabel', name) + (opts.rank ? ' · #' + opts.rank : '') }, name)),
+        (marks.length || plays || cat) ? h('p', { class: 'entry-meta' }, cat, marks, plays) : null),
+      getButton(g));
+  }
+  const GROUP_ICON = { food: 'c-food', drink: 'c-drink', shop: 'c-shop', farm: 'c-farm', life: 'c-life', brain: 'c-brain', other: 'i-dice' };
+  function groupIcon(id) {
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
+    svg.setAttribute('class', 'icon');
+    use.setAttribute('href', '#' + (GROUP_ICON[id] || 'i-cal'));
+    svg.append(use);
+    return h('span', { class: 'gh-ico', 'aria-hidden': 'true' }, svg);
+  }
+  function group(id, label, note, items, opts) {
+    const cat = id.startsWith('c-') ? id.slice(2) : '';
+    return h('section', { class: 'group', id, 'data-cat': cat || null },
+      h('div', { class: 'group-head' }, groupIcon(cat), h('h3', { class: 'num', text: label }), h('p', { class: 'num', text: note })),
+      h('ul', { class: 'entries' }, items.map(g => entry(g, opts))));
+  }
+  function renderCats() {
+    const box = document.getElementById('cats');
+    const counts = {};
+    games.forEach(g => { const k = g.cat || ''; counts[k] = (counts[k] || 0) + 1; });
+    const hotN = countsState === 'ok' ? hotList().length : 0;
+    const chip = (key, label, n) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!ask && view === key), onclick: () => setView(key) },
+      label, n ? h('small', { class: 'num', text: n }) : null);
+    box.replaceChildren(chip('all', t('catAll'), games.length), chip('new', t('tabNew'), recentList().length), chip('hot', t('tabHot'), hotN),
+      h('span', { class: 'cats-sep', 'aria-hidden': 'true' }),
+      ...CATS.filter(c => counts[c.key]).map(c => chip(c.key, c[lang], counts[c.key])),
+      ...(counts[''] ? [chip('other', t('catOther'), counts[''])] : []));
+    const on = box.querySelector('[aria-pressed="true"]');
+    box.scrollLeft = on ? Math.max(0, on.offsetLeft - box.offsetLeft - box.clientWidth / 2 + on.offsetWidth / 2) : 0;
+    catsFade();
+  }
+  function renderIdeas() {
+    document.getElementById('ideas').replaceChildren(...t('ideas').map(text =>
+      h('button', { class: 'idea', type: 'button', text, onclick: () => { document.getElementById('q').value = text; submitAsk(); } })));
+  }
+  // Vệt mờ ở mép chỉ hiện khi còn thể loại bị khuất; lăn chuột để cuộn ngang.
+  function catsFade() {
+    const box = document.getElementById('cats');
+    box.classList.toggle('more-l', box.scrollLeft > 2);
+    box.classList.toggle('more-r', box.scrollLeft + box.clientWidth < box.scrollWidth - 2);
+  }
+  document.getElementById('cats').addEventListener('scroll', catsFade, { passive: true });
+  window.addEventListener('resize', catsFade);
+  document.getElementById('cats').addEventListener('wheel', e => {
+    const box = e.currentTarget;
+    if (box.scrollWidth <= box.clientWidth || Math.abs(e.deltaX) > Math.abs(e.deltaY)) return;
+    const before = box.scrollLeft;
+    box.scrollLeft += e.deltaY;
+    if (box.scrollLeft !== before) e.preventDefault();
+  }, { passive: false });
+  const inCat = (g, key) => key === 'other' ? !g.cat : g.cat === key;
+  function renderList() {
+    const hot = hotList();
+    const hotSet = new Set(hot);
+    const box = document.getElementById('groups');
+    const title = document.getElementById('section-title');
+    const meta = document.getElementById('section-meta');
+    let nodes = [];
+    document.getElementById('home').hidden = !!ask || view !== 'all';
+    renderCats();
+
+    if (ask) {
+      title.textContent = t('headAsk');
+      meta.textContent = t('noteAsk', ask.items.length, ask.text);
+      nodes = ask.items.length ? [h('ul', { class: 'entries' }, ask.items.map(g => entry(g, { hotSet, showCat: true })))]
+        : [empty(t('emptyAsk', ask.text), t('backToAll'), () => setView('all'))];
+    } else if (view === 'new') {
+      const list = recentList();
+      title.textContent = t('headNew');
+      meta.textContent = t('noteNew', list.length);
+      const days = new Map();
+      list.forEach(g => { const k = dayLabel(g.added); if (!days.has(k)) days.set(k, { d: g.added, items: [] }); days.get(k).items.push(g); });
+      nodes = [...days.entries()].map(([k, v]) => group('d-' + k, k + ' · ' + v.d.toLocaleDateString(locale(), { weekday: 'long' }), t('groupCount', v.items.length), v.items, { hotSet, showCat: true }));
+      if (!list.length) nodes = [empty(t('emptyNew'), t('backToAll'), () => setView('all'))];
+    } else if (view === 'hot') {
+      title.textContent = t('headHot');
+      meta.textContent = t('noteHot', hot.length);
+      nodes = hot.length ? [h('ol', { class: 'entries' }, hot.map((g, i) => entry(g, { rank: i + 1, showCat: true })))]
+        : [empty(countsState === 'loading' ? t('chartLoading') : countsState === 'error' ? t('chartError') : t('emptyHot'), t('backToAll'), () => setView('all'))];
+    } else if (view !== 'all') {
+      const list = games.filter(g => inCat(g, view)).sort(byName);
+      title.textContent = view === 'other' ? t('catOther') : catLabel(view);
+      meta.textContent = t('noteCat', list.length);
+      nodes = list.length ? [h('ul', { class: 'entries' }, list.map(g => entry(g, { hotSet })))]
+        : [empty(t('emptyAsk', ''), t('backToAll'), () => setView('all'))];
+    } else {
+      title.textContent = t('headAll');
+      meta.textContent = t('noteAll', games.length);
+      const groups = new Map();
+      [...games].sort((a, b) => catOrder(a.cat) - catOrder(b.cat) || byName(a, b)).forEach(g => {
+        const k = g.cat || 'other'; if (!groups.has(k)) groups.set(k, []); groups.get(k).push(g);
+      });
+      nodes = [...groups.entries()].map(([k, items]) => group('c-' + k, k === 'other' ? t('catOther') : catLabel(k), t('groupCount', items.length), items, { hotSet }));
+    }
+    box.replaceChildren(...nodes);
+    setBarH();
+  }
+  function empty(text, action, fn) {
+    return h('div', { class: 'empty' },
+      h('img', { src: 'assets/cat-empty.webp', width: 420, height: 183, alt: '' }),
+      h('p', { text }),
+      h('button', { type: 'button', onclick: fn, text: action }));
+  }
+  // ---------- Thống kê ----------
+  function renderStats() {
+    document.getElementById('f-games').textContent = fmt(games.length);
+    document.getElementById('f-plays').textContent = countsState === 'ok' ? fmt(games.reduce((s, g) => s + countFor(g), 0)) : '–';
+    document.getElementById('f-visitors').textContent = visitorCount == null ? '–' : fmt(visitorCount);
+    document.getElementById('stats-note').textContent = t(countsState === 'error' || statsState === 'error' ? 'statsError' : countsState === 'loading' ? 'statsLoading' : 'statsOk');
+  }
+  function renderAll() { renderShelf(); renderChart(); renderList(); renderStats(); }
+
+  // ---------- Chơi ----------
+  function onPlay(g) {
+    if (!played.has(g.key)) {
+      played.add(g.key);
+      store.set(PLAYED_KEY, JSON.stringify([...played].slice(-400)));
+      freshPlay = g.key;
+    }
+    recordGlobalPlay(g);
+    // Vẽ lại sau một nhịp để thẻ mới mở không bị chặn.
+    setTimeout(() => { renderAll(); freshPlay = null; }, 60);
+  }
+  let toastTimer;
+  function toast(text) {
+    const el = document.getElementById('toast');
+    el.textContent = text; el.classList.add('show');
+    clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
+  }
+  document.getElementById('random').addEventListener('click', () => {
+    const pool = ask ? ask.items : view === 'new' ? recentList() : view === 'hot' ? hotList() : view !== 'all' ? games.filter(g => inCat(g, view)) : games;
+    const list = pool.length ? pool : games;
+    const g = list[Math.floor(Math.random() * list.length)];
+    if (!g) return;
+    window.open(g.url, '_blank', 'noopener');
+    onPlay(g);
+    toast(t('opening', titleOf(g)));
+  });
+
+  // ---------- Tab & tìm ----------
+  const bar = document.getElementById('bar');
+  const anchor = document.getElementById('bar-anchor');
+  const toList = () => { if (window.scrollY > anchor.offsetTop) window.scrollTo({ top: anchor.offsetTop }); };
+  function setView(key) {
+    view = key;
+    ask = null;
+    renderList();
+    toList();
+  }
+  document.getElementById('see-new').addEventListener('click', () => setView('new'));
+  document.getElementById('see-hot').addEventListener('click', () => setView('hot'));
+
+  // ---------- Ô mô tả ----------
+  // Bản này tự hiểu mô tả bằng từ khoá ngay trên máy. Sau này gắn AI: chỉ cần thay hàm suggestGames
+  // (ví dụ gọi POST /api/suggest trên máy chủ MeeGame, khoá AI để ở máy chủ), miễn trả về danh sách game theo thứ tự hợp nhất.
+  const IDEA_WORDS = {
+    food: ['nau', 'an', 'quan an', 'bep', 'mon', 'do an', 'nha hang', 'dau bep', 'banh mi', 'pho', 'bun', 'com', 'lau', 'nuong', 'an vat', 'cook', 'cooking', 'food', 'kitchen', 'restaurant', 'chef'],
+    drink: ['tra', 'ca phe', 'cafe', 'coffee', 'tea', 'tra sua', 'pha che', 'banh ngot', 'ngot', 'kem', 'nuoc', 'bakery', 'dessert', 'sweet', 'drink'],
+    shop: ['ban hang', 'buon ban', 'tiem', 'cua hang', 'kinh doanh', 'lam giau', 'kiem tien', 'di cho', 'shop', 'store', 'business', 'sell', 'money', 'cam do'],
+    farm: ['nong trai', 'trong', 'trong trot', 'cay', 'rau', 'vuon', 'lang', 'xay', 'xay lang', 'chan nuoi', 'nuoi ca', 'farm', 'garden', 'town', 'village', 'build'],
+    life: ['doi song', 'cau chuyen', 'truyen', 'cuoc song', 'cam dong', 'tinh cam', 'meo', 'nha', 'phong van', 'life', 'story', 'cat', 'home', 'cozy'],
+    brain: ['choi co', 'co vua', 'co tuong', 'tri tue', 'dau tri', 'do vui', 'logic', 'suy nghi', 'tam ly', 'chess', 'puzzle', 'brain', 'quiz']
+  };
+  const NEW_WORDS = ['moi', 'moi ra', 'vua ra', 'gan day', 'new', 'latest', 'just released'];
+  const HOT_WORDS = ['hot', 'choi nhieu', 'nhieu nguoi', 'pho bien', 'noi tieng', 'trend', 'popular', 'most played'];
+  const SKIP = new Set(['game', 'games', 'choi', 'muon', 'toi', 'minh', 'cho', 've', 'mot', 'nhung', 'cac', 'la', 'co', 'de', 'thich', 'kieu', 'loai', 'nao', 'gi', 'va', 'hay', 'nhe', 'nhang', 'vui', 'ban', 'a', 'the', 'and', 'or', 'i', 'want', 'to', 'play', 'some', 'with', 'of', 'dang', 'duoc', 'ra', 'an']);
+  const hasPhrase = (text, w) => (' ' + text + ' ').includes(' ' + w + ' ');
+  // Hỏi Jev trên máy chủ trước (tối đa 5 giây); lỗi, chưa bật AI hoặc mất mạng thì tự tìm bằng từ khoá.
+  async function suggestGames(text) {
+    const local = keywordSuggest(text);
+    if (!apiReady) return local;
+    try {
+      const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 5000);
+      const res = await api('/api/suggest', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text }), signal: ctrl.signal
+      });
+      clearTimeout(timer);
+      if (!res.ok) return local;
+      const data = await res.json();
+      const byUrl = new Map(games.map(g => [g.url, g]));
+      const ai = (data.results || []).map(r => byUrl.get(safeHttp(r.url))).filter(Boolean);
+      if (!ai.length) return local;
+      const seen = new Set(ai);
+      return ai.concat(local.filter(g => !seen.has(g))).slice(0, 24);
+    } catch (_) { return local; }
+  }
+  function keywordSuggest(text) {
+    const q = fold(text).replace(/[^a-z0-9 ]+/g, ' ').replace(/\s+/g, ' ').trim();
+    if (!q) return [];
+    const cats = new Set(Object.keys(IDEA_WORDS).filter(k => IDEA_WORDS[k].some(w => hasPhrase(q, w))));
+    const wantNew = NEW_WORDS.some(w => hasPhrase(q, w));
+    const wantHot = HOT_WORDS.some(w => hasPhrase(q, w));
+    const words = q.split(' ').filter(w => w.length > 1 && !SKIP.has(w));
+    const hotSet = new Set(hotList());
+    const scored = games.map(g => {
+      const hay = fold([g.name, g.aliases, g.titleEn, englishTitle(g)].join(' ')).replace(/[^a-z0-9 ]+/g, ' ');
+      let score = 0;
+      if (q.length > 2 && hay.includes(q)) score += 12;
+      words.forEach(w => { if (hasPhrase(hay, w)) score += 3; });
+      if (g.cat && cats.has(g.cat)) score += 5;
+      if (wantNew && isRecent(g)) score += 4;
+      if (wantHot && hotSet.has(g)) score += 4;
+      return { g, score };
+    }).filter(x => x.score > 0);
+    scored.sort((a, b) => b.score - a.score || countFor(b.g) - countFor(a.g) || byName(a.g, b.g));
+    return scored.slice(0, 24).map(x => x.g);
+  }
+  let askSeq = 0;
+  async function submitAsk() {
+    const input = document.getElementById('q');
+    const text = input.value.trim().replace(/\s+/g, ' ');
+    syncClear();
+    if (!text) { if (ask) setView(view); return; }
+    const seq = ++askSeq;
+    const go = document.querySelector('.ask-go');
+    go.setAttribute('aria-busy', 'true');
+    const items = await suggestGames(text);
+    if (seq !== askSeq) return;
+    go.removeAttribute('aria-busy');
+    ask = { text, items };
+    input.blur();
+    renderList();
+    const top = document.getElementById('contents').getBoundingClientRect().top + window.scrollY - document.getElementById('bar').offsetHeight - 8;
+    window.scrollTo({ top, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  }
+  function syncClear() { document.getElementById('ask-clear').hidden = !document.getElementById('q').value; }
+  document.getElementById('ask').addEventListener('submit', e => { e.preventDefault(); submitAsk(); });
+  document.getElementById('q').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); submitAsk(); }
+  });
+  document.getElementById('q').addEventListener('input', () => { syncClear(); if (!document.getElementById('q').value.trim() && ask) setView(view); });
+  document.getElementById('ask-clear').addEventListener('click', () => {
+    const input = document.getElementById('q');
+    input.value = ''; syncClear();
+    if (ask) { ask = null; renderList(); }
+    input.focus();
+  });
+  document.getElementById('jump').addEventListener('click', () => {
+    window.scrollTo({ top: 0, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    setTimeout(() => document.getElementById('q').focus({ preventScroll: true }), 350);
+  });
+  document.addEventListener('keydown', e => {
+    const tag = document.activeElement?.tagName || '';
+    if (e.key === '/' && !/INPUT|TEXTAREA/.test(tag)) { e.preventDefault(); document.getElementById('q').focus(); }
+  });
+  let tick = false;
+  const onScroll = () => { bar.classList.toggle('stuck', window.scrollY > anchor.offsetTop); };
+  window.addEventListener('scroll', () => { if (!tick) { tick = true; requestAnimationFrame(() => { onScroll(); tick = false; }); } }, { passive: true });
+  function setBarH() { document.documentElement.style.setProperty('--bar-h', document.getElementById('bar').offsetHeight + 'px'); }
+  window.addEventListener('resize', setBarH); setBarH();
+
+  // ---------- Ngôn ngữ, giao diện, cài đặt ----------
+  function applyLanguage(next) {
+    lang = next;
+    store.set('meegame_language', lang);
+    document.documentElement.lang = lang;
+    document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.dataset.i18n); });
+    document.querySelectorAll('[data-i18n-label]').forEach(el => el.setAttribute('aria-label', t(el.dataset.i18nLabel)));
+    document.getElementById('q').placeholder = t('askPh');
+    renderIdeas();
+    document.getElementById('lang-quick').textContent = lang === 'vi' ? 'EN' : 'VI';
+    document.querySelectorAll('.seg [data-lang]').forEach(s => s.classList.toggle('on', s.dataset.lang === lang));
+    renderAll();
+    setBarH();
+  }
+  const root = document.documentElement;
+  function syncTheme() {
+    const dark = root.classList.contains('dark-mode');
+    document.getElementById('theme').setAttribute('aria-pressed', String(dark));
+    document.getElementById('theme-quick').setAttribute('aria-pressed', String(dark));
+    document.querySelector('meta[name="theme-color"]').content = dark ? '#170F13' : '#FFF6F8';
+  }
+  function toggleTheme() { store.set('meegame_theme', root.classList.toggle('dark-mode') ? 'dark' : 'light'); syncTheme(); }
+  document.getElementById('theme').addEventListener('click', toggleTheme);
+  document.getElementById('theme-quick').addEventListener('click', toggleTheme);
+  document.getElementById('lang').addEventListener('click', () => applyLanguage(lang === 'vi' ? 'en' : 'vi'));
+  document.getElementById('lang-quick').addEventListener('click', () => applyLanguage(lang === 'vi' ? 'en' : 'vi'));
+  syncTheme();
+
+  const opener = document.getElementById('settings-open');
+  const sheet = document.getElementById('settings');
+  function setSettings(open) {
+    document.body.classList.toggle('settings-open', open);
+    opener.setAttribute('aria-expanded', String(open));
+    if (open) setTimeout(() => document.getElementById('settings-close').focus({ preventScroll: true }), 50);
+    else opener.focus({ preventScroll: true });
+  }
+  opener.addEventListener('click', () => setSettings(true));
+  document.getElementById('settings-close').addEventListener('click', () => setSettings(false));
+  document.getElementById('sheet-backdrop').addEventListener('click', () => setSettings(false));
+  document.addEventListener('keydown', e => {
+    if (!document.body.classList.contains('settings-open')) return;
+    if (e.key === 'Escape') setSettings(false);
+    if (e.key === 'Tab') {
+      const f = [...sheet.querySelectorAll('button, a[href]')];
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
+  // Thêm tham số phiên bản để bỏ qua bộ nhớ đệm và tải bản mới nhất.
+  document.getElementById('update').addEventListener('click', async () => {
+    const label = document.getElementById('update-label');
+    label.textContent = t('checking');
+    try {
+      const check = new URL(location.href); check.searchParams.set('meegame_check', String(Date.now()));
+      const res = await fetch(check.toString(), { cache: 'no-store', headers: { 'Cache-Control': 'no-cache' } });
+      if (!res.ok) throw new Error('Update check failed');
+      label.textContent = t('reloading');
+      const next = new URL(location.href); next.searchParams.delete('meegame_check'); next.searchParams.set('v', String(Date.now()));
+      location.replace(next.toString());
+    } catch (_) {
+      label.textContent = t('checkFail');
+      setTimeout(() => { label.textContent = t('update'); }, 2500);
+    }
+  });
+
+  // ---------- Máy chủ ----------
+  const api = (path, opts = {}) => fetch(API + path, { cache: 'no-store', ...opts });
+  async function loadGames() {
+    if (!apiReady) return;
+    try {
+      const ctrl = new AbortController(); const timer = setTimeout(() => ctrl.abort(), 9000);
+      const res = await api('/api/games', { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (!res.ok) throw new Error('games ' + res.status);
+      const rows = await res.json();
+      // Bảng trống nghĩa là chưa nhập dữ liệu: giữ danh sách dự phòng.
+      if (!Array.isArray(rows) || !rows.length) return;
+      store.set(CACHE_KEY, JSON.stringify(rows));
+      games = normalize(rows);
+      renderAll();
+    } catch (err) { console.warn('MeeGame: dùng danh sách dự phòng vì chưa đọc được danh sách game:', err); }
+  }
+  function getVisitorId() {
+    const key = 'meegame_visitor_id_v1';
+    let id = store.get(key);
+    if (!id) {
+      id = (window.crypto && typeof crypto.randomUUID === 'function') ? crypto.randomUUID()
+        : 'v-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2) + Math.random().toString(36).slice(2);
+      store.set(key, id);
+    }
+    return id;
+  }
+  function setVisitors(data) {
+    if (typeof data?.count !== 'number') return;
+    visitorCount = data.count; statsState = 'ok'; renderStats(); renderChart();
+  }
+  async function registerVisitor() {
+    if (!apiReady) return;
+    try {
+      const res = await api('/api/visitors', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ visitor_id: getVisitorId() }), keepalive: true
+      });
+      if (!res.ok) throw new Error('visitor ' + res.status);
+      setVisitors(await res.json());
+    } catch (err) { console.warn('MeeGame visitor count could not update:', err); statsState = 'error'; renderStats(); }
+  }
+  async function refreshVisitorCount() {
+    if (!apiReady) return;
+    const res = await api('/api/visitors');
+    if (!res.ok) throw new Error('visitor count ' + res.status);
+    setVisitors(await res.json());
+  }
+  async function loadGlobalCounts() {
+    if (!apiReady) { renderAll(); return; }
+    try {
+      const res = await api('/api/plays');
+      if (!res.ok) throw new Error('stats ' + res.status);
+      const map = await res.json();
+      counts = {};
+      Object.entries(map).forEach(([url, n]) => { counts[url] = Number(n) || 0; });
+      countsState = 'ok';
+    } catch (err) { console.warn('MeeGame global stats could not load:', err); countsState = 'error'; }
+    renderAll();
+  }
+  const pending = new Set();
+  async function recordGlobalPlay(g) {
+    if (!apiReady || pending.has(g.key)) return;
+    pending.add(g.key);
+    try {
+      const res = await api('/api/plays', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url: g.url }), keepalive: true
+      });
+      if (!res.ok) throw new Error('play ' + res.status);
+      const data = await res.json();
+      counts[g.key] = Math.max(countFor(g) + 1, Number(data.play_count) || 0);
+      renderAll();
+    } catch (err) { console.warn('MeeGame global play count could not be recorded:', err); }
+    finally { pending.delete(g.key); }
+  }
+
+  applyLanguage(lang);
+  loadGames();
+  loadGlobalCounts();
+  registerVisitor();
+  setInterval(() => { refreshVisitorCount().catch(err => console.warn('MeeGame visitor refresh failed:', err)); }, 30000);
+})();
+</script>
+</body>
+</html>

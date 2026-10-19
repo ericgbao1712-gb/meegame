@@ -1,0 +1,544 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Đăng game · MeeGame</title>
+<meta name="theme-color" content="#FFF6F8">
+<link rel="icon" href="assets/logo-256.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script>
+  (() => {
+    try {
+      const saved = localStorage.getItem('meegame_theme');
+      const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+      if (dark) document.documentElement.classList.add('dark-mode');
+    } catch (_) {}
+  })();
+</script>
+<style>
+:root {
+  --bg: #FFF6F8; --raised: #FFFFFF; --fill: #FCEAF0; --fill-2: #F8DCE6; --line: #F4DEE5;
+  --ink: #2B1820; --ink-2: #7A5864;
+  --accent: #C21E5C; --on-accent: #FFFFFF; --tint: #FDE1EB; --on-tint: #9A1747;
+  --danger: #C42318; --danger-tint: #FCE9E7;
+  --lift: 0 10px 30px rgba(120, 30, 64, .14), 0 1px 3px rgba(120, 30, 64, .08);
+  --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --gutter: 16px;
+  --ease: cubic-bezier(.2, .8, .2, 1);
+  color-scheme: light;
+}
+html.dark-mode {
+  --bg: #170F13; --raised: #22181D; --fill: #2B1F25; --fill-2: #382930; --line: #34262D;
+  --ink: #FBF0F4; --ink-2: #C9A9B5;
+  --accent: #FF8DB4; --on-accent: #3B0A1D; --tint: #3F1F2C; --on-tint: #FFB6CF;
+  --danger: #FF7A6E; --danger-tint: #3A1C19;
+  --lift: 0 12px 34px rgba(0, 0, 0, .55);
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 16px/1.5 var(--font); caret-color: var(--accent); -webkit-tap-highlight-color: transparent; }
+img { display: block; max-width: 100%; height: auto; }
+a { color: inherit; text-decoration: none; }
+button, input, select { font: inherit; color: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: progress; opacity: .6; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 8px; }
+html { scrollbar-color: var(--fill-2) transparent; }
+::selection { background: var(--tint); color: var(--on-tint); }
+h1, h2 { text-wrap: balance; }
+[hidden] { display: none !important; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { width: 100%; max-width: 1180px; margin: 0 auto; padding: 0 var(--gutter); }
+.icon { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.num { font-variant-numeric: tabular-nums; }
+
+/* Đầu trang */
+.top { position: sticky; top: 0; z-index: 10; background: var(--bg); box-shadow: 0 1px 0 var(--line); }
+.top .wrap { display: flex; align-items: center; gap: 10px; min-height: 60px; padding-top: env(safe-area-inset-top); }
+.top img { width: 38px; height: 38px; border-radius: 10px; box-shadow: 0 0 0 1px var(--line); }
+.top-title { flex: 1; min-width: 0; }
+.top-title h1 { margin: 0; font-size: 17px; line-height: 1.2; font-weight: 700; }
+.top-title p { margin: 0; font-size: 13px; color: var(--ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pill { display: inline-flex; align-items: center; gap: 6px; height: 40px; padding: 0 14px; border-radius: 999px; border: 0; background: var(--fill); font-size: 14px; font-weight: 600; white-space: nowrap; }
+.pill:hover { background: var(--fill-2); }
+.top-title h1 { white-space: nowrap; }
+@media (max-width: 519px) { .pill { width: 40px; padding: 0; justify-content: center; } .pill span { display: none; } }
+
+/* Đăng nhập */
+.login { display: grid; gap: 16px; padding-top: 28px; padding-bottom: 48px; max-width: 480px; }
+.login > p { margin: 0; color: var(--ink-2); }
+.panel { border-radius: 18px; background: var(--fill); }
+.panel-head { display: flex; align-items: center; gap: 12px; padding: 18px 18px 0; }
+.panel-head h2 { flex: 1; margin: 0; font-size: 22px; line-height: 1.2; font-weight: 700; letter-spacing: -.015em; }
+.panel-body { display: grid; gap: 16px; padding: 14px 18px 20px; }
+
+.field { display: grid; gap: 6px; }
+.field > span { font-weight: 600; font-size: 14px; }
+.field small { color: var(--ink-2); font-size: 13px; }
+.field input:not([type="checkbox"]), .field select {
+  width: 100%; height: 46px; padding: 0 12px; background: var(--raised);
+  border: 1px solid var(--line); border-radius: 12px; font-size: 16px; -webkit-appearance: none; appearance: none;
+}
+html.dark-mode .field input:not([type="checkbox"]), html.dark-mode .field select { background-color: var(--bg); }
+.field input::placeholder { color: var(--ink-2); opacity: 1; }
+.field input:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--tint); }
+select.pick { padding-right: 36px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%2359606A' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+html.dark-mode select.pick { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1.5l5 5 5-5' fill='none' stroke='%23A2A8B0' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); }
+select.pick:invalid { color: var(--ink-2); }
+.cat-filter { width: 100%; height: 42px; padding: 0 36px 0 12px; border: 0; border-radius: 12px; background-color: var(--fill); font-size: 15px; font-weight: 600; -webkit-appearance: none; appearance: none; }
+.cat-filter:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.field input[aria-invalid="true"], .field select[aria-invalid="true"] { border-color: var(--danger); box-shadow: 0 0 0 3px var(--danger-tint); }
+.check { display: flex; align-items: center; gap: 10px; min-height: 44px; font-weight: 500; }
+.check input { width: 22px; height: 22px; accent-color: var(--accent); }
+.two { display: grid; gap: 16px; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 46px; padding: 0 18px; border: 0; border-radius: 12px; background: var(--fill-2); color: var(--ink);
+  font-size: 15px; font-weight: 700; transition: background .15s, transform .15s var(--ease);
+}
+.btn:active { transform: scale(.97); }
+.btn:hover { background: var(--line); }
+html.dark-mode .btn:hover { background: #343941; }
+.btn.primary { background: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { filter: brightness(1.08); background: var(--accent); }
+.btn.small { min-height: 38px; padding: 0 14px; border-radius: 999px; font-size: 14px; background: var(--fill); }
+.btn.small:hover { background: var(--fill-2); }
+.btn.danger { color: var(--danger); }
+.btn.danger:hover { background: var(--danger-tint); }
+.btn.solid-danger { background: var(--danger); color: #fff; }
+html.dark-mode .btn.solid-danger { color: #2A0B08; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.msg { margin: 0; padding: 10px 12px; border-radius: 12px; background: var(--raised); font-weight: 500; }
+.msg.error { background: var(--danger-tint); color: var(--danger); }
+.msg.ok { background: var(--tint); color: var(--on-tint); }
+
+/* Bàn làm việc */
+.desk { display: grid; gap: 28px; padding-top: 20px; padding-bottom: 56px; }
+.preview { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 12px; align-items: center; padding: 10px; border-radius: 14px; background: var(--raised); }
+html.dark-mode .preview { background: var(--bg); }
+.preview .thumb, .row .thumb { aspect-ratio: 600 / 420; border-radius: 10px; background: var(--fill-2); box-shadow: inset 0 0 0 1px var(--line); overflow: hidden; }
+.preview .thumb img, .row .thumb img { width: 100%; height: 100%; object-fit: cover; object-position: top center; }
+.preview b { display: block; font-size: 16px; font-weight: 600; overflow-wrap: anywhere; }
+.preview small { color: var(--ink-2); font-size: 13px; }
+
+.list-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px; }
+.list-head h2 { margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -.015em; }
+.list-head p { margin: 0; font-size: 14px; color: var(--ink-2); }
+.tools { display: grid; gap: 10px; margin-top: 12px; }
+.search { position: relative; }
+.search .icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--ink-2); }
+.search input { width: 100%; height: 42px; padding: 0 12px 0 38px; border: 0; border-radius: 12px; background: var(--fill); font-size: 16px; -webkit-appearance: none; appearance: none; }
+.search input:focus { outline: none; box-shadow: 0 0 0 2px var(--accent); }
+.filters { display: grid; grid-template-columns: repeat(3, 1fr); padding: 3px; border-radius: 11px; background: var(--fill); }
+.filters button { height: 36px; border: 0; border-radius: 8px; background: none; font-size: 14px; font-weight: 600; color: var(--ink-2); }
+.filters button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+html.dark-mode .filters button[aria-pressed="true"] { background: var(--fill-2); }
+.rows { margin: 8px 0 0; padding: 0; list-style: none; }
+.row { position: relative; display: grid; grid-template-columns: 84px minmax(0, 1fr); gap: 8px 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.row.is-hidden .thumb { opacity: .45; filter: grayscale(1); }
+.row.is-hidden .row-name { color: var(--ink-2); }
+.row.editing { background: var(--tint); border-radius: 14px; padding: 12px; border-bottom-color: transparent; }
+.row .thumb { align-self: start; }
+.row-name { margin: 0; font-weight: 600; font-size: 16px; line-height: 1.3; overflow-wrap: anywhere; }
+.row-meta { margin: 3px 0 0; display: flex; flex-wrap: wrap; align-items: center; gap: 4px 10px; font-size: 13px; color: var(--ink-2); }
+.row-meta .cat { flex-basis: 100%; color: var(--ink); font-weight: 500; }
+.row-meta .cat.none { color: var(--danger); }
+.row-meta a { overflow-wrap: anywhere; }
+.row-meta a:hover { text-decoration: underline; }
+.mark { display: inline-block; padding: 1px 7px; border-radius: 6px; font-size: 12px; font-weight: 600; background: var(--fill-2); color: var(--ink); }
+.row-actions { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; }
+.empty { padding: 24px 0; color: var(--ink-2); }
+
+dialog { width: min(420px, calc(100% - 32px)); padding: 0; border: 0; border-radius: 20px; background: var(--fill); color: var(--ink); box-shadow: var(--lift); }
+dialog::backdrop { background: rgba(10, 12, 14, .45); }
+dialog .panel-body p { margin: 0; }
+
+.toast { position: fixed; z-index: 50; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom)); max-width: calc(100% - 32px); padding: 10px 16px; border-radius: 999px; background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transform: translate(-50%, 20px); transition: opacity .2s, transform .25s var(--ease); }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+@media (min-width: 720px) {
+  :root { --gutter: 28px; }
+  .two { grid-template-columns: 1fr 1fr; }
+  .row { grid-template-columns: 112px minmax(0, 1fr) auto; align-items: center; }
+  .row-actions { grid-column: auto; }
+  .tools { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .tools .cat-filter { grid-column: 1 / -1; }
+}
+@media (min-width: 1100px) {
+  .desk { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 40px; align-items: start; }
+  /* Khung đăng game cuộn riêng, danh sách bên phải cuộn theo trang */
+  .desk > .panel { position: sticky; top: 76px; max-height: calc(100vh - 92px); max-height: calc(100dvh - 92px); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: var(--fill-2) transparent; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M4 11l8-6.5 8 6.5"/><path d="M6 10v9.5h12V10"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 4v16M4 12h16"/></symbol>
+  <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8M10 12h10M16.5 8.5 20 12l-3.5 3.5"/></symbol>
+</svg>
+
+<header class="top">
+  <div class="wrap">
+    <img src="assets/logo-256.png" width="96" height="96" alt="Logo MeeGame: mèo chơi game">
+    <div class="top-title">
+      <h1>Đăng game</h1>
+      <p id="who">Phòng biên tập · MeeGame</p>
+    </div>
+    <a class="pill" href="./" aria-label="Trang chính"><svg class="icon"><use href="#i-home"/></svg><span>Trang chính</span></a>
+    <button class="pill" type="button" id="logout" aria-label="Đăng xuất" hidden><svg class="icon"><use href="#i-out"/></svg><span>Thoát</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- Màn đăng nhập -->
+  <section class="wrap login" id="login-view" hidden>
+    <p>Chỉ tài khoản biên tập của Team MeeGame vào được đây để đăng, sửa, ẩn hoặc xoá game.</p>
+    <form class="panel" id="login-form" novalidate>
+      <div class="panel-head"><h2>Đăng nhập</h2></div>
+      <div class="panel-body">
+        <label class="field"><span>Email</span><input id="email" type="email" autocomplete="username" inputmode="email" required></label>
+        <label class="field"><span>Mật khẩu</span><input id="password" type="password" autocomplete="current-password" required></label>
+        <p class="msg error" id="login-error" role="alert" hidden></p>
+        <button class="btn primary" type="submit" id="login-btn">Đăng nhập</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- Không có quyền / lỗi cấu hình -->
+  <section class="wrap login" id="blocked-view" hidden>
+    <div class="panel">
+      <div class="panel-head"><h2 id="blocked-title">Chưa vào được</h2></div>
+      <div class="panel-body">
+        <p id="blocked-text"></p>
+        <div class="actions"><button class="btn" type="button" id="blocked-retry">Thử lại</button><button class="btn" type="button" id="blocked-logout">Đăng xuất</button></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bàn làm việc -->
+  <section class="wrap desk" id="desk-view" hidden>
+    <form class="panel" id="game-form" novalidate>
+      <div class="panel-head"><h2 id="form-title">Đăng game mới</h2></div>
+      <div class="panel-body">
+        <label class="field"><span>Tên game *</span><input id="f-name" required maxlength="120" placeholder="Ví dụ: Tiệm trà tí hon"></label>
+        <label class="field"><span>Link game *</span><input id="f-url" type="url" inputmode="url" required placeholder="https://…" autocomplete="off" spellcheck="false"><small id="url-hint">Dán nguyên link trang game, có https://.</small></label>
+        <label class="field"><span>Thể loại *</span><select class="pick" id="f-cat" required><option value="" disabled selected>Chọn thể loại</option></select><small>Trang chính xếp game theo thể loại này.</small></label>
+        <div class="preview" aria-live="polite">
+          <div class="thumb" id="pv-thumb"></div>
+          <div><b id="pv-name">Tên game</b><small id="pv-note">Ảnh bìa tự chụp từ trang game. Lần đầu có thể mất khoảng một phút mới có ảnh.</small></div>
+        </div>
+        <div class="two">
+          <label class="field"><span>Ngày lên kệ</span><input id="f-date" type="date"><small>Game lên kệ trong 5 ngày gần nhất sẽ hiện ở mục Mới.</small></label>
+          <label class="field"><span>Tên tiếng Anh</span><input id="f-en" maxlength="120" placeholder="Không bắt buộc"><small>Để trống thì trang tự dịch.</small></label>
+        </div>
+        <label class="field"><span>Tên gọi khác</span><input id="f-alias" maxlength="300" placeholder="Ví dụ: cắt tóc, tiệm tóc"><small>Giúp người chơi tìm ra game bằng từ khác. Cách nhau bằng dấu phẩy.</small></label>
+        <label class="field"><span>Link ảnh bìa riêng</span><input id="f-cover" type="url" inputmode="url" placeholder="Không bắt buộc" autocomplete="off" spellcheck="false"><small>Chỉ điền khi ảnh tự chụp bị xấu. Khoảng 5 phút sau đăng, ảnh được tự chép về meegame.shop cho chắc.</small></label>
+        <label class="check"><input id="f-hidden" type="checkbox"> Ẩn khỏi trang chính</label>
+        <p class="msg error" id="form-error" role="alert" hidden></p>
+        <div class="actions">
+          <button class="btn primary" type="submit" id="save-btn"><svg class="icon"><use href="#i-plus"/></svg><span id="save-label">Đăng lên trang</span></button>
+          <button class="btn" type="button" id="cancel-edit" hidden>Huỷ sửa</button>
+        </div>
+      </div>
+    </form>
+
+    <section aria-labelledby="list-title">
+      <div class="list-head"><h2 id="list-title">Danh sách</h2><p class="num" id="list-meta"></p></div>
+      <div class="tools">
+        <label class="search"><span class="sr-only" hidden>Tìm game</span><svg class="icon"><use href="#i-search"/></svg><input id="q" type="search" placeholder="Tìm tên hoặc link" aria-label="Tìm game"></label>
+        <div class="filters" role="group" aria-label="Lọc">
+          <button type="button" data-f="all" aria-pressed="true">Tất cả</button>
+          <button type="button" data-f="shown" aria-pressed="false">Đang hiện</button>
+          <button type="button" data-f="hidden" aria-pressed="false">Đang ẩn</button>
+        </div>
+        <select class="cat-filter pick" id="cat-filter" aria-label="Lọc theo thể loại"><option value="">Mọi thể loại</option></select>
+      </div>
+      <ul class="rows" id="rows"></ul>
+    </section>
+  </section>
+</main>
+
+<dialog id="confirm">
+  <form method="dialog">
+    <div class="panel-head"><h2>Xoá hẳn?</h2></div>
+    <div class="panel-body">
+      <p id="confirm-text"></p>
+      <p style="color:var(--ink-2);font-size:14px">Muốn tạm cất thì bấm “Ẩn” thay vì xoá, lúc nào cũng hiện lại được.</p>
+      <div class="actions"><button class="btn" value="cancel">Giữ lại</button><button class="btn solid-danger" value="ok" id="confirm-ok">Xoá hẳn</button></div>
+    </div>
+  </form>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="categories.js"></script>
+<script src="config.js"></script>
+<script>
+(() => {
+  // Máy chủ MeeGame (SQLite trên VPS) đặt trong config.js. Quyền sửa dữ liệu do máy chủ kiểm tra theo phiên đăng nhập.
+  const API = String(window.MEEGAME_API || '').trim().replace(/\/+$/, '');
+  const TOKEN_KEY = 'meegame_admin_token_v1';
+  const $ = id => document.getElementById(id);
+  const views = ['login-view', 'blocked-view', 'desk-view'];
+  const show = id => views.forEach(v => { $(v).hidden = v !== id; });
+  const fold = s => (s || '').toLocaleLowerCase('vi-VN').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/g, 'd');
+  const fmt = n => Number(n || 0).toLocaleString('vi-VN');
+  const shotOf = url => 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(url) + '?w=720&h=504&vpw=1200&vph=840';
+  function safeHttp(u) { try { const x = new URL(String(u || '').trim()); return /^https?:$/.test(x.protocol) && x.hostname.includes('.') ? x.href : null; } catch (_) { return null; } }
+  const todayISO = () => { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); };
+  const dmy = iso => iso ? iso.slice(8, 10) + '.' + iso.slice(5, 7) + '.' + iso.slice(0, 4) : 'chưa có ngày';
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (v == null || v === false) continue;
+      if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v;
+      else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v);
+    }
+    kids.flat().forEach(c => c != null && c !== false && el.append(c));
+    return el;
+  }
+  function thumb(src, name) {
+    const img = h('img', { src, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer' });
+    img.addEventListener('error', () => img.replaceWith(h('span', { style: 'display:grid;place-items:center;height:100%;font-size:24px;font-weight:700;color:var(--ink-2)', text: (name || '?').charAt(0).toUpperCase() })), { once: true });
+    return img;
+  }
+  let toastTimer;
+  function toast(text) { const el = $('toast'); el.textContent = text; el.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2600); }
+
+  if (!/^https:\/\/[^\s/]+/.test(API) && !/^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(API)) {
+    show('blocked-view');
+    $('blocked-title').textContent = 'Chưa nối máy chủ';
+    $('blocked-text').textContent = 'Mở file config.js, điền địa chỉ máy chủ MeeGame (bắt đầu bằng https://) vào MEEGAME_API rồi đưa lại lên GitHub.';
+    $('blocked-logout').hidden = true;
+    $('blocked-retry').onclick = () => location.reload();
+    return;
+  }
+  const session = {
+    get() { try { return localStorage.getItem(TOKEN_KEY); } catch (_) { return null; } },
+    set(v) { try { v ? localStorage.setItem(TOKEN_KEY, v) : localStorage.removeItem(TOKEN_KEY); } catch (_) {} }
+  };
+  // Gọi máy chủ. Trả { data } hoặc { error: { status, code, message, field } }, không bao giờ ném lỗi.
+  async function call(method, path, body) {
+    const headers = {};
+    const token = session.get();
+    if (token) headers.Authorization = 'Bearer ' + token;
+    if (body !== undefined) headers['Content-Type'] = 'application/json';
+    let res;
+    try {
+      res = await fetch(API + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store' });
+    } catch (_) {
+      return { error: { status: 0, code: 'network', message: 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.' } };
+    }
+    let data = null;
+    try { data = await res.json(); } catch (_) {}
+    if (res.ok) return { data };
+    if (res.status === 401 && path !== '/api/admin/login') { session.set(null); setTimeout(() => signedOut(data?.message), 0); }
+    return { error: { status: res.status, code: data?.error || 'http_' + res.status, message: data?.message || 'Máy chủ trả lỗi ' + res.status + '.', field: data?.field } };
+  }
+
+  let games = [];
+  let plays = {};
+  let filter = 'all';
+  const CATS = window.MEEGAME_CATEGORIES || [];
+  const catName = key => (CATS.find(c => c.key === key) || {}).vi || 'Chưa xếp loại';
+  CATS.forEach(c => {
+    $('f-cat').append(h('option', { value: c.key, text: c.vi }));
+    $('cat-filter').append(h('option', { value: c.key, text: c.vi }));
+  });
+  $('cat-filter').append(h('option', { value: 'none', text: 'Chưa xếp loại' }));
+  let editingId = null;
+
+  // ---------- Đăng nhập ----------
+  $('login-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('login-error'); err.hidden = true;
+    const email = $('email').value.trim(), password = $('password').value;
+    if (!email || !password) { err.textContent = 'Nhập email và mật khẩu.'; err.hidden = false; return; }
+    $('login-btn').disabled = true; $('login-btn').textContent = 'Đang vào…';
+    const { data, error } = await call('POST', '/api/admin/login', { email, password });
+    $('login-btn').disabled = false; $('login-btn').textContent = 'Đăng nhập';
+    if (error) { err.textContent = error.message; err.hidden = false; return; }
+    session.set(data.token);
+    $('password').value = '';
+    enter();
+  });
+  function signedOut(message) {
+    $('logout').hidden = true; $('who').textContent = 'Phòng biên tập · MeeGame'; show('login-view');
+    $('login-error').textContent = message || ''; $('login-error').hidden = !message;
+  }
+  async function logout() { await call('POST', '/api/admin/logout'); session.set(null); signedOut(); }
+  $('logout').addEventListener('click', logout);
+  $('blocked-logout').addEventListener('click', logout);
+  $('blocked-retry').addEventListener('click', enter);
+
+  function blocked(title, text) { show('blocked-view'); $('blocked-title').textContent = title; $('blocked-text').textContent = text; }
+
+  async function enter() {
+    if (!session.get()) { show('login-view'); setTimeout(() => $('email').focus(), 30); return; }
+    const { data, error } = await call('GET', '/api/admin/me');
+    if (error) {
+      if (error.status === 401) return;
+      return blocked('Chưa vào được', error.message);
+    }
+    $('who').textContent = 'Biên tập · ' + data.email;
+    $('logout').hidden = false;
+    show('desk-view');
+    resetForm();
+    await load();
+  }
+
+  // ---------- Dữ liệu ----------
+  async function load() {
+    $('rows').replaceChildren(h('li', { class: 'empty', text: 'Đang tải danh sách…' }));
+    const { data, error } = await call('GET', '/api/admin/games');
+    if (error) { if (error.status !== 401) $('rows').replaceChildren(h('li', { class: 'empty', text: 'Không tải được danh sách: ' + error.message })); return; }
+    games = data.games || [];
+    plays = {};
+    Object.entries(data.plays || {}).forEach(([url, n]) => { plays[url] = Number(n) || 0; });
+    renderRows();
+  }
+  const playsOf = g => { const k = safeHttp(g.url); return k ? plays[k] || 0 : 0; };
+
+  function renderRows() {
+    const q = fold($('q').value.trim());
+    const cat = $('cat-filter').value;
+    const list = games.filter(g => (filter === 'all' || (filter === 'hidden') === !!g.hidden) && (!cat || (cat === 'none' ? !g.category : g.category === cat)) && (!q || fold(g.name + ' ' + g.url + ' ' + (g.aliases || '')).includes(q)));
+    const hiddenCount = games.filter(g => g.hidden).length;
+    $('list-meta').textContent = `${games.length} game · ${games.length - hiddenCount} đang hiện · ${hiddenCount} đang ẩn`;
+    if (!list.length) { $('rows').replaceChildren(h('li', { class: 'empty', text: games.length ? 'Không có game nào khớp.' : 'Chưa có game nào. Đăng game đầu tiên ở khung bên cạnh.' })); return; }
+    $('rows').replaceChildren(...list.map(g => {
+      let host = g.url; try { host = new URL(g.url).hostname.replace(/^www\./, ''); } catch (_) {}
+      return h('li', { class: 'row' + (g.hidden ? ' is-hidden' : '') + (g.id === editingId ? ' editing' : '') },
+        h('div', { class: 'thumb' }, thumb(safeHttp(g.cover_url) || shotOf(g.url), g.name)),
+        h('div', null,
+          h('p', { class: 'row-name', text: g.name }),
+          h('p', { class: 'row-meta num' },
+            h('span', { class: g.category ? 'cat' : 'cat none', text: catName(g.category) }),
+            g.hidden ? h('span', { class: 'mark', text: 'Đang ẩn' }) : null,
+            h('span', { text: 'Lên kệ ' + dmy(g.added_at) }),
+            h('span', { text: fmt(playsOf(g)) + ' lượt' }),
+            h('a', { href: g.url, target: '_blank', rel: 'noopener noreferrer', text: host }))
+        ),
+        h('div', { class: 'row-actions' },
+          h('button', { class: 'btn small', type: 'button', onclick: () => startEdit(g), text: 'Sửa' }),
+          h('button', { class: 'btn small', type: 'button', onclick: e => toggleHidden(g, e.currentTarget), text: g.hidden ? 'Hiện' : 'Ẩn' }),
+          h('button', { class: 'btn small danger', type: 'button', onclick: () => remove(g), text: 'Xoá' }))
+      );
+    }));
+  }
+  $('q').addEventListener('input', renderRows);
+  $('cat-filter').addEventListener('change', renderRows);
+  document.querySelectorAll('.filters button').forEach(b => b.addEventListener('click', () => {
+    filter = b.dataset.f;
+    document.querySelectorAll('.filters button').forEach(x => x.setAttribute('aria-pressed', String(x === b)));
+    renderRows();
+  }));
+
+  // ---------- Form ----------
+  const F = { name: $('f-name'), url: $('f-url'), date: $('f-date'), en: $('f-en'), alias: $('f-alias'), cover: $('f-cover'), hidden: $('f-hidden'), cat: $('f-cat') };
+  function resetForm() {
+    editingId = null;
+    Object.values(F).forEach(i => { if (i.type === 'checkbox') i.checked = false; else i.value = ''; i.removeAttribute('aria-invalid'); });
+    F.date.value = todayISO();
+    $('form-title').textContent = 'Đăng game mới';
+    $('save-label').textContent = 'Đăng lên trang';
+    $('cancel-edit').hidden = true;
+    $('form-error').hidden = true;
+    $('url-hint').textContent = 'Dán nguyên link trang game, có https://.';
+    updatePreview();
+  }
+  function startEdit(g) {
+    editingId = g.id;
+    F.name.value = g.name; F.url.value = g.url; F.date.value = g.added_at || '';
+    F.en.value = g.title_en || ''; F.alias.value = g.aliases || ''; F.cover.value = g.cover_url || ''; F.hidden.checked = !!g.hidden;
+    F.cat.value = g.category || '';
+    $('form-title').textContent = 'Sửa game';
+    $('save-label').textContent = 'Lưu thay đổi';
+    $('cancel-edit').hidden = false;
+    $('form-error').hidden = true;
+    $('url-hint').textContent = 'Đổi link thì lượt chơi của game sẽ đếm lại từ 0.';
+    updatePreview(); renderRows();
+    const form = $('game-form');
+    if (form.scrollHeight > form.clientHeight && getComputedStyle(form).overflowY === 'auto') form.scrollTo({ top: 0, behavior: 'smooth' });
+    else form.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    F.name.focus({ preventScroll: true });
+  }
+  $('cancel-edit').addEventListener('click', () => { resetForm(); renderRows(); });
+  let pvTimer;
+  function updatePreview() {
+    $('pv-name').textContent = F.name.value.trim() || 'Tên game';
+    clearTimeout(pvTimer);
+    pvTimer = setTimeout(() => {
+      const src = safeHttp(F.cover.value) || (safeHttp(F.url.value) ? shotOf(F.url.value.trim()) : null);
+      $('pv-thumb').replaceChildren(src ? thumb(src, F.name.value) : '');
+    }, 500);
+  }
+  [F.name, F.url, F.cover].forEach(i => i.addEventListener('input', updatePreview));
+
+  $('game-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const err = $('form-error'); err.hidden = true;
+    Object.values(F).forEach(i => i.removeAttribute('aria-invalid'));
+    const name = F.name.value.trim().replace(/\s+/g, ' ');
+    const url = safeHttp(F.url.value);
+    const cover = F.cover.value.trim() ? safeHttp(F.cover.value) : null;
+    const fail = (input, text) => { input.setAttribute('aria-invalid', 'true'); err.textContent = text; err.hidden = false; input.focus(); };
+    if (!name) return fail(F.name, 'Chưa có tên game.');
+    if (!url) return fail(F.url, 'Link game chưa đúng. Link phải bắt đầu bằng https:// hoặc http://');
+    if (!F.cat.value) return fail(F.cat, 'Chưa chọn thể loại.');
+    if (F.cover.value.trim() && !cover) return fail(F.cover, 'Link ảnh bìa chưa đúng. Để trống nếu không cần.');
+    const dup = games.find(g => g.id !== editingId && safeHttp(g.url) === url);
+    if (dup) return fail(F.url, `Link này đã có trong danh sách: “${dup.name}”${dup.hidden ? ' (đang ẩn)' : ''}.`);
+    const row = { name, url, cover_url: cover, title_en: F.en.value.trim() || null, aliases: F.alias.value.trim() || null, added_at: F.date.value || null, hidden: F.hidden.checked, category: F.cat.value };
+    $('save-btn').disabled = true;
+    const res = editingId ? await call('PATCH', '/api/admin/games/' + editingId, row) : await call('POST', '/api/admin/games', row);
+    $('save-btn').disabled = false;
+    if (res.error) {
+      if (res.error.status === 401) return;
+      const input = { name: F.name, url: F.url, cover_url: F.cover, category: F.cat, added_at: F.date }[res.error.field];
+      if (input) return fail(input, res.error.message);
+      err.textContent = 'Chưa lưu được: ' + res.error.message; err.hidden = false; return;
+    }
+    toast(editingId ? `Đã lưu “${name}”` : `Đã đăng “${name}” lên trang`);
+    if (editingId) games = games.map(g => g.id === editingId ? res.data : g); else games.unshift(res.data);
+    resetForm(); renderRows();
+  });
+
+  async function toggleHidden(g, btn) {
+    btn.disabled = true;
+    const { data, error } = await call('PATCH', '/api/admin/games/' + g.id, { hidden: !g.hidden });
+    btn.disabled = false;
+    if (error) { if (error.status !== 401) toast('Chưa đổi được: ' + error.message); return; }
+    games = games.map(x => x.id === g.id ? data : x);
+    toast(data.hidden ? `Đã ẩn “${g.name}”` : `Đã hiện lại “${g.name}”`);
+    renderRows();
+  }
+  function remove(g) {
+    const dlg = $('confirm');
+    $('confirm-text').textContent = `Xoá “${g.name}” khỏi danh sách? Không hoàn tác được.`;
+    dlg.returnValue = '';
+    dlg.onclose = async () => {
+      if (dlg.returnValue !== 'ok') return;
+      const { error } = await call('DELETE', '/api/admin/games/' + g.id);
+      if (error) { if (error.status !== 401) toast('Chưa xoá được: ' + error.message); return; }
+      games = games.filter(x => x.id !== g.id);
+      if (editingId === g.id) resetForm();
+      toast(`Đã xoá “${g.name}”`);
+      renderRows();
+    };
+    dlg.showModal();
+  }
+
+  enter();
+})();
+</script>
+</body>
+</html>
