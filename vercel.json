@@ -7,15 +7,15 @@
     { "source": "/quanlyidol", "destination": "/quanlyidol/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/api", "destination": "/api/[...all].js" },
-    { "source": "/api/(.*)", "destination": "/api/[...all].js" },
     { "source": "/admin", "destination": "/web/admin.html" },
     { "source": "/xoailac/", "destination": "/web/xoailac/index.html" },
-    { "source": "/xoailac/(.*)", "destination": "/web/xoailac/$1" },
+    { "source": "/xoailac/:path*", "destination": "/web/xoailac/:path*" },
     { "source": "/quanlau/", "destination": "/web/quanlau/index.html" },
-    { "source": "/quanlau/(.*)", "destination": "/web/quanlau/$1" },
+    { "source": "/quanlau/:path*", "destination": "/web/quanlau/:path*" },
     { "source": "/quanlyidol/", "destination": "/web/quanlyidol/index.html" },
-    { "source": "/quanlyidol/(.*)", "destination": "/web/quanlyidol/$1" },
-    { "source": "/(.*)", "destination": "/web/$1" }
+    { "source": "/quanlyidol/:path*", "destination": "/web/quanlyidol/:path*" },
+    { "source": "/assets/:path*", "destination": "/web/assets/:path*" },
+    { "source": "/((?!api/).*)", "destination": "/web/$1" },
+    { "source": "/", "destination": "/web/index.html" }
   ]
 }
