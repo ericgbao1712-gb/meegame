@@ -2,8 +2,10 @@
 // and lets it open without a connection. Network first: an online player always gets the newest files (the
 // server sends them no-cache), the copy in the cache is only used when the network fails.
 // Saves live in localStorage and are never touched here.
-const CACHE = 'xoailac-v1';
-const CORE = ['./', 'index.html', 'style.css', 'manifest.json', 'src/main.js', 'assets/app/icon-192.png'];
+const CACHE = 'xoailac-v2';
+// Trang thật là /xoailac (vercel.json: trailingSlash:false) nên scope là "/xoailac", không phải "/xoailac/".
+const HOME = '/xoailac';
+const CORE = [HOME, 'index.html', 'style.css', 'manifest.json', 'src/main.js', 'assets/app/icon-192.png'];
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(CACHE).then((c) => c.addAll(CORE)).catch(() => {}).then(() => self.skipWaiting()));
@@ -17,7 +19,7 @@ self.addEventListener('fetch', (e) => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
-  if (url.origin !== self.location.origin || !url.pathname.startsWith(new URL('./', self.location).pathname)) return;
+  if (url.origin !== self.location.origin || !(url.pathname === HOME || url.pathname.startsWith(HOME + '/'))) return;
   e.respondWith(
     fetch(req).then((res) => {
       if (res.ok && res.type === 'basic') { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(req, copy)).catch(() => {}); }

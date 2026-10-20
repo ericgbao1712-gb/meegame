@@ -153,6 +153,6 @@ function showStale() {
 // sandboxed preview (no service workers) it just does nothing.
 try {
   if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[sw] not registered:', e && e.message)); });
+    window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', { scope: '/xoailac' }).catch((e) => console.warn('[sw] not registered:', e && e.message)); });
   }
 } catch (e) { /* not installable here, the game still runs */ }

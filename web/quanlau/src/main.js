@@ -110,5 +110,5 @@ boot().catch((e) => console.error('[boot] fatal', e));
 // v1.2: installable app (Android "Cài đặt ứng dụng" / "Thêm vào màn hình chính"). Chrome only offers the install
 // once the page has a manifest with 192/512 icons and a registered service worker — the game had neither.
 if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol)) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch((e) => console.warn('[sw] not registered:', e && e.message)); });
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js', { scope: '/quanlau' }).catch((e) => console.warn('[sw] not registered:', e && e.message)); });
 }
