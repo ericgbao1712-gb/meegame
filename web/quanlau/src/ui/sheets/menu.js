@@ -1,4 +1,4 @@
-// Sheet 2 — Thực đơn: 7 hotpots (enable, recipe level, mastery) + drinks.
+// Sheet 2 — Thực đơn: 7 hotpots (enable, recipe level, mastery) + drinks + (v1.6) món ăn kèm, tráng miệng.
 import { h, div, span, ico } from '../dom.js';
 import { act, sfx, S } from '../ctx.js';
 import * as D from '../data.js';
@@ -73,6 +73,40 @@ export const menuSheet = {
         div('grow', h('b', null, d.name), span('muted', ok ? `Vốn ${fmtShort(d.cost)} · lời ${fmtShort(d.price - d.cost)}` : 'Mở ở Lv ' + d.unlockLv)),
         ok ? div('dp', span('num', fmtShort(d.price))) : ico('ui_lock', 32)));
     });
-    body.appendChild(noteBox('ui_info', 'Mỗi nồi lẩu cần **đủ nguyên liệu trong kho** mới nấu được. Món nào hết hàng sẽ **mờ** ở bếp.', ''));
+    // v1.6 món ăn kèm + tráng miệng: bật/tắt từng món; món tắt thì khách không gọi và quản kho không nhập
+    const extraRow = (it, price) => {
+      const unl = D.ingUnlocked(it.id);
+      const lvOk = s.level >= it.unlockLv;
+      const tool = it.needs ? C.UPGRADES.find((u) => u.id === it.needs) : null;
+      const on = s.menu?.[it.id] !== false;
+      if (!unl) {
+        return div('card row drink extra locked',
+          ico(it.icon, 32, 'dim'),
+          div('grow', h('b', null, it.name), span('muted', lvOk && tool ? `Cần mua ${tool.name} (Nâng cấp)` : 'Mở ở Lv ' + it.unlockLv)),
+          div('dp', span('num dim', fmtShort(price))), ico('ui_lock', 32));
+      }
+      const have = D.stock(it.id);
+      return div('card row drink extra' + (on ? '' : ' off'),
+        ico(it.icon, 32),
+        div('grow', h('b', null, it.name),
+          span('muted', `Vốn ${fmtShort(it.cost)} · lời ${fmtShort(price - it.cost)} · kho ${have}`)),
+        div('dp', span('num', fmtShort(price))),
+        toggle(on, () => { const r = act('toggleExtraItem', it.id); if (r.ok !== false) api.rerender(); }, 'Bán ' + it.name));
+    };
+    const sides = C.INGREDIENTS.filter((i) => i.side);
+    const sidesSelling = sides.filter((i) => D.ingUnlocked(i.id) && s.menu?.[i.id] !== false).length;
+    body.appendChild(secTitle('Món ăn kèm', `${sidesSelling} món đang bán · khách gọi cùng nồi lẩu`));
+    const nextLv = Math.min(...sides.filter((i) => i.unlockLv > s.level).map((i) => i.unlockLv), Infinity);
+    sides.filter((i) => i.unlockLv <= s.level || i.unlockLv === nextLv)
+      .forEach((i) => body.appendChild(extraRow(i, D.sidePrice(i.id))));
+    const more = sides.filter((i) => i.unlockLv > nextLv).length;
+    if (more) body.appendChild(span('muted sm extra-more', `Còn ${more} món ăn kèm mở ở các cấp sau — xem ở bảng "Hành trình lên cấp".`));
+
+    const desserts = C.INGREDIENTS.filter((i) => i.dessert);
+    const dsSelling = desserts.filter((i) => D.ingUnlocked(i.id) && s.menu?.[i.id] !== false).length;
+    body.appendChild(secTitle('Tráng miệng', `${dsSelling} món đang bán · khách gọi sau khi ăn lẩu`));
+    desserts.forEach((i) => body.appendChild(extraRow(i, i.extraPrice)));
+
+    body.appendChild(noteBox('ui_info', 'Mỗi nồi lẩu cần **đủ nguyên liệu trong kho** mới nấu được. Món nào hết hàng sẽ **mờ** ở bếp. Món ăn kèm, tráng miệng **tắt** thì khách không gọi và quản kho không nhập.', ''));
   },
 };

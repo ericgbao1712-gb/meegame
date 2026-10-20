@@ -184,9 +184,11 @@ export function setLevel(G, target) {
 export const isPotUnlocked = (G, id) => !!POT[id] && G.state.level >= POT[id].unlockLv;
 export const isIngUnlocked = (G, id) => !!ING[id] && G.state.level >= ING[id].unlockLv && (!ING[id].needs || (G.state.upgrades[ING[id].needs] || 0) > 0);
 /** v1.1 tráng miệng the shop can serve right now (unlocked, equipment bought). */
-export const dessertsOn = (G) => C.INGREDIENTS.filter((i) => i.dessert && isIngUnlocked(G, i.id));
+// v1.6: a món ăn kèm / tráng miệng the owner switched off in Thực đơn (state.menu[id] === false) is neither ordered nor restocked
+export const offMenu = (G, id) => !!G.state.menu && G.state.menu[id] === false;
+export const dessertsOn = (G) => C.INGREDIENTS.filter((i) => i.dessert && isIngUnlocked(G, i.id) && !offMenu(G, i.id));
 /** v1.4 món ăn kèm the shop can serve (unlocked + its tool bought) and their selling price with the tool's level bonus. */
-export const sidesOn = (G) => C.INGREDIENTS.filter((i) => i.side && isIngUnlocked(G, i.id));
+export const sidesOn = (G) => C.INGREDIENTS.filter((i) => i.side && isIngUnlocked(G, i.id) && !offMenu(G, i.id));
 export function sidePrice(G, id) {
   const i = ING[id]; if (!i) return 0;
   const u = i.needs ? UP[i.needs] : null, lv = u ? (G.state.upgrades[i.needs] || 0) : 1;

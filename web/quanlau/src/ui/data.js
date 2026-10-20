@@ -42,6 +42,7 @@ export function potPrice(id) {
   const p = POT[id]; const lvl = st().recipes?.[id]?.lvl ?? 1;
   return Math.round(p.price * (1 + (lvl - 1) * C.RECIPE.pricePerLevel));
 }
+export const sidePrice = (id) => get('sidePrice', id) ?? ING[id]?.extraPrice ?? 0;   // v1.6
 export const ingUnlocked = (id) => { const v = get('isIngUnlocked', id); return v ?? st().level >= ING[id].unlockLv; };
 export const potUnlocked = (id) => { const v = get('isPotUnlocked', id); return v ?? st().level >= POT[id].unlockLv; };
 export const drinkUnlocked = (id) => { const v = get('isDrinkUnlocked', id); return v ?? st().level >= DRINK[id].unlockLv; };

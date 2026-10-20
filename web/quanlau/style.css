@@ -1226,3 +1226,9 @@ button.hchip:active { transform: translateY(2px); }
 .stoves.broths.n6 .st.bt, .stoves.broths.n7 .st.bt { height: 42px; }
 .stoves.broths .st.bt .sg, .stoves.broths .st.bt .sicon { width: 22px; height: 22px; }
 .tslots { gap: 1px; } .slot { margin: 0; width: 21px; height: 21px; } .slot .ico { width: 13px; height: 13px; }
+/* v1.6 Thực đơn: món ăn kèm / tráng miệng */
+.drink.extra .dp { margin-right: 4px; }
+.drink.extra .dp .num { font-size: 22px; }
+.drink.extra.off { opacity: .6; }
+.drink.extra .dp .num.dim { opacity: .45; }
+.extra-more { display: block; margin: -2px 6px 8px; }

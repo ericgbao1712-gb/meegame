@@ -2,7 +2,7 @@
 import * as C from '../config.js';
 import {
   ING, POT, UP, xpNeed, tierDef, builtTables, allTables, builtStoves, khoInfo, buyPrice as baseBuyPrice, potPrice, masteryStars,
-  ambienceOf, featureUnlocked, isPotUnlocked, isIngUnlocked, isDrinkUnlocked, salaryTotal, staffSalary,
+  ambienceOf, featureUnlocked, isPotUnlocked, isIngUnlocked, isDrinkUnlocked, salaryTotal, staffSalary, sidePrice,
 } from './economy.js';
 import { staffSlots, roleUnlocked, roleCount, candidatesOf } from './staff.js';
 import { trayStatus } from './kitchen.js';
@@ -194,6 +194,7 @@ export function createGetters(G) {
     unlocked: (key) => featureUnlocked(G, key),
     isPotUnlocked: (id) => isPotUnlocked(G, id),
     isIngUnlocked: (id) => isIngUnlocked(G, id),
+    sidePrice: (id) => sidePrice(G, id),   // v1.6 Thực đơn
     isDrinkUnlocked: (id) => isDrinkUnlocked(G, id),
     availablePots, upgradeInfo, recipeInfo, candidates,
     tierInfo: () => tierInfo(G),

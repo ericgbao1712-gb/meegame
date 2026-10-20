@@ -286,6 +286,16 @@ export function createGame(save, opts = {}) {
       return { ok: true, on };
     }),
 
+    // v1.6: bật/tắt món ăn kèm, tráng miệng trong Thực đơn (default on: state.menu[id] undefined = đang bán)
+    toggleExtraItem: wrap((id) => {
+      const it = C.INGREDIENTS.find((i) => i.id === id && (i.side || i.dessert));
+      if (!it) return fail('unknown', 'Không có món này.');
+      if (state.level < it.unlockLv) return fail('locked', `${it.name} mở ở Lv ${it.unlockLv} nha!`);
+      const on = state.menu[id] === false;
+      state.menu[id] = on;
+      return { ok: true, on };
+    }),
+
     hire: wrap((role, idx) => staff.hire(G, role, idx)),
     fire: wrap((id) => staff.fire(G, id)),
     refreshCandidates: wrap((role) => staff.refreshCandidates(G, role)),
