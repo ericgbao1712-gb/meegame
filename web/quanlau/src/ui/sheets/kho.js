@@ -9,7 +9,7 @@ import { secTitle, noteBox, celebrate, floatAt, toggle, unitPrice } from './comm
 function packBtn(id, label, n, price, free, money, rowEl, api) {
   const afford = Math.floor((money + 1e-9) / Math.max(0.01, price));
   const can = free > 0 && afford > 0;
-  const real = Math.max(0, Math.min(n === 'fill' ? free : n, free, afford));
+  const real = Math.max(0, Math.min(n, free, afford));
   const cost = real * price;
   const b = h('button', { class: 'btn jade sm pack' + (can ? '' : ' off'), 'aria-label': `Mua ${label} ${D.ING[id].name}` },
     span('lb', label),
@@ -87,7 +87,6 @@ export const khoSheet = {
       {
         const btns = div('ing-btns');
         C.MARKET.packs.forEach((n) => btns.appendChild(packBtn(id, '+' + n, n, price, free, s.money, row, api)));
-        btns.appendChild(packBtn(id, 'Đầy', 'fill', price, free, s.money, row, api));
         row.appendChild(btns);
       }
       body.appendChild(row);

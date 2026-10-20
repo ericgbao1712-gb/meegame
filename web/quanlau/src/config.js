@@ -526,7 +526,7 @@ export const FEATURES = {
 export const MARKET = {
   dailyVol: 0.10, meanRevert: 0.2, min: 0.75, max: 1.35, // multiplier random walk on cost
   // no buying while the restaurant is open: the kho is stocked at the start of the day only
-  packs: [10, 50],               // buy buttons (+ "Đầy kho")
+  packs: [5, 10, 50],            // v1.6c buy buttons: +5 / +10 / +50 (nút "Đầy kho" đã bỏ theo yêu cầu chủ dự án)
   soldOutTargetMult: 2,         // …or × this when yesterday sold out (usage undercounts the real demand)
   autoBuyTargetMult: 1.3,        // auto restock to yesterday usage × this (min 8 each for enabled pots)
 };

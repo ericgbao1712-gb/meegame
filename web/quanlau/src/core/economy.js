@@ -299,7 +299,7 @@ export function buyIngredient(G, ing, qty) {
   const { used, cap } = khoInfo(G);
   const free = cap - used;
   if (free <= 0) return { ok: false, reason: 'full', msg: 'Kho đầy rồi! Nâng cấp kho hoặc bán bớt nha.' };
-  let n = qty === 'fill' ? free : Math.max(1, Math.floor(qty || 1));
+  let n = Math.max(1, Math.floor(Number(qty) || 1));   // v1.6c: no more 'fill' (nhập đầy kho) — fixed packs only
   n = Math.min(n, free);
   const afford = Math.floor((s.money + 1e-9) / price);
   if (afford <= 0) return { ok: false, reason: 'money', msg: `Chưa đủ tiền mua ${def.name} (${fmtMoney(price)}/phần).` };
