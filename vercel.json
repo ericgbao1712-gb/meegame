@@ -54,5 +54,20 @@
       "source": "/",
       "destination": "/web/index.html"
     }
+  ],
+  "headers": [
+    {
+      "source": "/quanlyidol/sw.js",
+      "headers": [
+        {
+          "key": "Service-Worker-Allowed",
+          "value": "/quanlyidol"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-cache"
+        }
+      ]
+    }
   ]
 }

@@ -1187,3 +1187,7 @@ setInterval(clock,1000);
 document.addEventListener("pointerdown",()=>Music.unlock(),{once:true});
 // nhận quà điểm danh sau khi đóng popup offline
 document.addEventListener("click",e=>{if(e.target.closest("[data-a=close]")&&S.daily!==today())setTimeout(daily,50)});
+// Service worker: cho phép cài như app trên điện thoại và mở khi mất mạng (xem sw.js về scope "/quanlyidol")
+if('serviceWorker' in navigator && /^https?:$/.test(location.protocol)){
+  window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js',{scope:'/quanlyidol'}).catch(e=>console.warn('[sw] chưa đăng ký được:',e&&e.message))});
+}

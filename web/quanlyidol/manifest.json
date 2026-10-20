@@ -1,0 +1,20 @@
+{
+  "id": "/quanlyidol",
+  "name": "Idol Agency Tycoon",
+  "short_name": "Idol Tycoon",
+  "description": "Game quản lý công ty giải trí K-pop: luyện tập, debut, ra nhạc, thắng cúp và mở rộng thành đế chế Hallyu.",
+  "lang": "vi",
+  "start_url": "/quanlyidol",
+  "scope": "/quanlyidol",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff4fa",
+  "theme_color": "#ff6fae",
+  "categories": ["games"],
+  "icons": [
+    { "src": "assets/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "assets/app/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "assets/app/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

@@ -11,7 +11,9 @@ Trang tĩnh thuần: **không cần build, không cần server riêng**, tiến 
 | `style.css` | Toàn bộ giao diện (trước đây nằm trong thẻ `<style>`) |
 | `game.js` | Toàn bộ logic game (trước đây nằm trong thẻ `<script>`) |
 | `assets/` | Ảnh nền `bg_*.jpg`, sprite idol `idols_f1..f8 / m1..m8.jpg` (lưới 3×3), icon `ic/*.png` |
-| `favicon.ico`, `favicon-32.png`, `apple-touch-icon.png` | Icon tab trình duyệt / màn hình chính iPhone (làm từ `assets/ic/s_lightstick.png`) |
+| `favicon.ico`, `assets/app/` | Logo: icon tab trình duyệt, icon màn hình chính (Android `icon-*` + `maskable-*`, iPhone `apple-touch-icon.png`) |
+| `manifest.json` | Khai báo app cho điện thoại: tên "Idol Tycoon", logo, màu, `start_url`/`scope` = `/quanlyidol` |
+| `sw.js` | Service worker: cho phép cài như app và mở khi mất mạng (network first) |
 | `capcao.js` | Bản test bắt đầu ở cấp cao (tắt mặc định, xem cuối file) |
 | `fonts/fonts.css` | Khai báo font Baloo 2 + Quicksand tự host (có bản tiếng Việt) |
 | `tai-font.bat`, `tai-font.sh` | Tải 6 file font `.woff2` vào `fonts/` — **chạy 1 lần** sau khi giải nén |
@@ -57,6 +59,15 @@ Không mở thẳng `index.html` bằng double-click (file://): một số trìn
 - Lịch: 6 sticker/ngày (trước 3), mỗi người/nhóm 2 sticker/ngày (trước 1, không trùng loại).
 - Nhiệm vụ: 23 → 42, chia 6 Level, hoàn thành Level có thưởng thêm.
 - Save cũ vẫn chơi tiếp được: id idol cũ tự đổi sang id mới khi mở game.
+
+## Cài như app trên điện thoại
+
+- Android (Chrome): menu ⋮ → "Cài đặt ứng dụng" / "Thêm vào màn hình chính". iPhone (Safari): Chia sẻ → "Thêm vào MH chính".
+- Vì `vercel.json` đặt `trailingSlash: false`, trang thật là `/quanlyidol` (không có `/` cuối). Do đó:
+  - `manifest.json` dùng `start_url` và `scope` = `/quanlyidol` (nếu để `./` thì thành `/quanlyidol/`, trang thật nằm ngoài scope).
+  - `sw.js` đăng ký với scope `/quanlyidol`; `vercel.json` gửi header `Service-Worker-Allowed: /quanlyidol` cho file này.
+- Đổi logo: sửa ảnh trong `assets/app/` (giữ đúng tên và kích thước). Ảnh `maskable-*` phải để phần hình chính trong vòng tròn 80% ở giữa vì Android tự cắt theo khuôn icon.
+- Sửa `style.css`/`game.js` không cần đổi gì ở `sw.js` (network first luôn lấy bản mới khi có mạng).
 
 ## Lưu ý khi cập nhật
 
