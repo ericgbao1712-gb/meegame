@@ -1,3 +1,5 @@
-// Địa chỉ máy chủ MeeGame (VPS, server/meegame_api.py sau Cloudflare + Traefik), phải là https://.
-// Để trống thì trang chính dùng danh sách dự phòng trong games-seed.js và ẩn số lượt chơi.
-window.MEEGAME_API = 'https://api.meegame.shop';
+// Địa chỉ máy chủ MeeGame (Vercel Serverless Function hoặc VPS).
+// Tự động nhận diện domain hiện tại (meegame.io.vn hoặc vercel.app).
+window.MEEGAME_API = (typeof window !== 'undefined' && window.location && window.location.origin && window.location.origin.startsWith('http'))
+  ? window.location.origin
+  : '';

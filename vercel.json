@@ -1,0 +1,58 @@
+{
+  "version": 2,
+  "trailingSlash": false,
+  "rewrites": [
+    {
+      "source": "/admin",
+      "destination": "/web/admin.html"
+    },
+    {
+      "source": "/xoailac",
+      "destination": "/web/xoailac/index.html"
+    },
+    {
+      "source": "/xoailac/(.*)",
+      "destination": "/web/xoailac/$1"
+    },
+    {
+      "source": "/quanlau",
+      "destination": "/web/quanlau/index.html"
+    },
+    {
+      "source": "/quanlau/(.*)",
+      "destination": "/web/quanlau/$1"
+    },
+    {
+      "source": "/quanlyidol",
+      "destination": "/web/quanlyidol/index.html"
+    },
+    {
+      "source": "/quanlyidol/(.*)",
+      "destination": "/web/quanlyidol/$1"
+    },
+    {
+      "source": "/assets/(.*)",
+      "destination": "/web/assets/$1"
+    },
+    {
+      "source": "/games-seed.js",
+      "destination": "/web/games-seed.js"
+    },
+    {
+      "source": "/titles-en.js",
+      "destination": "/web/titles-en.js"
+    },
+    {
+      "source": "/categories.js",
+      "destination": "/web/categories.js"
+    },
+    {
+      "source": "/config.js",
+      "destination": "/web/config.js"
+    },
+    {
+      "source": "/",
+      "destination": "/web/index.html"
+    }
+  ]
+}
