@@ -25,6 +25,9 @@ export const TIME = {
   rushHours: [[11 * 60, 13 * 60], [17 * 60 + 30, 21 * 60]],
   weekdays: ['T2', 'T3', 'T4', 'T5', 'T6', 'T7', 'CN'], // day 1 = T2
   weekendMult: 1.3,
+  // v1.6b đầu game đông hơn chút: ở vỉa hè + trong hẻm, giờ vắng (10h, 13–16h, 22h) có khách đều hơn (sàn 0,9 nhóm/giờ)
+  // và cả ngày +10%. Giờ cao điểm gần như giữ nguyên, số món chờ cùng lúc vẫn bị giới hạn bởi số bàn → người mới không bị ngợp.
+  earlyGame: { maxTier: 2, floor: 0.9, mult: 1.1 },
 };
 
 // ───────────────────────────── START ─────────────────────────────

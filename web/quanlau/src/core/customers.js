@@ -37,8 +37,10 @@ export function weatherDemand(G) {
 export function demandRate(G) {
   const s = G.state;
   const hour = Math.floor(s.clock / 60);
-  const curve = C.TIME.demandCurve[hour] ?? 0;
+  let curve = C.TIME.demandCurve[hour] ?? 0;
   if (!curve) return 0;
+  const eg = C.TIME.earlyGame;
+  if (eg && s.tier <= eg.maxTier) curve = Math.max(curve, eg.floor) * eg.mult;   // v1.6b
   const ev = eventDef(G);
   let r = curve * tierDef(G).demand * C.RATING.demandMult(s.rating.avg) * weatherDemand(G);
   r *= (ev && ev.demand) || 1;
