@@ -914,9 +914,8 @@ export const CLOUD = {
 // Trùng món → mảnh; gom mảnh đổi món còn thiếu. Bảo hiểm: 10 hộp chắc chắn có Hiếm trở lên, 150 hộp chắc chắn có Bí ẩn.
 export const BOX = {
   // owner 22/10: tăng giá hộp + giá đổi mảnh; tỉ lệ / bảo hiểm chỉnh theo bộ 61 món của Lẩu Ơi
-  price: [200, 400, 1000, 2500, 4000],          // k / hộp theo cấp quán (owner 22/10: Chuỗi 1 hộp 4 triệu)
-  price10: [1750, 3500, 8750, 22000, 35000],    // k / 10 hộp (owner 22/10: Chuỗi 10 hộp 35 triệu ≈ 8,75 hộp)
-  tenMult: 9,                                   // dự phòng khi thiếu price10
+  price: [200, 400, 1000, 2500, 5000],  // k / hộp theo cấp quán (owner 22/10: "để lại giá cũ")
+  tenMult: 9,                           // mở 10 hộp = giá 9 hộp
   freePerDay: 1,
   rar: [
     { id: 1, name: 'Thường',   rate: 60, shard: 5,   cost: 40,   icon: 'ui_star_empty' },

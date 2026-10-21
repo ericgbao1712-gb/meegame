@@ -118,8 +118,8 @@ export function boxView(body, api, set = 'hop') {
   body.appendChild(h('button', { class: 'btn jade lg block bx-free' + (bi.freeLeft ? ' glow' : ''), type: 'button', disabled: !bi.freeLeft, onclick: (e) => doOpen(1, true, e.currentTarget, api) },
     ico(bi.icon, 32), bi.freeLeft ? 'Mở miễn phí hôm nay' : 'Mai mở miễn phí tiếp nha'));
   body.appendChild(noteBox('ui_mom', curSet === 'tui'
-    ? `Túi mù toàn đồ bếp, máy móc cho quán con: rút được thì vào **Quán ▸ Trang trí** bấm **Dùng**. **10 túi rẻ hơn mua lẻ**, mỗi ngày **1 túi miễn phí**. Đã chi ${fmtMoney(bi.spent)}.`
-    : `Má dặn: hộp mù mua cho vui thôi con, **10 hộp rẻ hơn mua lẻ**, mỗi ngày có **1 hộp miễn phí**. Đã chi ${fmtMoney(bi.spent)} cho hộp mù.`, 'gold'));
+    ? `Túi mù toàn đồ bếp, máy móc cho quán con: rút được thì vào **Quán ▸ Trang trí** bấm **Dùng**. **10 túi chỉ tính tiền 9**, mỗi ngày **1 túi miễn phí**. Đã chi ${fmtMoney(bi.spent)}.`
+    : `Má dặn: hộp mù mua cho vui thôi con, **10 hộp chỉ tính tiền 9**, mỗi ngày có **1 hộp miễn phí**. Đã chi ${fmtMoney(bi.spent)} cho hộp mù.`, 'gold'));
 }
 
 function doOpen(n, free, btn, api) {
@@ -256,7 +256,7 @@ function openRules() {
             h('td', null, span('num', r.rate + '%')), h('td', null, span('num', String(count(r.id)))),
             h('td', null, span('num', '+' + r.shard)), h('td', null, span('num', String(r.cost))))))),
         h('ul', { class: 'bx-rules' },
-          h('li', null, `Giá theo cấp quán: bây giờ ${fmtShort(bi.price)} một ${u}, mở 10 ${u} ${fmtShort(bi.price10)} (rẻ hơn mua lẻ ${fmtShort(bi.price * 10 - bi.price10)}). Mỗi ngày trong game được mở 1 ${u} miễn phí.`),
+          h('li', null, `Giá theo cấp quán: bây giờ ${fmtShort(bi.price)} một ${u}, mở 10 ${u} ${fmtShort(bi.price10)} (chỉ tính tiền 9). Mỗi ngày trong game được mở 1 ${u} miễn phí.`),
           h('li', null, `Bảo hiểm: ${bi.pityRare} ${u} liền chưa ra Hiếm thì ${u} kế tiếp chắc chắn Hiếm trở lên; ${bi.pityEpic} ${u} chắc chắn Cực hiếm trở lên; ${bi.pityMyst} ${u} chắc chắn Bí ẩn. Ra món đó rồi thì đếm lại từ đầu.`),
           h('li', null, 'Ra món đã có thì thành mảnh sứ (cột "Trùng"). Mảnh dùng chung cho Hộp mù và Túi mù, gom để đổi đúng món còn thiếu (cột "Đổi").'),
           h('li', null, 'Món ăn, đồ uống độc quyền tự lên Thực đơn; món ăn kèm, tráng miệng cần dụng cụ bếp như món thường.'),
