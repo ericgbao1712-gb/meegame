@@ -21,7 +21,10 @@ const FILTERS = [
   { id: 'noi', label: 'Nồi & bàn', kinds: ['pot', 'table'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'] }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
-const info = () => G().get?.boxInfo?.() || null;
+let curSet = 'hop';   // v1.18c 'hop' = Hộp mù, 'tui' = Túi mù
+const info = () => G().get?.boxInfo?.(curSet) || null;
+const unit = () => (curSet === 'tui' ? 'túi' : 'hộp');
+const setItems = () => C.BOX.items.filter((x) => x.set === curSet);
 
 function img(src, size, cls = '') {
   const im = h('img', { class: 'pix ' + cls, width: size, height: size, alt: '' });
@@ -54,25 +57,31 @@ export function itemPic(it, size = 40) {
 const equipped = (it, bi) => (it.kind === 'badge' && bi.badge === it.id) || (it.kind === 'pot' && bi.pot === it.ref) || (it.kind === 'table' && bi.table === it.ref);
 
 /** Quán ▸ Giải trí ▸ Hộp mù */
-export function boxView(body, api) {
+export function boxView(body, api, set = 'hop') {
+  curSet = set === 'tui' ? 'tui' : 'hop';
   const bi = info();
   if (!bi) return;
-  if (!bi.unlocked) { body.appendChild(lockCard('Hộp mù', `Mở ở Lv ${C.FEATURES.blindbox}. Rút hộp ra món ăn độc quyền, đồng phục, nồi lẩu, đồ trang trí và thẻ thành tích lên bảng xếp hạng.`, 'ui_hopmu')); return; }
+  if (!bi.unlocked) {
+    body.appendChild(lockCard(bi.name, curSet === 'tui'
+      ? `Mở ở Lv ${bi.unlockLv}. Túi mù ra đồ bếp, máy móc, tiện ích đặt được trong quán: máy thái thịt, máy bán nước, dây chuyền làm mì, Xưởng Viên Thả Lẩu…`
+      : `Mở ở Lv ${bi.unlockLv}. Rút hộp ra món ăn độc quyền, đồng phục, nồi lẩu, đồ trang trí và thẻ thành tích lên bảng xếp hạng.`, bi.icon));
+    return;
+  }
   const s = S();
   body.appendChild(div('card bx-head',
-    ico('ui_hopmu', 48),
+    ico(bi.icon, 48),
     div('grow',
-      h('b', { class: 'bx-title' }, 'Hộp mù Lẩu Ơi'),
-      div('bx-count', span('num', String(bi.owned)), span('muted', '/' + bi.total + ' món · đã mở '), span('num', String(bi.opened)), span('muted', ' hộp')),
+      h('b', { class: 'bx-title' }, bi.name + ' Lẩu Ơi'),
+      div('bx-count', span('num', String(bi.owned)), span('muted', '/' + bi.total + ' món · đã mở '), span('num', String(bi.opened)), span('muted', ' ' + unit())),
       div('bar bx-bar', h('i', { style: { '--p': Math.round(bi.owned / bi.total * 100) } })))));
   // lọc
   const fr = div('bx-filter');
-  FILTERS.forEach((f) => fr.appendChild(h('button', { class: 'chip' + (filter === f.id ? ' ink' : ''), type: 'button', onclick: () => { filter = f.id; sfx('click'); api.rerender(); } }, f.label)));
-  body.appendChild(fr);
+  if (curSet === 'hop') FILTERS.forEach((f) => fr.appendChild(h('button', { class: 'chip' + (filter === f.id ? ' ink' : ''), type: 'button', onclick: () => { filter = f.id; sfx('click'); api.rerender(); } }, f.label)));
+  if (fr.childNodes.length) body.appendChild(fr);
   // lưới bộ sưu tập
   const fk = FILTERS.find((f) => f.id === filter)?.kinds;
   const grid = div('bx-grid');
-  C.BOX.items.filter((it) => !fk || fk.includes(it.kind)).slice().sort((a, b) => a.r - b.r).forEach((it, i) => {
+  setItems().filter((it) => curSet !== 'hop' || !fk || fk.includes(it.kind)).slice().sort((a, b) => a.r - b.r).forEach((it, i) => {
     const n = bi.got[it.id] || 0;
     const cell = h('button', { class: 'bx-cell ' + RCLS[it.r] + (n ? ' got' : ' miss') + (equipped(it, bi) ? ' eq' : ''), type: 'button', title: n ? it.name : '???', 'aria-label': n ? it.name : 'Chưa có' },
       n ? itemPic(it, 36) : ico('ui_lock', 16, 'bx-lock'),
@@ -90,9 +99,9 @@ export function boxView(body, api) {
     div('grow', div('bx-pity-t', span('', label), span('num', `${Math.min(at, max)}/${max}`)),
       div('bar thin noshine', h('i', { style: { '--p': Math.round(Math.min(at, max) / max * 100) } }))));
   body.appendChild(div('bx-pitys',
-    pity('ui_star_half', 'Chắc chắn Hiếm', bi.rareAt, C.BOX.pityRare, 'r2'),
-    pity('ui_star', 'Chắc chắn Cực hiếm', bi.epicAt, C.BOX.pityEpic, 'r3'),
-    pity('ui_chest_gold', 'Chắc chắn Bí ẩn', bi.mystAt, C.BOX.pityMyst, 'r4')));
+    pity('ui_star_half', 'Chắc chắn Hiếm', bi.rareAt, bi.pityRare, 'r2'),
+    pity('ui_star', 'Chắc chắn Cực hiếm', bi.epicAt, bi.pityEpic, 'r3'),
+    pity('ui_chest_gold', 'Chắc chắn Bí ẩn', bi.mystAt, bi.pityMyst, 'r4')));
   body.appendChild(div('card bx-tools',
     ico('ui_manh', 32),
     div('grow', span('muted sm', 'Mảnh sứ'), span('num bx-shards', String(bi.shards))),
@@ -100,15 +109,17 @@ export function boxView(body, api) {
     h('button', { class: 'btn paper sm', type: 'button', onclick: () => { sfx('click'); openRules(); } }, ico('ui_book', 16), 'Luật chơi')));
   const can1 = s.money >= bi.price, can10 = s.money >= bi.price10;
   body.appendChild(div('bx-buy',
-    h('button', { class: 'btn red lg bx-open', type: 'button', disabled: !can1, onclick: (e) => doOpen(1, false, e.currentTarget, api) }, span('', 'Mở 1 hộp'), span('pr', ico('ui_coin', 16), span('num', fmtShort(bi.price)))),
-    h('button', { class: 'btn dark lg bx-open', type: 'button', disabled: !can10, onclick: (e) => doOpen(10, false, e.currentTarget, api) }, span('', 'Mở 10 hộp'), span('pr', ico('ui_coin', 16), span('num', fmtShort(bi.price10))))));
+    h('button', { class: 'btn red lg bx-open', type: 'button', disabled: !can1, onclick: (e) => doOpen(1, false, e.currentTarget, api) }, span('', 'Mở 1 ' + unit()), span('pr', ico('ui_coin', 16), span('num', fmtShort(bi.price)))),
+    h('button', { class: 'btn dark lg bx-open', type: 'button', disabled: !can10, onclick: (e) => doOpen(10, false, e.currentTarget, api) }, span('', 'Mở 10 ' + unit()), span('pr', ico('ui_coin', 16), span('num', fmtShort(bi.price10))))));
   body.appendChild(h('button', { class: 'btn jade lg block bx-free' + (bi.freeLeft ? ' glow' : ''), type: 'button', disabled: !bi.freeLeft, onclick: (e) => doOpen(1, true, e.currentTarget, api) },
-    ico('ui_hopmu', 32), bi.freeLeft ? 'Mở miễn phí hôm nay' : 'Mai mở miễn phí tiếp nha'));
-  body.appendChild(noteBox('ui_mom', `Má dặn: hộp mù mua cho vui thôi con, **10 hộp chỉ tính tiền 9**, mỗi ngày có **1 hộp miễn phí**. Đã chi ${fmtMoney(bi.spent)} cho hộp mù.`, 'gold'));
+    ico(bi.icon, 32), bi.freeLeft ? 'Mở miễn phí hôm nay' : 'Mai mở miễn phí tiếp nha'));
+  body.appendChild(noteBox('ui_mom', curSet === 'tui'
+    ? `Túi mù toàn đồ bếp, máy móc cho quán con: rút được thì vào **Quán ▸ Trang trí** bấm **Dùng**. **10 túi chỉ tính tiền 9**, mỗi ngày **1 túi miễn phí**. Đã chi ${fmtMoney(bi.spent)}.`
+    : `Má dặn: hộp mù mua cho vui thôi con, **10 hộp chỉ tính tiền 9**, mỗi ngày có **1 hộp miễn phí**. Đã chi ${fmtMoney(bi.spent)} cho hộp mù.`, 'gold'));
 }
 
 function doOpen(n, free, btn, api) {
-  const r = act('openBox', n, free);
+  const r = act('openBox', n, free, curSet);
   if (r.ok === false) { sfx('error'); return; }
   sfx('whoosh'); vibrate(20);
   try { if (!free) floatAt(btn, '-' + fmtShort(r.cost), '#b8343a'); } catch (e) { /* ignore */ }
@@ -127,7 +138,7 @@ function openReveal(got, api) {
       got.forEach((g, i) => {
         const it = C.BOX_ITEM[g.id];
         const card = div('bx-rc ' + RCLS[g.r], div('bx-rc-in',
-          div('bx-rc-back', ico('ui_hopmu', 32)),
+          div('bx-rc-back', ico(curSet === 'tui' ? 'ui_tuimu' : 'ui_hopmu', 32)),
           div('bx-rc-front', itemPic(it, got.length === 1 ? 72 : 36), h('b', null, it.name),
             span('bx-rc-r', RAR[g.r - 1].name), g.dup ? span('chip bx-rc-dup', ico('ui_manh', 16), '+' + g.shards) : span('chip red bx-rc-new', 'MỚI'))));
         card.style.setProperty('--d', (i * (got.length > 1 ? 0.12 : 0) + 0.3) + 's');
@@ -135,7 +146,7 @@ function openReveal(got, api) {
       });
       const newItems = got.filter((g) => !g.dup).map((g) => C.BOX_ITEM[g.id]);
       return div('mbody cel', div('rays on'),
-        div('cel-top', span('cel-kicker', 'HỘP MÙ'), h('b', { class: 'cel-title' }, best >= 4 ? 'BÍ ẨN!' : best >= 3 ? 'CỰC HIẾM!' : news ? 'CÓ MÓN MỚI!' : 'MỞ HỘP!')),
+        div('cel-top', span('cel-kicker', curSet === 'tui' ? 'TÚI MÙ' : 'HỘP MÙ'), h('b', { class: 'cel-title' }, best >= 4 ? 'BÍ ẨN!' : best >= 3 ? 'CỰC HIẾM!' : news ? 'CÓ MÓN MỚI!' : 'MỞ HỘP!')),
         wrap,
         newItems.length ? h('p', { class: 'cel-sub bx-hint' }, hintFor(newItems)) : null,
         h('button', { class: 'btn red lg block', type: 'button', onclick: () => { sfx('confirm'); m.close('ok'); } }, 'Nhận quà'));
@@ -161,7 +172,7 @@ function openItem(it, api) {
   ctx.modal({
     id: 'bxitem', cls: 'bxitem', priority: 20, queue: false, sound: 'pop',
     build: (m) => {
-      const [head, body] = frame(n ? it.name : 'Món bí ẩn', { icon: 'ui_hopmu', onClose: () => m.close('x') });
+      const [head, body] = frame(n ? it.name : 'Món bí ẩn', { icon: it.set === 'tui' ? 'ui_tuimu' : 'ui_hopmu', onClose: () => m.close('x') });
       const rer = () => { m.close('ok'); api.rerender(); };
       const btns = [];
       if (n) {
@@ -178,7 +189,7 @@ function openItem(it, api) {
       body.append(...[
         div('bx-big ' + RCLS[it.r] + (n ? '' : ' miss'), n ? itemPic(it, 72) : ico('ui_lock', 48, 'bx-lock')),
         div('bx-meta', span('chip bx-rc-chip ' + RCLS[it.r], ico(RAR[it.r - 1].icon, 16), RAR[it.r - 1].name), span('chip', KIND[it.kind])),
-        h('p', { class: 'muted sm' }, n ? describe(it) : 'Chưa rút được món này. Mở hộp mù hoặc gom mảnh để đổi.'),
+        h('p', { class: 'muted sm' }, n ? describe(it) : `Chưa rút được món này. Mở ${it.set === 'tui' ? 'túi mù' : 'hộp mù'} hoặc gom mảnh để đổi.`),
         n > 1 ? span('muted sm bx-dupn', `Đã rút ${n} lần (trùng thành mảnh).`) : null,
         ...btns].filter(Boolean));
       return [head, body];
@@ -205,7 +216,7 @@ function openExchange(api) {
     build: (m) => {
       const bi = info();
       const [head, body] = frame('Đổi mảnh sứ', { icon: 'ui_manh', sub: `Bạn có ${bi.shards} mảnh`, onClose: () => m.close('x') });
-      const miss = C.BOX.items.filter((x) => !(bi.got[x.id] > 0)).sort((a, b) => a.r - b.r);
+      const miss = setItems().filter((x) => !(bi.got[x.id] > 0)).sort((a, b) => a.r - b.r);
       if (!miss.length) body.appendChild(div('nodata', 'Bạn sưu tầm đủ hết rồi! Quá đỉnh.'));
       miss.forEach((it) => {
         const cost = RAR[it.r - 1].cost;
@@ -225,9 +236,10 @@ function openRules() {
   ctx.modal({
     id: 'bxrules', cls: 'bxrules', priority: 20, queue: false, sound: 'pop',
     build: (m) => {
-      const [head, body] = frame('Luật chơi Hộp mù', { icon: 'ui_book', onClose: () => m.close('x') });
-      const count = (r) => C.BOX.items.filter((x) => x.r === r).length;
       const bi = info();
+      const [head, body] = frame('Luật chơi ' + bi.name, { icon: 'ui_book', onClose: () => m.close('x') });
+      const count = (r) => setItems().filter((x) => x.r === r).length;
+      const u = unit();
       body.append(
         h('table', { class: 'bx-table' },
           h('thead', null, h('tr', null, h('th', null, 'Độ hiếm'), h('th', null, 'Tỉ lệ'), h('th', null, 'Số món'), h('th', null, 'Trùng'), h('th', null, 'Đổi'))),
@@ -236,9 +248,9 @@ function openRules() {
             h('td', null, span('num', r.rate + '%')), h('td', null, span('num', String(count(r.id)))),
             h('td', null, span('num', '+' + r.shard)), h('td', null, span('num', String(r.cost))))))),
         h('ul', { class: 'bx-rules' },
-          h('li', null, `Giá theo cấp quán: bây giờ ${fmtShort(bi.price)} một hộp, mở 10 hộp ${fmtShort(bi.price10)} (rẻ hơn 1 hộp). Mỗi ngày trong game được mở 1 hộp miễn phí.`),
-          h('li', null, `Bảo hiểm: ${C.BOX.pityRare} hộp liền chưa ra Hiếm thì hộp kế tiếp chắc chắn Hiếm trở lên; ${C.BOX.pityEpic} hộp chắc chắn Cực hiếm trở lên; ${C.BOX.pityMyst} hộp chắc chắn Bí ẩn. Ra món đó rồi thì đếm lại từ đầu.`),
-          h('li', null, 'Ra món đã có thì thành mảnh sứ (cột "Trùng"). Gom mảnh để đổi đúng món còn thiếu (cột "Đổi").'),
+          h('li', null, `Giá theo cấp quán: bây giờ ${fmtShort(bi.price)} một ${u}, mở 10 ${u} ${fmtShort(bi.price10)} (chỉ tính tiền 9). Mỗi ngày trong game được mở 1 ${u} miễn phí.`),
+          h('li', null, `Bảo hiểm: ${bi.pityRare} ${u} liền chưa ra Hiếm thì ${u} kế tiếp chắc chắn Hiếm trở lên; ${bi.pityEpic} ${u} chắc chắn Cực hiếm trở lên; ${bi.pityMyst} ${u} chắc chắn Bí ẩn. Ra món đó rồi thì đếm lại từ đầu.`),
+          h('li', null, 'Ra món đã có thì thành mảnh sứ (cột "Trùng"). Mảnh dùng chung cho Hộp mù và Túi mù, gom để đổi đúng món còn thiếu (cột "Đổi").'),
           h('li', null, 'Món ăn, đồ uống độc quyền tự lên Thực đơn; món ăn kèm, tráng miệng cần dụng cụ bếp như món thường.'),
           h('li', null, 'Đồ trang trí vào Quán ▸ Trang trí để dùng, có món tăng khách, tip hoặc độ kiên nhẫn. Kiểu nồi, kiểu bàn, thẻ thành tích bấm vào món trong bộ sưu tập để dùng.'),
           h('li', null, 'Thẻ thành tích đang đeo hiện cạnh tên quán trên bảng xếp hạng.')),

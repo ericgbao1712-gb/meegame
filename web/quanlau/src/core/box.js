@@ -1,6 +1,6 @@
-// v1.18 Hộp mù (tab Quán ▸ Giải trí). Rút hộp → 1 món sưu tầm theo độ hiếm (C.BOX).
-// Món mới: mở luôn (món ăn bán được ngay, màu áo / kiểu chủ quán chọn được, thẻ thành tích đeo được).
-// Món trùng: đổi ra mảnh. Gom mảnh đổi món còn thiếu. Bảo hiểm Hiếm (10 hộp) và Bí ẩn (150 hộp).
+// v1.18 Hộp mù + v1.18c Túi mù (tab Quán ▸ Giải trí). Rút → 1 món sưu tầm theo độ hiếm (C.BOX), mỗi dòng
+// (set 'hop' / 'tui') có bộ món, giá, bảo hiểm, lượt miễn phí riêng; mảnh sứ dùng chung.
+// Món mới: mở luôn. Món trùng: ra mảnh. Gom mảnh đổi món còn thiếu.
 import * as C from '../config.js';
 import { fmtMoney } from './format.js';
 import { spend, featureUnlocked } from './economy.js';
@@ -23,18 +23,25 @@ export function boxState(s) {
   if (b.pot && !C.POT_SKINS[b.pot]) b.pot = null;           // kiểu nồi đang dùng (ref trong C.POT_SKINS)
   if (b.table && !C.TABLE_SKINS[b.table]) b.table = null;   // kiểu bàn đang dùng
   if (!Array.isArray(b.log)) b.log = [];                  // 20 món gần nhất
+  if (!b.tui || typeof b.tui !== 'object') b.tui = {};   // bộ đếm riêng của Túi mù (Hộp mù dùng các trường ở trên)
+  for (const k of ['opened', 'sinceRare', 'sinceEpic', 'sinceMyst', 'freeDay', 'spent']) if (!(b.tui[k] >= 0)) b.tui[k] = 0;
   return b;
 }
+const setOf = (set) => (set === 'tui' ? 'tui' : 'hop');
+/** bộ đếm (opened, since*, freeDay, spent) của một dòng */
+const ctr = (b, set) => (setOf(set) === 'tui' ? b.tui : b);
+const SET = (set) => C.boxSet(setOf(set));
 
-export const boxPrice = (G) => B().price[Math.max(0, Math.min(B().price.length - 1, (G.state.tier || 1) - 1))];
+export const boxPrice = (G, set) => { const p = SET(set).price; return p[Math.max(0, Math.min(p.length - 1, (G.state.tier || 1) - 1))]; };
 
-function rollRarity(G, b) {
-  if (b.sinceMyst + 1 >= B().pityMyst) return 4;
-  if (B().pityEpic && b.sinceEpic + 1 >= B().pityEpic) {
+function rollRarity(G, b, set) {
+  const P = SET(set);
+  if (b.sinceMyst + 1 >= P.pityMyst) return 4;
+  if (P.pityEpic && b.sinceEpic + 1 >= P.pityEpic) {
     const r = G.rng.weighted(B().rar.filter((x) => x.id >= 3), (x) => x.rate);
     return r ? r.id : 3;
   }
-  if (b.sinceRare + 1 >= B().pityRare) {   // bảo hiểm: Hiếm trở lên (giữ tỉ lệ tương đối giữa Hiếm / Cực hiếm / Bí ẩn)
+  if (b.sinceRare + 1 >= P.pityRare) {   // bảo hiểm: Hiếm trở lên (giữ tỉ lệ tương đối giữa Hiếm / Cực hiếm / Bí ẩn)
     const r = G.rng.weighted(B().rar.filter((x) => x.id >= 2), (x) => x.rate);
     return r ? r.id : 2;
   }
@@ -59,10 +66,10 @@ function grant(G, item) {
   return { id: item.id, r: item.r, dup, shards };
 }
 
-function rollOne(G) {
-  const b = boxState(G.state);
-  const r = rollRarity(G, b);
-  const pool = B().items.filter((x) => x.r === r);
+function rollOne(G, set) {
+  const b = ctr(boxState(G.state), set);
+  const r = rollRarity(G, b, set);
+  const pool = B().items.filter((x) => x.r === r && x.set === setOf(set));
   const item = G.rng.pick(pool);
   b.opened++;
   b.sinceRare = r >= 2 ? 0 : b.sinceRare + 1;
@@ -72,26 +79,26 @@ function rollOne(G) {
 }
 
 /** Mở n hộp (1 hoặc 10). free = hộp miễn phí trong ngày. */
-export function openBox(G, n = 1, free = false) {
-  const s = G.state, b = boxState(s);
-  if (!featureUnlocked(G, 'blindbox')) return fail('locked', `Hộp mù mở ở Lv ${C.FEATURES.blindbox} nha!`);
+export function openBox(G, n = 1, free = false, set = 'hop') {
+  const s = G.state, all = boxState(s), b = ctr(all, set), P = SET(set), unit = setOf(set) === 'tui' ? 'túi' : 'hộp';
+  if (!featureUnlocked(G, P.feature)) return fail('locked', `${P.name} mở ở Lv ${C.FEATURES[P.feature]} nha!`);
   n = n === 10 ? 10 : 1;
   let cost = 0;
   if (free) {
-    if (n !== 1) return fail('free', 'Hộp miễn phí chỉ 1 hộp thôi nha.');
-    if (b.freeDay === s.day) return fail('freeUsed', 'Hôm nay mở hộp miễn phí rồi, mai quay lại nha!');
+    if (n !== 1) return fail('free', `${P.name} miễn phí chỉ 1 ${unit} thôi nha.`);
+    if (b.freeDay === s.day) return fail('freeUsed', `Hôm nay mở ${unit} miễn phí rồi, mai quay lại nha!`);
   } else {
-    cost = boxPrice(G) * (n === 10 ? B().tenMult : 1);
-    if (s.money + 1e-9 < cost) return fail('money', `Cần ${fmtMoney(cost)} để mở ${n} hộp, chưa đủ tiền nha.`);
+    cost = boxPrice(G, set) * (n === 10 ? B().tenMult : 1);
+    if (s.money + 1e-9 < cost) return fail('money', `Cần ${fmtMoney(cost)} để mở ${n} ${unit}, chưa đủ tiền nha.`);
   }
   if (free) b.freeDay = s.day;
   else { spend(G, 'box', cost, 'box'); b.spent += cost; }
   const got = [];
-  for (let i = 0; i < n; i++) got.push(rollOne(G));
-  b.log = got.map((x) => x.id).concat(b.log).slice(0, 20);
+  for (let i = 0; i < n; i++) got.push(rollOne(G, set));
+  all.log = got.map((x) => x.id).concat(all.log).slice(0, 20);
   G.counter('boxOpened', n);
-  G.emit('boxOpened', { got, cost, free });
-  return { ok: true, got, cost, free, shards: b.shards };
+  G.emit('boxOpened', { got, cost, free, set: setOf(set) });
+  return { ok: true, got, cost, free, set: setOf(set), shards: all.shards };
 }
 
 /** Đổi mảnh lấy một món còn thiếu. */
@@ -119,14 +126,17 @@ export function equipBox(G, id, on = true) {
 }
 export const setBadge = (G, id) => (id == null ? (boxState(G.state).badge = null, { ok: true }) : equipBox(G, id, true));
 
-export function boxInfo(G) {
-  const s = G.state, b = boxState(s);
-  const total = B().items.length, owned = B().items.filter((x) => b.got[x.id] > 0).length;
+export function boxInfo(G, set = 'hop') {
+  const s = G.state, all = boxState(s), b = ctr(all, set), P = SET(set);
+  const items = B().items.filter((x) => x.set === setOf(set));
+  const total = items.length, owned = items.filter((x) => all.got[x.id] > 0).length;
   return {
-    unlocked: featureUnlocked(G, 'blindbox'), price: boxPrice(G), price10: boxPrice(G) * B().tenMult,
-    freeLeft: b.freeDay === s.day ? 0 : 1, shards: b.shards, opened: b.opened, owned, total,
-    rareIn: Math.max(1, B().pityRare - b.sinceRare), epicIn: Math.max(1, (B().pityEpic || 0) - b.sinceEpic), mystIn: Math.max(1, B().pityMyst - b.sinceMyst),
+    set: setOf(set), name: P.name, icon: P.icon, unlockLv: C.FEATURES[P.feature],
+    unlocked: featureUnlocked(G, P.feature), price: boxPrice(G, set), price10: boxPrice(G, set) * B().tenMult,
+    pityRare: P.pityRare, pityEpic: P.pityEpic, pityMyst: P.pityMyst,
+    freeLeft: b.freeDay === s.day ? 0 : 1, shards: all.shards, opened: b.opened, owned, total,
+    rareIn: Math.max(1, P.pityRare - b.sinceRare), epicIn: Math.max(1, (P.pityEpic || 0) - b.sinceEpic), mystIn: Math.max(1, P.pityMyst - b.sinceMyst),
     rareAt: b.sinceRare, epicAt: b.sinceEpic, mystAt: b.sinceMyst,
-    got: Object.assign({}, b.got), badge: b.badge || null, pot: b.pot || null, table: b.table || null, spent: b.spent,
+    got: Object.assign({}, all.got), badge: all.badge || null, pot: all.pot || null, table: all.table || null, spent: b.spent,
   };
 }

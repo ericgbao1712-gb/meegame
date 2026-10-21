@@ -159,13 +159,13 @@ const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: 
 // v1.18 tab Giải trí: Vé số + Hộp mù
 let fun = 'veso';
 function funView(body, api) {
-  const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.();
-  const seg = div('seg-row fun-seg');
-  [['veso', 'Vé số', 'ui_ticket', !!li && (li.waiting > 0 || li.unclaimed > 0)], ['hopmu', 'Hộp mù', 'ui_hopmu', !!bi && bi.unlocked && bi.freeLeft > 0]].forEach(([id, label, icon, dot]) => {
+  const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.('hop'), ti = G().get?.boxInfo?.('tui');
+  const seg = div('seg-row fun-seg three');
+  [['veso', 'Vé số', 'ui_ticket', !!li && (li.waiting > 0 || li.unclaimed > 0)], ['hopmu', 'Hộp mù', 'ui_hopmu', !!bi && bi.unlocked && bi.freeLeft > 0], ['tuimu', 'Túi mù', 'ui_tuimu', !!ti && ti.unlocked && ti.freeLeft > 0]].forEach(([id, label, icon, dot]) => {
     seg.appendChild(h('button', { class: 'seg' + (fun === id ? ' on' : ''), type: 'button', onclick: () => { if (fun === id) return; fun = id; sfx('click'); api.rerender(); } }, ico(icon, 16), label, dot ? h('i', { class: 'dot' }) : null));
   });
   body.appendChild(seg);
-  (fun === 'hopmu' ? boxView : lotteryView)(body, api);
+  if (fun === 'hopmu' || fun === 'tuimu') boxView(body, api, fun === 'tuimu' ? 'tui' : 'hop'); else lotteryView(body, api);
 }
 
 function tabDots() {
@@ -176,7 +176,7 @@ function tabDots() {
   d.deco = D.featureOn('deco') && C.DECO.some((x) => !x.default && !x.source && x.price > 0 && (x.minTier || 1) <= D.tierNow() && (x.lv || 1) <= (s.level || 1) && !(s.deco?.owned || []).includes(x.id) && s.money >= x.price);
   d.expand = !!G().get?.tierInfo?.()?.canExpand;
   { const b = G().get?.taxInfo?.()?.bill; d.tax = !!b && b.daysLeft <= C.TAX.remindDays; }   // v1.14
-  { const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.(); d.giaitri = (!!li && (li.waiting > 0 || li.unclaimed > 0)) || (!!bi && bi.unlocked && bi.freeLeft > 0); }   // v1.15 / v1.18
+  { const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.('hop'), ti = G().get?.boxInfo?.('tui'); d.giaitri = (!!li && (li.waiting > 0 || li.unclaimed > 0)) || (!!bi && bi.unlocked && bi.freeLeft > 0) || (!!ti && ti.unlocked && ti.freeLeft > 0); }   // v1.15 / v1.18
   return d;
 }
 
@@ -185,7 +185,7 @@ export const shopSheet = {
   icon: 'ui_shop',
   build(body, api) {
     let sub = api.sub;
-    if (sub === 'veso' || sub === 'hopmu') { fun = sub; sub = 'giaitri'; }   // v1.18 link cũ tới Vé số / link Hộp mù
+    if (sub === 'veso' || sub === 'hopmu' || sub === 'tuimu') { fun = sub; sub = 'giaitri'; }   // v1.18 link cũ tới Vé số / link Hộp mù
     if (!VIEWS[sub]) sub = 'quests';
     const dots = tabDots();
     api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'giaitri' && !D.featureOn('lottery') && !D.featureOn('blindbox') && !(G().get?.lotteryInfo?.()?.list?.length)) })), sub, (id) => api.setSub(id));

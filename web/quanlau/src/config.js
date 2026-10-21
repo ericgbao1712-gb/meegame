@@ -547,6 +547,28 @@ export const DECO = [
   { id: 'db_robotmeo',   cat: 'dacbiet', name: 'Robot phục vụ Mèo',      price: 0, amb: 18, source: 'box', box: 'bx_d_robotmeo', effect: { tipMult: 1.2, patienceMult: 1.08 }, desc: 'Meo meo mang món tới bàn. Tip +20%, kiên nhẫn +8%.' },
   { id: 'db_robotgau',   cat: 'dacbiet', name: 'Robot phục vụ Gấu Trúc', price: 0, amb: 18, source: 'box', box: 'bx_d_robotgau', effect: { demandMult: 1.12 }, desc: 'Ai đi ngang cũng ghé chụp hình. Khách +12%.' },
   { id: 'db_quaythungan', cat: 'dacbiet', name: 'Quầy thu ngân Mèo Thần Tài', price: 0, amb: 18, source: 'box', box: 'bx_d_quaythungan', effect: { tipMult: 1.25 }, desc: 'Mèo vẫy tay mỗi lần tính tiền. Tip +25%.' },
+  // v1.18c đồ ĐỘC QUYỀN Túi mù (đồ bếp, máy móc, tiện ích)
+  { id: 'tuong_giadao', cat: 'tuong', name: 'Giá để dao', price: 0, amb: 4, source: 'box', box: 'bt_giadao' },
+  { id: 'tuong_thot', cat: 'tuong', name: 'Bộ thớt treo tường', price: 0, amb: 4, source: 'box', box: 'bt_thot' },
+  { id: 'tuong_lichsk', cat: 'tuong', name: 'Bảng lịch sự kiện', price: 0, amb: 5, source: 'box', box: 'bt_lichsk', effect: { demandMult: 1.02 }, desc: 'Ghi ngày khuyến mãi, khách nhớ mà ghé. Khách +2%.' },
+  { id: 'db_sanuot', cat: 'dacbiet', name: 'Biển cảnh báo sàn ướt', price: 0, amb: 2, source: 'box', box: 'bt_sanuot', effect: { patienceMult: 1.02 }, desc: 'Sàn sạch bóng, khách yên tâm. Kiên nhẫn +2%.' },
+  { id: 'db_choilau', cat: 'dacbiet', name: 'Bộ chổi, cây lau, xô nước', price: 0, amb: 3, source: 'box', box: 'bt_choilau', effect: { patienceMult: 1.03 }, desc: 'Quán lúc nào cũng sạch. Kiên nhẫn +3%.' },
+  { id: 'db_maythai', cat: 'dacbiet', name: 'Máy thái thịt cuộn', price: 0, amb: 8, source: 'box', box: 'bt_maythai', effect: { patienceMult: 1.04 }, desc: 'Thịt thái mỏng đều, ra món nhanh. Kiên nhẫn +4%.' },
+  { id: 'db_mayxay', cat: 'dacbiet', name: 'Máy xay ớt sa tế', price: 0, amb: 7, source: 'box', box: 'bt_mayxay', effect: { tipMult: 1.04 }, desc: 'Sa tế nhà làm thơm lừng. Tip +4%.' },
+  { id: 'db_mayvatcam', cat: 'dacbiet', name: 'Máy vắt nước cam', price: 0, amb: 8, source: 'box', box: 'bt_mayvatcam', effect: { demandMult: 1.03 }, desc: 'Cam vắt tươi tại quán. Khách +3%.' },
+  { id: 'db_locKK', cat: 'dacbiet', name: 'Máy lọc không khí', price: 0, amb: 9, source: 'box', box: 'bt_locKK', effect: { patienceMult: 1.05 }, desc: 'Hết mùi khói lẩu. Kiên nhẫn +5%.' },
+  { id: 'db_mayutra', cat: 'dacbiet', name: 'Bình ủ trà inox', price: 0, amb: 8, source: 'box', box: 'bt_mayutra', effect: { tipMult: 1.05 }, desc: 'Trà nóng mời khách mọi lúc. Tip +5%.' },
+  { id: 'db_bannuoc', cat: 'dacbiet', name: 'Máy bán nước tự động', price: 0, amb: 10, source: 'box', box: 'bt_bannuoc', effect: { demandMult: 1.05 }, desc: 'Khách chờ bàn mua nước uống. Khách +5%.' },
+  { id: 'tuong_kds', cat: 'tuong', name: 'Màn hình đơn bếp', price: 0, amb: 9, source: 'box', box: 'bt_kds', effect: { patienceMult: 1.06 }, desc: 'Bếp thấy đơn ngay, không sót món. Kiên nhẫn +6%.' },
+  { id: 'tuong_chamcong', cat: 'tuong', name: 'Máy chấm công', price: 0, amb: 6, source: 'box', box: 'bt_chamcong', effect: { patienceMult: 1.03 }, desc: 'Nhân viên đi làm đúng giờ. Kiên nhẫn +3%.' },
+  { id: 'db_daychuyenmi', cat: 'dacbiet', name: 'Dây chuyền làm mì tươi', price: 0, amb: 13, source: 'box', box: 'bt_daychuyenmi', effect: { patienceMult: 1.08 }, desc: 'Mì tươi cán tại quán. Kiên nhẫn +8%.' },
+  { id: 'db_donggoi', cat: 'dacbiet', name: 'Trạm đóng gói mang về', price: 0, amb: 12, source: 'box', box: 'bt_donggoi', effect: { demandMult: 1.06 }, desc: 'Đơn mang về gói nhanh, đẹp. Khách +6%.' },
+  { id: 'tuong_camera', cat: 'tuong', name: 'Màn hình camera an ninh', price: 0, amb: 12, source: 'box', box: 'bt_camera', effect: { tipMult: 1.08 }, desc: 'Quán an toàn, khách thoải mái. Tip +8%.' },
+  { id: 'db_robotlau', cat: 'dacbiet', name: 'Robot lau sàn tự động', price: 0, amb: 12, source: 'box', box: 'bt_robotlau', effect: { patienceMult: 1.07 }, desc: 'Chạy vòng vòng lau sàn. Kiên nhẫn +7%.' },
+  { id: 'db_photobooth', cat: 'dacbiet', name: 'Máy chụp ảnh lấy liền', price: 0, amb: 14, source: 'box', box: 'bt_photobooth', effect: { demandMult: 1.08 }, desc: 'Khách chụp hình check-in. Khách +8%.' },
+  { id: 'db_bachvi', cat: 'dacbiet', name: 'Cỗ Máy Nước Dùng Bách Vị', price: 0, amb: 18, source: 'box', box: 'bt_bachvi', effect: { demandMult: 1.1, patienceMult: 1.05 }, desc: 'Bốn bình nước dùng tự pha. Khách +10%, kiên nhẫn +5%.' },
+  { id: 'db_xuongvien', cat: 'dacbiet', name: 'Xưởng Viên Thả Lẩu', price: 0, amb: 18, source: 'box', box: 'bt_xuongvien', effect: { tipMult: 1.15 }, desc: 'Viên cá, viên tôm ra liên tục. Tip +15%.' },
+  { id: 'db_phatra', cat: 'dacbiet', name: 'Máy Pha Trà Thượng Hạng', price: 0, amb: 18, source: 'box', box: 'bt_phatra', effect: { tipMult: 1.1, patienceMult: 1.08 }, desc: 'Ấm men ngọc rót trà mời khách. Tip +10%, kiên nhẫn +8%.' },
   { id: 'db_karaoke',   cat: 'dacbiet', name: 'Dàn karaoke',   price: 40000, amb: 20, lv: 31, minTier: 4, effect: { patienceMult: 1.15 }, desc: 'Khách kiên nhẫn hơn 15%. Hàng xóm thì… hơi bực.' },
 ];
 
@@ -599,6 +621,7 @@ export const FEATURES = {
   tax: 13,      // v1.14 đóng thuế theo kỳ (quán đã làm ăn ổn định)
   hire_shipper: 11, ship: 11,   // v1.16 nhận đơn ship + thuê Shipper
   blindbox: 8,  // v1.18 Hộp mù (tab Giải trí, cùng Vé số)
+  blindbag: 10, // v1.18c Túi mù: đồ bếp, máy móc, tiện ích
 };
 
 // ───────────────────────────── v1.14 GIÁ BÁN (người chơi tự đặt, mang từ Xoài Lắc v2) ─────────────────────────────
@@ -902,6 +925,11 @@ export const BOX = {
     { id: 4, name: 'Bí ẩn',    rate: 2,  shard: 100, cost: 2000, icon: 'ui_chest_gold' },
   ],
   pityRare: 10, pityEpic: 40, pityMyst: 100,   // chắc chắn Hiếm+ trong 10 hộp, Cực hiếm+ trong 40, Bí ẩn trong 100
+  // v1.18c hai dòng: Hộp mù (set 'hop', mọi món chưa ghi set) và Túi mù (set 'tui': đồ bếp, máy móc, tiện ích)
+  sets: {
+    hop: { name: 'Hộp mù', icon: 'ui_hopmu', feature: 'blindbox' },
+    tui: { name: 'Túi mù', icon: 'ui_tuimu', feature: 'blindbag', price: [120, 250, 600, 1500, 3000], pityRare: 10, pityEpic: 30, pityMyst: 70 },
+  },
   items: [
     // món ăn / uống độc quyền
     { id: 'bx_kemtra',    r: 1, kind: 'food', ref: 'tm_kemtra',   name: 'Kem trà xanh' },
@@ -958,6 +986,28 @@ export const BOX = {
     { id: 'bx_d_robotmeo', r: 4, kind: 'deco', ref: 'db_robotmeo',   name: 'Robot phục vụ Mèo' },
     { id: 'bx_d_robotgau', r: 4, kind: 'deco', ref: 'db_robotgau',   name: 'Robot phục vụ Gấu Trúc' },
     { id: 'bx_d_quaythungan', r: 4, kind: 'deco', ref: 'db_quaythungan', name: 'Quầy thu ngân Mèo Thần Tài' },
+    // ═══ v1.18c TÚI MÙ (set 'tui'): đồ bếp, máy móc, tiện ích — đặt trong Quán ▸ Trang trí ═══
+    { id: 'bt_giadao', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_giadao', name: 'Giá để dao' },
+    { id: 'bt_thot', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_thot', name: 'Bộ thớt treo tường' },
+    { id: 'bt_lichsk', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_lichsk', name: 'Bảng lịch sự kiện' },
+    { id: 'bt_sanuot', set: 'tui', r: 1, kind: 'deco', ref: 'db_sanuot', name: 'Biển cảnh báo sàn ướt' },
+    { id: 'bt_choilau', set: 'tui', r: 1, kind: 'deco', ref: 'db_choilau', name: 'Bộ chổi, cây lau, xô nước' },
+    { id: 'bt_maythai', set: 'tui', r: 2, kind: 'deco', ref: 'db_maythai', name: 'Máy thái thịt cuộn' },
+    { id: 'bt_mayxay', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayxay', name: 'Máy xay ớt sa tế' },
+    { id: 'bt_mayvatcam', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayvatcam', name: 'Máy vắt nước cam' },
+    { id: 'bt_locKK', set: 'tui', r: 2, kind: 'deco', ref: 'db_locKK', name: 'Máy lọc không khí' },
+    { id: 'bt_mayutra', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayutra', name: 'Bình ủ trà inox' },
+    { id: 'bt_bannuoc', set: 'tui', r: 2, kind: 'deco', ref: 'db_bannuoc', name: 'Máy bán nước tự động' },
+    { id: 'bt_kds', set: 'tui', r: 2, kind: 'deco', ref: 'tuong_kds', name: 'Màn hình đơn bếp' },
+    { id: 'bt_chamcong', set: 'tui', r: 2, kind: 'deco', ref: 'tuong_chamcong', name: 'Máy chấm công' },
+    { id: 'bt_daychuyenmi', set: 'tui', r: 3, kind: 'deco', ref: 'db_daychuyenmi', name: 'Dây chuyền làm mì tươi' },
+    { id: 'bt_donggoi', set: 'tui', r: 3, kind: 'deco', ref: 'db_donggoi', name: 'Trạm đóng gói mang về' },
+    { id: 'bt_camera', set: 'tui', r: 3, kind: 'deco', ref: 'tuong_camera', name: 'Màn hình camera an ninh' },
+    { id: 'bt_robotlau', set: 'tui', r: 3, kind: 'deco', ref: 'db_robotlau', name: 'Robot lau sàn tự động' },
+    { id: 'bt_photobooth', set: 'tui', r: 3, kind: 'deco', ref: 'db_photobooth', name: 'Máy chụp ảnh lấy liền' },
+    { id: 'bt_bachvi', set: 'tui', r: 4, kind: 'deco', ref: 'db_bachvi', name: 'Cỗ Máy Nước Dùng Bách Vị' },
+    { id: 'bt_xuongvien', set: 'tui', r: 4, kind: 'deco', ref: 'db_xuongvien', name: 'Xưởng Viên Thả Lẩu' },
+    { id: 'bt_phatra', set: 'tui', r: 4, kind: 'deco', ref: 'db_phatra', name: 'Máy Pha Trà Thượng Hạng' },
     // thẻ thành tích (đeo 1 thẻ, hiện cạnh tên quán trên bảng xếp hạng)
     { id: 'bx_b_tapsu',   r: 1, kind: 'badge', icon: 'pot_ga', name: 'Lẩu thủ tập sự' },
     { id: 'bx_b_chamchi', r: 1, kind: 'badge', icon: 'ui_clock', name: 'Chủ quán chăm chỉ' },
@@ -991,7 +1041,9 @@ export const TABLE_SKINS = {
   occho:    { name: 'Bàn lẩu gỗ óc chó',    h: 20,  s: 0.5, v: 0.62 },
   ngurthien: { name: 'Bàn Lẩu Ngự Thiện',   h: 2,   s: 0.78, v: 0.85 },
 };
+for (const it of BOX.items) if (!it.set) it.set = 'hop';
 export const BOX_ITEM = Object.fromEntries(BOX.items.map((x) => [x.id, x]));
+export const boxSet = (id) => Object.assign({ price: BOX.price, pityRare: BOX.pityRare, pityEpic: BOX.pityEpic, pityMyst: BOX.pityMyst }, BOX.sets[id] || BOX.sets.hop);
 export const boxHas = (s, id) => !!(s && s.box && s.box.got && s.box.got[id] > 0);
 /** Món / màu / kiểu đã mở: tới cấp HOẶC (món độc quyền) đã có trong Hộp mù. */
 export const lvOk = (s, it, lvKey = 'unlockLv') => !!it && (((s && s.level) || 1) >= (it[lvKey] || 1) || (!!it.box && boxHas(s, it.box)));

@@ -10,11 +10,14 @@ export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
   ver: 118,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Hộp mù & tab Giải trí!',
+  hero: 'Hộp mù, Túi mù & Giải trí!',
   items: [
     { icon: 'ui_hopmu', title: 'Hộp mù', lv: C.FEATURES.blindbox, isNew: true,
       text: `Vào **Quán ▸ Giải trí ▸ Hộp mù**. Mỗi ngày mở **1 hộp miễn phí**. Ra món ăn độc quyền, đồng phục, kiểu chủ quán, **nồi lẩu và bàn ghế** đẹp, **robot phục vụ**, đồ trang trí, và **thẻ thành tích** hiện trên bảng xếp hạng. Sưu tầm đủ ${C.BOX.items.length} món!`,
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
+    { icon: 'ui_tuimu', title: 'Túi mù', lv: C.FEATURES.blindbag, isNew: true,
+      text: `Dòng mới bên cạnh Hộp mù: **${C.BOX.items.filter((x) => x.set === 'tui').length} món đồ bếp, máy móc, tiện ích** đặt được trong quán. Có máy thái thịt, máy bán nước, dây chuyền làm mì, robot lau sàn, máy chụp ảnh, và món Bí ẩn như **Xưởng Viên Thả Lẩu**, **Cỗ Máy Nước Dùng Bách Vị**. Món nào cũng tăng khách, tip hoặc độ kiên nhẫn.`,
+      go: ['shop', 'tuimu'], goLabel: 'Mở Túi mù' },
     { icon: 'ui_ticket', title: 'Tab Giải trí + Giải năm vé số', lv: C.FEATURES.lottery, isNew: true,
       text: `Vé số và Hộp mù nằm chung tab **Giải trí**. Vé số có thêm **Giải năm ${C.LOTTERY.tiers.find((t) => t.id === 'nam').prize}k**: mua đều tay khoảng 2 ngày là có cơ hội trúng.`,
       go: ['shop', 'veso'], goLabel: 'Xem Vé số' },
