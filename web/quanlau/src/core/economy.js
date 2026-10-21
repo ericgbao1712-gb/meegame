@@ -376,14 +376,28 @@ export function quankhoTick(G, dtMin) {
   if (!w) return null;
   const trip = w.qkTrip;
   if (trip && s.phase === 'report') { w.qkTrip = null; quankhoDeliver(G, trip.list); return null; }   // day ended mid-trip
-  if (s.phase !== 'open' || !mods(G).hasQuankho || trip) return null;
+  if (s.phase !== 'open' || !mods(G).hasQuankho) return null;
   w.qkCool = Math.max(0, (w.qkCool || 0) - dtMin);
-  if (w.qkCool > 0) return null;
+  if (trip) {
+    // v1.10: món nào hết / sắp hết trong lúc quản kho chưa về → mua luôn trong chuyến này (trả tiền lúc về)
+    if (trip.phase === 'go' || trip.phase === 'away') {
+      for (const it of quankhoNeeds(G)) if (!trip.list.some((x) => x.id === it.id)) trip.list.push(it);
+    }
+    return null;
+  }
   const list = quankhoNeeds(G);
   if (!list.length) return null;
+  // v1.10: hết hẳn một món (còn 0 phần) đang bán → chạy đi chợ NGAY, không chờ hết giờ nghỉ giữa 2 chuyến
+  const out = list.filter((x) => x.have <= 0);
+  const soldOutNow = w.soldOutDay === s.day;      // không món nào trên thực đơn nấu được nữa
+  if (w.qkCool > 0 && !out.length && !soldOutNow) return null;
   if (khoInfo(G).used >= khoInfo(G).cap) { w.qkCool = Q.cooldown; return null; }
   w.qkCool = Q.cooldown;
   w.qkTrip = { list, phase: 'go', t: 0 };
+  if (out.length || soldOutNow) {
+    const names = out.slice(0, 2).map((x) => (ING[x.id] ? ING[x.id].name.toLowerCase() : x.id)).join(', ');
+    G.toast(`Hết ${names || 'hàng'}${out.length > 2 ? '…' : ''} — Quản kho chạy đi chợ ngay, chờ chút là có hàng!`, 'info', 'ui_kho');
+  }
   return w.qkTrip;
 }
 

@@ -37,8 +37,12 @@ export function mountDock(root, sceneUi) {
   // nothing on the menu can be made: restock now (the market is open all day) or close up early
   function askCloseEarly() {
     if (S().phase !== 'open') return;
+    // v1.10: quản kho đã chạy đi chợ → chỉ báo chờ hàng về, không hỏi đóng cửa
+    if (ctx.game.world?.qkTrip) { ctx.toast('Hết hàng! Quản kho đang đi chợ, chút nữa có hàng bán tiếp nha.', 'info', 'ui_kho'); return; }
+    const hasQk = (S().staff || []).some((m) => m.role === 'quankho');
     ctx.confirm({ title: 'Hết hàng rồi!', icon: 'ui_kho', yes: 'Nhập thêm hàng', no: 'Đóng cửa sớm',
-      text: 'Kho hết món để bán rồi. Nhập thêm hàng để bán tiếp, hay đóng cửa sớm qua ngày mới?',
+      text: 'Kho hết món để bán rồi. Nhập thêm hàng để bán tiếp, hay đóng cửa sớm qua ngày mới?'
+        + (hasQk ? '' : ' (Thuê Quản kho thì hết hàng là anh ấy tự chạy đi chợ.)'),
       onYes: () => { ctx.openSheet('kho'); },
       onNo: () => { const r = act('closeEarly'); if (r.ok !== false) sfx('door'); } });
   }

@@ -7,6 +7,8 @@
 //   GET  /api/lau/save                                  → bản lưu trên mạng (đầy đủ)
 //   PUT  /api/lau/save          { save, base, force }   → lưu lên mạng (bản cũ được giữ trong game_save_backups)
 //                                base = updatedAt của bản trên mạng mà máy này đồng bộ lần cuối; khác → 409
+//   POST /api/lau/save/delete                           → xóa quán trên mạng (+ các bản sao lưu) để chơi lại từ đầu
+//   POST /api/lau/auth/unlink                           → hủy liên kết Gmail: xóa quán + bản sao lưu + tài khoản, xóa cookie
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   GET  /api/lau/admin/players            (admin)      → danh sách người chơi để kiểm tra gian lận
 //   POST /api/lau/admin/players/:id        (admin)      { hidden?, flagged? } → ẩn / bỏ đánh dấu
@@ -199,6 +201,21 @@ export default async function handler(req, res) {
 
     if (method === 'GET' && path === '/auth/me') {
       return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid)) });
+    }
+
+    // ── v1.10: xóa dữ liệu / hủy liên kết Gmail ──
+    if (method === 'POST' && (path === '/save/delete' || path === '/auth/unlink')) {
+      await db.execute({ sql: 'DELETE FROM game_save_backups WHERE player_id = ? AND game = ?', args: [pid, GAME] });
+      await db.execute({ sql: 'DELETE FROM game_saves WHERE player_id = ? AND game = ?', args: [pid, GAME] });
+      if (path === '/save/delete') return send(res, 200, { ok: true, cloud: null });
+      // Bảng players dùng chung cho các game MeeGame: chỉ xóa tài khoản khi không còn game nào khác lưu tiến trình.
+      const other = await db.execute({ sql: 'SELECT count(*) AS n FROM game_saves WHERE player_id = ?', args: [pid] });
+      const removed = num(other.rows[0] && other.rows[0].n) === 0;
+      if (removed) {
+        await db.execute({ sql: 'DELETE FROM game_save_backups WHERE player_id = ?', args: [pid] });
+        await db.execute({ sql: 'DELETE FROM players WHERE id = ?', args: [pid] });
+      }
+      return send(res, 200, { ok: true, removed }, { 'Set-Cookie': clearSessionCookie() });
     }
 
     if (method === 'GET' && path === '/save') {

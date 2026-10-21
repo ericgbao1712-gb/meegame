@@ -12,7 +12,7 @@ import * as C from '../config.js';
 import { h, div, span, ico } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
-import { writeSave } from '../storage.js';
+import { writeSave, clearSave } from '../storage.js';
 import { fmtShort } from '../core/format.js';
 
 const CL = C.CLOUD;
@@ -20,6 +20,7 @@ const GIS_SRC = 'https://accounts.google.com/gsi/client';
 const SEEN_KEY = 'lau-oi/cloud/seen';     // máy này từng đăng nhập → kiểm tra phiên ngay khi mở game
 const PREV_KEY = 'lau-oi/save/prev';
 const SYNC_KEY = 'lau-oi/cloud/sync';   // { pid, base (updatedAt trên mạng), sig (quán lúc đồng bộ) }
+const SAVE_KEY = 'lau-oi/save/v1';
 
 const st = {
   ready: false, offline: false, player: null, cloud: null,
@@ -103,6 +104,66 @@ export async function signOut() {
   emit();
   ctx.closeModals?.(); ctx.closeSheet?.();
   openGate();
+}
+
+// ───────────── v1.10: xóa dữ liệu chơi lại / hủy liên kết Gmail ─────────────
+// Trước đây "Xóa save, chơi lại" chỉ xóa trên máy → mở lại game thì quán trên mạng tự tải về, không chơi lại được.
+function wipeLocalAndReload(msg) {
+  st.player = null; st.cloud = null; st.busy = true;          // chặn mọi lần tự lưu lên mạng từ đây
+  try { ctx.game.serialize = () => null; } catch (e) { /* ignore */ }   // autosave / pagehide không ghi quán cũ lại
+  for (const k of [SAVE_KEY, PREV_KEY, SYNC_KEY]) lsSet(k, null);
+  clearSave();
+  emit();
+  ctx.toast(msg, 'info', 'ui_trash');
+  setTimeout(() => { lsSet(SAVE_KEY, null); try { location.reload(); } catch (e) { /* ignore */ } }, 900);
+}
+
+/** Xóa quán (trên máy + trên mạng nếu đang đăng nhập), vẫn giữ đăng nhập → chơi lại từ đầu. */
+export async function resetProgress() {
+  if (st.player) {
+    st.busy = true; emit();
+    const r = await api('POST', '/save/delete', {});
+    st.busy = false;
+    if (r.status !== 200) {
+      st.lastErr = r.status === 0 ? 'Mất mạng nên chưa xóa được quán trên mạng.' : (r.json?.message || 'Chưa xóa được quán trên mạng.');
+      emit(); ctx.toast(st.lastErr + ' Thử lại sau nha.', 'bad'); return false;
+    }
+    wipeLocalAndReload('Đã xóa sạch quán (cả trên mạng). Mình làm lại từ đầu nha!');
+    return true;
+  }
+  wipeLocalAndReload(lsGet(SEEN_KEY) || st.offline
+    ? 'Đã xóa quán trên máy này. Quán trên mạng chưa xóa được vì chưa đăng nhập.'
+    : 'Đã xóa sạch. Mình làm lại từ đầu nha!');
+  return true;
+}
+
+/** Hủy liên kết Gmail: xóa quán + các bản sao lưu + tài khoản trên máy chủ, gỡ quyền Google, xóa dữ liệu trên máy. */
+export async function unlinkAccount() {
+  if (!st.player) return false;
+  const email = st.player.email;
+  st.busy = true; emit();
+  const r = await api('POST', '/auth/unlink', {});
+  st.busy = false;
+  if (r.status !== 200) {
+    st.lastErr = r.status === 0 ? 'Mất mạng nên chưa hủy liên kết được.' : (r.json?.message || 'Chưa hủy liên kết được.');
+    emit(); ctx.toast(st.lastErr + ' Thử lại sau nha.', 'bad'); return false;
+  }
+  lsSet(SEEN_KEY, null);
+  try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch (e) { /* ignore */ }
+  if (email) loadGis().then((g) => g.accounts.id.revoke(email, () => {})).catch(() => {});   // gỡ quyền MeeGame khỏi tài khoản Google
+  wipeLocalAndReload('Đã hủy liên kết Gmail và xóa hết dữ liệu. Chơi lại từ đầu nha!');
+  return true;
+}
+
+export function askUnlink() {
+  if (!st.player) return;
+  ctx.confirm({
+    title: 'Hủy liên kết Gmail?', icon: 'ui_trash', danger: true, yes: 'Hủy liên kết & xóa', no: 'Thôi, giữ lại',
+    text: `Gmail ${st.player.email || ''} sẽ bị gỡ khỏi Lẩu Ơi!. Quán trên mạng, các bản sao lưu và quán trên máy này sẽ bị xóa sạch, `
+      + 'không lấy lại được. Sau đó bạn chơi lại từ đầu (đăng nhập Gmail khác hoặc chính Gmail này đều được).',
+    input: { word: 'XÓA', hint: 'Gõ XÓA để xác nhận' },
+    onYes: () => { unlinkAccount(); },
+  });
 }
 
 // ───────────── màn chắn: phải đăng nhập mới chơi tiếp ─────────────
@@ -301,7 +362,8 @@ export function accountPanel({ compact = false, gate = false } = {}) {
       st.lastErr ? span('bk-err', st.lastErr) : null,
       div('set-bk', saveBtn,
         h('button', { class: 'btn paper sm', onclick: () => { sfx('click'); ctx.closeModals?.(); ctx.openSheet('shop', 'rank'); } }, ico('ui_trophy', 16), 'Xếp hạng'),
-        h('button', { class: 'btn paper sm', onclick: () => { sfx('click'); signOut(); } }, 'Đăng xuất')));
+        h('button', { class: 'btn paper sm', onclick: () => { sfx('click'); signOut(); } }, 'Đăng xuất')),
+      compact ? null : div('set-bk', h('button', { class: 'btn red sm', disabled: st.busy, onclick: () => { sfx('click'); askUnlink(); } }, ico('ui_trash', 16), 'Hủy liên kết Gmail & xóa dữ liệu')));
   };
   let shown = false;
   const fn = () => { if (shown && !box.isConnected) { st.listeners.delete(fn); return; } draw(); };

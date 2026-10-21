@@ -667,7 +667,8 @@ export const DAILY_POOL = [
   { id: 'd_thank',   text: 'Cảm ơn {n} đánh giá',           type: 'thank',      target: () => 3, chest: 'wood' },
 ];
 // v1.7: từ Lv 10 XP nhận từ nhiệm vụ (rương nhiệm vụ ngày + mục tiêu chính) ×1.6
-export const QUEST_XP = { fromLv: 10, mult: 1.6 };
+// v1.10: chủ game "tăng exp nhiệm vụ lên 60%" → +60% áp dụng cho MỌI cấp (trước chỉ từ Lv 10)
+export const QUEST_XP = { fromLv: 1, mult: 1.6 };
 
 export const CHESTS = {
   wood:   { name: 'Rương gỗ',  money: [80, 150],  xp: 20, decoChance: 0 },

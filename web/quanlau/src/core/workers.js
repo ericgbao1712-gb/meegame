@@ -297,7 +297,12 @@ function stockBlocked(G, t) {
 }
 function warnOut(G, ing) {
   const w = G.world;
-  if ((w.chefWarn[ing] ?? -99) < w.tMin - 20) { w.chefWarn[ing] = w.tMin; G.toast(`Hết ${ING[ing].name.toLowerCase()} rồi — mở Kho nhập thêm nha.`, 'bad', ING[ing].icon); }
+  if ((w.chefWarn[ing] ?? -99) < w.tMin - 20) {
+    w.chefWarn[ing] = w.tMin;
+    // v1.10: có quản kho đang đi chợ thì báo chờ hàng về, không bắt người chơi tự đi chợ
+    if (w.qkTrip) G.toast(`Hết ${ING[ing].name.toLowerCase()} — Quản kho đang đi chợ, chờ chút nha.`, 'info', ING[ing].icon);
+    else G.toast(`Hết ${ING[ing].name.toLowerCase()} rồi — mở Kho nhập thêm nha.`, 'bad', ING[ing].icon);
+  }
 }
 
 function tickChef(G, a, m, dtMin, open) {

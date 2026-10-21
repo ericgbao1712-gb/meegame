@@ -8,7 +8,7 @@ import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
 import { openBackup, openRestore } from '../backup.js';
-import { accountPanel } from '../cloud.js';
+import { accountPanel, resetProgress } from '../cloud.js';
 import { countUp, confettiFor, unlockPic, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
 /** self-updating switch (the shared `toggle` needs a rebuild to flip) */
@@ -108,14 +108,8 @@ function dayLenCard() {
     div('seg-row daylen', btns));
 }
 
-async function resetEverything() {
-  try { const m = await import('../../storage.js'); await m.clearSave?.(); } catch (e) { /* ignore */ }
-  try { localStorage.removeItem('lau-oi/save/v1'); } catch (e) { /* ignore */ }
-  // keep autosave / pagehide from writing the old game back before the reload
-  try { ctx.game.serialize = () => null; } catch (e) { /* ignore */ }
-  ctx.toast('Đã xóa sạch. Mình làm lại từ đầu nha!', 'info', 'ui_trash');
-  setTimeout(() => { try { localStorage.removeItem('lau-oi/save/v1'); } catch (e) { /* ignore */ } try { location.reload(); } catch (e) { /* ignore */ } }, 700);
-}
+// v1.10: xóa cả quán trên mạng (trước chỉ xóa trên máy → mở lại game quán cũ trên mạng tự tải về)
+function resetEverything() { return resetProgress(); }
 
 export function openSettings() {
   return ctx.modal({
@@ -152,7 +146,7 @@ export function openSettings() {
         h('button', { class: 'btn red sm block', onclick: () => {
           ctx.confirm({
             title: 'Xóa hết và chơi lại?', icon: 'ui_trash', danger: true, yes: 'Xóa hết', no: 'Thôi, giữ lại',
-            text: 'Toàn bộ tiến trình (tiền, cấp độ, nhân viên…) sẽ mất sạch và không lấy lại được nha.',
+            text: 'Toàn bộ tiến trình (tiền, cấp độ, nhân viên…) trên máy này và trên mạng sẽ mất sạch, không lấy lại được nha. Vẫn giữ đăng nhập Gmail.',
             input: { word: 'XÓA', hint: 'Gõ XÓA để xác nhận' },
             onYes: () => { resetEverything(); },
           });
