@@ -4,7 +4,7 @@
 // at integer world coordinates and lands 1:1 on buffer pixels.
 import {
   drawSceneBack, sceneDrawables, drawSceneFront, drawTable, drawStove, drawCoinPile, drawBubble, drawParticle,
-  drawVehicle, drawWeather, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins,
+  drawVehicle, drawWeather, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins, setSitLift, sitLiftFor,
 } from '../art/index.js';
 import { PAL } from '../art/palette.js';
 import { TIME, RAIN, DECO, TIERS } from '../config.js';
@@ -487,7 +487,8 @@ export function createRenderer(canvas, game) {
 
     // environment handed to the art functions (one object, mutated in place)
     env.t = time; env.clock = s.clock; env.day = s.day; env.weather = wxNow; env.event = s.event; env.tier = s.tier;
-    setSkins(s.box && s.box.pot, s.box && s.box.table, s.box && s.box.chair, s.box && s.box.tform, s.box && s.box.cform);   // v1.18 kiểu nồi / bàn Hộp mù
+    setSkins(s.box && s.box.pot, s.box && s.box.table, s.box && s.box.chair, s.box && s.box.tform, s.box && s.box.cform);
+    setSitLift(sitLiftFor(s.upgrades.tablestyle, s.box && s.box.cform));   // v1.18q dáng ngồi theo ghế   // v1.18 kiểu nồi / bàn Hộp mù
     env.layout = L; env.up = s.upgrades; env.deco = s.deco.equipped; env.decoMore = s.deco.more || []; env.open = s.phase === 'open' || s.phase === 'closing';
     env.shopName = s.shopName; env.city = s.location;   // v1.7 dời quán
     { // v1.2: the equipped lamp lights the whole shop — a little by day (CSS brightness), more at night (drawLighting)

@@ -5,6 +5,9 @@
 import { loadAtlas, blit, DETAIL } from './assets.js';
 import CHARS from './data/chars.js';
 import { SIT_LIFT } from './layouts.js';
+// v1.18q: mỗi loại ghế một độ cao ngồi (renderer đặt theo ghế đang dùng)
+let sitLift = SIT_LIFT;
+export function setSitLift(v) { sitLift = v > 0 ? v : SIT_LIFT; }
 import { UNIFORMS, UNIFORM_STYLES, OWNER_LOOKS } from '../config.js';
 
 export const CHAR_W = 16, CHAR_H = 24;
@@ -318,7 +321,7 @@ function draw(ctx, look, x, y, o) {
     }
     case 'sit': case 'eat': {
       name = 'sit_' + dir; standing = false; carry = null;
-      dy = -SIT_LIFT;                                                   // perched on the stool, not on the ground
+      dy = -sitLift;                                                    // perched on the stool, not on the ground (v1.18q: theo loại ghế)
       if (pose === 'eat' && Math.floor(t / 0.25) % 2) dy -= 0.5;       // chopstick bob
       break;
     }

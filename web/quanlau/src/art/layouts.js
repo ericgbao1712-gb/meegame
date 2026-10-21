@@ -33,6 +33,11 @@ export const SEAT = [
   { dx: 0, dy: 13, facing: 'up' },     // in front, back to the camera
 ];
 export const SIT_LIFT = 3.5;
+// v1.18q độ cao mặt ghế (world px) → khách ngồi đúng lên mặt ghế, không lún hay lơ lửng
+//   đẩu gốc theo kiểu bàn (tablestyle 0..4), dáng ghế Hộp mù theo id (C.CHAIR_SHAPES)
+export const SIT_BY_STYLE = [2.5, 3.5, 3.5, 4.5, 4.5];
+export const SIT_BY_FORM = { tre: 1.5, dem: 2.5, tua: 1.5, tuadem: 2.5, banh: 4.5 };
+export const sitLiftFor = (tablestyle, cform) => SIT_BY_FORM[cform] ?? SIT_BY_STYLE[Math.max(0, Math.min(4, tablestyle | 0))];
 const table = (x, y, floor = 1) => ({ x, y, floor, seats: SEAT.map((s) => ({ x: x + s.dx, y: y + s.dy, facing: s.facing })) });
 
 const LAYOUTS = {
