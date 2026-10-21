@@ -377,7 +377,7 @@ export function createGame(save, opts = {}) {
     upgradeBranch: wrap((id) => day.upgradeBranch(G, id)),
     moveShop: wrap((id) => day.moveShop(G, id)),   // v1.7
 
-    debug: {
+    debug: {   // v1.8: any use marks the save (it stays off the leaderboard)
       money: wrap((k) => { addMoney(G, Number(k) || 0, 'debug'); return { ok: true }; }),
       xp: wrap((n) => { addXp(G, Number(n) || 0); return { ok: true }; }),
       level: wrap((n) => { setLevel(G, Number(n) || 1); staff.genCandidates(G); return { ok: true }; }),
@@ -411,6 +411,11 @@ export function createGame(save, opts = {}) {
       }),
     },
   };
+  // v1.8: dùng chế độ thử (#debug) thì quán bị đánh dấu → không lên bảng xếp hạng
+  for (const k of Object.keys(act.debug)) {
+    const f = act.debug[k];
+    act.debug[k] = (...a) => { state.flags.ui.cheat = true; return f(...a); };
+  }
 
   const game = {
     state, world, cfg: C,

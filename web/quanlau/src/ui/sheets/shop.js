@@ -8,6 +8,7 @@ import { fmtShort, fmtMoney, fmtRating, fmtClock } from '../../core/format.js';
 import { secTitle, noteBox, stars, celebrate, floatAt, costBtn, lockCard, portrait } from './common.js';
 import { questsView } from './quests.js';
 import { expandView, branchesView } from './expand.js';
+import { leaderboardView } from '../cloud.js';
 
 // ------------------------------------------------------------------ Trang trí
 function decoThumb(id, size = 48) {
@@ -146,8 +147,9 @@ const TABS = [
   { id: 'expand', label: 'Mở rộng', icon: 'ui_shop' },
   { id: 'mkt', label: 'Quảng bá', icon: 'ui_megaphone' },
   { id: 'branches', label: 'Chi nhánh', icon: 'ui_map' },
+  { id: 'rank', label: 'Xếp hạng', icon: 'ui_trophy' },   // v1.8
 ];
-const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView };
+const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView, rank: leaderboardView };
 
 function tabDots() {
   const s = S(); const d = {};

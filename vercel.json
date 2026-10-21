@@ -51,6 +51,10 @@
       "destination": "/web/config.js"
     },
     {
+      "source": "/privacy",
+      "destination": "/web/privacy.html"
+    },
+    {
       "source": "/",
       "destination": "/web/index.html"
     }

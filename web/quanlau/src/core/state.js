@@ -58,7 +58,7 @@ export function defaultState(now = Date.now()) {
     login: { lastDate: '', streak: 0, claimedDate: null },
     book: { kinds },
     stats: { potsSold: 0, potsSoldOf: {}, served: 0, fiveStars: 0, angry: 0, extrasServed: 0, drinksSold: 0, dessertsSold: 0, sidesSold: 0, daysPlayed: 0,
-      bestDayRevenue: 0, bestDayProfit: 0, avgDayProfit: 0 },
+      bestDayRevenue: 0, bestDayProfit: 0, avgDayProfit: 0, moneyEarned: 0 },
     today: newToday(),
     report: null,
     branches,
@@ -94,6 +94,8 @@ export function migrate(save, now) {
   if (!(s.tier >= 1 && s.tier <= C.TIERS.length)) s.tier = 1;
   if (C.LEVEL.max && s.level > C.LEVEL.max) s.level = C.LEVEL.max;   // v1.3: level cap 40
   if (!(s.money >= 0)) s.money = 0;
+  // v1.8: tổng tiền kiếm được (bảng xếp hạng) — save cũ chưa có thì tính từ tiền đang có
+  if (s.started && !(s.stats.moneyEarned >= s.money)) s.stats.moneyEarned = s.money;
   s.v = C.VERSION;
   return s;
 }

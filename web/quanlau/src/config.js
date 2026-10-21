@@ -749,3 +749,12 @@ export const MOM = {
 
 // Teaser for the next games in the series (shown at the ending + settings)
 export const NEXT_GAMES = ['Tiramisu', 'Buffet Lẩu Tobooki'];   // màn chào + Cài đặt ▸ Sắp ra mắt
+
+// v1.8: đăng nhập Google + lưu lên mạng + bảng xếp hạng (API: /api/lau/*, Vercel + Turso).
+// Client ID là mã công khai của MeeGame trên Google (không phải mật khẩu).
+export const CLOUD = {
+  clientId: '279939367302-c932eltrgmjda8jdj3vm15t2hh6lg42t.apps.googleusercontent.com',
+  api: '/api/lau',
+  syncSec: 120,          // tự lưu lên mạng tối đa 2 phút / lần khi có thay đổi
+  levelSlack: 2,         // bản mới hơn nhưng thấp hơn quá 2 cấp → hỏi người chơi thay vì tự lấy
+};

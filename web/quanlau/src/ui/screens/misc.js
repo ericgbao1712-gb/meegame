@@ -8,6 +8,7 @@ import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
 import { openBackup, openRestore } from '../backup.js';
+import { accountPanel } from '../cloud.js';
 import { countUp, confettiFor, unlockPic, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
 /** self-updating switch (the shared `toggle` needs a rebuild to flip) */
@@ -138,6 +139,7 @@ export function openSettings() {
         div('card set-card',
           span('sl-l', 'Tên quán'),
           div('set-name', name, saveName)),
+        div('card set-card', accountPanel()),   // v1.8 đăng nhập Google
         div('card set-card',
           div('set-row', ico('ui_chest_gold', 32), div('grow', span('sl-l', 'Sao lưu tiến trình'), span('muted sm', 'Lấy mã (hoặc file) để đổi máy, chơi lại vẫn giữ nguyên quán'))),
           div('set-bk',

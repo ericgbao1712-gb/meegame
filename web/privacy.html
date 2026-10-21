@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chính sách bảo mật · MeeGame</title>
+<link rel="canonical" href="https://meegame.io.vn/privacy">
+<style>
+  :root { --bg: #fff8ec; --fg: #3b2a20; --muted: #7a6455; --accent: #c8452f; --line: #ecd9bf; color-scheme: light; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #1f1915; --fg: #f3e8db; --muted: #bba898; --accent: #ff8a6b; --line: #3a2f27; color-scheme: dark; } }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.65 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { max-width: 680px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-left, 0px)) 48px; }
+  h1 { font-size: 1.7rem; line-height: 1.25; margin: 0 0 4px; }
+  h2 { font-size: 1.1rem; margin: 28px 0 6px; }
+  p, li { color: var(--fg); }
+  .muted { color: var(--muted); font-size: .9rem; }
+  a { color: var(--accent); }
+  ul { padding-left: 1.2em; }
+  table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  td, th { text-align: left; padding: 8px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Chính sách bảo mật</h1>
+  <p class="muted">MeeGame (meegame.io.vn) · cập nhật ngày 21/10/2026</p>
+
+  <p>Trang này nói rõ MeeGame lấy dữ liệu gì khi bạn đăng nhập bằng Google trong các game của MeeGame (hiện là Lẩu Ơi!), dùng để làm gì và bạn có thể xóa thế nào. Đăng nhập là <b>không bắt buộc</b>: không đăng nhập vẫn chơi đầy đủ, tiến trình lưu trong trình duyệt của bạn.</p>
+
+  <h2>Dữ liệu MeeGame lưu khi bạn đăng nhập</h2>
+  <table>
+    <tr><th>Dữ liệu</th><th>Dùng để</th></tr>
+    <tr><td>Mã tài khoản Google, email, tên, ảnh đại diện</td><td>Nhận ra bạn khi đăng nhập lại; hiện trong phần Tài khoản của game (chỉ bạn thấy).</td></tr>
+    <tr><td>Tiến trình game (tên quán, cấp, tiền, nhân viên…)</td><td>Lưu lên mạng để đổi máy vẫn chơi tiếp. Giữ thêm tối đa 10 bản cũ để khôi phục khi lỡ ghi đè.</td></tr>
+    <tr><td>Tên quán, cấp độ, tổng tiền kiếm được, số nồi lẩu đã bán</td><td>Bảng xếp hạng công khai. Bảng chỉ hiện <b>tên quán</b>, không hiện tên thật hay email.</td></tr>
+  </table>
+  <p>MeeGame <b>không</b> đọc Gmail, danh bạ hay tệp của bạn; chỉ xin quyền cơ bản <code>openid</code>, <code>email</code>, <code>profile</code>. MeeGame không bán hay chia sẻ dữ liệu này cho bên khác, không dùng cho quảng cáo.</p>
+
+  <h2>Cookie</h2>
+  <p>Sau khi đăng nhập, trình duyệt giữ một cookie phiên (<code>mg_player</code>, 60 ngày) để bạn không phải đăng nhập lại mỗi lần. Cookie chỉ dùng cho MeeGame và không theo dõi bạn trên trang khác. Nút đăng nhập do Google cung cấp, Google xử lý theo <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">chính sách của Google</a>.</p>
+
+  <h2>Lưu ở đâu</h2>
+  <p>Dữ liệu nằm trong cơ sở dữ liệu của MeeGame (Turso), máy chủ chạy trên Vercel. Kết nối luôn được mã hóa (HTTPS).</p>
+
+  <h2>Xóa dữ liệu</h2>
+  <ul>
+    <li>Đăng xuất trong game (Cài đặt ▸ Tài khoản) sẽ xóa cookie trên máy đó.</li>
+    <li>Muốn xóa hẳn tài khoản và tiến trình trên mạng: gửi email tới <b>ericgbao1712@gmail.com</b> từ chính địa chỉ Gmail đã đăng nhập. MeeGame xóa trong vòng 30 ngày.</li>
+    <li>Bạn cũng có thể gỡ quyền của MeeGame tại <a href="https://myaccount.google.com/permissions" target="_blank" rel="noopener">myaccount.google.com/permissions</a>.</li>
+  </ul>
+
+  <h2>Trẻ em</h2>
+  <p>Người dưới 13 tuổi nên chơi mà không đăng nhập, hoặc nhờ cha mẹ đồng ý trước khi đăng nhập.</p>
+
+  <h2>Thay đổi</h2>
+  <p>Nếu chính sách thay đổi, ngày cập nhật ở đầu trang sẽ đổi theo.</p>
+
+  <p class="muted"><a href="/">← Về MeeGame</a></p>
+</main>
+</body>
+</html>
