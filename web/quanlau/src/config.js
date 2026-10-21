@@ -511,7 +511,7 @@ export const LEVEL = {
     9500, 10500, 11500, 12500, 13500, 14500, 15500, 16500, 17500, 18500, 19500, 20500, 21500, 22500], // 26 … 39
   xpTableMult: 1.5,   // owner 20/10: "+30%" then "tăng xp lên 50%" — every level needs 50% more XP than the table
   lateFrom: 16, lateMult: 2,   // owner 20/10: "exp từ lv 16 tăng gấp đôi" — Lv 16 → 17 and up need twice the XP
-  barMult: 1.6,   // owner 21/10: "tăng thanh xp lên 60%" — mọi cấp cần thêm 60% XP (vd Lv 32: 46.500 → 74.400)
+  barMult: 1.6 * 1.2,   // owner 21/10: "tăng thanh xp lên 60%" (Lv 32: 46.500 → 74.400) rồi "tăng thêm 20%" (→ 89.280)
   xpToNext: (lv) => Math.round(LEVEL.table[Math.max(1, Math.min(lv, LEVEL.table.length)) - 1] * LEVEL.xpTableMult * (lv >= LEVEL.lateFrom ? LEVEL.lateMult : 1) * LEVEL.barMult / 10) * 10,
   // XP for a finished table: price/8 + 3/person + 6 if 5★, × tierXp
   xpForGroup: (potPrice, size, stars, tier) => Math.round((potPrice / 8 + 3 * size + (stars >= 5 ? 6 : 0)) * [1, 1.3, 1.7, 2.2, 2.6][tier - 1]),
