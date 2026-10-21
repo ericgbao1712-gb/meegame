@@ -19,10 +19,10 @@ const KIND = {
 };
 const FILTERS = [
   { id: 'all', label: 'Tất cả' }, { id: 'mon', label: 'Món', kinds: ['food', 'drink'] }, { id: 'ao', label: 'Trang phục', kinds: ['uniform', 'look'] },
-  { id: 'noi', label: 'Nồi & bàn', kinds: ['pot', 'table'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'] }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
+  { id: 'noi', label: 'Nồi & bàn', kinds: ['pot', 'table'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
-let curSet = 'hop';   // v1.18c 'hop' = Hộp mù, 'tui' = Túi mù
+let curSet = 'hop';   // v1.18e chỉ còn Hộp mù (Túi mù đã gộp vào)
 const info = () => G().get?.boxInfo?.(curSet) || null;
 const unit = () => (curSet === 'tui' ? 'túi' : 'hộp');
 const setItems = () => C.BOX.items.filter((x) => x.set === curSet);
@@ -59,7 +59,7 @@ const equipped = (it, bi) => (it.kind === 'badge' && bi.badge === it.id) || (it.
 
 /** Quán ▸ Giải trí ▸ Hộp mù */
 export function boxView(body, api, set = 'hop') {
-  curSet = set === 'tui' ? 'tui' : 'hop';
+  curSet = 'hop';
   const bi = info();
   if (!bi) return;
   if (!bi.unlocked) {
@@ -80,9 +80,10 @@ export function boxView(body, api, set = 'hop') {
   if (curSet === 'hop') FILTERS.forEach((f) => fr.appendChild(h('button', { class: 'chip' + (filter === f.id ? ' ink' : ''), type: 'button', onclick: () => { filter = f.id; sfx('click'); api.rerender(); } }, f.label)));
   if (fr.childNodes.length) body.appendChild(fr);
   // lưới bộ sưu tập
-  const fk = FILTERS.find((f) => f.id === filter)?.kinds;
+  const F = FILTERS.find((f) => f.id === filter), fk = F?.kinds;
+  const okGrp = (it) => !F || F.grp == null || (it.grp || '') === F.grp;
   const grid = div('bx-grid');
-  setItems().filter((it) => curSet !== 'hop' || !fk || fk.includes(it.kind)).slice().sort((a, b) => a.r - b.r).forEach((it, i) => {
+  setItems().filter((it) => (!fk || fk.includes(it.kind)) && okGrp(it)).slice().sort((a, b) => a.r - b.r).forEach((it, i) => {
     const n = bi.got[it.id] || 0;
     const cell = h('button', { class: 'bx-cell ' + RCLS[it.r] + (n ? ' got' : ' miss') + (equipped(it, bi) ? ' eq' : ''), type: 'button', title: n ? it.name : '???', 'aria-label': n ? it.name : 'Chưa có' },
       n ? itemPic(it, 36) : ico('ui_lock', 16, 'bx-lock'),

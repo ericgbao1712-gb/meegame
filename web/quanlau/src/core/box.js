@@ -1,5 +1,4 @@
-// v1.18 Hộp mù + v1.18c Túi mù (tab Quán ▸ Giải trí). Rút → 1 món sưu tầm theo độ hiếm (C.BOX), mỗi dòng
-// (set 'hop' / 'tui') có bộ món, giá, bảo hiểm, lượt miễn phí riêng; mảnh sứ dùng chung.
+// v1.18 Hộp mù (tab Quán ▸ Giải trí). Rút → 1 món sưu tầm theo độ hiếm (C.BOX). v1.18e: Túi mù gộp vào đây.
 // Món mới: mở luôn. Món trùng: ra mảnh. Gom mảnh đổi món còn thiếu.
 import * as C from '../config.js';
 import { fmtMoney } from './format.js';
@@ -23,13 +22,17 @@ export function boxState(s) {
   if (b.pot && !C.POT_SKINS[b.pot]) b.pot = null;           // kiểu nồi đang dùng (ref trong C.POT_SKINS)
   if (b.table && !C.TABLE_SKINS[b.table]) b.table = null;   // kiểu bàn đang dùng
   if (!Array.isArray(b.log)) b.log = [];                  // 20 món gần nhất
-  if (!b.tui || typeof b.tui !== 'object') b.tui = {};   // bộ đếm riêng của Túi mù (Hộp mù dùng các trường ở trên)
-  for (const k of ['opened', 'sinceRare', 'sinceEpic', 'sinceMyst', 'freeDay', 'spent']) if (!(b.tui[k] >= 0)) b.tui[k] = 0;
+  // v1.18e gộp Túi mù vào Hộp mù: số túi đã mở / tiền đã chi cộng dồn vào Hộp mù (một lần)
+  if (b.tui && typeof b.tui === 'object') {
+    b.opened += Math.max(0, b.tui.opened | 0);
+    b.spent += Math.max(0, +b.tui.spent || 0);
+    delete b.tui;
+  }
   return b;
 }
-const setOf = (set) => (set === 'tui' ? 'tui' : 'hop');
+const setOf = () => 'hop';   // v1.18e chỉ còn Hộp mù
 /** bộ đếm (opened, since*, freeDay, spent) của một dòng */
-const ctr = (b, set) => (setOf(set) === 'tui' ? b.tui : b);
+const ctr = (b) => b;
 const SET = (set) => C.boxSet(setOf(set));
 
 export const boxPrice = (G, set) => { const p = SET(set).price; return p[Math.max(0, Math.min(p.length - 1, (G.state.tier || 1) - 1))]; };
@@ -80,7 +83,7 @@ function rollOne(G, set) {
 
 /** Mở n hộp (1 hoặc 10). free = hộp miễn phí trong ngày. */
 export function openBox(G, n = 1, free = false, set = 'hop') {
-  const s = G.state, all = boxState(s), b = ctr(all, set), P = SET(set), unit = setOf(set) === 'tui' ? 'túi' : 'hộp';
+  const s = G.state, all = boxState(s), b = ctr(all, set), P = SET(set), unit = 'hộp';
   if (!featureUnlocked(G, P.feature)) return fail('locked', `${P.name} mở ở Lv ${C.FEATURES[P.feature]} nha!`);
   n = n === 10 ? 10 : 1;
   let cost = 0;

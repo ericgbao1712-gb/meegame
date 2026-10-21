@@ -621,7 +621,6 @@ export const FEATURES = {
   tax: 13,      // v1.14 đóng thuế theo kỳ (quán đã làm ăn ổn định)
   hire_shipper: 11, ship: 11,   // v1.16 nhận đơn ship + thuê Shipper
   blindbox: 8,  // v1.18 Hộp mù (tab Giải trí, cùng Vé số)
-  blindbag: 10, // v1.18c Túi mù: đồ bếp, máy móc, tiện ích
 };
 
 // ───────────────────────────── v1.14 GIÁ BÁN (người chơi tự đặt, mang từ Xoài Lắc v2) ─────────────────────────────
@@ -925,10 +924,9 @@ export const BOX = {
     { id: 4, name: 'Bí ẩn',    rate: 2,  shard: 100, cost: 2000, icon: 'ui_chest_gold' },
   ],
   pityRare: 10, pityEpic: 40, pityMyst: 100,   // chắc chắn Hiếm+ trong 10 hộp, Cực hiếm+ trong 40, Bí ẩn trong 100
-  // v1.18c hai dòng: Hộp mù (set 'hop', mọi món chưa ghi set) và Túi mù (set 'tui': đồ bếp, máy móc, tiện ích)
+  // v1.18e: owner 22/10 "gộp túi mù và hộp mù lại" — một Hộp mù duy nhất, đủ cả món của Túi mù cũ (grp 'bep')
   sets: {
     hop: { name: 'Hộp mù', icon: 'ui_hopmu', feature: 'blindbox' },
-    tui: { name: 'Túi mù', icon: 'ui_tuimu', feature: 'blindbag', price: [120, 250, 600, 1500, 3000], pityRare: 10, pityEpic: 30, pityMyst: 70 },
   },
   items: [
     // món ăn / uống độc quyền
@@ -986,28 +984,28 @@ export const BOX = {
     { id: 'bx_d_robotmeo', r: 4, kind: 'deco', ref: 'db_robotmeo',   name: 'Robot phục vụ Mèo' },
     { id: 'bx_d_robotgau', r: 4, kind: 'deco', ref: 'db_robotgau',   name: 'Robot phục vụ Gấu Trúc' },
     { id: 'bx_d_quaythungan', r: 4, kind: 'deco', ref: 'db_quaythungan', name: 'Quầy thu ngân Mèo Thần Tài' },
-    // ═══ v1.18c TÚI MÙ (set 'tui'): đồ bếp, máy móc, tiện ích — đặt trong Quán ▸ Trang trí ═══
-    { id: 'bt_giadao', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_giadao', name: 'Giá để dao' },
-    { id: 'bt_thot', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_thot', name: 'Bộ thớt treo tường' },
-    { id: 'bt_lichsk', set: 'tui', r: 1, kind: 'deco', ref: 'tuong_lichsk', name: 'Bảng lịch sự kiện' },
-    { id: 'bt_sanuot', set: 'tui', r: 1, kind: 'deco', ref: 'db_sanuot', name: 'Biển cảnh báo sàn ướt' },
-    { id: 'bt_choilau', set: 'tui', r: 1, kind: 'deco', ref: 'db_choilau', name: 'Bộ chổi, cây lau, xô nước' },
-    { id: 'bt_maythai', set: 'tui', r: 2, kind: 'deco', ref: 'db_maythai', name: 'Máy thái thịt cuộn' },
-    { id: 'bt_mayxay', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayxay', name: 'Máy xay ớt sa tế' },
-    { id: 'bt_mayvatcam', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayvatcam', name: 'Máy vắt nước cam' },
-    { id: 'bt_locKK', set: 'tui', r: 2, kind: 'deco', ref: 'db_locKK', name: 'Máy lọc không khí' },
-    { id: 'bt_mayutra', set: 'tui', r: 2, kind: 'deco', ref: 'db_mayutra', name: 'Bình ủ trà inox' },
-    { id: 'bt_bannuoc', set: 'tui', r: 2, kind: 'deco', ref: 'db_bannuoc', name: 'Máy bán nước tự động' },
-    { id: 'bt_kds', set: 'tui', r: 2, kind: 'deco', ref: 'tuong_kds', name: 'Màn hình đơn bếp' },
-    { id: 'bt_chamcong', set: 'tui', r: 2, kind: 'deco', ref: 'tuong_chamcong', name: 'Máy chấm công' },
-    { id: 'bt_daychuyenmi', set: 'tui', r: 3, kind: 'deco', ref: 'db_daychuyenmi', name: 'Dây chuyền làm mì tươi' },
-    { id: 'bt_donggoi', set: 'tui', r: 3, kind: 'deco', ref: 'db_donggoi', name: 'Trạm đóng gói mang về' },
-    { id: 'bt_camera', set: 'tui', r: 3, kind: 'deco', ref: 'tuong_camera', name: 'Màn hình camera an ninh' },
-    { id: 'bt_robotlau', set: 'tui', r: 3, kind: 'deco', ref: 'db_robotlau', name: 'Robot lau sàn tự động' },
-    { id: 'bt_photobooth', set: 'tui', r: 3, kind: 'deco', ref: 'db_photobooth', name: 'Máy chụp ảnh lấy liền' },
-    { id: 'bt_bachvi', set: 'tui', r: 4, kind: 'deco', ref: 'db_bachvi', name: 'Cỗ Máy Nước Dùng Bách Vị' },
-    { id: 'bt_xuongvien', set: 'tui', r: 4, kind: 'deco', ref: 'db_xuongvien', name: 'Xưởng Viên Thả Lẩu' },
-    { id: 'bt_phatra', set: 'tui', r: 4, kind: 'deco', ref: 'db_phatra', name: 'Máy Pha Trà Thượng Hạng' },
+    // ═══ v1.18c đồ bếp, máy móc, tiện ích (v1.18e gộp Túi mù vào Hộp mù) — đặt trong Quán ▸ Trang trí ═══
+    { id: 'bt_giadao', grp: 'bep', r: 1, kind: 'deco', ref: 'tuong_giadao', name: 'Giá để dao' },
+    { id: 'bt_thot', grp: 'bep', r: 1, kind: 'deco', ref: 'tuong_thot', name: 'Bộ thớt treo tường' },
+    { id: 'bt_lichsk', grp: 'bep', r: 1, kind: 'deco', ref: 'tuong_lichsk', name: 'Bảng lịch sự kiện' },
+    { id: 'bt_sanuot', grp: 'bep', r: 1, kind: 'deco', ref: 'db_sanuot', name: 'Biển cảnh báo sàn ướt' },
+    { id: 'bt_choilau', grp: 'bep', r: 1, kind: 'deco', ref: 'db_choilau', name: 'Bộ chổi, cây lau, xô nước' },
+    { id: 'bt_maythai', grp: 'bep', r: 2, kind: 'deco', ref: 'db_maythai', name: 'Máy thái thịt cuộn' },
+    { id: 'bt_mayxay', grp: 'bep', r: 2, kind: 'deco', ref: 'db_mayxay', name: 'Máy xay ớt sa tế' },
+    { id: 'bt_mayvatcam', grp: 'bep', r: 2, kind: 'deco', ref: 'db_mayvatcam', name: 'Máy vắt nước cam' },
+    { id: 'bt_locKK', grp: 'bep', r: 2, kind: 'deco', ref: 'db_locKK', name: 'Máy lọc không khí' },
+    { id: 'bt_mayutra', grp: 'bep', r: 2, kind: 'deco', ref: 'db_mayutra', name: 'Bình ủ trà inox' },
+    { id: 'bt_bannuoc', grp: 'bep', r: 2, kind: 'deco', ref: 'db_bannuoc', name: 'Máy bán nước tự động' },
+    { id: 'bt_kds', grp: 'bep', r: 2, kind: 'deco', ref: 'tuong_kds', name: 'Màn hình đơn bếp' },
+    { id: 'bt_chamcong', grp: 'bep', r: 2, kind: 'deco', ref: 'tuong_chamcong', name: 'Máy chấm công' },
+    { id: 'bt_daychuyenmi', grp: 'bep', r: 3, kind: 'deco', ref: 'db_daychuyenmi', name: 'Dây chuyền làm mì tươi' },
+    { id: 'bt_donggoi', grp: 'bep', r: 3, kind: 'deco', ref: 'db_donggoi', name: 'Trạm đóng gói mang về' },
+    { id: 'bt_camera', grp: 'bep', r: 3, kind: 'deco', ref: 'tuong_camera', name: 'Màn hình camera an ninh' },
+    { id: 'bt_robotlau', grp: 'bep', r: 3, kind: 'deco', ref: 'db_robotlau', name: 'Robot lau sàn tự động' },
+    { id: 'bt_photobooth', grp: 'bep', r: 3, kind: 'deco', ref: 'db_photobooth', name: 'Máy chụp ảnh lấy liền' },
+    { id: 'bt_bachvi', grp: 'bep', r: 4, kind: 'deco', ref: 'db_bachvi', name: 'Cỗ Máy Nước Dùng Bách Vị' },
+    { id: 'bt_xuongvien', grp: 'bep', r: 4, kind: 'deco', ref: 'db_xuongvien', name: 'Xưởng Viên Thả Lẩu' },
+    { id: 'bt_phatra', grp: 'bep', r: 4, kind: 'deco', ref: 'db_phatra', name: 'Máy Pha Trà Thượng Hạng' },
     // thẻ thành tích (đeo 1 thẻ, hiện cạnh tên quán trên bảng xếp hạng)
     { id: 'bx_b_tapsu',   r: 1, kind: 'badge', icon: 'pot_ga', name: 'Lẩu thủ tập sự' },
     { id: 'bx_b_chamchi', r: 1, kind: 'badge', icon: 'ui_clock', name: 'Chủ quán chăm chỉ' },
