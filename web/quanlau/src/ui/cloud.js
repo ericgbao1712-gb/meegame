@@ -13,6 +13,7 @@ import { h, div, span, ico } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
+import { badgePlate, badgeRowCls } from './badge.js';
 import { fmtShort, fmtMoney } from '../core/format.js';
 import { countUp, confettiFor, vibrate } from './screens/kit.js';
 
@@ -28,13 +29,6 @@ const st = {
   busy: false, lastUpload: 0, lastSig: '', lastErr: '', listeners: new Set(),
 };
 const emit = () => { for (const f of st.listeners) { try { f(); } catch (e) { /* ignore */ } } };
-// v1.18 thẻ thành tích Hộp mù cạnh tên quán
-function badgeChip(id) {
-  const b = id ? C.badgeOf(id) : null;
-  if (!b) return null;
-  const r = ['', 'r1', 'r2', 'r3', 'r4'][b.r] || 'r1';
-  return span('cl-badge ' + r, ico(b.icon, 16), b.name);
-}
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
 
@@ -491,9 +485,9 @@ export function leaderboardView(body, api2) {
     if (!data) { list.appendChild(span('muted sm', 'Chưa tải được bảng xếp hạng (cần mạng).')); return; }
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
-      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : ''),
+      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + badgeRowCls(r.badge),
         span('cl-rank num', String(r.rank)),
-        div('grow', h('b', null, r.shopName, badgeChip(r.badge)), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
+        div('grow', h('b', null, r.shopName), badgePlate(r.badge), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
         span('num cl-val', B.fmt(r.value))));
     }
     const me = data.me;

@@ -1624,10 +1624,54 @@ button.hchip:active { transform: translateY(2px); }
 .bx-table td { text-align: right; padding: 6px 4px; }
 .bx-table td .num { font-size: 22px; line-height: .8; }
 .bx-rules { margin: 4px 0 12px; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; font: 600 13.5px/1.45 var(--f-body); color: var(--ink-2); }
-/* thẻ thành tích trên bảng xếp hạng */
-.cl-badge { display: inline-flex; align-items: center; gap: 3px; margin-left: 6px; padding: 1px 7px 1px 3px; border-radius: 999px; font: 800 10.5px/1.5 var(--f-body);
-  background: var(--bg); color: var(--t); box-shadow: 0 0 0 1.5px var(--line); vertical-align: middle; white-space: nowrap; }
-.cl-badge .ico { width: 16px; height: 16px; }
+/* thẻ thành tích (bảng tên) — v1.18d: N giấy · R bạc xanh lấp lánh · SR vàng vệt sáng · SSR cầu vồng */
+.cl-badge { position: relative; align-self: flex-start; display: inline-flex; align-items: center; gap: 5px; height: 22px; margin: 4px 0 1px; padding: 0 9px 0 2px;
+  border-radius: 7px; font: 800 11px/1 var(--f-body); white-space: nowrap; overflow: hidden; isolation: isolate;
+  color: var(--ink); background: var(--paper-2); box-shadow: 0 0 0 2px var(--line), inset 0 -3px 0 0 rgba(138, 85, 48, .18), 0 3px 0 0 var(--line); }
+.cl-badge .cb-medal { flex: none; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: radial-gradient(circle at 50% 35%, #fffaf0 0 55%, var(--sand) 56%); box-shadow: 0 0 0 1.5px var(--line); }
+.cl-badge .cb-medal .ico { width: 14px; height: 14px; image-rendering: pixelated; }
+.cl-badge .cb-tag { flex: none; padding: 2px 4px 1px; border-radius: 4px; font: 400 9px/1 var(--f-display); letter-spacing: .04em; color: #fff; background: var(--stone-2); box-shadow: 0 0 0 1px var(--line); }
+.cl-badge .cb-name { position: relative; z-index: 1; }
+.cl-badge .cb-spark { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.cl-badge .cb-spark span { position: absolute; width: 3px; height: 3px; background: #fff; box-shadow: 0 0 3px #fff; opacity: 0; animation: cbTw 2.4s ease-in-out infinite; }
+.cl-badge .cb-spark span:nth-child(1) { left: 34%; top: 4px; } .cl-badge .cb-spark span:nth-child(2) { left: 68%; top: 13px; animation-delay: .8s; } .cl-badge .cb-spark span:nth-child(3) { left: 88%; top: 5px; animation-delay: 1.6s; }
+@keyframes cbTw { 0%, 70%, 100% { opacity: 0; transform: scale(.4) rotate(0); } 80% { opacity: 1; transform: scale(1) rotate(45deg); } }
+/* R — Hiếm */
+.cl-badge.b2 { color: #24527a; background: linear-gradient(180deg, #f2f9ff 0%, #cfe6f8 55%, #b4d4ee 100%);
+  box-shadow: 0 0 0 2px var(--line), inset 0 0 0 1.5px rgba(255, 255, 255, .9), inset 0 -3px 0 0 #8fbde3, 0 3px 0 0 var(--line); }
+.cl-badge.b2 .cb-tag { background: #5fa8de; }
+.cl-badge.b2 .cb-medal { background: radial-gradient(circle at 50% 35%, #ffffff 0 55%, #9ccbee 56%); }
+/* SR — Cực hiếm */
+.cl-badge.b3 { color: #6b3a08; background: linear-gradient(180deg, #fff6cf 0%, #ffd965 50%, #f2b13a 100%);
+  box-shadow: 0 0 0 2px var(--line), inset 0 0 0 1.5px rgba(255, 250, 220, .95), inset 0 -3px 0 0 #d48a1e, 0 3px 0 0 var(--line), 0 0 8px rgba(246, 184, 60, .55); }
+.cl-badge.b3 .cb-tag { background: linear-gradient(180deg, #ef6a4f, #c8342e); }
+.cl-badge.b3 .cb-medal { background: radial-gradient(circle at 50% 35%, #fffbe8 0 55%, #f0b43a 56%); box-shadow: 0 0 0 1.5px var(--line), 0 0 0 3px #fff2b8; }
+.cl-badge.b3::after, .cl-badge.b4::after { content: ''; position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(110deg, transparent 30%, rgba(255, 255, 255, .85) 45%, transparent 60%) -160% 0 / 220% 100% no-repeat; animation: cbShine 2.8s ease-in-out infinite; }
+@keyframes cbShine { 0%, 55% { background-position: -160% 0; } 100% { background-position: 160% 0; } }
+/* SSR — Bí ẩn */
+.cl-badge.b4 { color: #fff; text-shadow: -1px -1px 0 var(--line), 1px -1px 0 var(--line), -1px 1px 0 var(--line), 1px 1px 0 var(--line), 0 2px 0 var(--line);
+  background: linear-gradient(90deg, #ff6b8b, #ffb347, #ffe066, #6ee7a8, #6cc6ff, #b18cff, #ff6b8b) 0 0 / 300% 100%; animation: cbRainbow 4s linear infinite;
+  box-shadow: 0 0 0 2px var(--line), inset 0 0 0 1.5px rgba(255, 255, 255, .8), inset 0 -3px 0 0 rgba(90, 40, 120, .35), 0 3px 0 0 var(--line), 0 0 10px rgba(255, 120, 200, .65); }
+.cl-badge.b4 .cb-tag { background: var(--ink); color: #ffe066; text-shadow: none; }
+.cl-badge.b4 .cb-medal { background: radial-gradient(circle at 50% 35%, #fff 0 55%, #ffd1f0 56%); box-shadow: 0 0 0 1.5px var(--line), 0 0 6px #fff; }
+@keyframes cbRainbow { from { background-position: 0 0; } to { background-position: 300% 0; } }
+.cl-badge.big { height: 30px; font-size: 14px; gap: 7px; padding: 0 12px 0 3px; border-radius: 9px; }
+.cl-badge.big .cb-medal { width: 24px; height: 24px; } .cl-badge.big .cb-medal .ico { width: 18px; height: 18px; }
+.cl-badge.big .cb-tag { font-size: 11px; padding: 3px 5px 2px; }
+.bx-plate-pv { display: flex; flex-direction: column; align-items: center; gap: 4px; margin: 2px 0 10px; }
+.bx-plate-pv .cl-badge { align-self: center; }
+/* khung cả dòng trên bảng xếp hạng cho quán đeo thẻ R / SR / SSR */
+.cl-row.bdg2 { background: linear-gradient(100deg, #f7fbff, #e6f2fc 60%, #f7fbff); box-shadow: inset 0 0 0 2px var(--line), inset 0 0 0 4px #a9d0ef; }
+.cl-row.bdg3 { position: relative; background: linear-gradient(100deg, #fffaf0, #fff0c4 55%, #fffaf0);
+  box-shadow: inset 0 0 0 2px var(--line), inset 0 0 0 4px #f6c84c, inset 0 0 0 5px #fff4c2, 0 0 10px rgba(246, 184, 60, .35); }
+.cl-row.bdg4 { position: relative; border: 3px solid transparent; padding: 6px 8px;
+  background: linear-gradient(100deg, #fff8fd, #f4ecff 50%, #eaf8ff) padding-box,
+    linear-gradient(90deg, #ff6b8b, #ffb347, #ffe066, #6ee7a8, #6cc6ff, #b18cff, #ff6b8b) 0 0 / 300% 100% border-box;
+  animation: cbRainbow 4s linear infinite; box-shadow: 0 0 0 2px var(--line), 0 0 12px rgba(255, 120, 200, .45); }
+.cl-row.me.bdg2, .cl-row.me.bdg3 { box-shadow: inset 0 0 0 3px var(--jade, #2f9a8a), inset 0 0 0 5px #f6c84c; }
+.cl-row.me.bdg4 { box-shadow: 0 0 0 2px var(--line), 0 0 0 4px var(--jade, #2f9a8a), 0 0 12px rgba(255, 120, 200, .45); }
+@media (prefers-reduced-motion: reduce) { .cl-badge, .cl-badge::after, .cl-badge .cb-spark span, .cl-row.bdg4 { animation: none !important; } }
 .card.bx-head, .card.bx-pity, .card.bx-tools { flex-direction: row !important; align-items: center !important; text-align: left; }
 .bx-head .grow, .bx-pity .grow, .bx-tools .grow { flex: 1 1 auto; align-items: stretch; }
 .bx-rates { flex-wrap: nowrap; gap: 4px; overflow-x: auto; scrollbar-width: none; }

@@ -8,6 +8,7 @@ import { fmtMoney, fmtShort } from '../core/format.js';
 import { frame } from './modals.js';
 import { lockCard, floatAt, noteBox, celebrate } from './sheets/common.js';
 import { confettiFor, vibrate } from './screens/kit.js';
+import { badgePlate } from './badge.js';
 import { decoIconURL, lookPreviewURL, makeStaffLook, makeOwnerLook, skinPreviewURL } from '../art/index.js';
 
 const RAR = C.BOX.rar;
@@ -189,6 +190,7 @@ function openItem(it, api) {
       body.append(...[
         div('bx-big ' + RCLS[it.r] + (n ? '' : ' miss'), n ? itemPic(it, 72) : ico('ui_lock', 48, 'bx-lock')),
         div('bx-meta', span('chip bx-rc-chip ' + RCLS[it.r], ico(RAR[it.r - 1].icon, 16), RAR[it.r - 1].name), span('chip', KIND[it.kind])),
+        it.kind === 'badge' ? div('bx-plate-pv', span('muted sm', 'Trên bảng xếp hạng:'), badgePlate(it.id, { big: true })) : null,
         h('p', { class: 'muted sm' }, n ? describe(it) : `Chưa rút được món này. Mở ${it.set === 'tui' ? 'túi mù' : 'hộp mù'} hoặc gom mảnh để đổi.`),
         n > 1 ? span('muted sm bx-dupn', `Đã rút ${n} lần (trùng thành mảnh).`) : null,
         ...btns].filter(Boolean));
