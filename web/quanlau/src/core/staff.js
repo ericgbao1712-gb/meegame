@@ -9,7 +9,8 @@ const ROLE_BIAS = { phucvu: [1.4, 0.7, 1.2], daubep: [1.1, 1.6, 0.5], thungan: [
 const fail = (reason, msg) => ({ ok: false, reason, msg });
 
 export const roleUnlocked = (G, role) => !!SC.roles[role] && G.state.level >= SC.roles[role].unlockLv && G.state.tier >= SC.roles[role].minTier;
-export const staffSlots = (G) => ({ used: G.state.staff.length, max: SC.slotsByTier[G.state.tier - 1] });
+export const slotBonusAt = (lv) => (SC.slotBonus || []).reduce((n, [at, k]) => n + (lv >= at ? k : 0), 0);   // v1.17
+export const staffSlots = (G) => ({ used: G.state.staff.length, max: Math.min(SC.maxSlots || 99, SC.slotsByTier[G.state.tier - 1] + slotBonusAt(G.state.level)) });
 export const roleCount = (G, role) => G.state.staff.filter((m) => m.role === role).length;
 export const candidatesOf = (G, role) => G.state.candidates.list.filter((c) => c.role === role);
 

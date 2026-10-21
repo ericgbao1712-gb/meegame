@@ -357,6 +357,9 @@ export const STAFF = {
     shipper: { name: 'Shipper',  icon: 'eq_truck', unlockLv: 11, minTier: 1, max: 3,  desc: 'Có shipper thì quán nhận đơn ship qua điện thoại. Bếp nấu xong, shipper chạy xe giao lẩu tận nhà, khách trả thêm phí ship.' },
   },
   slotsByTier: [2, 4, 6, 9, 9],
+  // v1.17: lên cấp mở thêm chỗ chứa nhân viên (cộng vào slotsByTier), tối đa 12 người một quán
+  slotBonus: [[20, 1], [28, 1], [34, 1]],
+  maxSlots: 12,
   rarityWeights: [40, 30, 18, 9, 3],          // ★1..★5
   rarityPoints: [6, 9, 12, 16, 21],           // total stat points (spd+skl+chm), ±2
   salary: (s, tier) => Math.round((30 + 5 * (s.spd + s.skl + s.chm)) * [1, 1.6, 2.4, 2.8, 2.8][tier - 1]), // k/day
@@ -713,10 +716,12 @@ export const MAIN_QUESTS = [
   { id: 'q28', text: 'Gặp đủ 10 kiểu khách',            type: 'kindsMet', target: 10,  reward: { money: 5000 } },
   { id: 'q29', text: 'Mở Nhà hàng lẩu 2 tầng',          type: 'tier', target: 4,       reward: { money: 10000 }, mom: 'tier4' },
   { id: 'q30', text: 'Có 8 nhân viên',                  type: 'staffCount', target: 8, reward: { money: 8000 } },
+  { id: 'qn1', text: 'Có 10 nhân viên',                 type: 'staffCount', target: 10, reward: { money: 15000 } },           // v1.17
   { id: 'q31', text: 'Mở khoá Lẩu thập cẩm Nhà Mình',   type: 'level', target: 18,     reward: { money: 10000 } },
   { id: 'q32', text: 'Bán 2.000 nồi lẩu',               type: 'potsSold', target: 2000, reward: { money: 15000 } },
   { id: 'qd3', text: 'Bán 150 phần tráng miệng',         type: 'dessertsSold', target: 150, reward: { money: 20000 } },
   { id: 'q33', text: 'Đạt 4.5★ với ít nhất 60 đánh giá', type: 'rating', target: 4.5, minReviews: 60, reward: { money: 20000 } },
+  { id: 'qn2', text: 'Có đủ 12 nhân viên',              type: 'staffCount', target: 12, reward: { money: 30000 } },           // v1.17
   { id: 'q34', text: 'Mở Chuỗi Lẩu Nhà Mình',           type: 'tier', target: 5,       reward: { money: 50000 }, mom: 'tier5' },
   { id: 'q35', text: 'Mở chi nhánh đầu tiên',           type: 'branches', target: 1,   reward: { money: 30000 } },
   { id: 'q36', text: 'Mở 3 chi nhánh',                  type: 'branches', target: 3,   reward: { money: 100000 } },
@@ -729,6 +734,7 @@ export const MAIN_QUESTS = [
 export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 }];
 // v1.16 nhiệm vụ chính mới: save cũ giữ đúng nhiệm vụ đang làm (đổi chỉ số theo id, xem state.migrate)
 export const MAIN_QUESTS_V116 = ['qp1', 'ql1', 'qs1', 'qs2', 'qt1'];
+export const MAIN_QUESTS_V117 = ['qn1', 'qn2'];
 
 // Daily tasks: 3 picked per game day from the pool (only those whose `minLv` ≤ level).
 // target(t) receives tier; reward is a chest tier.

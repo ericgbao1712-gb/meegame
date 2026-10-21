@@ -92,14 +92,17 @@ export function migrate(save, now) {
     if (shift) { s.quests.main = p + shift; s.quests.mainClaimable = false; }
   }
   if (s.flags && s.flags.ui) s.flags.ui.mqV11 = true;
-  // v1.16: thêm nhiệm vụ chính (C.MAIN_QUESTS_V116). Save cũ đang làm nhiệm vụ nào thì vẫn đúng nhiệm vụ đó.
-  if (save.started && !(s.flags.ui && s.flags.ui.mqV116)) {
-    const oldList = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V116.includes(q.id));
+  // v1.16 / v1.17: thêm nhiệm vụ chính. Save cũ đang làm nhiệm vụ nào thì vẫn đúng nhiệm vụ đó.
+  const remapMain = (from, to) => {
     const p = s.quests.main | 0;
-    const id = oldList[p] && oldList[p].id;
-    s.quests.main = id ? C.MAIN_QUESTS.findIndex((q) => q.id === id) : C.MAIN_QUESTS.length;
-  }
+    const id = from[p] && from[p].id;
+    s.quests.main = id ? to.findIndex((q) => q.id === id) : to.length;
+  };
+  const L117 = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V117.includes(q.id));
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV116)) remapMain(L117.filter((q) => !C.MAIN_QUESTS_V116.includes(q.id)), L117);
   if (s.flags && s.flags.ui) s.flags.ui.mqV116 = true;
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV117)) remapMain(L117, C.MAIN_QUESTS);
+  if (s.flags && s.flags.ui) s.flags.ui.mqV117 = true;
   // sanity
   if (!(s.clock >= C.TIME.dayStart)) s.clock = C.TIME.dayStart;
   if (!['prep', 'open', 'closing', 'report'].includes(s.phase)) s.phase = 'prep';

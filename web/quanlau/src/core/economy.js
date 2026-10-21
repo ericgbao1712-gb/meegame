@@ -230,6 +230,7 @@ export function unlocksAt(level) {
   for (const r of Object.keys(C.STAFF.roles)) if (C.STAFF.roles[r].unlockLv === level) out.push({ type: 'role', id: r, name: C.STAFF.roles[r].name });
   for (const f of Object.keys(C.FEATURES)) if (C.FEATURES[f] === level && FEATURE_NAMES[f]) out.push({ type: 'feature', id: f, name: FEATURE_NAMES[f] });
   for (const t of C.TIERS) if (t.require && t.require.level === level) out.push({ type: 'tier', id: t.id, name: t.name });
+  for (const [lv, k] of C.STAFF.slotBonus || []) if (lv === level) out.push({ type: 'slot', id: 'slot' + lv, name: `+${k} chỗ nhân viên`, desc: `Quán chứa thêm ${k} nhân viên (tối đa ${C.STAFF.maxSlots} người)` });   // v1.17
   out.push(...C.cosmeticUnlocksAt(level));
   return out;
 }

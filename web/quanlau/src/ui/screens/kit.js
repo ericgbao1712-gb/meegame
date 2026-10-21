@@ -65,7 +65,7 @@ export function confettiFor(handle, opts = {}) {
 }
 
 // ---- unlock cards (level-up / roadmap) -------------------------------------------------------
-export const UNLOCK_LABEL = { pot: 'Món lẩu mới', ingredient: 'Nguyên liệu mới', drink: 'Đồ uống mới', role: 'Nhân viên mới', feature: 'Tính năng mới', tier: 'Mở rộng quán', dessert: 'Món tráng miệng mới', side: 'Món ăn kèm mới', equip: 'Thiết bị mới', deco: 'Đồ trang trí mới', uniform: 'Đồng phục mới', look: 'Kiểu nhân vật mới', cust: 'Khách hàng mới' };
+export const UNLOCK_LABEL = { pot: 'Món lẩu mới', ingredient: 'Nguyên liệu mới', drink: 'Đồ uống mới', role: 'Nhân viên mới', feature: 'Tính năng mới', tier: 'Mở rộng quán', dessert: 'Món tráng miệng mới', side: 'Món ăn kèm mới', equip: 'Thiết bị mới', deco: 'Đồ trang trí mới', uniform: 'Đồng phục mới', look: 'Kiểu nhân vật mới', cust: 'Khách hàng mới', slot: 'Thêm chỗ nhân viên' };
 export const FEATURE_NAME = {
   deco: 'Trang trí quán', daily: 'Nhiệm vụ ngày', reservations: 'Khách đặt bàn', mkt_reviewer: 'Mời Food Reviewer', mkt_livestream: 'Livestream bán hàng',
   speed2: 'Tăng tốc ×2', manageMode: 'Chế độ quản lý', extras: 'Khách gọi thêm món', lottery: 'Vé số + Đoán số',
@@ -81,6 +81,7 @@ export function unlockIcon(u) {
     case 'role': return u.id === 'shipper' ? 'eq_truck' : 'role_' + u.id;
     case 'feature': return FEATURE_ICON[u.id] || 'ui_star';
     case 'tier': return 'ui_shop';
+    case 'slot': return 'ui_staff';
     case 'dessert': return D.ING[u.id]?.icon || 'tm_kem';
     case 'side': return D.ING[u.id]?.icon || 'ak_oc';
     case 'equip': return C.UPGRADES.find((x) => x.id === u.id)?.icon || 'eq_stove';
@@ -121,6 +122,7 @@ export function unlocksAtLevel(level) {
   for (const r of Object.keys(C.STAFF.roles)) if (C.STAFF.roles[r].unlockLv === level) out.push({ type: 'role', id: r, name: C.STAFF.roles[r].name });
   for (const f of Object.keys(C.FEATURES)) if (C.FEATURES[f] === level && FEATURE_NAME[f]) out.push({ type: 'feature', id: f, name: FEATURE_NAME[f] });
   for (const t of C.TIERS) if (t.require && t.require.level === level) out.push({ type: 'tier', id: t.id, name: t.name });
+  for (const [lv, k] of C.STAFF.slotBonus || []) if (lv === level) out.push({ type: 'slot', id: 'slot' + lv, name: `+${k} chỗ nhân viên`, desc: `Quán chứa thêm ${k} nhân viên (tối đa ${C.STAFF.maxSlots} người)` });   // v1.17
   out.push(...C.cosmeticUnlocksAt(level));
   return out;
 }

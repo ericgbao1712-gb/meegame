@@ -7,9 +7,12 @@ import { frame } from './modals.js';
 import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
-  ver: 116,
+  ver: 117,
   title: 'Có gì mới trong Lẩu Ơi!',
   items: [
+    { icon: 'ui_staff', title: 'Quán chứa tới 12 nhân viên', lv: C.STAFF.slotBonus[0][0],
+      text: `Lên **Lv ${C.STAFF.slotBonus.map((x) => x[0]).join(', ')}** mỗi mốc mở thêm 1 chỗ nhân viên. Nhà hàng 2 tầng chứa được tối đa **${C.STAFF.maxSlots} người**. Có nhiệm vụ mới: đủ 10 và 12 nhân viên.`,
+      go: ['staff', null], goLabel: 'Xem Nhân viên' },
     { icon: 'ui_ticket', title: 'Vé số có số + Dò vé', lv: C.FEATURES.lottery,
       text: 'Cô bán vé số ghé quán: chạm vào cô để mua vé 6 số. Hết ngày quay xổ số, sáng hôm sau vào **Quán ▸ Vé số** để **dò vé** và bấm **Nhận thưởng**. Giải đặc biệt 100 triệu!',
       go: ['shop', 'veso'], goLabel: 'Xem Vé số' },
@@ -42,7 +45,7 @@ export function openWhatsNew({ force = false } = {}) {
     build: (m) => {
       const [head, body] = frame(NEWS.title, { icon: 'ui_gift', onClose: () => m.close('x') });
       body.append(
-        div('wn-hero', span('wn-kick', 'BẢN CẬP NHẬT MỚI'), h('b', null, 'Vé số, Đoán số & Đơn ship!')),
+        div('wn-hero', span('wn-kick', 'BẢN CẬP NHẬT MỚI'), h('b', null, '12 nhân viên, Đơn ship & Vé số!')),
         ...NEWS.items.map((it) => div('card wn-item',
           ico(it.icon, 32),
           div('grow',
