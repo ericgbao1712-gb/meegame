@@ -196,7 +196,8 @@ function recolorCanvas(key, base, skin, mode) {
     if (!d[i + 3]) continue;
     const [h, s, v] = hsv(d[i], d[i + 1], d[i + 2]);
     if (v < 0.22) continue;                                         // giữ viền đậm
-    const hit = mode === 'metal' ? s < 0.2 : s > 0.2;   // bàn: mọi phần có màu (gỗ, nhựa đỏ…), chân inox xám giữ nguyên
+    // bàn: mọi phần có màu (gỗ, nhựa đỏ…), chân inox xám giữ nguyên; 'woodonly' (dáng ghế): chỉ phần gỗ → đệm đỏ, sứ, tre giữ màu riêng
+    const hit = mode === 'metal' ? s < 0.2 : mode === 'woodonly' ? (h >= 14 && h <= 46 && s > 0.25) : s > 0.2;
     if (!hit) continue;
     const ns = mode === 'metal' ? skin.s : Math.min(1, skin.s * (0.6 + 0.5 * s));
     let [r, gg, b] = rgb(skin.h, ns, Math.min(1, v * skin.v));
@@ -209,12 +210,17 @@ function recolorCanvas(key, base, skin, mode) {
   return c;
 }
 /** put() có áp kiểu bàn / kiểu ghế khi đang đeo (v1.18h: ghế 'stool*' theo màu ghế, bàn 'table*' theo màu bàn). */
-function putTableSkin(ctx, key, x, y) {
+const SEAT_SUFFIX = ['_l', '_r', '', '_f'];   // v1.18l ghế quay theo chỗ: trái, phải, sau bàn, trước bàn
+function putTableSkin(ctx, key, x, y, seat = -1) {
   const chair = key.startsWith('stool');
-  if (chair && FORM_CHAIR) key = 'cshape_' + FORM_CHAIR;          // v1.18i dáng ghế
-  else if (!chair && FORM_TABLE) key = 'tshape_' + FORM_TABLE;    // v1.18i dáng bàn
+  let form = false;
+  if (chair && FORM_CHAIR) {                                        // v1.18i dáng ghế
+    key = 'cshape_' + FORM_CHAIR; form = true;
+    const k2 = seat >= 0 ? key + SEAT_SUFFIX[seat] : key;
+    if (F[k2]) key = k2;
+  } else if (!chair && FORM_TABLE) key = 'tshape_' + FORM_TABLE;    // v1.18i dáng bàn
   const sk = chair ? (SKIN_CHAIR && CHAIR_SKINS[SKIN_CHAIR]) : (SKIN_TABLE && TABLE_SKINS[SKIN_TABLE]);
-  const c = sk ? recolorCanvas(key, null, sk, 'wood') : null;
+  const c = sk ? recolorCanvas(key, null, sk, form ? 'woodonly' : 'wood') : null;
   if (c) putCanvas(ctx, c, F[key], x, y); else put(ctx, key, x, y);
 }
 
@@ -225,7 +231,7 @@ const tableOf = (style) => 'table' + clamp(style | 0, 0, 4);
 /** The back seat's stool lives in the back layer (the guest and the table are drawn over it). */
 function drawBackStools(ctx, L, env) {
   const st = stoolOf(env.up ? env.up.tablestyle : 0);
-  for (const t of L.tables) putTableSkin(ctx, st, t.x + SEAT[2].dx, t.y + SEAT[2].dy + 2);
+  for (const t of L.tables) putTableSkin(ctx, st, t.x + SEAT[2].dx, t.y + SEAT[2].dy + 2, 2);
 }
 
 // ─────────────────────────────── pot (code-tinted broth) ───────────────────────────────
@@ -489,10 +495,12 @@ export function drawTable(ctx, table, opts = {}) {
     const { x, y } = table, st = clamp(opts.style | 0, 0, 4);
     const sk = stoolOf(st);
     // left / right / front stools tuck in beside and under the table; the back one is in the back layer
-    putTableSkin(ctx, sk, x + SEAT[0].dx, y + SEAT[0].dy + 2);
-    putTableSkin(ctx, sk, x + SEAT[1].dx, y + SEAT[1].dy + 2);
-    putTableSkin(ctx, sk, x + SEAT[3].dx, y + SEAT[3].dy + 1);
+    putTableSkin(ctx, sk, x + SEAT[0].dx, y + SEAT[0].dy + 2, 0);
+    putTableSkin(ctx, sk, x + SEAT[1].dx, y + SEAT[1].dy + 2, 1);
+    if (!FORM_CHAIR) putTableSkin(ctx, sk, x + SEAT[3].dx, y + SEAT[3].dy + 1, 3);
     putTableSkin(ctx, tableOf(st), x, y);
+    // v1.18l: dáng ghế mới cao hơn đẩu gốc → ghế trước bàn vẽ SAU bàn để không bị mặt bàn che
+    if (FORM_CHAIR) putTableSkin(ctx, sk, x + SEAT[3].dx, y + SEAT[3].dy + 1, 3);
     const t = opts.t || 0;
     if (opts.dirty) {
       put(ctx, 'dirty_bowls', x - 7, y - 2 + TOP); put(ctx, 'dirty_plate', x + 5, y - 2 + TOP); put(ctx, 'dirty_cup', x + 9, y - 8 + TOP);

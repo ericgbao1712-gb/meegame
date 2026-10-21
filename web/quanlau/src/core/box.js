@@ -38,7 +38,9 @@ const setOf = () => 'hop';   // v1.18e chỉ còn Hộp mù
 const ctr = (b) => b;
 const SET = (set) => C.boxSet(setOf(set));
 
-export const boxPrice = (G, set) => { const p = SET(set).price; return p[Math.max(0, Math.min(p.length - 1, (G.state.tier || 1) - 1))]; };
+const tierPick = (G, arr) => arr[Math.max(0, Math.min(arr.length - 1, (G.state.tier || 1) - 1))];
+export const boxPrice = (G, set) => tierPick(G, SET(set).price);
+export const boxPrice10 = (G, set) => { const p = SET(set).price10; return p ? tierPick(G, p) : boxPrice(G, set) * B().tenMult; };
 
 function rollRarity(G, b, set) {
   const P = SET(set);
@@ -97,7 +99,7 @@ export function openBox(G, n = 1, free = false, set = 'hop') {
     if (n !== 1) return fail('free', `${P.name} miễn phí chỉ 1 ${unit} thôi nha.`);
     if (b.freeDay === s.day) return fail('freeUsed', `Hôm nay mở ${unit} miễn phí rồi, mai quay lại nha!`);
   } else {
-    cost = boxPrice(G, set) * (n === 10 ? B().tenMult : 1);
+    cost = n === 10 ? boxPrice10(G, set) : boxPrice(G, set);
     if (s.money + 1e-9 < cost) return fail('money', `Cần ${fmtMoney(cost)} để mở ${n} ${unit}, chưa đủ tiền nha.`);
   }
   if (free) b.freeDay = s.day;
@@ -141,7 +143,7 @@ export function boxInfo(G, set = 'hop') {
   const total = items.length, owned = items.filter((x) => all.got[x.id] > 0).length;
   return {
     set: setOf(set), name: P.name, icon: P.icon, unlockLv: C.FEATURES[P.feature],
-    unlocked: featureUnlocked(G, P.feature), price: boxPrice(G, set), price10: boxPrice(G, set) * B().tenMult,
+    unlocked: featureUnlocked(G, P.feature), price: boxPrice(G, set), price10: boxPrice10(G, set),
     pityRare: P.pityRare, pityEpic: P.pityEpic, pityMyst: P.pityMyst,
     freeLeft: b.freeDay === s.day ? 0 : 1, shards: all.shards, opened: b.opened, owned, total,
     rareIn: Math.max(1, P.pityRare - b.sinceRare), epicIn: Math.max(1, (P.pityEpic || 0) - b.sinceEpic), mystIn: Math.max(1, P.pityMyst - b.sinceMyst),
