@@ -1,7 +1,7 @@
 // Lẩu Ơi! service worker (v1.2): makes the game installable as an app (Android "Cài đặt ứng dụng", desktop Chrome/Edge)
 // and lets it open without a connection. Network first: an online player always gets the newest files; the cached
 // copy is only used when the network fails. Saves live in localStorage and are never touched here.
-const CACHE = 'lauoi-v35';
+const CACHE = 'lauoi-v36';
 // Trang thật là /quanlau (vercel.json: trailingSlash:false) nên scope là "/quanlau", không phải "/quanlau/".
 const HOME = '/quanlau';
 const CORE = [HOME, 'index.html', 'style.css', 'manifest.json', 'src/main.js', 'assets/app/icon-192.png'];
