@@ -10,7 +10,6 @@ import { confettiFor, vibrate } from './screens/kit.js';
 
 const info = () => ctx.game.get?.lotteryInfo?.() || null;
 const TIER = Object.fromEntries(C.LOTTERY.tiers.map((t) => [t.id, t]));
-const JACKPOT = Math.max(...C.LOTTERY.tiers.map((t) => t.prize));   // giải đặc biệt
 const tierName = (id) => (id === 'doan' ? 'Trúng Đoán số' : TIER[id] ? TIER[id].name : '');
 let justChecked = new Set();
 
@@ -38,9 +37,6 @@ function ticketEl(it, { onCheck, onClaim } = {}) {
   return div('ticket ' + it.kind + ' st-' + it.status + (checked && it.prize > 0 ? ' win' : '') + (justChecked.has(it.id) ? ' just' : ''),
     head,
     div('tk-num', ds),
-    // v1.15b: một dòng "Có cơ hội nhận …" (vé số: giải đặc biệt; phiếu đoán số: cược × 70) — chỉ khi chưa dò
-    it.status === 'wait' || it.status === 'drawn'
-      ? span('tk-sub', 'Có cơ hội nhận ' + fmtShort(it.kind === 'cuoc' ? it.amount * C.LOTTERY.guess.payout : JACKPOT)) : null,
     div('tk-foot', checked && it.prize > 0 ? span('tk-tier', tierName(it.tier)) : span('', ''), foot));
 }
 
