@@ -579,7 +579,9 @@ export const VIRAL = { days: 2, demand: 1.6, badDemand: 0.8 };
 export const SIDE = { chance: 0.5, second: 0.3 };
 
 // v1.2: hired quản kho restocks mid-service when an ingredient on the menu drops to lowAt portions
-export const QUANKHO_RUN = { lowAt: 3, cooldown: 45, minBuy: 12, usageShare: 0.5 };
+// v1.9: quản kho đi chợ sớm hơn (sắp hết = còn ≤ lowAt phần HOẶC không đủ bán horizonMin phút tới theo tốc độ bán
+// hôm nay), đi bộ ra chợ thật, tripMin phút sau mang hàng về (trả tiền lúc về). Mua đủ bán ~buyMin phút, ít nhất minBuy.
+export const QUANKHO_RUN = { lowAt: 6, horizonMin: 120, cooldown: 10, minBuy: 15, buyMin: 240, usageShare: 0.5, tripMin: 6, runMult: 2 };
 
 // ───────────────────────────── OFFLINE & CHAIN ─────────────────────────────
 export const OFFLINE = { minAwaySec: 120, shopShare: 0.125 /* v1.2: halved */, chainShare: 0.5 /* v1.2: halved */, daySec: 240 /* offline pays as if a day took 4 min (kept when days became 9 min) */, shopCapSec: 4 * 3600, chainCapSec: 8 * 3600 };

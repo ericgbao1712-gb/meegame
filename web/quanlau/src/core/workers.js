@@ -3,7 +3,7 @@
 import * as C from '../config.js';
 import { makeActor, removeActor, stepActor, walkTo } from './world.js';
 import { route, pathLength, floorOf } from './routing.js';
-import { UP, mods, consumeIngredient, featureUnlocked, ING } from './economy.js';
+import { UP, mods, consumeIngredient, featureUnlocked, ING, quankhoDeliver } from './economy.js';
 import { findTicket, missingIngredients, needsDrinks } from './kitchen.js';
 import { onTicketServed, collectCoins } from './customers.js';
 import { staffJob } from './staff.js';
@@ -123,6 +123,7 @@ export function updateWorkers(G, dtMin) {
       case 'phucvu': tickWaiter(G, a, m, dtMin, open); break;
       case 'daubep': tickChef(G, a, m, dtMin, open); break;
       case 'thungan': tickStander(G, a, dtMin, 'idle'); break;
+      case 'quankho': tickQuankho(G, a, m, dtMin); break;
       default: tickStander(G, a, dtMin, 'write');
     }
   }
@@ -256,6 +257,36 @@ function tickWaiter(G, a, m, dtMin, open) {
 function tickStander(G, a, dtMin, pose) {
   if (a.path) { stepActor(G.world.layout, a, dtMin); a.pose = 'walk'; return; }
   goHome(G, a, pose);
+}
+
+// ───────────── quản kho: đi chợ giữa ca (v1.9) ─────────────
+function tickQuankho(G, a, m, dtMin) {
+  const w = G.world, trip = w.qkTrip, L = w.layout;
+  if (!trip || (trip.by && trip.by !== a.id)) { a.hidden = false; tickStander(G, a, dtMin, 'write'); return; }
+  trip.by = a.id;
+  a.speed *= C.QUANKHO_RUN.runMult || 1;   // chạy đi chạy về
+  const sp = L.spawn[0];
+  if (trip.phase === 'go') {
+    if (!a.path) {
+      if (Math.abs(a.x - sp.x) < 1.5 && Math.abs(a.y - sp.y) < 1.5) { trip.phase = 'away'; trip.t = C.QUANKHO_RUN.tripMin; a.hidden = true; a.pose = 'idle'; return; }
+      walkTo(G, a, sp.x, sp.y);
+    }
+    stepActor(L, a, dtMin); a.pose = 'walk'; return;
+  }
+  if (trip.phase === 'away') {
+    trip.t -= dtMin;
+    if (trip.t > 0) return;
+    trip.phase = 'back'; a.hidden = false; a.x = sp.x; a.y = sp.y; a.path = null; a.carry = 'box';
+  }
+  if (trip.phase === 'back') {
+    const h = a.home;
+    if (!a.path && h && (Math.abs(a.x - h.x) > 1.5 || Math.abs(a.y - h.y) > 1.5)) walkTo(G, a, h.x, h.y);
+    if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
+    a.carry = null;
+    w.qkTrip = null;
+    quankhoDeliver(G, trip.list);
+    goHome(G, a, 'write');
+  }
 }
 
 // ───────────── chef ─────────────

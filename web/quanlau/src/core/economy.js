@@ -325,37 +325,66 @@ function wantedIngs(G) {
   return wanted;
 }
 
-/** v1.2: a hired quản kho runs to the market mid-service when something the menu needs is (nearly) out.
- *  No delivery fee, at most once every QUANKHO_RUN.cooldown game-minutes. */
-export function quankhoTick(G, dtMin) {
-  const s = G.state, w = G.world, Q = C.QUANKHO_RUN;
-  if (!w || s.phase !== 'open' || !mods(G).hasQuankho) return null;
-  w.qkCool = Math.max(0, (w.qkCool || 0) - dtMin);
-  if (w.qkCool > 0) return null;
-  const low = [];
-  for (const id of wantedIngs(G)) if (isIngUnlocked(G, id) && (s.inventory[id] || 0) <= Q.lowAt) low.push(id);
-  if (!low.length) return null;
-  w.qkCool = Q.cooldown;
+/** v1.9: what a quản kho should buy right now: ingredients the menu needs that will run out soon.
+ *  Sắp hết = ≤ lowAt portions, or less than horizonMin minutes of today's selling rate. → [{ id, n }] (n = wanted qty) */
+export function quankhoNeeds(G) {
+  const s = G.state, Q = C.QUANKHO_RUN;
+  const mins = Math.max(30, (s.clock || C.TIME.dayStart) - C.TIME.dayStart);
+  const out = [];
+  for (const id of wantedIngs(G)) {
+    if (!isIngUnlocked(G, id)) continue;
+    const have = s.inventory[id] || 0;
+    const rate = (s.today.usage[id] || 0) / mins;                       // portions per game-minute today
+    if (have > Q.lowAt && have >= rate * Q.horizonMin) continue;
+    const want = Math.max(Q.minBuy, Math.ceil(rate * Q.buyMin), Math.ceil((s.usageYesterday[id] || 0) * Q.usageShare));
+    if (want - have > 0) out.push({ id, n: want - have, have });
+  }
+  out.sort((x, y) => x.have - y.have);
+  return out;
+}
+
+/** v1.9: the quản kho is back from the market — pay and stock what fits (kho space, money). */
+export function quankhoDeliver(G, list) {
+  const s = G.state;
   let { used } = khoInfo(G);
   const { cap } = khoInfo(G);
   let spent = 0, bought = 0;
-  low.sort((a, b) => (s.inventory[a] || 0) - (s.inventory[b] || 0));
-  for (const id of low) {
-    const target = Math.max(Q.minBuy, Math.ceil((s.usageYesterday[id] || 0) * Q.usageShare));
-    const price = buyPrice(G, id);
-    const n = Math.min(target - (s.inventory[id] || 0), cap - used, Math.floor((s.money + 1e-9) / price));
+  for (const it of list || []) {
+    const price = buyPrice(G, it.id);
+    const n = Math.min(it.n, cap - used, Math.floor((s.money + 1e-9) / price));
     if (n <= 0) continue;
     const cost = round2(n * price);
     addMoney(G, -cost, 'restock');
-    addStock(G, id, n);
+    addStock(G, it.id, n);
     used += n; spent += cost; bought += n;
-    resetStockWarn(G, id);
+    resetStockWarn(G, it.id);
   }
   if (bought > 0) {
-    w.soldOutDay = 0;
-    G.toast(`Quản kho chạy chợ giữa ca: +${bought} phần (−${fmtMoney(spent)})`, 'info', 'ui_kho');
+    if (G.world) G.world.soldOutDay = 0;
+    const names = list.filter((x) => x.n > 0).slice(0, 3).map((x) => (ING[x.id] ? ING[x.id].name : x.id)).join(', ');
+    G.toast(`Quản kho đi chợ về: +${bought} phần ${names}${list.length > 3 ? '…' : ''} (−${fmtMoney(spent)})`, 'good', 'ui_kho');
+  } else if (list && list.length) {
+    G.toast(cap - used <= 0 ? 'Quản kho đi chợ về nhưng kho đầy, không cất thêm được!' : 'Quản kho đi chợ về tay không: không đủ tiền mua hàng.', 'bad', 'ui_kho');
   }
   return { bought, spent };
+}
+
+/** v1.2→v1.9: during service a hired quản kho checks stock; when something will run out soon he walks to the
+ *  market (workers.js moves him: out the gate, away tripMin game-minutes, back) and the goods arrive with him. */
+export function quankhoTick(G, dtMin) {
+  const s = G.state, w = G.world, Q = C.QUANKHO_RUN;
+  if (!w) return null;
+  const trip = w.qkTrip;
+  if (trip && s.phase === 'report') { w.qkTrip = null; quankhoDeliver(G, trip.list); return null; }   // day ended mid-trip
+  if (s.phase !== 'open' || !mods(G).hasQuankho || trip) return null;
+  w.qkCool = Math.max(0, (w.qkCool || 0) - dtMin);
+  if (w.qkCool > 0) return null;
+  const list = quankhoNeeds(G);
+  if (!list.length) return null;
+  if (khoInfo(G).used >= khoInfo(G).cap) { w.qkCool = Q.cooldown; return null; }
+  w.qkCool = Q.cooldown;
+  w.qkTrip = { list, phase: 'go', t: 0 };
+  return w.qkTrip;
 }
 
 /** Morning auto-restock (supplier upgrade or quản kho). fee = 0 for quản kho. */
