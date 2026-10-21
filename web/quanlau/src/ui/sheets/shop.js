@@ -143,13 +143,13 @@ function mktView(body, api) {
 // ------------------------------------------------------------------ container
 const TABS = [
   { id: 'quests', label: 'Nhiệm vụ', icon: 'ui_quest' },
+  { id: 'veso', label: 'Vé số', icon: 'ui_ticket' },      // v1.15 (ngay sau Nhiệm vụ)
   { id: 'deco', label: 'Trang trí', icon: 'ui_deco' },
   { id: 'reviews', label: 'Đánh giá', icon: 'ui_review' },
   { id: 'book', label: 'Sổ khách', icon: 'ui_book' },
   { id: 'expand', label: 'Mở rộng', icon: 'ui_shop' },
   { id: 'mkt', label: 'Quảng bá', icon: 'ui_megaphone' },
   { id: 'branches', label: 'Chi nhánh', icon: 'ui_map' },
-  { id: 'veso', label: 'Vé số', icon: 'ui_ticket' },      // v1.15
   { id: 'tax', label: 'Thuế', icon: 'ui_book' },          // v1.14
   { id: 'rank', label: 'Xếp hạng', icon: 'ui_trophy' },   // v1.8
 ];
