@@ -5,7 +5,21 @@
 // The renderer draws into a buffer at DETAIL px per world px with integer world coordinates, so sprites blit 1:1.
 // Everything is wrapped so that unknown ids / a missing atlas never throw (the frame just lacks that sprite).
 import { PAL, BROTH } from './palette.js';
-import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES } from '../config.js';
+import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES, DECO } from '../config.js';
+const DECO_CAT = Object.fromEntries(DECO.map((d) => [d.id, d.cat]));
+/** v1.18p đồ đặt thêm → [{id, slot}] theo chỗ của quán (tường / sàn), hết chỗ thì không vẽ */
+function moreSlots(env, kind) {
+  const L = env.layout, M = (L && L.decoMore) || {}, slots = kind === 'wall' ? (M.tuong || []) : (M.floor || []);
+  const out = [];
+  for (const id of env.decoMore || []) {
+    const cat = DECO_CAT[id];
+    if (!cat || cat === 'den' || (kind === 'wall') !== (cat === 'tuong')) continue;
+    const slot = slots[out.length];
+    if (!slot) break;
+    if (F[id]) out.push({ id, slot });
+  }
+  return out;
+}
 import { drawIcon } from './icons.js';
 import { loadAtlas, blit, frameCanvas, frameOk, DETAIL } from './assets.js';
 import PROPS from './data/props.js';
@@ -304,6 +318,7 @@ export function drawSceneBack(ctx, tier, env, view) {
     const up = env.up || {}, dc = env.deco || {};
     // wall hangings (tường)
     if (dc.tuong && F[dc.tuong]) for (const s of (L.deco.tuong || [])) putTop(ctx, dc.tuong, s.x, s.y);
+    for (const m of moreSlots(env, 'wall')) putTop(ctx, m.id, m.slot.x, m.slot.y);   // v1.18p đồ treo tường đặt thêm
     // wall-mounted air conditioner
     if (lvl(up.cooling) >= 3 && sc && sc.cool) for (const a of sc.cool.ac) put(ctx, 'aircon', a.x, a.y);
     // shop sign
@@ -414,7 +429,7 @@ export function sceneDrawables(tier, env) {
     const L = env.layout;
     if (!L) return [];
     const up = env.up || {}, dc = env.deco || {};
-    const key = [L.scene, tier, L.kitchen.stoves.length, lvl(up.kho), lvl(up.cooler), lvl(up.cooling), lvl(up.speaker), lvl(up.pos), dc.cay, dc.dacbiet].join('|');
+    const key = [L.scene, tier, L.kitchen.stoves.length, lvl(up.kho), lvl(up.cooler), lvl(up.cooling), lvl(up.speaker), lvl(up.pos), dc.cay, dc.dacbiet, (env.decoMore || []).join(',')].join('|');
     if (sceneDrawables.key === key && sceneDrawables.layout === L) return sceneDrawables.list;
     const sc = SCENES[L.scene] || {}, list = [], E = L.equip || {};
     // kitchen counters under every built stove
@@ -435,6 +450,7 @@ export function sceneDrawables(tier, env) {
     // equipped plants / special items
     if (dc.cay && F[dc.cay]) for (const s of (L.deco.cay || [])) list.push({ y: s.y, draw: (ctx) => put(ctx, dc.cay, s.x, s.y) });
     if (dc.dacbiet && F[dc.dacbiet]) for (const s of (L.deco.dacbiet || [])) list.push({ y: s.y, draw: (ctx) => put(ctx, dc.dacbiet, s.x, s.y) });
+    for (const m of moreSlots(env, 'floor')) list.push({ y: m.slot.y, draw: (ctx) => put(ctx, m.id, m.slot.x, m.slot.y) });   // v1.18p đồ đặt sàn thêm
     // static decor of the scene
     for (const p of (sc.props || [])) list.push({ y: p.y, draw: (ctx) => put(ctx, p.k, p.x, p.y) });
     sceneDrawables.key = key; sceneDrawables.layout = L; sceneDrawables.list = list;

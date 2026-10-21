@@ -28,6 +28,11 @@ function decoView(body, api) {
   body.appendChild(div('card amb', ico('ui_heart', 32), div('grow', div('amb-t', h('b', null, 'Không khí quán'), span('num', Math.round(amb * 100) + '%')),
     div('bar ' + (amb > 0.66 ? '' : 'jade'), h('i', { style: { '--p': amb * 100 } })), span('muted sm', 'Không khí đẹp thì khách kiên nhẫn và tip nhiều hơn.')),));
   const owned = new Set(s.deco?.owned || []);
+  // v1.18p đặt nhiều món cùng lúc: mỗi loại 1 món chính + chỗ đặt thêm (treo tường / đặt sàn) tùy quán
+  const more = new Set(s.deco?.more || []), mi = G().get?.decoMore?.();
+  if (mi) body.appendChild(div('card deco-more', ico('ui_deco', 32),
+    div('grow', h('b', null, 'Đặt thêm nhiều món'), span('muted sm', 'Mỗi loại có 1 món chính. Bấm "Đặt thêm" để bày thêm món khác vào chỗ trống. Hiệu ứng cộng dồn, có giới hạn.')),
+    div('deco-slots', span('chip', 'Tường ', span('num', `${mi.wall.used}/${mi.wall.max}`)), span('chip', 'Sàn ', span('num', `${mi.floor.used}/${mi.floor.max}`)))));
   C.DECO_CATS.forEach((cat) => {
     const eq = s.deco?.equipped?.[cat.id];
     const eqDef = C.DECO.find((d) => d.id === eq);
@@ -37,17 +42,29 @@ function decoView(body, api) {
       const isEq = eq === d.id, isOwned = owned.has(d.id);
       const tierLock = (d.minTier || 1) > D.tierNow();
       const lvLock = (d.lv || 1) > (s.level || 1);
-      const card = div('card deco' + (isEq ? ' on' : '') + (!isOwned && (tierLock || lvLock || d.source) ? ' locked' : ''));
+      const card = div('card deco' + (isEq || more.has(d.id) ? ' on' : '') + (!isOwned && (tierLock || lvLock || d.source) ? ' locked' : ''));
       card.appendChild(div('deco-pic', decoThumb(d.id, 48), d.amb ? span('chip amb', '+' + d.amb) : null));
       card.appendChild(h('b', { class: 'dn' }, d.default ? 'Không dùng' : d.name));
       if (d.desc) card.appendChild(span('muted sm dd', d.desc));
       if (d.light && !d.default) card.appendChild(span('muted sm dd', `Độ sáng +${Math.round(d.light * 100)} (buổi tối càng rõ)`));
       const act_ = div('deco-act');
-      if (isEq) act_.appendChild(span('chip jade', ico('ui_check', 16), 'Đang dùng'));
-      else if (isOwned) {
+      const isMore = more.has(d.id), kind = d.default || d.cat === 'den' ? null : d.cat === 'tuong' ? 'wall' : 'floor';
+      if (isEq) act_.appendChild(span('chip jade', ico('ui_check', 16), 'Món chính'));
+      else if (isMore) {
+        act_.appendChild(span('chip gold', ico('ui_check', 16), 'Đặt thêm'));
+        const b = h('button', { class: 'btn paper sm' }, 'Cất');
+        b.addEventListener('click', () => { const r = act('placeDecoExtra', d.id, false); if (r.ok === false) return; sfx('click'); api.rerender(); });
+        act_.appendChild(b);
+      } else if (isOwned) {
         const b = h('button', { class: 'btn paper sm' }, d.default ? 'Gỡ ra' : 'Dùng');
         b.addEventListener('click', () => { const r = act('equipDeco', d.id); if (r.ok === false) return; sfx('click'); ctx.tutorial?.onAction?.('deco'); api.rerender(); });
         act_.appendChild(b);
+        if (kind && mi) {
+          const full = mi[kind].used >= mi[kind].max;
+          const b2 = h('button', { class: 'btn ' + (full ? 'paper' : 'jade') + ' sm', disabled: full, title: full ? 'Hết chỗ, cất bớt một món' : '' }, full ? 'Hết chỗ' : 'Đặt thêm');
+          b2.addEventListener('click', () => { const r = act('placeDecoExtra', d.id, true); if (r.ok === false) return; sfx('confirm'); api.rerender(); });
+          act_.appendChild(b2);
+        }
       } else if (d.source) act_.appendChild(span('chip', ico('ui_gift', 16), d.source === 'login' ? 'Quà điểm danh' : d.source === 'box' ? 'Hộp mù' : 'Quà tặng'));
       else if (tierLock) act_.appendChild(span('chip red', ico('ui_lock', 16), C.TIERS[d.minTier - 1].name));
       else if (lvLock) act_.appendChild(span('chip red', ico('ui_lock', 16), 'Lv ' + d.lv));

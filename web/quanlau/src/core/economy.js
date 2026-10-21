@@ -180,8 +180,8 @@ export function mods(G) {
   const has = (trait) => staff.some((m) => m.trait === trait);
   const count = (trait) => staff.filter((m) => m.trait === trait).length;
   let decoDemand = 1, decoTip = 1, decoPatience = 1, decoFootball = 1;
-  for (const cat of Object.keys(s.deco.equipped)) {
-    const d = DECO_BY_ID[s.deco.equipped[cat]];
+  for (const id of decoInUse(s)) {
+    const d = DECO_BY_ID[id];
     const e = d && d.effect;
     if (!e) continue;
     if (e.demandMult) decoDemand *= e.demandMult;
@@ -189,6 +189,8 @@ export function mods(G) {
     if (e.patienceMult) decoPatience *= e.patienceMult;
     if (e.footballMult) decoFootball = e.footballMult;
   }
+  // v1.18p đặt nhiều món cùng lúc: hiệu ứng cộng dồn nhưng có trần
+  decoDemand = Math.min(decoDemand, C.DECO_CAP.demand); decoTip = Math.min(decoTip, C.DECO_CAP.tip); decoPatience = Math.min(decoPatience, C.DECO_CAP.patience);
   const cashier = staff.some((m) => m.role === 'thungan');
   G._mods = {
     patience: (1 + up.tablestyle * UP.tablestyle.patiencePer + up.speaker * UP.speaker.patiencePer) * (cashier ? 1.2 : 1) * (has('hat') ? 1.1 : 1) * decoPatience,
@@ -204,11 +206,26 @@ export function mods(G) {
   return G._mods;
 }
 export function dirtyMods(G) { G.modsDirty = true; }
+/** v1.18p mọi món trang trí đang dùng: món chính từng loại + đồ đặt thêm */
+export function decoInUse(s) {
+  const out = [];
+  for (const cat of Object.keys(s.deco.equipped || {})) if (s.deco.equipped[cat]) out.push(s.deco.equipped[cat]);
+  for (const id of s.deco.more || []) if (!out.includes(id)) out.push(id);
+  return out;
+}
+/** chỗ đặt thêm: 'wall' (đồ treo tường) / 'floor' (cây, đồ đặc biệt); đèn không đặt thêm */
+export const decoSlotKind = (d) => (!d || d.default || d.cat === 'den' ? null : d.cat === 'tuong' ? 'wall' : 'floor');
+export function decoMoreInfo(G) {
+  const s = G.state, L = G.world && G.world.layout, M = (L && L.decoMore) || { tuong: [], floor: [] };
+  const used = { wall: 0, floor: 0 };
+  for (const id of s.deco.more || []) { const k = decoSlotKind(DECO_BY_ID[id]); if (k) used[k]++; }
+  return { wall: { used: used.wall, max: (M.tuong || []).length }, floor: { used: used.floor, max: (M.floor || []).length }, list: (s.deco.more || []).slice() };
+}
 
 export function ambienceOf(G) {
   const s = G.state, up = s.upgrades;
   let a = 0;
-  for (const cat of Object.keys(s.deco.equipped)) a += (DECO_BY_ID[s.deco.equipped[cat]] || {}).amb || 0;
+  for (const id of decoInUse(s)) a += (DECO_BY_ID[id] || {}).amb || 0;
   a += up.tablestyle * UP.tablestyle.amb + up.cooling * UP.cooling.amb + up.speaker * UP.speaker.amb + up.sign * UP.sign.amb;
   return clamp(a / tierDef(G).ambCap, 0, 1);
 }

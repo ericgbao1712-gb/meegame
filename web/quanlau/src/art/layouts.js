@@ -55,6 +55,7 @@ const LAYOUTS = {
     staffSpots: { waiter: [{ x: 40, y: 88 }, { x: 40, y: 112 }], cashier: null, quankho: null, manager: { x: 96, y: 80 } },
     props: [{ id: 'vihe_counter', x: 61, y: 74 }],
     deco: { den: [{ x: 34, y: 22, w: 78 }], cay: [{ x: 126, y: 72 }], tuong: [{ x: 98, y: 32 }], dacbiet: [{ x: 28, y: 79 }] },   // v1.2: mèo thần tài no longer on top of the loa
+    decoMore: { tuong: [{ x: 22, y: 36 }], floor: [{ x: 22, y: 92 }] },   // v1.18p chỗ đặt THÊM đồ trang trí (treo tường / đặt sàn)
     equip: { cooler: { x: 104, y: 76 }, cooling: { x: 134, y: 98 }, speaker: { x: 10, y: 70 }, pos: null, tarp: { x: 28, y: 20, w: 92 }, kho: { x: 92, y: 74 } },
     sign: { x: 32, y: 5, w: 82, h: 12 },
     street: { y: 160 },
@@ -79,6 +80,7 @@ const LAYOUTS = {
     staffSpots: { waiter: [{ x: 64, y: 91 }, { x: 112, y: 118 }, { x: 64, y: 146 }], cashier: { x: 156, y: 79 }, quankho: null, manager: { x: 112, y: 91 } },
     props: [{ id: 'hem_counter', x: 56, y: 84 }, { id: 'hem_cashier_desk', x: 156, y: 85 }],
     deco: { den: [{ x: 24, y: 27, w: 64 }], cay: [{ x: 10, y: 118 }], tuong: [{ x: 129, y: 40 }], dacbiet: [{ x: 168, y: 118 }] },
+    decoMore: { tuong: [{ x: 44, y: 6 }, { x: 166, y: 44 }], floor: [{ x: 9, y: 150 }, { x: 170, y: 160 }] },
     // v1.2: tủ đông beside the kitchen (was standing in the dining floor), loa by the right window
     equip: { cooler: { x: 10, y: 92 }, cooling: { x: 166, y: 104 }, speaker: { x: 130, y: 80 }, pos: { x: 155, y: 79 }, tarp: null, kho: { x: 100, y: 84 } },
     sign: { x: 77, y: 6, w: 62, h: 16 },
@@ -104,6 +106,7 @@ const LAYOUTS = {
     staffSpots: { waiter: [{ x: 140, y: 92 }, { x: 53, y: 120 }, { x: 99, y: 152 }, { x: 145, y: 152 }], cashier: { x: 160, y: 79 }, quankho: { x: 31, y: 89, facing: 'left' }, manager: { x: 150, y: 184 } },   // v1.3: quản kho beside the tủ đông, not inside it
     props: [{ id: 'mapho_counter', x: 71, y: 80 }, { id: 'mapho_cashier_desk', x: 160, y: 86 }],
     deco: { den: [{ x: 14, y: 31, w: 164 }], cay: [{ x: 184, y: 118 }, { x: 8, y: 158 }], tuong: [{ x: 148, y: 38 }], dacbiet: [{ x: 110, y: 84 }] },   // v1.2: off table 10
+    decoMore: { tuong: [{ x: 8, y: 44 }, { x: 188, y: 44 }], floor: [{ x: 22, y: 192 }, { x: 156, y: 194 }] },
     equip: { cooler: { x: 134, y: 86 }, cooling: { x: 182, y: 150 }, speaker: { x: 186, y: 74 }, pos: { x: 160, y: 80 }, tarp: null, kho: { x: 14, y: 84 } },
     sign: { x: 20, y: 3, w: 152, h: 15 },
     gate: { x: 99, y: 172, yIn: 153 },   // v1.3: front fence opening spans x 55…138 → cross on the middle aisle
@@ -144,6 +147,7 @@ const LAYOUTS = {
       tuong: [{ x: 146, y: 198 }, { x: 70, y: 40 }],
       dacbiet: [{ x: 156, y: 228 }],   // v1.7: góc sau bên phải cạnh tủ, không còn chắn chân cầu thang (trước: 170,236)
     },
+    decoMore: { tuong: [{ x: 24, y: 44 }, { x: 128, y: 44 }], floor: [{ x: 158, y: 104 }, { x: 104, y: 66 }] },
     equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 16, y: 293 }, tarp: null, kho: { x: 14, y: 222 } },
     sign: { x: 28, y: 157, w: 136, h: 13 },
     gate: { x: 105, y: 312, yIn: 266 },  // v1.3: front fence opening spans x 57…135 → cross on the middle aisle

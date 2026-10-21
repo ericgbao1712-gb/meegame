@@ -508,6 +508,8 @@ export const DECO_CATS = [
   { id: 'tuong',   name: 'Tường' },
   { id: 'dacbiet', name: 'Đặc biệt' },
 ];
+// v1.18p đặt nhiều đồ trang trí cùng lúc: hiệu ứng nhân dồn nhưng tối đa (khách ×1,4 · tip ×1,6 · kiên nhẫn ×1,5)
+export const DECO_CAP = { demand: 1.4, tip: 1.6, patience: 1.5 };
 export const DECO = [
   { id: 'den_bong',     cat: 'den', name: 'Bóng đèn tròn',     price: 0,     amb: 0,  default: true, light: 0.04 },
   { id: 'den_day',      cat: 'den', name: 'Đèn dây vàng',      price: 300,   amb: 4, light: 0.08 },

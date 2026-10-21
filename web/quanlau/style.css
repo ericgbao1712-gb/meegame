@@ -1687,3 +1687,9 @@ button.hchip:active { transform: translateY(2px); }
 .fun-seg.three .seg { font-size: 12px; gap: 4px; }
 /* v1.18h: chừa thêm chỗ dưới cùng bảng để thẻ cuối không sát / lẫn vào thanh menu */
 .sbody-inner { padding-bottom: calc(26px + var(--sab, 0px)); }
+/* v1.18p đặt nhiều đồ trang trí */
+.card.deco-more { flex-direction: row !important; align-items: center !important; flex-wrap: wrap; gap: 10px; }
+.card.deco-more .grow { flex: 1 1 160px; display: flex; flex-direction: column; gap: 2px; }
+.deco-slots { display: flex; gap: 4px; }
+.deco-slots .num { font-size: 18px; line-height: .8; margin-left: 2px; }
+.deco-act { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }

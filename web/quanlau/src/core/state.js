@@ -48,7 +48,7 @@ export function defaultState(now = Date.now()) {
     inventory, lots: {}, expired: null, market, autoRestock: false, usageYesterday: {},
     recipes, menu,
     upgrades,
-    deco: { owned: defaults.map((d) => d.id), equipped },
+    deco: { owned: defaults.map((d) => d.id), equipped, more: [] },   // v1.18p more = đồ đặt thêm (ngoài món chính mỗi loại)
     staff: [], candidates: { day: 0, list: [] }, staffTickets: 0, ownerMode: 'work', nextStaffId: 1, nextCid: 1,
     rating: { recent: [], avg: C.RATING.prior, count: 0 },
     reviews: [], nextReviewId: 1, combo: { best: 0 },

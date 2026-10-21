@@ -5,7 +5,7 @@ import { createRng } from './rng.js';
 import { migrate } from './state.js';
 import { createWorld, syncLayout } from './world.js';
 import {
-  UP, DECO_BY_ID, POT, tierDef, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
+  UP, DECO_BY_ID, POT, tierDef, decoSlotKind, decoMoreInfo, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
 } from './economy.js';
 import * as kitchen from './kitchen.js';
 import * as customers from './customers.js';
@@ -312,6 +312,23 @@ export function createGame(save, opts = {}) {
       if (!d) return fail('unknown', 'Không có món trang trí này.');
       if (!state.deco.owned.includes(id)) return fail('notOwned', 'Bạn chưa có món này nha.');
       state.deco.equipped[d.cat] = id;
+      if (Array.isArray(state.deco.more)) state.deco.more = state.deco.more.filter((x) => x !== id);   // thành món chính thì bỏ khỏi đồ đặt thêm
+      G.modsDirty = true;
+      return { ok: true };
+    }),
+    // v1.18p đặt thêm / cất đồ trang trí (ngoài món chính mỗi loại), theo số chỗ trống của quán
+    placeDecoExtra: wrap((id, on = true) => {
+      const d = DECO_BY_ID[id];
+      if (!d) return fail('unknown', 'Không có món trang trí này.');
+      if (!Array.isArray(state.deco.more)) state.deco.more = [];
+      if (!on) { state.deco.more = state.deco.more.filter((x) => x !== id); G.modsDirty = true; return { ok: true }; }
+      if (!state.deco.owned.includes(id)) return fail('notOwned', 'Bạn chưa có món này nha.');
+      const kind = decoSlotKind(d);
+      if (!kind) return fail('kind', d.cat === 'den' ? 'Đèn chỉ treo một kiểu cho cả quán thôi nha.' : 'Món này không đặt thêm được.');
+      if (state.deco.equipped[d.cat] === id || state.deco.more.includes(id)) return fail('used', 'Món này đang dùng rồi nha.');
+      const info = decoMoreInfo(G)[kind];
+      if (info.used >= info.max) return fail('full', kind === 'wall' ? `Hết chỗ treo tường rồi (${info.max} chỗ). Cất bớt một món nha.` : `Hết chỗ đặt sàn rồi (${info.max} chỗ). Cất bớt một món nha.`);
+      state.deco.more.push(id);
       G.modsDirty = true;
       return { ok: true };
     }),
