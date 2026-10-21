@@ -521,6 +521,37 @@ export const LEVEL = {
 export const FEATURES = {
   hire_phucvu: 2, hire_daubep: 3, deco: 4, daily: 4, reservations: 6, mkt_reviewer: 6,
   hire_thungan: 9, mkt_livestream: 10, hire_quankho: 17, speed2: 5, manageMode: 9, extras: 3, lottery: 3,
+  pricing: 3,   // v1.14 Thực đơn ▸ Giá bán: tự đặt giá từng món / cả thực đơn (mang từ Xoài Lắc)
+  tax: 5,       // v1.14 đóng thuế theo kỳ
+};
+
+// ───────────────────────────── v1.14 GIÁ BÁN (người chơi tự đặt, mang từ Xoài Lắc v2) ─────────────────────────────
+// state.prices[potId] = giá (k) người chơi chọn; không có = giá gợi ý (potPrice: giá gốc × cấp công thức × sổ công thức).
+// Khác Xoài Lắc: để giá gợi ý thì game chạy y như trước (không khách nào chê đắt) — chỉ khi NÂNG giá mới có người bỏ đi.
+export const PRICING = {
+  minMult: 0.5, maxMult: 2.0,             // giá được đặt = giá gốc × [0,5 … 2,0], tròn nghìn
+  // 1) chọn món: trọng số × (giá / gợi ý)^-choiceExp
+  choiceExp: 2, choiceMin: 0.3, choiceMax: 2.5,
+  // 2) chê đắt bỏ về: sig(k × (overW·(over − overC) − value)) − sig(tại giá gợi ý), chỉ khi over > 1.
+  //    over = giá / gợi ý. +10% ≈ 6%, +20% ≈ 21%, +30% ≈ 47% khách bỏ về.
+  k: 1.6, overW: 7.25, overC: 1.3,
+  valueRating: 0.5, valueRecipe: 0.15,    // ★ trên 4,0 / mỗi cấp công thức trên 1 → khách chịu giá cao hơn chút
+  // 3) truyền miệng: chỉ số giá cả thực đơn → lượng khách × index^-demandExp
+  demandExp: 0.8, demandMin: 0.7, demandMax: 1.3,
+  // 4) "đáng tiền" trong điểm hài lòng: × (1 − over)
+  valueW: 1.2, valueMin: -0.5, valueMax: 0.35,
+  priceyReviewChance: 0.15,               // khách chê đắt đôi khi để lại đánh giá 3★
+  bulkSteps: [-10, -5, 5, 10],            // nút chỉnh cả thực đơn (%)
+};
+
+// ───────────────────────────── v1.14 THUẾ ─────────────────────────────
+// Hộ kinh doanh ăn uống nộp thuế khoán trên doanh thu (thuế GTGT 3% + TNCN 1,5% = 4,5%). Doanh thu tiền lẩu, nước,
+// món kèm, tráng miệng (không tính tiền tip). Cứ periodDays ngày ra một tờ thông báo thuế, hạn đóng graceDays ngày.
+// Trễ hạn: mỗi ngày phạt lateFeePerDay; trễ forceAfter ngày thì bị cưỡng chế thu luôn + phạt thêm forceFine.
+export const TAX = {
+  rate: 0.045, periodDays: 7, graceDays: 3, remindDays: 2,
+  lateFeePerDay: 0.05, forceAfter: 3, forceFine: 0.2, minBill: 5,
+  officer: 'Cán bộ thuế phường',
 };
 
 // ───────────────────────────── MARKET ─────────────────────────────

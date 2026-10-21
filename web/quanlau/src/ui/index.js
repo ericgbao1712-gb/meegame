@@ -17,6 +17,7 @@ import { installModalScreens } from './screens/index.js';
 import { createTutorial } from './tutorial.js';
 import { mountDebug } from './debug.js';
 import { initCloud } from './cloud.js';
+import { initTax } from './tax.js';
 
 function ensure(id, parent, tag = 'div') {
   let el = document.getElementById(id);
@@ -64,7 +65,8 @@ export function mountUI(game, { renderer, audio } = {}) {
   installModalScreens();
   ctx.tutorial = createTutorial({ coachRoot });
   const debug = mountDebug();
-  try { initCloud(game); } catch (e) { console.error('[ui] cloud', e); }   // v1.8
+  try { initCloud(game); } catch (e) { console.error('[ui] cloud', e); }
+  try { initTax(game); } catch (e) { console.error('[ui] tax', e); }   // v1.14   // v1.8
 
   // ---- layout vars: HUD / nav / dock heights → CSS, then tell the renderer
   const setVars = () => {

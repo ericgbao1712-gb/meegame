@@ -5,7 +5,7 @@ import { createRng } from './rng.js';
 import { migrate } from './state.js';
 import { createWorld, syncLayout } from './world.js';
 import {
-  UP, DECO_BY_ID, POT, tierDef, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate,
+  UP, DECO_BY_ID, POT, tierDef, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
 } from './economy.js';
 import * as kitchen from './kitchen.js';
 import * as customers from './customers.js';
@@ -219,6 +219,39 @@ export function createGame(save, opts = {}) {
       return { ok: true, money: m, xp: x };
     }),
     liquidate: wrap((id, n) => liquidate(G, id, n)),   // v1.10 thanh lý
+    /** v1.14 giá một món: nghìn đồng trong khoảng priceBounds, hoặc null = về giá gợi ý. */
+    setPrice: wrap((potId, price) => {
+      if (!POT[potId]) return fail('unknown', 'Không có món này.');
+      if (!featureUnlocked(G, 'pricing')) return fail('locked', `Tự đặt giá bán mở ở Lv ${C.FEATURES.pricing} nha.`);
+      if (price == null) { delete state.prices[potId]; return { ok: true, price: null }; }
+      const v = Math.round(Number(price)), b = priceBounds(potId);
+      if (!isFinite(v) || v <= 0) return fail('range', 'Giá phải lớn hơn 0 nha.');
+      if (v < b.min || v > b.max) return fail('range', `Giá ${POT[potId].name} chỉ đặt được từ ${fmtMoney(b.min)} đến ${fmtMoney(b.max)}.`);
+      state.prices[potId] = v;
+      G.counter('setPrice', 1);
+      return { ok: true, price: v };
+    }),
+    /** v1.14 chỉnh giá CẢ THỰC ĐƠN: pct = +5 / −10… (% so với giá đang bán, từng món kẹp trong khoảng), null = tất cả về giá gợi ý. */
+    setAllPrices: wrap((pct) => {
+      if (!featureUnlocked(G, 'pricing')) return fail('locked', `Tự đặt giá bán mở ở Lv ${C.FEATURES.pricing} nha.`);
+      const pots = C.HOTPOTS.filter((p) => isPotUnlocked(G, p.id));
+      if (pct == null) { for (const p of pots) delete state.prices[p.id]; return { ok: true, changed: pots.length }; }
+      const f = 1 + Number(pct) / 100;
+      if (!isFinite(f) || f <= 0) return fail('range', 'Mức chỉnh giá không hợp lệ.');
+      let changed = 0, capped = 0;
+      for (const p of pots) {
+        const b = priceBounds(p.id);
+        const cur = typeof state.prices[p.id] === 'number' ? state.prices[p.id] : potPrice(G, p.id);
+        let v = Math.round(cur * f);
+        if (v === cur) v = cur + Math.sign(f - 1);        // ít nhất 1k mỗi lần bấm
+        const nv = Math.max(b.min, Math.min(b.max, v));
+        if (nv !== v) capped++;
+        if (nv !== cur) { state.prices[p.id] = nv; changed++; }
+      }
+      if (changed) G.counter('setPrice', 1);
+      return { ok: true, changed, capped };
+    }),
+    payTax: wrap(() => payTax(G)),   // v1.14
     setAutoRestock: wrap((on) => {
       if (on && !(state.upgrades.supplier > 0 || mods(G).hasQuankho)) return fail('locked', 'Cần mua Mối chợ đầu mối hoặc thuê Quản kho trước nha.');
       state.autoRestock = !!on;

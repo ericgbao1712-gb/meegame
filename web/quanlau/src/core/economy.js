@@ -74,6 +74,94 @@ export function potPrice(G, potId) {
   const lvl = G.state.recipes[potId]?.lvl || 1;
   return Math.round(p.price * (1 + (lvl - 1) * C.RECIPE.pricePerLevel) * (1 + masteryStars(G, potId) * C.RECIPE.masteryPriceBonus));
 }
+// ───────────── v1.14 giá bán (người chơi tự đặt) ─────────────
+/** Khoảng giá được đặt cho một món (bội số cố định của giá gốc → giá đã lưu không phải đổi khi lên cấp công thức). */
+export function priceBounds(potId) {
+  const p = POT[potId];
+  if (!p) return { min: 1, max: 1 };
+  return { min: Math.max(1, Math.round(p.price * C.PRICING.minMult)), max: Math.max(2, Math.round(p.price * C.PRICING.maxMult)) };
+}
+/** Giá đang bán: giá người chơi đặt (kẹp trong khoảng), không thì giá gợi ý. */
+export function sellPrice(G, potId) {
+  const v = G.state.prices && G.state.prices[potId];
+  if (typeof v === 'number' && isFinite(v) && v > 0) { const b = priceBounds(potId); return clamp(Math.round(v), b.min, b.max); }
+  return potPrice(G, potId);
+}
+/** giá / giá gợi ý (1 = đúng giá gợi ý). */
+export const priceRatio = (G, potId) => sellPrice(G, potId) / Math.max(1, potPrice(G, potId));
+/** Vốn nguyên liệu một nồi theo giá chợ hôm nay. */
+export function portionCost(G, potId) {
+  const p = POT[potId];
+  if (!p) return 0;
+  let c = 0;
+  for (const i of p.recipe) c += buyPrice(G, i);
+  return round2(c);
+}
+/** Truyền miệng: giá trung bình cả thực đơn so với gợi ý → hệ số lượng khách. */
+export function menuPriceDemand(G) {
+  const s = G.state;
+  let sum = 0, n = 0;
+  for (const p of C.HOTPOTS) if (s.menu[p.id] && isPotUnlocked(G, p.id)) { sum += priceRatio(G, p.id); n++; }
+  if (!n) return 1;
+  const P = C.PRICING;
+  return clamp(Math.pow(sum / n, -P.demandExp), P.demandMin, P.demandMax);
+}
+
+// ───────────── v1.14 thuế ─────────────
+const taxOf = (s) => (s.tax && typeof s.tax === 'object' ? s.tax : (s.tax = { since: 0, base: 0, bill: null, nextId: 1, history: [] }));
+/** Tiền phạt trễ hạn tính tới hôm nay. */
+export function taxLateFee(G, bill) {
+  const late = Math.max(0, G.state.day - bill.dueDay);
+  return round2(bill.amount * C.TAX.lateFeePerDay * late);
+}
+/** Cuối ngày: cộng doanh thu vào kỳ thuế; đủ periodDays ngày thì ra thông báo thuế (hạn graceDays ngày). */
+export function taxDayEnd(G) {
+  const s = G.state, T = C.TAX, tx = taxOf(s);
+  if (!featureUnlocked(G, 'tax')) return null;
+  if (!tx.since) tx.since = s.day;
+  tx.base = round2(tx.base + (s.today.revenue || 0));
+  if (s.day - tx.since + 1 < T.periodDays) return null;
+  const amount = Math.round(tx.base * T.rate);
+  const from = tx.since, to = s.day, base = tx.base;
+  tx.since = s.day + 1; tx.base = 0;
+  if (amount < T.minBill) return null;
+  if (tx.bill) { tx.bill.amount += amount; tx.bill.base = round2(tx.bill.base + base); tx.bill.to = to; tx.bill.dueDay = s.day + T.graceDays; }
+  else tx.bill = { id: tx.nextId++, from, to, base, amount, dueDay: s.day + T.graceDays, issuedDay: s.day };
+  G.emit('taxBill', { bill: Object.assign({}, tx.bill) });
+  return tx.bill;
+}
+/** Sáng ngày mới: quá hạn forceAfter ngày thì cán bộ thuế thu luôn (kèm phạt), thiếu tiền thì Má bù. */
+export function taxMorning(G) {
+  const s = G.state, T = C.TAX, tx = taxOf(s), b = tx.bill;
+  if (!b) return null;
+  const late = s.day - b.dueDay;
+  if (late < T.forceAfter) return null;
+  const fee = taxLateFee(G, b), fine = Math.round(b.amount * T.forceFine);
+  const total = round2(b.amount + fee + fine);
+  const paid = spend(G, 'tax', total, 'tax');
+  tx.history.unshift({ id: b.id, from: b.from, to: b.to, amount: b.amount, fee: round2(fee + fine), paidDay: s.day, forced: true });
+  tx.history.length = Math.min(tx.history.length, 20);
+  tx.bill = null;
+  const short = round2(total - paid);
+  G.momText('taxForced', `${T.officer} ghé quán thu thuế quá hạn ${late} ngày: ${fmtMoney(b.amount)} tiền thuế + ${fmtMoney(fee + fine)} tiền phạt.`
+    + (short > 0 ? ` Két không đủ, Má bù cho ${fmtMoney(short)} lần này. Lần sau nhớ đóng đúng hạn nha con!` : ' Lần sau nhớ đóng đúng hạn kẻo bị phạt nha con!'));
+  G.emit('taxForced', { amount: b.amount, fee: fee + fine });
+  return { forced: true, total };
+}
+/** Người chơi bấm Đóng thuế. */
+export function payTax(G) {
+  const s = G.state, tx = taxOf(s), b = tx.bill;
+  if (!b) return { ok: false, reason: 'none', msg: 'Hiện không có khoản thuế nào cần đóng.' };
+  const fee = taxLateFee(G, b), total = round2(b.amount + fee);
+  if (s.money + 1e-9 < total) return { ok: false, reason: 'money', msg: `Cần ${fmtMoney(total)} để đóng thuế, két còn ${fmtMoney(s.money)}.` };
+  spend(G, 'tax', total, 'tax');
+  tx.history.unshift({ id: b.id, from: b.from, to: b.to, amount: b.amount, fee, paidDay: s.day, forced: false, early: s.day < b.dueDay });
+  tx.history.length = Math.min(tx.history.length, 20);
+  tx.bill = null;
+  G.counter('taxPaid', 1);
+  return { ok: true, total, fee };
+}
+
 export function khoInfo(G) {
   const s = G.state;
   let used = 0;

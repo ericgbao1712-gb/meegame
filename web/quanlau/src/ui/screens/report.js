@@ -8,8 +8,8 @@ import { frame } from '../modals.js';
 import { stars, portrait, noteBox } from '../sheets/common.js';
 import { countUp, createTimeline, wxName } from './kit.js';
 
-const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Mua vé số', liquidation: 'Lỗ thanh lý hàng cũ' };
-const COST_ICON = { ingredients: 'ui_kho', broth: 'ui_fire', drinks: 'drk_trada', salary: 'ui_staff', rent: 'ui_home', marketing: 'ui_megaphone', lottery: 'ui_ticket', liquidation: 'ui_coin' };
+const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Mua vé số', liquidation: 'Lỗ thanh lý hàng cũ', tax: 'Thuế' };
+const COST_ICON = { ingredients: 'ui_kho', broth: 'ui_fire', drinks: 'drk_trada', salary: 'ui_staff', rent: 'ui_home', marketing: 'ui_megaphone', lottery: 'ui_ticket', liquidation: 'ui_coin', tax: 'ui_book' };
 const MINUS = '−';
 
 const money = (v) => fmtMoney(Math.round(v * 1000) / 1000);
@@ -112,6 +112,13 @@ function build(m, rep) {
     div('grow', h('b', null, 'Dự báo ngày mai'),
       h('p', null, fc.text || (wxName(fc.weather) ? 'Ngày mai: ' + wxName(fc.weather) + '.' : '')),
       fev || resv ? div('chips', fev ? span('chip gold', ico('ui_star', 16), fev.name) : null, resv ? span('chip jade', ico('ui_reserve', 16), `${resv} bàn đặt trước`) : null) : null)));
+
+  // v1.14 thuế + khách chê đắt
+  if (rep.tax && rep.tax.bill) {
+    const b = rep.tax.bill, left = b.dueDay - (rep.day || s.day);
+    sec(noteBox('ui_book', `**Thông báo thuế** ngày ${b.from}–${b.to}: **${fmtMoney(b.amount)}**, hạn đóng hết ngày ${b.dueDay}${left > 0 ? ` (còn ${left} ngày)` : left === 0 ? ' (hôm nay)' : ` (quá hạn ${-left} ngày)`}. Đóng ở **Quán ▸ Thuế**.`, left < 0 ? 'red' : 'gold'));
+  }
+  if (rep.priceLost > 0) sec(noteBox('ui_coin', `**${rep.priceLost} nhóm khách** chê đắt bỏ về hôm nay. Xem lại ở **Thực đơn ▸ Giá bán** nha.`, rep.priceLost >= 5 ? 'red' : ''));
 
   // Má / goal hint
   if (rep.goalHint) sec(noteBox('ui_mom', rep.goalHint, 'gold'));

@@ -3,8 +3,9 @@ import * as C from '../config.js';
 import {
   ING, POT, UP, xpNeed, tierDef, builtTables, allTables, builtStoves, khoInfo, buyPrice as baseBuyPrice, potPrice, masteryStars,
   ambienceOf, featureUnlocked, isPotUnlocked, isIngUnlocked, isDrinkUnlocked, salaryTotal, staffSalary, sidePrice,
-  liquidateQuote, oldStock,
+  liquidateQuote, oldStock, sellPrice, priceBounds, portionCost, menuPriceDemand, taxLateFee,
 } from './economy.js';
+import { refuseChance } from './customers.js';
 import { staffSlots, roleUnlocked, roleCount, candidatesOf } from './staff.js';
 import { trayStatus } from './kitchen.js';
 import { mainQuestInfo, dailyTasks, loginInfo } from './quests.js';
@@ -86,7 +87,7 @@ export function createGetters(G) {
     const nextMastery = C.RECIPE.masteryAt[stars] ?? null;
     return {
       id: potId, lvl: r.lvl, max, cost, canUpgrade: cost != null && s.money + 1e-9 >= cost && isPotUnlocked(G, potId),
-      price: potPrice(G, potId), sold: r.sold, mastery: stars, nextMastery, unlocked: isPotUnlocked(G, potId), enabled: !!s.menu[potId],
+      price: sellPrice(G, potId), refPrice: potPrice(G, potId), sold: r.sold, mastery: stars, nextMastery, unlocked: isPotUnlocked(G, potId), enabled: !!s.menu[potId],
       nextPrice: r.lvl >= max ? null : Math.round(p.price * (1 + r.lvl * C.RECIPE.pricePerLevel) * (1 + stars * C.RECIPE.masteryPriceBonus)),
     };
   }
@@ -145,6 +146,7 @@ export function createGetters(G) {
     if (!shop) for (const r of s.reviews) if (r.stars >= 5 && !r.thanked) { shop = true; break; }
     if (!shop && featureUnlocked(G, 'deco')) for (const d of C.DECO) if (decoBuyable(d) && s.money >= d.price) { shop = true; break; }
     if (!shop && tierInfo(G).canExpand) shop = true;
+    if (!shop) { const t = taxInfo(); if (t.bill && t.bill.daysLeft <= C.TAX.remindDays) shop = true; }   // v1.14 thuế sắp / quá hạn
     return { kho, menu, upgrade, staff, shop };
   }
 
@@ -187,7 +189,38 @@ export function createGetters(G) {
     return set;
   }
 
+  // ───────────── v1.14 giá bán + thuế ─────────────
+  function priceInfo(potId) {
+    const p = POT[potId];
+    if (!p) return null;
+    const ref = potPrice(G, potId), price = sellPrice(G, potId), cost = portionCost(G, potId), b = priceBounds(potId);
+    let wsum = 0, rsum = 0;   // tỉ lệ khách chê đắt, trung bình theo các loại khách của quán hiện tại
+    for (const id of Object.keys(C.CUSTOMERS)) {
+      const k = C.CUSTOMERS[id];
+      if (!k.weight || (k.minTier || 1) > s.tier) continue;
+      const w = k.weight * ((k.prefers && k.prefers[potId]) ?? 0.5);
+      wsum += w; rsum += w * refuseChance(G, id, potId);
+    }
+    const ratio = price / Math.max(1, ref);
+    return { id: potId, ref, price, custom: typeof s.prices[potId] === 'number', cost, profit: Math.round(price - cost), min: b.min, max: b.max, ratio,
+      refuse: wsum ? rsum / wsum : 0, band: ratio < 0.9 ? 'cheap' : ratio > 1.08 ? 'pricey' : 'normal' };
+  }
+  function taxInfo() {
+    const tx = s.tax || { since: 0, base: 0, bill: null, history: [] }, T = C.TAX;
+    const unlocked = featureUnlocked(G, 'tax');
+    const since = tx.since || s.day;
+    let bill = null;
+    if (tx.bill) {
+      const fee = taxLateFee(G, tx.bill);
+      bill = Object.assign({}, tx.bill, { fee, total: Math.round((tx.bill.amount + fee) * 100) / 100, daysLeft: tx.bill.dueDay - s.day,
+        overdue: s.day > tx.bill.dueDay, forceDay: tx.bill.dueDay + T.forceAfter });
+    }
+    return { unlocked, unlockLv: C.FEATURES.tax, rate: T.rate, periodDays: T.periodDays, since, periodEnd: since + T.periodDays - 1,
+      base: tx.base || 0, estimate: Math.round((tx.base || 0) * T.rate), bill, history: (tx.history || []).slice() };
+  }
+
   return {
+    priceInfo, taxInfo, menuPriceDemand: () => menuPriceDemand(G),
     level, kho, buyPrice,
     liquidateQuote: (id, n) => liquidateQuote(G, id, n),   // v1.10 thanh lý
     oldStock: (id) => oldStock(G, id),

@@ -5,6 +5,7 @@ import * as D from '../data.js';
 import * as C from '../../config.js';
 import { fmtShort, fmtMoney } from '../../core/format.js';
 import { secTitle, noteBox, celebrate, floatAt, toggle, costBtn, pips, stars } from './common.js';
+import { pricesView } from './prices.js';
 
 function potCard(p, api, fresh) {
   const info = D.recipeInfo(p.id);
@@ -27,7 +28,7 @@ function potCard(p, api, fresh) {
     div('pot-ico', ico(p.icon, 48)),
     div('pot-info',
       div('pn', h('b', null, p.name), fresh ? span('newtag', 'Mới!') : null),
-      div('pp', span('num', fmtShort(info.price)), span('muted', '/nồi')),
+      div('pp', span('num', fmtShort(info.price)), span('muted', '/nồi'), info.refPrice && info.price !== info.refPrice ? span('chip ' + (info.price > info.refPrice ? 'red' : 'jade') + ' pp-tag', (info.price > info.refPrice ? '+' : '−') + Math.round(Math.abs(info.price / info.refPrice - 1) * 100) + '%') : null),
       rc),
     toggle(on, () => { const r = act('toggleMenuItem', p.id); if (r.ok !== false) api.rerender(); }, 'Bán ' + p.name)));
   // recipe level + mastery
@@ -53,7 +54,10 @@ export const menuSheet = {
   title: 'Thực đơn',
   icon: 'ui_menu',
   build(body, api) {
-    api.noTabs();
+    // v1.14: hai tab — Món (như cũ) và Giá bán
+    const sub = api.sub === 'gia' ? 'gia' : 'mon';
+    api.tabs([{ id: 'mon', label: 'Món', icon: 'ui_menu' }, { id: 'gia', label: 'Giá bán', icon: 'ui_coin', locked: !D.featureOn('pricing') }], sub, (id) => api.setSub(id));
+    if (sub === 'gia') { pricesView(body, api); return; }
     const s = S();
     const enabled = C.HOTPOTS.filter((p) => s.menu?.[p.id] && D.potUnlocked(p.id)).length;
     body.appendChild(secTitle('Các món lẩu', `${enabled} món đang bán`));

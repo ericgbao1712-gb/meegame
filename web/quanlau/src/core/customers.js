@@ -6,7 +6,7 @@ import { route } from './routing.js';
 import { makeActor, removeActor, setPath, stepActor, nid } from './world.js';
 import {
   POT, ING, DRINK, MARKETING_BY_ID, UP, tierDef, eventDef, mods, ambienceOf, potPrice, addMoney, spend, addXp,
-  isPotUnlocked, isDrinkUnlocked, featureUnlocked, dessertsOn, sidesOn, sidePrice,
+  isPotUnlocked, isDrinkUnlocked, featureUnlocked, dessertsOn, sidesOn, sidePrice, sellPrice, priceRatio, menuPriceDemand,
 } from './economy.js';
 import { createTicket, removeTicket, ticketRecipe } from './kitchen.js';
 import { scoreGroup, pushRating, makeReview, angryLine } from './rating.js';
@@ -47,6 +47,7 @@ export function demandRate(G) {
   if (ev && ev.id === 'bongda') r *= mods(G).footballMult;
   if (isWeekend(s.day)) r *= C.TIME.weekendMult;
   r *= marketingDemand(G) * s.viral.mult * (s.boost || 1) * mods(G).demand;
+  r *= menuPriceDemand(G);                    // v1.14 truyền miệng: thực đơn rẻ kéo khách, đắt thì vắng
   return r;
 }
 
@@ -354,11 +355,40 @@ function canMake(G, potId, reserved) {
   return true;
 }
 
+/** v1.14 Xác suất nhóm khách chê đắt bỏ về với giá đang bán (0 khi giá ≤ giá gợi ý). */
+const sig = (z) => 1 / (1 + Math.exp(-C.PRICING.k * z));
+export function refuseChance(G, kind, potId) {
+  const P = C.PRICING, s = G.state;
+  if (!K[kind] || !POT[potId]) return 0;
+  const over = priceRatio(G, potId);
+  if (over <= 1) return 0;
+  const lvl = (s.recipes[potId] && s.recipes[potId].lvl) || 1;
+  const value = P.valueRating * Math.max(0, s.rating.avg - 4) + P.valueRecipe * (lvl - 1);
+  return Math.max(0, sig(P.overW * (over - P.overC) - value) - sig(P.overW * (1 - P.overC) - value));
+}
+const choiceMult = (G, potId) => clamp(Math.pow(priceRatio(G, potId), -C.PRICING.choiceExp), C.PRICING.choiceMin, C.PRICING.choiceMax);
+function priceLeave(G, g, potId) {
+  const s = G.state, t = s.today;
+  t.lost++; t.priceLost = (t.priceLost || 0) + 1;
+  t.priceRefused = t.priceRefused || {};
+  t.priceRefused[potId] = (t.priceRefused[potId] || 0) + 1;
+  G.emit('priceLeave', { groupId: g.id, pot: potId, n: t.priceLost });
+  if (G.rng.chance(C.PRICING.priceyReviewChance)) {
+    pushRating(G, 3, 1);
+    t.stars += 3; t.rated++;
+    const review = makeReview(G, Object.assign({}, g, { pot: potId }), 3, null, G.rng.pick(C.REVIEW_TEXT.tags.pricey));
+    G.emit('review', { review, x: g.members[0] ? g.members[0].x : 0, y: g.members[0] ? g.members[0].y : 0, groupId: g.id });
+  }
+  freeSeat(G, g);
+  startLeaving(G, g, 1.2, false, 'price');
+  g.members.forEach((a) => { a.path = null; a.pose = 'idle'; });
+}
+
 function placeOrder(G, g) {
   const s = G.state, rng = G.rng, k = K[g.kind];
   const reserved = reservedStock(G);
   const pots = C.HOTPOTS.filter((p) => s.menu[p.id] && isPotUnlocked(G, p.id));
-  const weight = (p) => k.prefers[p.id] ?? 0.5;
+  const weight = (p) => (k.prefers[p.id] ?? 0.5) * choiceMult(G, p.id);
   if (!g.scripted) {
     // dishes whose stock ran out are off the menu until tomorrow (no buying while open)
     let pick = rng.weighted(pots, weight);
@@ -367,7 +397,15 @@ function placeOrder(G, g) {
       if (alt) { g.substitute = true; pick = alt; } else pick = null;
     }
     if (!pick) { soldOutLeave(G, g); return; }
+    // v1.14 xem bảng giá: thấy đắt thì xem thêm một món khác, vẫn đắt thì bỏ về (khách đặt bàn trước thì không)
+    if (!g.reservation && !g.special && rng.chance(refuseChance(G, g.kind, pick.id))) {
+      const others = pots.filter((p) => p.id !== pick.id && canMake(G, p.id, reserved));
+      const alt = rng.weighted(others, weight);
+      if (alt && !rng.chance(refuseChance(G, g.kind, alt.id))) { pick = alt; g.substitute = true; }
+      else { priceLeave(G, g, pick.id); return; }
+    }
     g.pot = pick.id;
+    g.price = sellPrice(G, g.pot);
   } else if (!canMake(G, g.pot, reserved)) {
     // scripted tutorial order but stock got wasted: pick something makeable
     const alt = pots.find((p) => canMake(G, p.id, reserved));
@@ -541,7 +579,8 @@ function finishGroup(G, g) {
   // money
   const info = g.info || { priceMult: 1, combo: 0 };
   const comboBonus = Math.min(info.combo * C.COMBO.bonusPer, C.COMBO.maxBonus);
-  const potPart = potPrice(G, g.pot) * (info.priceMult || 1) * (1 + comboBonus);
+  if (g.price == null) g.price = sellPrice(G, g.pot);   // v1.14 giá trên bảng lúc gọi món
+  const potPart = g.price * (info.priceMult || 1) * (1 + comboBonus);
   let drinksRev = 0;
   const drinkIds = g.drinks || [];
   for (const d of drinkIds) drinksRev += DRINK[d].price;

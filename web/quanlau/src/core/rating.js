@@ -2,7 +2,7 @@
 import * as C from '../config.js';
 import { clamp } from './util.js';
 import { fill } from './format.js';
-import { POT, ambienceOf, mods, potPrice, tierDef, eventDef } from './economy.js';
+import { POT, ambienceOf, mods, potPrice, sellPrice, tierDef, eventDef } from './economy.js';
 
 const SAT = C.SAT;
 
@@ -40,7 +40,9 @@ export function scoreGroup(G, g) {
   const likes = !!k.likesAmbience;
   const ev = eventDef(G);
   const budget = k.budget * (ev && ev.budgetMult && g.kind === 'vanphong' ? ev.budgetMult : 1);
-  const priceRatio = potPrice(G, potId) * (info.priceMult || 1) / budget;
+  const paid = (g.price != null ? g.price : sellPrice(G, potId)) * (info.priceMult || 1);   // v1.14 giá tự đặt
+  const priceRatio = paid / budget;
+  const over = paid / Math.max(1, potPrice(G, potId) * (info.priceMult || 1));
   const charm = charmBonus(G);
   let score = SAT.base + SAT.qualityWeight * (quality - SAT.baseQuality);
   const wRatio = info.waitRatio ?? 0.5;
@@ -48,6 +50,7 @@ export function scoreGroup(G, g) {
   score += SAT.ambienceWeight * amb * (likes ? 1.5 : 1);
   score += charm;
   score -= Math.min(SAT.pricePenaltyCap, SAT.pricePenalty * Math.max(0, priceRatio - 1));
+  { const P = C.PRICING; score += clamp((1 - over) * P.valueW, P.valueMin, P.valueMax); }   // v1.14 đáng tiền: rẻ hơn gợi ý thì vui, đắt hơn thì không
   const hot = s.weather === 'hot' && up.cooling === 0;
   const uncoveredRain = (g.wet || 0) > 2;     // sat through part of a shower before the tarp came out
   if (hot) score += SAT.hotNoCooling;

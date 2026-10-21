@@ -5,7 +5,7 @@ import { fmtMoney, fmtRating, fmtClock } from './format.js';
 import { newToday } from './state.js';
 import {
   addMoney, spend, tierDef, mods, autoRestock, rollMarket, salaryTotal, MARKETING_BY_ID, BRANCH_BY_ID, UP,
-  featureUnlocked, builtTables, allTables, isPotUnlocked, xpNeed, addXp, syncLots, expireStock,
+  featureUnlocked, builtTables, allTables, isPotUnlocked, xpNeed, addXp, syncLots, expireStock, taxDayEnd, taxMorning,
 } from './economy.js';
 import { syncLayout, makeActor, removeActor, setPath, stepActor } from './world.js';
 import { route } from './routing.js';
@@ -157,6 +157,8 @@ export function buildReport(G) {
     xpAfter: s.xp, xpNeed: xpNeed(s.level),
     forecast: forecastInfo(G), reservationsTomorrow: s.reservations.map((r) => Object.assign({}, r)),
     goalHint: '', money: s.money,
+    priceLost: t.priceLost || 0,                                       // v1.14
+    tax: s.tax ? { bill: s.tax.bill ? Object.assign({}, s.tax.bill) : null, base: s.tax.base, since: s.tax.since } : null,
   };
   rep.goalHint = goalHint(G);
   s.report = rep;
@@ -182,6 +184,7 @@ export function finishDay(G) {
   // fixed costs
   payFixed(G, 'salary', salaryTotal(G), 'tiền lương nhân viên');
   payFixed(G, 'rent', tierDef(G).rent, 'tiền thuê mặt bằng');
+  taxDayEnd(G);                                    // v1.14 cộng doanh thu vào kỳ thuế, đủ kỳ thì ra thông báo thuế
   // lifetime stats
   const profit = dayProfit(t);
   const st = s.stats;
@@ -218,6 +221,7 @@ export function startNextDay(G) {
   s.report = null;
   syncLots(G);
   expireStock(G);                                  // past-date portions go in the bin before the market opens
+  taxMorning(G);                                   // v1.14 quá hạn lâu → cán bộ thuế thu luôn
   w.lowWarned = {}; w.outWarned = {};
   resetCustomers(G);
   resetWorkers(G);

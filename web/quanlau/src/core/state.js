@@ -2,7 +2,7 @@
 import * as C from '../config.js';
 import { mergeDefaults, clone } from './util.js';
 
-export const COST_KEYS = ['ingredients', 'broth', 'drinks', 'salary', 'rent', 'marketing', 'lottery', 'liquidation'];   // v1.10 liquidation = lỗ thanh lý so với vốn
+export const COST_KEYS = ['ingredients', 'broth', 'drinks', 'salary', 'rent', 'marketing', 'lottery', 'liquidation', 'tax'];   // v1.14 tax = thuế + tiền phạt đã đóng   // v1.10 liquidation = lỗ thanh lý so với vốn
 
 export function newToday() {
   const costs = {};
@@ -12,6 +12,7 @@ export function newToday() {
     served: 0, angry: 0, fiveStars: 0, potsSold: 0, potsSoldOf: {}, drinksSold: 0, extrasServed: 0, dessertsSold: 0, sidesSold: 0, thanked: 0,
     comboMax: 0, newKinds: [], bestReviewId: null, noAngryUntil: null,
     stars: 0, rated: 0, lost: 0,            // star sum / count of finished groups, walk-aways
+    priceLost: 0, priceRefused: {},         // v1.14 nhóm khách chê đắt bỏ về (theo món)
     usage: {},                              // ingredients consumed today (→ usageYesterday)
     ratingBefore: 3.5, levelBefore: 1, lotteryWon: 0, lotteryTickets: 0,
   };
@@ -35,6 +36,8 @@ export function defaultState(now = Date.now()) {
   return {
     v: C.VERSION, savedAt: now, createdAt: now,
     started: false,
+    prices: {},                                                   // v1.14 giá bán người chơi tự đặt (k) theo món
+    tax: { since: 0, base: 0, bill: null, nextId: 1, history: [] }, // v1.14 thuế: kỳ đang tính + tờ thông báo chưa đóng
     shopName: C.START.shopName, avatar: 0, uniform: { staff: 'do', owner: 'do', staffStyle: 'tron', ownerStyle: 'tron' },
     money: C.START.money, xp: 0, level: 1, tier: 1,
     day: 1, clock: C.TIME.dayStart, phase: 'prep',
