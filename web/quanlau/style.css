@@ -1539,16 +1539,20 @@ button.hchip:active { transform: translateY(2px); }
 .bx-cell:active { transform: translateY(2px) scale(.96); }
 .bx-cell.miss { background: #efe3cf; box-shadow: 0 0 0 2px var(--line), inset 0 0 0 2px #d9c6a8, inset 0 -4px 0 0 #d9c6a8; }
 .bx-cell.miss .bx-lock { opacity: .45; }
-.bx-cell.r4.got { animation: bxIn .3s ease-out both, bxGlow 1.8s ease-in-out infinite; }
-.bx-cell.r3.got::after, .bx-cell.r4.got::after { content: ''; position: absolute; inset: 3px; border-radius: 8px; pointer-events: none;
-  background: linear-gradient(115deg, transparent 35%, rgba(255, 255, 255, .7) 50%, transparent 65%) -150% 0 / 250% 100% no-repeat; animation: bxShine 3.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 90ms); }
+/* v1.18k: hiệu ứng nhẹ (chỉ transform / opacity) để máy yếu không giật khi mở hộp */
+.bx-cell { overflow: hidden; }
+.bx-cell.r4.got { box-shadow: 0 0 0 2px var(--line), inset 0 0 0 2px var(--b), inset 0 -4px 0 0 var(--b), 0 0 8px var(--g); }
+.bx-cell.r3.got::after, .bx-cell.r4.got::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; pointer-events: none; will-change: transform;
+  background: linear-gradient(105deg, transparent, rgba(255, 255, 255, .65), transparent); transform: translateX(-120%); animation: bxShine 3.2s ease-in-out infinite; animation-delay: calc(var(--i, 0) * 90ms); }
 .bx-cell.eq { box-shadow: 0 0 0 2px var(--line), 0 0 0 4px var(--leaf), inset 0 0 0 2px var(--b), inset 0 -4px 0 0 var(--b); }
 .bx-cell img { width: 72%; height: 72%; object-fit: contain; image-rendering: pixelated; }
 .bx-n { position: absolute; right: 3px; bottom: 3px; font-size: 15px; line-height: .8; color: var(--t); }
 .bx-eq { position: absolute; left: 2px; top: 2px; width: 14px !important; height: 14px !important; }
 @keyframes bxIn { from { opacity: 0; transform: scale(.7); } to { opacity: 1; transform: none; } }
-@keyframes bxGlow { 0%, 100% { filter: drop-shadow(0 0 0 transparent); } 50% { filter: drop-shadow(0 0 6px var(--g)); } }
-@keyframes bxShine { 0%, 60% { background-position: -150% 0; } 100% { background-position: 150% 0; } }
+@keyframes bxShine { 0%, 60% { transform: translateX(-120%); } 100% { transform: translateX(260%); } }
+.bx-grid.still .bx-cell { animation: none; }
+/* bảng mở hộp đang hiện → tạm dừng vệt sáng của lưới phía sau */
+#app:has(.mbox.bxreveal) .bx-cell::after { animation-play-state: paused; }
 /* huy chương thẻ thành tích */
 .bx-medal { --s: 40px; width: var(--s); height: var(--s); display: grid; place-items: center; border-radius: 50%; position: relative;
   background: radial-gradient(circle at 50% 38%, #fffaf0 0 46%, var(--bg) 47% 62%, var(--b) 63%); box-shadow: 0 0 0 2px var(--line), inset 0 -3px 0 0 rgba(0, 0, 0, .12); }

@@ -22,6 +22,7 @@ const FILTERS = [
   { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
+let gridAnim = true;   // v1.18k: lưới chỉ chạy hiệu ứng nảy khi mới mở tab, không chạy lại sau mỗi lần mở hộp
 let curSet = 'hop';   // v1.18e chỉ còn Hộp mù (Túi mù đã gộp vào)
 const info = () => G().get?.boxInfo?.(curSet) || null;
 const unit = () => (curSet === 'tui' ? 'túi' : 'hộp');
@@ -82,7 +83,8 @@ export function boxView(body, api, set = 'hop') {
   // lưới bộ sưu tập
   const F = FILTERS.find((f) => f.id === filter), fk = F?.kinds;
   const okGrp = (it) => !F || F.grp == null || (it.grp || '') === F.grp;
-  const grid = div('bx-grid');
+  const grid = div('bx-grid' + (gridAnim ? '' : ' still'));
+  gridAnim = true;
   setItems().filter((it) => (!fk || fk.includes(it.kind)) && okGrp(it)).slice().sort((a, b) => a.r - b.r).forEach((it, i) => {
     const n = bi.got[it.id] || 0;
     const cell = h('button', { class: 'bx-cell ' + RCLS[it.r] + (n ? ' got' : ' miss') + (equipped(it, bi) ? ' eq' : ''), type: 'button', title: n ? it.name : '???', 'aria-label': n ? it.name : 'Chưa có' },
@@ -125,8 +127,7 @@ function doOpen(n, free, btn, api) {
   if (r.ok === false) { sfx('error'); return; }
   sfx('whoosh'); vibrate(20);
   try { if (!free) floatAt(btn, '-' + fmtShort(r.cost), '#b8343a'); } catch (e) { /* ignore */ }
-  openReveal(r.got, api);
-  api.rerender();
+  openReveal(r.got, api);   // lưới cập nhật SAU khi đóng bảng (không vẽ lại 100+ ô lúc đang mở quà)
 }
 
 /** Bảng mở hộp: kiểu bảng chúc mừng của Lẩu Ơi (tia sáng + confetti), thẻ lật từng món. */
@@ -135,6 +136,7 @@ function openReveal(got, api) {
   const news = got.filter((g) => !g.dup).length;
   const hd = ctx.modal({
     id: 'bxreveal', cls: 'celebrate bxreveal', priority: 30, queue: false, sound: best >= 3 ? 'levelup' : 'confirm',
+    onClose: () => { requestAnimationFrame(() => setTimeout(() => { gridAnim = false; api.rerender(); }, 0)); },
     build: (m) => {
       const wrap = div('bx-reveal' + (got.length === 1 ? ' single' : ''));
       got.forEach((g, i) => {
@@ -151,7 +153,7 @@ function openReveal(got, api) {
         div('cel-top', span('cel-kicker', curSet === 'tui' ? 'TÚI MÙ' : 'HỘP MÙ'), h('b', { class: 'cel-title' }, best >= 4 ? 'BÍ ẨN!' : best >= 3 ? 'CỰC HIẾM!' : news ? 'CÓ MÓN MỚI!' : 'MỞ HỘP!')),
         wrap,
         newItems.length ? h('p', { class: 'cel-sub bx-hint' }, hintFor(newItems)) : null,
-        h('button', { class: 'btn red lg block', type: 'button', onclick: () => { sfx('confirm'); m.close('ok'); } }, 'Nhận quà'));
+        h('button', { class: 'btn red lg block', type: 'button', onclick: () => { sfx('confirm'); m.close('ok'); try { m.scrim.remove(); } catch (e) { /* ignore */ } } }, 'Nhận quà'));   // v1.18k đóng ngay, không đợi mờ dần
     },
   });
   if (hd) { try { confettiFor(hd, { count: best >= 4 ? 150 : best >= 3 ? 90 : 40 }); } catch (e) { /* ignore */ } }
@@ -186,7 +188,7 @@ function openItem(it, api) {
         if (it.kind === 'uniform' || it.kind === 'look') btns.push(h('button', { class: 'btn jade block', type: 'button', onclick: () => { m.close('go'); ctx.openSheet('staff', 'team'); } }, 'Tới Đồng phục ▸'));
         if (it.kind === 'food' || it.kind === 'drink') btns.push(h('button', { class: 'btn jade block', type: 'button', onclick: () => { m.close('go'); ctx.openSheet('menu'); } }, 'Xem Thực đơn ▸'));
       } else {
-        btns.push(h('button', { class: 'btn red block', type: 'button', disabled: bi.shards < cost, onclick: () => { const r = act('exchangeBox', it.id); if (r.ok !== false) { sfx('cash'); m.close('ok'); openReveal(r.got, api); api.rerender(); } } }, ico('ui_manh', 16), `Đổi ${cost} mảnh (có ${bi.shards})`));
+        btns.push(h('button', { class: 'btn red block', type: 'button', disabled: bi.shards < cost, onclick: () => { const r = act('exchangeBox', it.id); if (r.ok !== false) { sfx('cash'); m.close('ok'); openReveal(r.got, api); } } }, ico('ui_manh', 16), `Đổi ${cost} mảnh (có ${bi.shards})`));
       }
       body.append(...[
         div('bx-big ' + RCLS[it.r] + (n ? '' : ' miss'), n ? itemPic(it, 72) : ico('ui_lock', 48, 'bx-lock')),
@@ -230,7 +232,7 @@ function openExchange(api) {
           div('bx-mini ' + RCLS[it.r], itemPic(it, 32)),
           div('grow', h('b', null, it.name), span('muted sm', RAR[it.r - 1].name + ' · ' + KIND[it.kind])),
           h('button', { class: 'btn sm ' + (bi.shards >= cost ? 'red' : 'paper'), type: 'button', disabled: bi.shards < cost, onclick: () => {
-            const r = act('exchangeBox', it.id); if (r.ok === false) return; sfx('cash'); m.close('ok'); openReveal(r.got, api); api.rerender();
+            const r = act('exchangeBox', it.id); if (r.ok === false) return; sfx('cash'); m.close('ok'); openReveal(r.got, api);
           } }, ico('ui_manh', 16), span('num', String(cost)))));
       });
       return [head, body];
