@@ -9,7 +9,7 @@ const AUTOSAVE_SEC = 15;
 
 // The CDN caches style.css (JS is served no-cache), so swap the plain <link> for a versioned one.
 // Bump CSS_VER on every deploy that touches style.css.
-const CSS_VER = '20261021i';
+const CSS_VER = '20261021j';
 (function freshCss() {
   try {
     const old = document.querySelector('link[rel="stylesheet"][href="style.css"]');
@@ -71,10 +71,7 @@ async function boot() {
     try { audio.unlock(); } catch (e) { /* audio is optional */ }
     if (!hit) { ui.onScenePick(null); return; }
     if (hit.type === 'coins') game.act.collect(hit.tableIdx);
-    else if (hit.type === 'veso') {
-      const r = game.act.buyLottery();
-      if (r && r.ok === false && r.msg) game.emit('toast', { text: r.msg, kind: 'bad', icon: 'ui_ticket' });
-    }
+    // v1.15: chạm cô bán vé số → UI mở bảng mua vé (ui/lottery.js), không mua ngay nữa
     ui.onScenePick(hit);
   };
   // browsers only start audio after a gesture anywhere on the page

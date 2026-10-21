@@ -16,6 +16,7 @@ import * as day from './day.js';
 import * as rain from './rain.js';
 import { createGetters } from './getters.js';
 import { fmtMoney, fmtDuration } from './format.js';
+import * as lottery from './lottery.js';
 
 const STEP = 0.1;            // max real seconds per simulation sub-step
 const fail = (reason, msg) => ({ ok: false, reason, msg });
@@ -252,6 +253,9 @@ export function createGame(save, opts = {}) {
       return { ok: true, changed, capped };
     }),
     payTax: wrap(() => payTax(G)),   // v1.14
+    placeBet: wrap((num, amount) => lottery.placeBet(G, num, amount)),   // v1.15 Đoán số
+    checkTickets: wrap((id) => lottery.checkTickets(G, id)),            // v1.15 dò vé
+    claimPrize: wrap((id) => lottery.claimPrize(G, id)),                // v1.15 nhận thưởng
     setAutoRestock: wrap((on) => {
       if (on && !(state.upgrades.supplier > 0 || mods(G).hasQuankho)) return fail('locked', 'Cần mua Mối chợ đầu mối hoặc thuê Quản kho trước nha.');
       state.autoRestock = !!on;

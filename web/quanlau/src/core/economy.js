@@ -31,7 +31,7 @@ export function addMoney(G, delta, reason = '', x, y) {
   const before = s.money;
   s.money = Math.max(0, round2(s.money + delta));
   const applied = round2(s.money - before);
-  if (applied > 0 && reason !== 'debug' && reason !== 'liquidation' && reason !== 'code' && s.stats) s.stats.moneyEarned = round2((s.stats.moneyEarned || 0) + applied);   // v1.8: bảng xếp hạng
+  if (applied > 0 && reason !== 'debug' && reason !== 'liquidation' && reason !== 'code' && reason !== 'lottery' && s.stats) s.stats.moneyEarned = round2((s.stats.moneyEarned || 0) + applied);   // v1.8: bảng xếp hạng
   if (applied !== 0) G.emit('money', { delta: applied, total: s.money, reason, x, y });
   return applied;
 }

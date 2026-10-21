@@ -6,6 +6,7 @@ import {
   liquidateQuote, oldStock, sellPrice, priceBounds, portionCost, menuPriceDemand, taxLateFee,
 } from './economy.js';
 import { refuseChance } from './customers.js';
+import { lotteryInfo } from './lottery.js';
 import { staffSlots, roleUnlocked, roleCount, candidatesOf } from './staff.js';
 import { trayStatus } from './kitchen.js';
 import { mainQuestInfo, dailyTasks, loginInfo } from './quests.js';
@@ -146,6 +147,7 @@ export function createGetters(G) {
     if (!shop) for (const r of s.reviews) if (r.stars >= 5 && !r.thanked) { shop = true; break; }
     if (!shop && featureUnlocked(G, 'deco')) for (const d of C.DECO) if (decoBuyable(d) && s.money >= d.price) { shop = true; break; }
     if (!shop && tierInfo(G).canExpand) shop = true;
+    if (!shop) { const li = lotteryInfo(G); if (li.waiting || li.unclaimed) shop = true; }   // v1.15 vé chờ dò / chờ lãnh
     if (!shop) { const t = taxInfo(); if (t.bill && t.bill.daysLeft <= C.TAX.remindDays) shop = true; }   // v1.14 thuế sắp / quá hạn
     return { kho, menu, upgrade, staff, shop };
   }
@@ -221,6 +223,7 @@ export function createGetters(G) {
 
   return {
     priceInfo, taxInfo, menuPriceDemand: () => menuPriceDemand(G),
+    lotteryInfo: () => lotteryInfo(G),   // v1.15
     level, kho, buyPrice,
     liquidateQuote: (id, n) => liquidateQuote(G, id, n),   // v1.10 thanh lý
     oldStock: (id) => oldStock(G, id),

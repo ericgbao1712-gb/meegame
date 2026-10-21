@@ -8,7 +8,7 @@ import { frame } from '../modals.js';
 import { stars, portrait, noteBox } from '../sheets/common.js';
 import { countUp, createTimeline, wxName } from './kit.js';
 
-const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Mua vé số', liquidation: 'Lỗ thanh lý hàng cũ', tax: 'Thuế' };
+const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Vé số & đoán số', liquidation: 'Lỗ thanh lý hàng cũ', tax: 'Thuế' };
 const COST_ICON = { ingredients: 'ui_kho', broth: 'ui_fire', drinks: 'drk_trada', salary: 'ui_staff', rent: 'ui_home', marketing: 'ui_megaphone', lottery: 'ui_ticket', liquidation: 'ui_coin', tax: 'ui_book' };
 const MINUS = '−';
 
@@ -38,11 +38,7 @@ function build(m, rep) {
   lines.push({ label: 'Doanh thu', v: rep.revenue || 0, kind: 'plus', icon: 'ui_coin' });
   if ((rep.tips || 0) > 0) lines.push({ label: 'Tiền tip', v: rep.tips, kind: 'plus', icon: 'ui_heart' });
   const lot = rep.lottery || {};
-  if (lot.tickets > 0) {
-    lines.push(lot.won > 0
-      ? { label: `Trúng số (${lot.tickets} vé)`, v: lot.won, kind: 'plus', icon: 'ui_ticket' }
-      : { label: `Vé số trật rồi (${lot.tickets} vé)`, v: 0, kind: 'plus', icon: 'ui_ticket', dim: true });
-  }
+  if (lot.won > 0) lines.push({ label: 'Lãnh thưởng vé số', v: lot.won, kind: 'plus', icon: 'ui_ticket' });   // v1.15 tiền đã bấm nhận hôm nay
   Object.keys(rep.costs || {}).forEach((k) => {
     if (rep.costs[k] > 0.0005) lines.push({ label: COST_LABEL[k] || k, v: rep.costs[k], kind: 'minus', icon: COST_ICON[k] || 'ui_coin' });
   });
@@ -113,6 +109,8 @@ function build(m, rep) {
       h('p', null, fc.text || (wxName(fc.weather) ? 'Ngày mai: ' + wxName(fc.weather) + '.' : '')),
       fev || resv ? div('chips', fev ? span('chip gold', ico('ui_star', 16), fev.name) : null, resv ? span('chip jade', ico('ui_reserve', 16), `${resv} bàn đặt trước`) : null) : null)));
 
+  // v1.15 vé số: tối nay quay, sáng mai dò
+  if ((lot.tickets || 0) + (lot.bets || 0) > 0) sec(noteBox('ui_ticket', `Đã quay xổ số! ${lot.tickets ? `**${lot.tickets} vé số**` : ''}${lot.tickets && lot.bets ? ' và ' : ''}${lot.bets ? `**${lot.bets} phiếu đoán số**` : ''} chờ dò. Sáng mai vào **Quán ▸ Vé số** để dò và nhận thưởng nha.`, 'gold'));
   // v1.14 thuế + khách chê đắt
   if (rep.tax && rep.tax.bill) {
     const b = rep.tax.bill, left = b.dueDay - (rep.day || s.day);

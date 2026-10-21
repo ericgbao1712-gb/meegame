@@ -281,7 +281,20 @@ export const CUSTOMERS = {
 // Ambient NPC (not a customer): cô bán vé số
 export const LOTTERY = {
   name: 'Cô bán vé số', ticketPrice: 10, maxPerDay: 5, visitChancePerHour: 0.12,
-  prizes: [{ chance: 0.01, amount: 1000 }, { chance: 0.10, amount: 100 }], // checked in order at day end
+  // v1.15 vé số có số 6 chữ số, cuối ngày quay kết quả; người chơi tự DÒ vé rồi bấm NHẬN THƯỞNG.
+  // Bảng kết quả giống xổ số kiến thiết (rút gọn): vé trúng một giải khi các số CUỐI của vé trùng một số của giải đó.
+  // Một vé chỉ lãnh giải cao nhất. Trúng ~6% số vé; trung bình trả ~55% tiền vé (vé số thật luôn lỗ nha).
+  tiers: [
+    { id: 'db',   name: 'Giải đặc biệt', digits: 6, count: 1, prize: 100000 },
+    { id: 'nhat', name: 'Giải nhất',     digits: 5, count: 1, prize: 15000 },
+    { id: 'nhi',  name: 'Giải nhì',      digits: 4, count: 1, prize: 3000 },
+    { id: 'ba',   name: 'Giải ba',       digits: 3, count: 2, prize: 600 },
+    { id: 'tu',   name: 'Giải tư',       digits: 2, count: 6, prize: 60 },
+  ],
+  claimDays: 7,           // vé trúng phải lãnh trong 7 ngày (vé thật 30 ngày)
+  keepDays: 14,           // vé cũ hơn thì cất khỏi sổ
+  // Đoán số: chọn 2 số 00–99, đặt cược; 2 số cuối GIẢI ĐẶC BIỆT trùng thì nhận cược × payout.
+  guess: { payout: 70, maxBets: 3, maxBet: 1000, maxShare: 0.2, chips: [50, 100, 500] },
 };
 
 // ───────────────────────────── SATISFACTION / RATING ─────────────────────────────

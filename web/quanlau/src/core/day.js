@@ -12,6 +12,7 @@ import { route } from './routing.js';
 import { startDay, beginClosing, resetCustomers, collectCoins, spawnGroup } from './customers.js';
 import { resetWorkers, syncWorkers } from './workers.js';
 import { genCandidates } from './staff.js';
+import { buyTicket, drawDay } from './lottery.js';
 import { rollDaily, autoClaimDailies, counter } from './quests.js';
 import { clearStove, dressStoves } from './kitchen.js';
 
@@ -152,7 +153,7 @@ export function buildReport(G) {
     avgStars: t.rated ? t.stars / t.rated : 0,
     bestReview: s.reviews.find((r) => r.id === t.bestReviewId) || null,
     comboMax: t.comboMax, newKinds: t.newKinds.slice(),
-    lottery: { tickets: t.lotteryTickets || 0, won: t.lotteryWon || 0 },
+    lottery: { tickets: t.lotteryTickets || 0, bets: t.lotteryBets || 0, won: t.lotteryWon || 0 },
     ratingBefore: t.ratingBefore, ratingAfter: s.rating.avg, levelBefore: t.levelBefore, levelAfter: s.level,
     xpAfter: s.xp, xpNeed: xpNeed(s.level),
     forecast: forecastInfo(G), reservationsTomorrow: s.reservations.map((r) => Object.assign({}, r)),
@@ -174,13 +175,9 @@ export function finishDay(G) {
   resetWorkers(G);
   if (w.veso) { removeActor(G, w.veso); w.veso = null; G.emit('lotteryLady', { on: false }); }
   if (w.rushOn) { w.rushOn = false; G.emit('rush', { on: false }); }
-  // lottery draw
-  const tickets = s.lottery.tickets;
-  let won = 0;
-  for (let i = 0; i < tickets; i++) for (const p of C.LOTTERY.prizes) if (G.rng.chance(p.chance)) { won += p.amount; break; }
-  if (won > 0) addMoney(G, won, 'lottery');
-  t.lotteryWon = won; t.lotteryTickets = tickets;
-  s.lottery.tickets = 0;
+  // v1.15 quay xổ số: vé / phiếu đoán số hôm nay chờ người chơi tự dò (không tự cộng tiền nữa)
+  const dr = drawDay(G);
+  t.lotteryTickets = dr.tickets; t.lotteryBets = dr.bets;
   // fixed costs
   payFixed(G, 'salary', salaryTotal(G), 'tiền lương nhân viên');
   payFixed(G, 'rent', tierDef(G).rent, 'tiền thuê mặt bằng');
@@ -322,16 +319,10 @@ export function updateLottery(G, dtMin) {
   }
 }
 
-export function buyLottery(G) {
-  const s = G.state, w = G.world, LT = C.LOTTERY;
-  if (!featureUnlocked(G, 'lottery')) return fail('locked', `Vé số mở ở Lv ${C.FEATURES.lottery} nha!`);
-  if (!w.veso || w.veso.leaving || w.veso.path) return fail('noLady', 'Cô bán vé số đi mất rồi.');
-  if (s.lottery.tickets >= LT.maxPerDay) return fail('max', `Mỗi ngày mua tối đa ${LT.maxPerDay} tờ thôi nha.`);
-  if (s.money + 1e-9 < LT.ticketPrice) return fail('money', `Vé số ${fmtMoney(LT.ticketPrice)} một tờ, chưa đủ tiền nha.`);
-  spend(G, 'lottery', LT.ticketPrice, 'lottery');
-  s.lottery.tickets++;
-  G.toast(`Mua 1 vé số (${s.lottery.tickets}/${LT.maxPerDay}). Tối nay dò kết quả nghen!`, 'info', 'ui_ticket');
-  return { ok: true, tickets: s.lottery.tickets };
+export function buyLottery(G) {   // v1.15: vé có số (core/lottery.js)
+  const r = buyTicket(G);
+  if (r.ok) G.toast(`Mua vé số ${r.ticket.num} (${C.LOTTERY.maxPerDay - r.left}/${C.LOTTERY.maxPerDay}). Tối nay quay số, mai dò nghen!`, 'info', 'ui_ticket');
+  return r;
 }
 
 // ───────────── branches (P2) ─────────────

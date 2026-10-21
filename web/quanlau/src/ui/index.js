@@ -18,6 +18,7 @@ import { createTutorial } from './tutorial.js';
 import { mountDebug } from './debug.js';
 import { initCloud } from './cloud.js';
 import { initTax } from './tax.js';
+import { initLottery, openLady } from './lottery.js';
 
 function ensure(id, parent, tag = 'div') {
   let el = document.getElementById(id);
@@ -66,7 +67,8 @@ export function mountUI(game, { renderer, audio } = {}) {
   ctx.tutorial = createTutorial({ coachRoot });
   const debug = mountDebug();
   try { initCloud(game); } catch (e) { console.error('[ui] cloud', e); }
-  try { initTax(game); } catch (e) { console.error('[ui] tax', e); }   // v1.14   // v1.8
+  try { initTax(game); } catch (e) { console.error('[ui] tax', e); }   // v1.14
+  try { initLottery(game); } catch (e) { console.error('[ui] lottery', e); }   // v1.15   // v1.8
 
   // ---- layout vars: HUD / nav / dock heights → CSS, then tell the renderer
   const setVars = () => {
@@ -111,7 +113,7 @@ export function mountUI(game, { renderer, audio } = {}) {
     try {
       if (hit.type === 'table') {
         ctx.tableInfo?.(hit);
-      }
+      } else if (hit.type === 'veso') openLady();   // v1.15 chạm cô bán vé số → bảng mua vé
     } catch (e) { console.error('[ui] scenePick', e); }
   }
   return { update, onScenePick, ctx };

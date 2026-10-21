@@ -99,7 +99,7 @@ export function mountToasts({ toastRoot, sceneUi }) {
   on('mom', (p) => ctx.mom(p.text));
   on('review', (p) => { const r = p.review || p; if (r && (r.stars >= 4 || r.stars <= 2)) ctx.reviewPop(r); });
   on('rush', (p) => { if (p.on) ctx.banner('GIỜ CAO ĐIỂM! KHÁCH ĐÔNG!', 'red'); });
-  on('lotteryLady', (p) => { if (p.on) ctx.toast('Cô bán vé số ghé quán kìa — chạm vào cô nha!', 'info', 'ui_ticket'); });
+  on('lotteryLady', (p) => { if (p.on) ctx.toast('Cô bán vé số ghé quán kìa — chạm vào cô để mua vé nha!', 'info', 'ui_ticket'); });
   on('stockLow', (p) => ctx.toast(`Sắp hết ${ING[p.ing]?.name?.toLowerCase() || 'hàng'} rồi!`, 'bad', ING[p.ing]?.icon));
   on('stockOut', (p) => ctx.toast(`Hết ${ING[p.ing]?.name?.toLowerCase() || 'hàng'}! Mở Kho nhập thêm nha.`, 'bad', ING[p.ing]?.icon));
   on('expired', (p) => ctx.toast(`Đã bỏ ${p.total} phần hàng hết hạn (−${Math.round(p.value)}k) — mua vừa đủ thôi nha`, 'bad', 'ui_trash'));

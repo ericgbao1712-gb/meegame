@@ -10,6 +10,7 @@ import { questsView } from './quests.js';
 import { expandView, branchesView } from './expand.js';
 import { leaderboardView } from '../cloud.js';
 import { taxView } from '../tax.js';
+import { lotteryView } from '../lottery.js';
 
 // ------------------------------------------------------------------ Trang trí
 function decoThumb(id, size = 48) {
@@ -148,10 +149,11 @@ const TABS = [
   { id: 'expand', label: 'Mở rộng', icon: 'ui_shop' },
   { id: 'mkt', label: 'Quảng bá', icon: 'ui_megaphone' },
   { id: 'branches', label: 'Chi nhánh', icon: 'ui_map' },
+  { id: 'veso', label: 'Vé số', icon: 'ui_ticket' },      // v1.15
   { id: 'tax', label: 'Thuế', icon: 'ui_book' },          // v1.14
   { id: 'rank', label: 'Xếp hạng', icon: 'ui_trophy' },   // v1.8
 ];
-const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView, tax: taxView, rank: leaderboardView };
+const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView, tax: taxView, veso: lotteryView, rank: leaderboardView };
 
 function tabDots() {
   const s = S(); const d = {};
@@ -161,6 +163,7 @@ function tabDots() {
   d.deco = D.featureOn('deco') && C.DECO.some((x) => !x.default && !x.source && x.price > 0 && (x.minTier || 1) <= D.tierNow() && (x.lv || 1) <= (s.level || 1) && !(s.deco?.owned || []).includes(x.id) && s.money >= x.price);
   d.expand = !!G().get?.tierInfo?.()?.canExpand;
   { const b = G().get?.taxInfo?.()?.bill; d.tax = !!b && b.daysLeft <= C.TAX.remindDays; }   // v1.14
+  { const li = G().get?.lotteryInfo?.(); d.veso = !!li && (li.waiting > 0 || li.unclaimed > 0); }   // v1.15
   return d;
 }
 
@@ -171,7 +174,7 @@ export const shopSheet = {
     let sub = api.sub;
     if (!VIEWS[sub]) sub = 'quests';
     const dots = tabDots();
-    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) })), sub, (id) => api.setSub(id));
+    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'veso' && !D.featureOn('lottery')) })), sub, (id) => api.setSub(id));
     VIEWS[sub](body, api);
   },
 };
