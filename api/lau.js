@@ -45,7 +45,7 @@ const BOARD_VALUE = { level: 'level', money: 'money_earned', pots: 'pots_sold' }
 
 const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
 const cleanCode = (c) => String(c || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
-const CODE_MAX_MONEY = 1e7, CODE_MAX_XP = 1e7;   // chặn gõ nhầm số quá lớn
+const CODE_MAX = 1e15;   // chủ game 21/10: không giới hạn tiền / XP của mã (chỉ chặn số vô nghĩa vượt khả năng lưu)
 const codeRow = (r) => ({ code: r.code, game: r.game, money: num(r.money), xp: num(r.xp), maxUses: r.max_uses == null ? null : num(r.max_uses),
   uses: num(r.uses), expiresAt: r.expires_at == null ? null : num(r.expires_at), disabled: !!num(r.disabled), note: r.note || '', createdAt: num(r.created_at) });
 const cleanName = (s, def = 'Quán Lẩu') => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24) || def;
@@ -55,7 +55,7 @@ export function saveSummary(save, game = DEFAULT_GAME) {
   if (!save || typeof save !== 'object' || Array.isArray(save) || !save.started) return null;
   const level = Math.floor(num(save.level));
   const money = num(save.money, -1);
-  if (!(level >= 1 && level <= 99) || !(money >= 0) || !Number.isFinite(money)) return null;
+  if (!(level >= 1 && level <= 100000) || !(money >= 0) || !Number.isFinite(money)) return null;   // Xoài Lắc không có cấp tối đa (mã quà có thể tặng rất nhiều XP)
   const stats = save.stats && typeof save.stats === 'object' ? save.stats : {};
   return {
     shop_name: cleanName(save.shopName, game === 'xoailac' ? 'Xe Xoài Lắc' : 'Quán Lẩu'),
@@ -72,13 +72,14 @@ export function saveSummary(save, game = DEFAULT_GAME) {
 }
 
 /** Anti-cheat: is the jump from the previous cloud save (or from nothing) believable? → reason string or null. */
-export function suspicious(prev, next, nowMs) {
+export function suspicious(prev, next, nowMs, gift = 0) {
+  // gift = tiền nhận từ mã quà tặng kể từ lần lưu trước: hợp lệ, không tính là tăng bất thường
   if (!prev) {
-    if (next.money_earned > (next.days_played + 1) * FIRST_UPLOAD_PER_DAY) return 'Tiền nhiều bất thường so với số ngày đã chơi';
+    if (next.money_earned - gift > (next.days_played + 1) * FIRST_UPLOAD_PER_DAY) return 'Tiền nhiều bất thường so với số ngày đã chơi';
     return null;
   }
   const dt = Math.max(0, (nowMs - num(prev.updated_at)) / 1000) + GRACE_SEC;
-  if (next.money_earned - num(prev.money_earned) > dt * RATE_K_PER_SEC) return 'Tiền tăng nhanh bất thường';
+  if (next.money_earned - num(prev.money_earned) - gift > dt * RATE_K_PER_SEC) return 'Tiền tăng nhanh bất thường';
   if (next.pots_sold - num(prev.pots_sold) > dt * POTS_PER_SEC) return 'Số nồi bán tăng nhanh bất thường';
   return null;
 }
@@ -199,7 +200,7 @@ export default async function handler(req, res) {
         const game = ['quanlau', 'xoailac', '*'].includes(b.game) ? b.game : '*';
         const money = Math.max(0, num(b.money)), xp = Math.max(0, Math.round(num(b.xp)));
         if (!(money > 0 || xp > 0)) return err(res, 400, 'invalid', 'Mã phải tặng tiền hoặc XP.', {}, 'money');
-        if (money > CODE_MAX_MONEY || xp > CODE_MAX_XP) return err(res, 400, 'invalid', 'Số tiền / XP quá lớn.', {}, 'money');
+        if (!Number.isFinite(money) || !Number.isFinite(xp) || money > CODE_MAX || xp > CODE_MAX) return err(res, 400, 'invalid', 'Số tiền / XP không hợp lệ.', {}, 'money');
         const maxUses = b.maxUses == null || b.maxUses === '' ? null : Math.max(1, Math.floor(num(b.maxUses, 1)));
         const expiresAt = b.expiresAt ? Math.floor(num(b.expiresAt)) || null : null;
         const dup = await db.execute({ sql: 'SELECT code FROM gift_codes WHERE code = ?', args: [code] });
@@ -426,7 +427,11 @@ export default async function handler(req, res) {
       if (prev && !body.force && body.base != null && num(prev.updated_at) > num(body.base)) {
         return send(res, 409, { error: 'conflict', message: 'Trên mạng có bản mới hơn.', cloud: meta(prev) });
       }
-      const reason = num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs);
+      const giftRow = await db.execute({
+        sql: 'SELECT COALESCE(sum(money), 0) AS m FROM gift_redemptions WHERE player_id = ? AND game = ? AND created_at > ?',
+        args: [pid, GAME, prev ? num(prev.updated_at) - 60e3 : 0],
+      });
+      const reason = num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs, num(giftRow.rows[0] && giftRow.rows[0].m));
       const flagged = num(prev && prev.flagged) || reason ? 1 : 0;
       if (prev) {
         await db.execute({
