@@ -1,6 +1,6 @@
 // Icons (TECH_SPEC §2.1): 32×32 sprites (2× detail) = 16×16 world px, packed in assets/icons.png
 // (frame table src/art/data/icons.js, keys = icon names). Never throws; unknown names draw a magenta 2×2 marker.
-import { loadAtlas } from './assets.js';
+import { loadAtlas, frameOk } from './assets.js';
 import ICON_DATA from './data/icons.js';
 
 const rec = loadAtlas(ICON_DATA.file);
@@ -33,6 +33,7 @@ export function drawIcon(ctx, name, x, y, scale = 1) {
     return;
   }
   if (!rec.img) return;                                 // atlas still loading
+  if (!frameOk(rec, f)) return;                         // v1.18n ảnh cũ trong bộ nhớ đệm chưa có icon mới: bỏ qua, không báo lỗi
   if (ctx.imageSmoothingEnabled) ctx.imageSmoothingEnabled = false;
   ctx.drawImage(rec.img, f[0], f[1], f[2], f[3], x, y, s, s);
 }

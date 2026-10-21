@@ -7,7 +7,7 @@
 import { PAL, BROTH } from './palette.js';
 import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES } from '../config.js';
 import { drawIcon } from './icons.js';
-import { loadAtlas, blit, frameCanvas, DETAIL } from './assets.js';
+import { loadAtlas, blit, frameCanvas, frameOk, DETAIL } from './assets.js';
 import PROPS from './data/props.js';
 import SCENES from './data/scenes.js';
 import { SEAT, sceneGeom } from './layouts.js';
@@ -165,7 +165,8 @@ let SKIN_POT = null, SKIN_TABLE = null, SKIN_CHAIR = null;
 let FORM_TABLE = null, FORM_CHAIR = null;
 export function setSkins(pot, table, chair, tform, cform) {
   SKIN_POT = POT_SKINS[pot] ? pot : null; SKIN_TABLE = TABLE_SKINS[table] ? table : null; SKIN_CHAIR = CHAIR_SKINS[chair] ? chair : null;
-  FORM_TABLE = TABLE_SHAPES[tform] && F['tshape_' + tform] ? tform : null; FORM_CHAIR = CHAIR_SHAPES[cform] && F['cshape_' + cform] ? cform : null;
+  // chỉ dùng dáng mới khi ảnh đã tải có khung đó (ảnh cũ trong bộ nhớ đệm → giữ bàn ghế gốc, không mất bàn)
+  FORM_TABLE = TABLE_SHAPES[tform] && frameOk(P, F['tshape_' + tform]) ? tform : null; FORM_CHAIR = CHAIR_SHAPES[cform] && frameOk(P, F['cshape_' + cform]) ? cform : null;
 }
 const skinCache = new Map();
 function hsv(r, g, b) {
@@ -183,7 +184,7 @@ function rgb(h, s, v) {
 function recolorCanvas(key, base, skin, mode) {
   if (!skin || !hasDOM || !P.img) return null;
   const f = F[key];
-  if (!f) return null;
+  if (!f || !frameOk(P, f)) return null;
   const ck = key + '|' + mode + '|' + skin.name + (base ? '|' : '');
   let c = skinCache.get(ck);
   if (c) return c;
@@ -217,7 +218,7 @@ function putTableSkin(ctx, key, x, y, seat = -1) {
   if (chair && FORM_CHAIR) {                                        // v1.18i dáng ghế
     key = 'cshape_' + FORM_CHAIR; form = true;
     const k2 = seat >= 0 ? key + SEAT_SUFFIX[seat] : key;
-    if (F[k2]) key = k2;
+    if (frameOk(P, F[k2])) key = k2;
   } else if (!chair && FORM_TABLE) key = 'tshape_' + FORM_TABLE;    // v1.18i dáng bàn
   const sk = chair ? (SKIN_CHAIR && CHAIR_SKINS[SKIN_CHAIR]) : (SKIN_TABLE && TABLE_SKINS[SKIN_TABLE]);
   const c = sk ? recolorCanvas(key, null, sk, form ? 'woodonly' : 'wood') : null;
@@ -239,7 +240,7 @@ const potCache = new Map();
 /** Pot sprite with its steel interior replaced by the broth colours (clipped by the pot's _m mask frame). */
 function potCanvas(key, broth, fillB) {
   const f = F[key], m = F[key + '_m'];
-  if (!f || !m || !P.img || !hasDOM) return null;
+  if (!f || !m || !P.img || !hasDOM || !frameOk(P, f) || !frameOk(P, m)) return null;
   const ck = key + '|' + broth + '|' + fillB + '|' + (SKIN_POT || '');
   let c = potCache.get(ck);
   if (c) return c;

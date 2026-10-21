@@ -8,7 +8,9 @@
 // drawn with blit() at a world position lands 1:1 on buffer pixels (crisp, no resampling).
 // Keep DETAIL in sync with `DETAIL` in src/render/renderer.js.
 export const DETAIL = 2;
-export const ASSET_VER = 'l17';
+export const ASSET_VER = 'l18n';   // v1.18n: icons.png + props.png có thêm khung mới (Hộp mù) — PHẢI tăng khi đổi PNG
+/** khung có nằm trong ảnh đã tải không (ảnh cũ trong bộ nhớ đệm + dữ liệu khung mới → Safari báo lỗi drawImage) */
+export const frameOk = (rec, f) => !!(rec && rec.img && f) && f[0] + f[2] <= (rec.img.naturalWidth || rec.img.width) && f[1] + f[3] <= (rec.img.naturalHeight || rec.img.height);
 
 const hasDOM = typeof document !== 'undefined';
 const atlases = new Map();     // file → { img, flipped }
@@ -50,7 +52,7 @@ function flippedOf(rec) {
  * flip = mirror horizontally around the anchor. Returns false if the atlas is not loaded yet.
  */
 export function blit(ctx, rec, f, x, y, flip = false, alpha = 1) {
-  if (!rec || !rec.img || !f) return false;
+  if (!rec || !rec.img || !f || !frameOk(rec, f)) return false;
   const [fx, fy, fw, fh, ax, ay] = f;
   const px = Math.round(x * DETAIL), py = Math.round(y * DETAIL);   // snap to buffer pixels
   const dx = (px - (flip ? fw - ax : ax)) / DETAIL, dy = (py - ay) / DETAIL;
@@ -67,7 +69,7 @@ export function blit(ctx, rec, f, x, y, flip = false, alpha = 1) {
 
 /** Copy one frame into its own canvas, upscaled by an integer factor (for DOM <img> data URLs). */
 export function frameCanvas(rec, f, scale = 1, flip = false) {
-  if (!hasDOM || !rec || !rec.img || !f) return null;
+  if (!hasDOM || !rec || !rec.img || !f || !frameOk(rec, f)) return null;
   const [fx, fy, fw, fh] = f;
   const c = document.createElement('canvas');
   c.width = fw * scale; c.height = fh * scale;
