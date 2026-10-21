@@ -891,16 +891,17 @@ export const CLOUD = {
 // (nhân viên + chủ quán), kiểu chủ quán (mở sớm, không cần đợi cấp), thẻ thành tích (đeo lên bảng xếp hạng).
 // Trùng món → mảnh; gom mảnh đổi món còn thiếu. Bảo hiểm: 10 hộp chắc chắn có Hiếm trở lên, 150 hộp chắc chắn có Bí ẩn.
 export const BOX = {
-  price: [80, 150, 400, 900, 1800],   // k / hộp theo cấp quán
-  tenMult: 9,                          // mở 10 hộp = giá 9 hộp
+  // owner 22/10: tăng giá hộp + giá đổi mảnh; tỉ lệ / bảo hiểm chỉnh theo bộ 61 món của Lẩu Ơi
+  price: [200, 400, 1000, 2500, 5000],  // k / hộp theo cấp quán
+  tenMult: 9,                           // mở 10 hộp = giá 9 hộp
   freePerDay: 1,
   rar: [
-    { id: 1, name: 'Thường',   rate: 65, shard: 5,   cost: 20 },
-    { id: 2, name: 'Hiếm',     rate: 28, shard: 15,  cost: 60 },
-    { id: 3, name: 'Cực hiếm', rate: 6,  shard: 40,  cost: 700 },
-    { id: 4, name: 'Bí ẩn',    rate: 1,  shard: 100, cost: 1500 },
+    { id: 1, name: 'Thường',   rate: 60, shard: 5,   cost: 40,   icon: 'ui_star_empty' },
+    { id: 2, name: 'Hiếm',     rate: 30, shard: 15,  cost: 150,  icon: 'ui_star_half' },
+    { id: 3, name: 'Cực hiếm', rate: 8,  shard: 40,  cost: 900,  icon: 'ui_star' },
+    { id: 4, name: 'Bí ẩn',    rate: 2,  shard: 100, cost: 2000, icon: 'ui_chest_gold' },
   ],
-  pityRare: 10, pityMyst: 150,
+  pityRare: 10, pityEpic: 40, pityMyst: 100,   // chắc chắn Hiếm+ trong 10 hộp, Cực hiếm+ trong 40, Bí ẩn trong 100
   items: [
     // món ăn / uống độc quyền
     { id: 'bx_kemtra',    r: 1, kind: 'food', ref: 'tm_kemtra',   name: 'Kem trà xanh' },
@@ -958,18 +959,18 @@ export const BOX = {
     { id: 'bx_d_robotgau', r: 4, kind: 'deco', ref: 'db_robotgau',   name: 'Robot phục vụ Gấu Trúc' },
     { id: 'bx_d_quaythungan', r: 4, kind: 'deco', ref: 'db_quaythungan', name: 'Quầy thu ngân Mèo Thần Tài' },
     // thẻ thành tích (đeo 1 thẻ, hiện cạnh tên quán trên bảng xếp hạng)
-    { id: 'bx_b_tapsu',   r: 1, kind: 'badge', emoji: '🍲', name: 'Lẩu thủ tập sự' },
-    { id: 'bx_b_chamchi', r: 1, kind: 'badge', emoji: '🧹', name: 'Chủ quán chăm chỉ' },
-    { id: 'bx_b_trada',   r: 1, kind: 'badge', emoji: '🧊', name: 'Fan cứng trà đá' },
-    { id: 'bx_b_cay',     r: 1, kind: 'badge', emoji: '🌶️', name: 'Thánh ăn cay' },
-    { id: 'bx_b_bep',     r: 2, kind: 'badge', emoji: '👩‍🍳', name: 'Bếp trưởng vàng' },
-    { id: 'bx_b_ship',    r: 2, kind: 'badge', emoji: '🛵', name: 'Ông hoàng ship' },
-    { id: 'bx_b_thantai', r: 2, kind: 'badge', emoji: '💰', name: 'Thần tài gõ cửa' },
-    { id: 'bx_b_den',     r: 2, kind: 'badge', emoji: '🏮', name: 'Quán quen của phố' },
-    { id: 'bx_b_vua',     r: 3, kind: 'badge', emoji: '👑', name: 'Vua lẩu Sài Gòn' },
-    { id: 'bx_b_dinh',    r: 3, kind: 'badge', emoji: '🏆', name: 'Lẩu đỉnh nóc' },
-    { id: 'bx_b_rong',    r: 4, kind: 'badge', emoji: '🐉', name: 'Rồng vàng' },
-    { id: 'bx_b_huyen',   r: 4, kind: 'badge', emoji: '💎', name: 'Huyền thoại Lẩu Ơi' },
+    { id: 'bx_b_tapsu',   r: 1, kind: 'badge', icon: 'pot_ga', name: 'Lẩu thủ tập sự' },
+    { id: 'bx_b_chamchi', r: 1, kind: 'badge', icon: 'ui_clock', name: 'Chủ quán chăm chỉ' },
+    { id: 'bx_b_trada',   r: 1, kind: 'badge', icon: 'drk_trada', name: 'Fan cứng trà đá' },
+    { id: 'bx_b_cay',     r: 1, kind: 'badge', icon: 'pot_chuacay', name: 'Thánh ăn cay' },
+    { id: 'bx_b_bep',     r: 2, kind: 'badge', icon: 'role_daubep', name: 'Bếp trưởng vàng' },
+    { id: 'bx_b_ship',    r: 2, kind: 'badge', icon: 'eq_truck', name: 'Ông hoàng ship' },
+    { id: 'bx_b_thantai', r: 2, kind: 'badge', icon: 'ui_coin', name: 'Thần tài gõ cửa' },
+    { id: 'bx_b_den',     r: 2, kind: 'badge', icon: 'ui_shop', name: 'Quán quen của phố' },
+    { id: 'bx_b_vua',     r: 3, kind: 'badge', icon: 'ui_trophy', name: 'Vua lẩu Sài Gòn' },
+    { id: 'bx_b_dinh',    r: 3, kind: 'badge', icon: 'ui_fire', name: 'Lẩu đỉnh nóc' },
+    { id: 'bx_b_rong',    r: 4, kind: 'badge', icon: 'pot_dacbiet', name: 'Rồng vàng' },
+    { id: 'bx_b_huyen',   r: 4, kind: 'badge', icon: 'ui_heart', name: 'Huyền thoại Lẩu Ơi' },
   ],
 };
 // v1.18 kiểu NỒI LẨU / BÀN LẨU độc quyền Hộp mù: đổi màu lúc vẽ (art/scenes.js tô lại phần inox của nồi, phần gỗ của bàn ghế).
@@ -994,5 +995,5 @@ export const BOX_ITEM = Object.fromEntries(BOX.items.map((x) => [x.id, x]));
 export const boxHas = (s, id) => !!(s && s.box && s.box.got && s.box.got[id] > 0);
 /** Món / màu / kiểu đã mở: tới cấp HOẶC (món độc quyền) đã có trong Hộp mù. */
 export const lvOk = (s, it, lvKey = 'unlockLv') => !!it && (((s && s.level) || 1) >= (it[lvKey] || 1) || (!!it.box && boxHas(s, it.box)));
-/** thẻ thành tích đang đeo (leaderboard): id → {emoji, name} */
+/** thẻ thành tích đang đeo (leaderboard): id → {icon, name} */
 export const badgeOf = (id) => { const b = BOX_ITEM[id]; return b && b.kind === 'badge' ? b : null; };

@@ -12,7 +12,7 @@ export const NEWS = {
   title: 'Có gì mới trong Lẩu Ơi!',
   hero: 'Hộp mù & tab Giải trí!',
   items: [
-    { icon: 'ui_gift', title: 'Hộp mù', lv: C.FEATURES.blindbox, isNew: true,
+    { icon: 'ui_hopmu', title: 'Hộp mù', lv: C.FEATURES.blindbox, isNew: true,
       text: `Vào **Quán ▸ Giải trí ▸ Hộp mù**. Mỗi ngày mở **1 hộp miễn phí**. Ra món ăn độc quyền, đồng phục, kiểu chủ quán, **nồi lẩu và bàn ghế** đẹp, **robot phục vụ**, đồ trang trí, và **thẻ thành tích** hiện trên bảng xếp hạng. Sưu tầm đủ ${C.BOX.items.length} món!`,
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
     { icon: 'ui_ticket', title: 'Tab Giải trí + Giải năm vé số', lv: C.FEATURES.lottery, isNew: true,

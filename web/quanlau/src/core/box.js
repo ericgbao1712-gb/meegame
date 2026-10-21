@@ -16,6 +16,7 @@ export function boxState(s) {
   if (!(b.opened >= 0)) b.opened = 0;
   if (!(b.sinceRare >= 0)) b.sinceRare = 0;               // số hộp liên tiếp chưa ra Hiếm+
   if (!(b.sinceMyst >= 0)) b.sinceMyst = 0;               // số hộp liên tiếp chưa ra Bí ẩn
+  if (!(b.sinceEpic >= 0)) b.sinceEpic = 0;               // số hộp liên tiếp chưa ra Cực hiếm+
   if (!(b.freeDay >= 0)) b.freeDay = 0;                   // ngày (s.day) đã mở hộp miễn phí
   if (!(b.spent >= 0)) b.spent = 0;
   if (b.badge && !C.badgeOf(b.badge)) b.badge = null;
@@ -29,6 +30,10 @@ export const boxPrice = (G) => B().price[Math.max(0, Math.min(B().price.length -
 
 function rollRarity(G, b) {
   if (b.sinceMyst + 1 >= B().pityMyst) return 4;
+  if (B().pityEpic && b.sinceEpic + 1 >= B().pityEpic) {
+    const r = G.rng.weighted(B().rar.filter((x) => x.id >= 3), (x) => x.rate);
+    return r ? r.id : 3;
+  }
   if (b.sinceRare + 1 >= B().pityRare) {   // bảo hiểm: Hiếm trở lên (giữ tỉ lệ tương đối giữa Hiếm / Cực hiếm / Bí ẩn)
     const r = G.rng.weighted(B().rar.filter((x) => x.id >= 2), (x) => x.rate);
     return r ? r.id : 2;
@@ -62,6 +67,7 @@ function rollOne(G) {
   b.opened++;
   b.sinceRare = r >= 2 ? 0 : b.sinceRare + 1;
   b.sinceMyst = r >= 4 ? 0 : b.sinceMyst + 1;
+  b.sinceEpic = r >= 3 ? 0 : b.sinceEpic + 1;
   return grant(G, item);
 }
 
@@ -119,7 +125,8 @@ export function boxInfo(G) {
   return {
     unlocked: featureUnlocked(G, 'blindbox'), price: boxPrice(G), price10: boxPrice(G) * B().tenMult,
     freeLeft: b.freeDay === s.day ? 0 : 1, shards: b.shards, opened: b.opened, owned, total,
-    rareIn: Math.max(1, B().pityRare - b.sinceRare), mystIn: Math.max(1, B().pityMyst - b.sinceMyst),
+    rareIn: Math.max(1, B().pityRare - b.sinceRare), epicIn: Math.max(1, (B().pityEpic || 0) - b.sinceEpic), mystIn: Math.max(1, B().pityMyst - b.sinceMyst),
+    rareAt: b.sinceRare, epicAt: b.sinceEpic, mystAt: b.sinceMyst,
     got: Object.assign({}, b.got), badge: b.badge || null, pot: b.pot || null, table: b.table || null, spent: b.spent,
   };
 }

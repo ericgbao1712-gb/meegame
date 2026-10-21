@@ -33,7 +33,7 @@ function badgeChip(id) {
   const b = id ? C.badgeOf(id) : null;
   if (!b) return null;
   const r = ['', 'r1', 'r2', 'r3', 'r4'][b.r] || 'r1';
-  return span('cl-badge ' + r, b.emoji + ' ' + b.name);
+  return span('cl-badge ' + r, ico(b.icon, 16), b.name);
 }
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };

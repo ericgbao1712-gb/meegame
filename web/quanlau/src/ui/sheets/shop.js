@@ -144,7 +144,7 @@ function mktView(body, api) {
 // ------------------------------------------------------------------ container
 const TABS = [
   { id: 'quests', label: 'Nhiệm vụ', icon: 'ui_quest' },
-  { id: 'giaitri', label: 'Giải trí', icon: 'ui_gift' },   // v1.18 Vé số + Hộp mù (ngay sau Nhiệm vụ)
+  { id: 'giaitri', label: 'Giải trí', icon: 'ui_hopmu' },   // v1.18 Vé số + Hộp mù (ngay sau Nhiệm vụ)
   { id: 'deco', label: 'Trang trí', icon: 'ui_deco' },
   { id: 'reviews', label: 'Đánh giá', icon: 'ui_review' },
   { id: 'book', label: 'Sổ khách', icon: 'ui_book' },
@@ -161,8 +161,8 @@ let fun = 'veso';
 function funView(body, api) {
   const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.();
   const seg = div('seg-row fun-seg');
-  [['veso', '🎟️ Vé số', !!li && (li.waiting > 0 || li.unclaimed > 0)], ['hopmu', '🎁 Hộp mù', !!bi && bi.unlocked && bi.freeLeft > 0]].forEach(([id, label, dot]) => {
-    seg.appendChild(h('button', { class: 'seg' + (fun === id ? ' on' : ''), type: 'button', onclick: () => { if (fun === id) return; fun = id; sfx('click'); api.rerender(); } }, label, dot ? h('i', { class: 'dot' }) : null));
+  [['veso', 'Vé số', 'ui_ticket', !!li && (li.waiting > 0 || li.unclaimed > 0)], ['hopmu', 'Hộp mù', 'ui_hopmu', !!bi && bi.unlocked && bi.freeLeft > 0]].forEach(([id, label, icon, dot]) => {
+    seg.appendChild(h('button', { class: 'seg' + (fun === id ? ' on' : ''), type: 'button', onclick: () => { if (fun === id) return; fun = id; sfx('click'); api.rerender(); } }, ico(icon, 16), label, dot ? h('i', { class: 'dot' }) : null));
   });
   body.appendChild(seg);
   (fun === 'hopmu' ? boxView : lotteryView)(body, api);
