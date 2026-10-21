@@ -89,7 +89,7 @@ export function expandView(body, api) {
 // ------------------------------------------------------------------ Chi nhánh
 // Stylised Vietnam outline in a 200×300 box + pin positions (same box, %).
 const VN_PATH = 'M40 10 L80 5 L105 18 L130 12 L142 30 L120 55 L110 75 L113 95 L126 115 L129 140 L139 165 L151 185 L153 205 L161 225 L166 245 L151 262 L136 275 L119 286 L97 292 L76 298 L60 292 L65 275 L82 262 L95 248 L105 225 L100 205 L90 190 L96 165 L84 140 L75 120 L62 100 L50 85 L38 70 L28 50 L30 30 Z';
-const PINS = { hanoi: [96, 50], danang: [143, 172], dalat: [104, 210], vungtau: [144, 282], cantho: [72, 279] };
+const PINS = { hanoi: [96, 50], danang: [143, 172], dalat: [104, 210], vungtau: [144, 282], cantho: [72, 279], hue: [118, 136], nhatrang: [166, 208], phuquoc: [30, 250] };   // v1.7: +Huế, Nha Trang, Phú Quốc
 
 function vnMap(onPick) {
   const s = S();
@@ -101,14 +101,42 @@ function vnMap(onPick) {
   C.BRANCHES.forEach((b) => {
     const lvl = s.branches?.[b.id] || 0;
     const [x, y] = PINS[b.id] || [100, 150];
-    const pin = h('button', { class: 'pin' + (lvl ? ' open' : ''), style: { left: (x / 2) + '%', top: (y / 3) + '%' }, 'aria-label': b.name },
+    const pin = h('button', { class: 'pin' + (lvl ? ' open' : '') + (s.location === b.id ? ' here' : ''), style: { left: (x / 2) + '%', top: (y / 3) + '%' }, 'aria-label': b.name },
       span('pin-dot', lvl ? span('num', String(lvl)) : ico('ui_lock', 16)), span('pin-name', b.name));
     pin.addEventListener('click', () => { sfx('click'); onPick(b.id); });
     map.appendChild(pin);
   });
-  const hq = h('div', { class: 'pin hq', style: { left: '76%', top: '80%' } }, span('pin-dot', ico('ui_shop', 16)), span('pin-name', 'TP.HCM'));
+  const hq = h('div', { class: 'pin hq' + (!s.location || s.location === C.HOME_CITY.id ? ' here' : ''), style: { left: '76%', top: '80%' } }, span('pin-dot', ico('ui_shop', 16)), span('pin-name', 'TP.HCM'));
   map.appendChild(hq);
   return map;
+}
+
+// v1.7 dời quán: the main shop can move to any opened branch city — the scenery around it changes
+const here = (s) => s.location || C.HOME_CITY.id;
+const cityName = (id) => (id === C.HOME_CITY.id ? C.HOME_CITY.name : (D.BR[id] || {}).name || id);
+function doMove(id, api) {
+  const r = act('moveShop', id);
+  if (r.ok === false) return;
+  sfx('whoosh');
+  api.rerender();
+}
+function moveBtn(s, b, api) {
+  if (here(s) === b.id) return span('chip jade', ico('ui_shop', 16), 'Quán đang ở đây');
+  const busy = s.phase === 'open' || s.phase === 'closing';
+  const btn = h('button', { class: 'btn sm' + (busy ? ' off' : ''), type: 'button' }, ico('ui_shop', 16), 'Dời quán về đây');
+  btn.addEventListener('click', () => doMove(b.id, api));
+  return btn;
+}
+function moveCard(s, api) {
+  const cur = here(s);
+  const card = div('card movecard', div('grow', h('b', null, 'Quán chính đang ở ' + cityName(cur)),
+    span('muted sm', 'Dời quán về chi nhánh nào thì phong cảnh quanh quán đổi theo thành phố đó. Miễn phí, làm lúc quán đóng cửa.')));
+  if (cur !== C.HOME_CITY.id) {
+    const btn = h('button', { class: 'btn sm', type: 'button' }, ico('ui_shop', 16), 'Về ' + C.HOME_CITY.name);
+    btn.addEventListener('click', () => doMove(C.HOME_CITY.id, api));
+    card.appendChild(btn);
+  }
+  return card;
 }
 
 export function branchesView(body, api) {
@@ -121,8 +149,9 @@ export function branchesView(body, api) {
 
   const cards = {};
   body.appendChild(vnMap((id) => { const el = cards[id]; if (!el) return; el.scrollIntoView({ block: 'center', behavior: ctx.reduced ? 'auto' : 'smooth' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }));
-  body.appendChild(div('card bsum', div('grow', h('b', null, `${open}/${C.BRANCHES.length} chi nhánh`), span('muted sm', 'Mở đủ 5 nơi là hoàn thành hành trình nha!')),
+  body.appendChild(div('card bsum', div('grow', h('b', null, `${open}/${C.BRANCHES.length} chi nhánh`), span('muted sm', `Mở đủ ${C.BRANCHES.length} nơi là hoàn thành hành trình nha!`)),
     span('chip gold', ico('ui_coin', 16), span('num', '+' + vnNum(rate) + 'k/giây'))));
+  body.appendChild(moveCard(s, api));
   body.appendChild(secTitle('Các chi nhánh', 'tiền về cả khi bạn đi vắng'));
 
   C.BRANCHES.forEach((b, i) => {
@@ -138,6 +167,7 @@ export function branchesView(body, api) {
         onClick: (btn) => { const r = act('openBranch', b.id); if (r.ok === false) return; celebrate(btn); ctx.fx?.confetti?.(document.getElementById('fx-root'), { count: 40, duration: 1.4 }); api.rerender(); } }));
     } else {
       bot.appendChild(pips(lvl, C.BRANCH.maxLevel));
+      bot.appendChild(moveBtn(s, b, api));
       if (lvl >= C.BRANCH.maxLevel) bot.appendChild(span('chip jade', ico('ui_check', 16), 'Tối đa'));
       else {
         const cost = C.BRANCH.upgradeCost(b, lvl);

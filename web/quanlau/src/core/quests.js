@@ -160,18 +160,25 @@ function giveDeco(G, id) {
   return id;
 }
 
+/** v1.7: quest XP (before LEVEL.xpGainMult) — ×QUEST_XP.mult from Lv QUEST_XP.fromLv. */
+export function questXp(level, xp) {
+  const q = C.QUEST_XP;
+  return q && (level || 1) >= q.fromLv ? Math.round(xp * q.mult) : xp;
+}
+
 export function openChest(G, chestId) {
   const s = G.state, c = C.CHESTS[chestId] || C.CHESTS.wood;
   const money = Math.round(G.rng.range(c.money[0], c.money[1]) * tierMult(G));
   addMoney(G, money, 'chest');
-  addXp(G, c.xp);
+  const xp = questXp(s.level, c.xp);
+  addXp(G, xp);
   let deco = null;
   if (c.decoChance && G.rng.chance(c.decoChance)) {
     const cand = C.DECO.filter((d) => !d.default && !s.deco.owned.includes(d.id) && d.source !== 'login' && (d.minTier || 1) <= s.tier);
     if (cand.length) deco = giveDeco(G, G.rng.pick(cand).id);
   }
   const ingredients = c.ingredientPack ? giveIngredients(G, c.ingredientPack, 2) : 0;
-  return { money, xp: c.xp, deco, ingredients };
+  return { money, xp, deco, ingredients };
 }
 
 export function claimMain(G) {
@@ -180,14 +187,15 @@ export function claimMain(G) {
   const q = C.MAIN_QUESTS[s.quests.main];
   const r = q.reward || {};
   if (r.money) addMoney(G, r.money, 'quest');
-  if (r.xp) addXp(G, r.xp);
+  const xp = r.xp ? questXp(s.level, r.xp) : 0;
+  if (xp) addXp(G, xp);
   let deco = null;
   if (r.deco) deco = giveDeco(G, r.deco);
   s.quests.main++;
   s.quests.mainClaimable = false;
   if (q.mom && !/^tier\d/.test(q.mom)) G.mom(q.mom);   // tier lines are shown by the tier-up modal
   updateQuests(G);
-  return { ok: true, reward: { money: r.money || 0, xp: r.xp || 0, deco, ingredients: 0 } };
+  return { ok: true, reward: { money: r.money || 0, xp, deco, ingredients: 0 } };
 }
 
 export function claimDaily(G, i) {

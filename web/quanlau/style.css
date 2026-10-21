@@ -869,6 +869,8 @@ button.hchip:active { transform: translateY(2px); }
 .pin-dot > * { transform: rotate(45deg); }
 .pin.open .pin-dot { background: var(--gold); box-shadow: 0 0 0 2px var(--line), inset 0 -3px 0 0 var(--gold-2); }
 .pin.hq { pointer-events: none; } .pin.hq .pin-dot { background: var(--red); }
+.pin.here .pin-dot { box-shadow: 0 0 0 2px var(--line), 0 0 0 4px var(--jade, #2f9a8a); }   /* v1.7 quán chính đang ở đây */
+.movecard { flex-direction: row !important; align-items: center; gap: 10px !important; }
 .pin-name { font: 800 10px/1 var(--f-body); background: var(--paper); padding: 3px 6px 2px; border-radius: 999px; box-shadow: 0 0 0 2px var(--line); white-space: nowrap; }
 .bsum { flex-direction: row !important; align-items: center; gap: 10px !important; }
 .br { gap: 8px !important; } .br-top { display: flex; align-items: center; gap: 10px; } .br-top b { font: 800 15px/1.2 var(--f-body); }

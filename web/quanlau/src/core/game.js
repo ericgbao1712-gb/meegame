@@ -375,6 +375,7 @@ export function createGame(save, opts = {}) {
     setFlag: wrap((key, val = true) => { state.flags.ui[String(key)] = val; return { ok: true }; }),
     openBranch: wrap((id) => day.openBranch(G, id)),
     upgradeBranch: wrap((id) => day.upgradeBranch(G, id)),
+    moveShop: wrap((id) => day.moveShop(G, id)),   // v1.7
 
     debug: {
       money: wrap((k) => { addMoney(G, Number(k) || 0, 'debug'); return { ok: true }; }),

@@ -589,7 +589,13 @@ export const BRANCHES = [
   { id: 'cantho',  name: 'Cần Thơ',  dish: 'Lẩu mắm',               cost: 245000,  income: 2.6 },
   { id: 'danang',  name: 'Đà Nẵng',  dish: 'Lẩu cá',                cost: 420000,  income: 4.1 },
   { id: 'hanoi',   name: 'Hà Nội',   dish: 'Lẩu riêu cua bắp bò',   cost: 700000,  income: 6.7 },
+  // v1.7: thêm 3 chi nhánh (cùng tỉ lệ ~105k vốn cho 1k/giây)
+  { id: 'hue',      name: 'Huế',       dish: 'Lẩu bò cay Huế',       cost: 1100000, income: 10.5 },
+  { id: 'nhatrang', name: 'Nha Trang', dish: 'Lẩu sứa cá',           cost: 1700000, income: 16 },
+  { id: 'phuquoc',  name: 'Phú Quốc',  dish: 'Lẩu cá bớp',           cost: 2600000, income: 24 },
 ];
+// v1.7 dời quán: the main shop can move to any opened branch city (scenery changes); 'saigon' = home
+export const HOME_CITY = { id: 'saigon', name: 'Sài Gòn' };
 export const BRANCH = { maxLevel: 5, upgradeCost: (b, lvl) => Math.round(b.cost * 0.6 * Math.pow(2.2, lvl - 1)) };
 
 // ───────────────────────────── QUESTS ─────────────────────────────
@@ -634,9 +640,10 @@ export const MAIN_QUESTS = [
   { id: 'q34', text: 'Mở Chuỗi Lẩu Nhà Mình',           type: 'tier', target: 5,       reward: { money: 50000 }, mom: 'tier5' },
   { id: 'q35', text: 'Mở chi nhánh đầu tiên',           type: 'branches', target: 1,   reward: { money: 30000 } },
   { id: 'q36', text: 'Mở 3 chi nhánh',                  type: 'branches', target: 3,   reward: { money: 100000 } },
-  { id: 'q37', text: 'Phủ sóng cả 5 thành phố',         type: 'branches', target: 5,   reward: { money: 300000 }, mom: 'ending' },
+  { id: 'q37', text: 'Mở 5 chi nhánh',                  type: 'branches', target: 5,   reward: { money: 300000 } },
   { id: 'qd4', text: 'Mua Máy nướng waffle',             type: 'upgrade:waffle', target: 1, reward: { money: 80000 } },
   { id: 'qd5', text: 'Bán 500 phần tráng miệng',         type: 'dessertsSold', target: 500, reward: { money: 200000 } },
+  { id: 'q38', text: 'Phủ sóng cả 8 thành phố',         type: 'branches', target: 8,   reward: { money: 1000000 }, mom: 'ending' },   // v1.7
 ];
 // v1.1: quests inserted into the main chain; old saves move their pointer past them (state.js migrate)
 export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 }];
@@ -657,6 +664,9 @@ export const DAILY_POOL = [
   { id: 'd_dessert', text: 'Bán {n} phần tráng miệng',      type: 'dessertsSold', target: (t) => [4, 8, 14, 20, 20][t - 1], chest: 'silver', minLv: 12 },
   { id: 'd_thank',   text: 'Cảm ơn {n} đánh giá',           type: 'thank',      target: () => 3, chest: 'wood' },
 ];
+// v1.7: từ Lv 10 XP nhận từ nhiệm vụ (rương nhiệm vụ ngày + mục tiêu chính) ×1.6
+export const QUEST_XP = { fromLv: 10, mult: 1.6 };
+
 export const CHESTS = {
   wood:   { name: 'Rương gỗ',  money: [80, 150],  xp: 20, decoChance: 0 },
   silver: { name: 'Rương bạc', money: [150, 300], xp: 40, decoChance: 0.05, ingredientPack: 5 },

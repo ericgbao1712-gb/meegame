@@ -62,6 +62,7 @@ export function defaultState(now = Date.now()) {
     today: newToday(),
     report: null,
     branches,
+    location: 'saigon',   // v1.7 dời quán
     ended: false,
     settings: { music: 0.6, sfx: 0.8, haptics: true, dayMin: C.TIME.defaultDayMin },
   };

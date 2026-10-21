@@ -383,6 +383,20 @@ export function upgradeBranch(G, id) {
   return { ok: true, level: lvl + 1 };
 }
 
+/** v1.7 dời quán: move the main shop to an opened branch city (or back home). Only between service days. */
+export function moveShop(G, id) {
+  const s = G.state, home = C.HOME_CITY.id;
+  const b = id === home ? C.HOME_CITY : BRANCH_BY_ID[id];
+  if (!b) return fail('unknown', 'Không có thành phố này.');
+  if (s.tier < 5) return fail('tier', 'Mở Chuỗi Lẩu Nhà Mình rồi mới dời quán được nha!');
+  if (id !== home && !(s.branches[id] > 0)) return fail('closed', `Mở chi nhánh ${b.name} trước rồi mới dời quán về đó được nha.`);
+  if ((s.location || home) === id) return fail('here', `Quán đang ở ${b.name} rồi nha.`);
+  if (s.phase === 'open' || s.phase === 'closing') return fail('open', 'Đang bán, đóng cửa xong rồi hẵng dời quán nha.');
+  s.location = id;
+  G.toast(`Quán đã dời về ${b.name}! Phong cảnh mới, khách vẫn đông như cũ.`, 'good', 'ui_map');
+  return { ok: true, location: id };
+}
+
 // ───────────── offline ─────────────
 export function offlineEarnings(G, awaySec) {
   const s = G.state, O = C.OFFLINE;

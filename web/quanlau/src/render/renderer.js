@@ -488,7 +488,7 @@ export function createRenderer(canvas, game) {
     // environment handed to the art functions (one object, mutated in place)
     env.t = time; env.clock = s.clock; env.day = s.day; env.weather = wxNow; env.event = s.event; env.tier = s.tier;
     env.layout = L; env.up = s.upgrades; env.deco = s.deco.equipped; env.open = s.phase === 'open' || s.phase === 'closing';
-    env.shopName = s.shopName;
+    env.shopName = s.shopName; env.city = s.location;   // v1.7 dời quán
     { // v1.2: the equipped lamp lights the whole shop — a little by day (CSS brightness), more at night (drawLighting)
       const den = DECO.find((d) => d.id === s.deco.equipped.den);
       env.light = (den && den.light) || 0.04;

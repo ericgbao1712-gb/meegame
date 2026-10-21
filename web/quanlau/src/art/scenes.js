@@ -9,7 +9,8 @@ import { drawIcon } from './icons.js';
 import { loadAtlas, blit, frameCanvas, DETAIL } from './assets.js';
 import PROPS from './data/props.js';
 import SCENES from './data/scenes.js';
-import { SEAT } from './layouts.js';
+import { SEAT, sceneGeom } from './layouts.js';
+import { paintCity, cityTheme } from './cities.js';
 
 const hasDOM = typeof document !== 'undefined';
 const U = 1 / DETAIL;                       // one sprite pixel in world units
@@ -71,8 +72,9 @@ function mirrorFill(g, c, horizontal, dir, edge, band, to, a0, a1) {
   }
   g.restore();
 }
-function bgFor(id) {
-  let e = bgExt[id];
+function bgFor(id, city) {
+  const ck = cityTheme(city) ? id + '|' + city : id;          // v1.7: one composite per (scene, city)
+  let e = bgExt[ck];
   if (e !== undefined) return e;
   const rec = BG[id], sc = SCENES[id];
   if (!rec || !rec.img || !sc || !hasDOM) return null;      // not decoded yet: do not cache
@@ -103,6 +105,9 @@ function bgFor(id) {
     mirrorFill(g, c, false, +1, B, BAND_Y, H, 0, W);
     // 3) above the PNG: stretch the (smooth sky) top row; the sides were already filled so the row is clean
     g.drawImage(c, 0, M, W, 1, 0, 0, W, M);
+    // v1.7 dời quán: the city's scenery around the shop (grade + pavement props + road sign)
+    const geo = sceneGeom(id);
+    if (geo && cityTheme(city)) paintCity(g, city, { L, T, R: Rr, B, W, H }, (wx, wy) => [(wx - sc.x) * DETAIL + M, (wy - sc.y) * DETAIL + M], geo.w, geo.laneY);
     // soft dusk vignette on the continuation only (fades in away from the painted art, never a visible seam)
     const fade = (x0, x1, y0, y1, flip) => {
       const gr = g.createLinearGradient(flip ? x1 : x0, 0, flip ? x0 : x1, 0);
@@ -115,7 +120,7 @@ function bgFor(id) {
     fade(Rr + WL, Rr + WL + F2, 0, H, false); g.fillStyle = 'rgba(70,56,110,0.34)'; g.fillRect(Rr + WL + F2, 0, Math.max(0, W - Rr - WL - F2), H);
     e = { c, dx: sc.x - M * U, dy: sc.y - M * U };
   } catch (err) { guard(err); e = null; }
-  bgExt[id] = e;
+  bgExt[ck] = e;
   return e;
 }
 
@@ -223,7 +228,7 @@ export function drawSceneBack(ctx, tier, env, view) {
     const L = env.layout;
     if (!L) return;
     const sc = SCENES[L.scene];
-    const e = bgFor(L.scene);
+    const e = bgFor(L.scene, env.city);
     ctx.fillStyle = (sc && sc.fill) || PAL.stone;
     ctx.fillRect(view.x0, view.y0, view.x1 - view.x0, view.y1 - view.y0);
     if (e) ctx.drawImage(e.c, e.dx, e.dy, e.c.width * U, e.c.height * U);

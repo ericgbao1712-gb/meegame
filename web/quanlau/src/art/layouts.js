@@ -135,16 +135,16 @@ const LAYOUTS = {
     },
     staffSpots: {
       waiter: [{ x: 150, y: 234 }, { x: 59, y: 265 }, { x: 105, y: 265 }, { x: 59, y: 102 }, { x: 105, y: 102 }],
-      cashier: { x: 152, y: 290 }, quankho: { x: 30, y: 231, facing: 'left' }, manager: { x: 140, y: 240 },   // v1.3: was half inside the tủ đông at the wall
+      cashier: { x: 16, y: 294 }, quankho: { x: 30, y: 231, facing: 'left' }, manager: { x: 140, y: 240 },   // v1.7: quầy thu ngân ra góc trước bên trái (trước kẹt giữa các bàn ở lối cổng)
     },
-    props: [{ id: 'haitang_counter', x: 80, y: 224 }, { id: 'haitang_cashier_desk', x: 152, y: 296 }, { id: 'haitang_balcony', x: 96, y: 148 }],
+    props: [{ id: 'haitang_counter', x: 80, y: 224 }, { id: 'haitang_cashier_desk', x: 16, y: 300 }, { id: 'haitang_balcony', x: 96, y: 148 }],
     deco: {
       den: [{ x: 16, y: 192, w: 140 }, { x: 24, y: 34, w: 140 }],
       cay: [{ x: 10, y: 262 }, { x: 22, y: 130 }],
       tuong: [{ x: 146, y: 198 }, { x: 70, y: 40 }],
-      dacbiet: [{ x: 170, y: 236 }],   // v1.2: was stacked with tủ đông + cây on the left wall
+      dacbiet: [{ x: 156, y: 228 }],   // v1.7: góc sau bên phải cạnh tủ, không còn chắn chân cầu thang (trước: 170,236)
     },
-    equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 152, y: 289 }, tarp: null, kho: { x: 14, y: 222 } },
+    equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 16, y: 293 }, tarp: null, kho: { x: 14, y: 222 } },
     sign: { x: 28, y: 157, w: 136, h: 13 },
     gate: { x: 105, y: 312, yIn: 266 },  // v1.3: front fence opening spans x 57…135 → cross on the middle aisle
     street: { y: 346 },
@@ -183,3 +183,5 @@ export function getLayout(tier, { tables = Infinity, stoves = Infinity, wing = 0
 
 export function sceneForTier(tier) { return SCENE_BY_TIER[tier]; }
 export const SCENES = Object.keys(LAYOUTS);
+/** v1.7: shop width + pavement line of a scene (world px), for the city scenery painted around it. */
+export function sceneGeom(id) { const L = LAYOUTS[id]; return L ? { w: L.w, laneY: L.lane.y } : null; }

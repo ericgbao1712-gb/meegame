@@ -4,6 +4,7 @@ import { ctx, act, G, S, sfx } from '../ctx.js';
 import * as D from '../data.js';
 import * as C from '../../config.js';
 import { fmtShort, fmtRating, fmtClock } from '../../core/format.js';
+import { questXp } from '../../core/quests.js';
 import { secTitle, noteBox, celebrate, costBtn, lockCard } from './common.js';
 
 export const CHEST_ICON = { wood: 'ui_chest_wood', silver: 'ui_chest_silver', gold: 'ui_chest_gold' };
@@ -17,7 +18,7 @@ export function fmtProg(type, v) {
 function rewardChips(r) {
   const out = [];
   if (r?.money) out.push(span('chip gold', ico('ui_coin', 16), span('num', fmtShort(r.money))));
-  if (r?.xp) out.push(span('chip jade', ico('ui_xp', 16), span('num', r.xp * (C.LEVEL.xpGainMult || 1) + ' XP')));
+  if (r?.xp) out.push(span('chip jade', ico('ui_xp', 16), span('num', questXp(D.levelInfo().level, r.xp) * (C.LEVEL.xpGainMult || 1) + ' XP')));
   if (r?.deco) out.push(span('chip', ico('ui_deco', 16), C.DECO.find((d) => d.id === r.deco)?.name || 'Trang trí'));
   return out;
 }
