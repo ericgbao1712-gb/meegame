@@ -397,7 +397,7 @@ button.hchip:active { transform: translateY(2px); }
 .switch.on::after { transform: translateX(26px); }
 .switch:disabled { opacity: .5; }
 
-.tinput { width: 100%; height: 46px; padding: 0 14px; margin: 4px 0; border-radius: 12px; background: var(--cream); color: var(--ink); font: 700 15px/1 var(--f-body); border: 0; outline: 0;
+.tinput { width: 100%; height: 46px; padding: 0 14px; margin: 4px 0; border-radius: 12px; background: var(--cream); color: var(--ink); font: 700 16px/1 var(--f-body); border: 0; outline: 0;
   box-shadow: 0 0 0 2px var(--line), inset 0 3px 0 0 rgba(90, 58, 42, .16); }
 .tinput:focus { box-shadow: 0 0 0 2px var(--jade-2), 0 0 0 5px rgba(47, 154, 138, .3), inset 0 3px 0 0 rgba(90, 58, 42, .16); }
 .tinput::placeholder { color: #b69d86; }

@@ -77,7 +77,8 @@
     .btn.solid-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
     .btn.sm { min-height: 30px; padding: 0 10px; font-size: 13px; border-radius: 8px; }
     :is(.btn, .pill, .seg button, .tabs button, input, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-    input, select { height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); min-width: 0; }
+    /* 16px: dưới 16px iPhone tự phóng to trang khi chạm vào ô nhập */
+    input, select { font-size: 16px; height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); min-width: 0; }
     input:focus, select:focus { border-color: var(--accent); outline: none; }
     .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
     .field small { font-weight: 400; color: var(--ink-2); }
