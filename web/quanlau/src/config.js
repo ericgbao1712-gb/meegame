@@ -1019,6 +1019,18 @@ export const BOX = {
     { id: 'bx_b_dinh',    r: 3, kind: 'badge', icon: 'ui_fire', name: 'Lẩu đỉnh nóc' },
     { id: 'bx_b_rong',    r: 4, kind: 'badge', icon: 'pot_dacbiet', name: 'Rồng vàng' },
     { id: 'bx_b_huyen',   r: 4, kind: 'badge', icon: 'ui_heart', name: 'Huyền thoại Lẩu Ơi' },
+    // v1.18f thêm 11 thẻ: 4 Thường, 3 Hiếm, 2 Cực hiếm, 2 Bí ẩn (SSR)
+    { id: 'bx_b_mua',     r: 1, kind: 'badge', icon: 'wx_rain',     name: 'Khách quen ngày mưa' },
+    { id: 'bx_b_tratac',  r: 1, kind: 'badge', icon: 'drk_tratac',  name: 'Mê trà tắc' },
+    { id: 'bx_b_cudem',   r: 1, kind: 'badge', icon: 'emo_zzz',     name: 'Cú đêm bán lẩu' },
+    { id: 'bx_b_nam',     r: 1, kind: 'badge', icon: 'pot_nam',     name: 'Chuyên gia lẩu nấm' },
+    { id: 'bx_b_haisan',  r: 2, kind: 'badge', icon: 'ing_muc',     name: 'Trùm hải sản' },
+    { id: 'bx_b_veso',    r: 2, kind: 'badge', icon: 'ui_ticket',   name: 'Tay chơi vé số' },
+    { id: 'bx_b_decor',   r: 2, kind: 'badge', icon: 'ui_deco',     name: 'Phù thủy trang trí' },
+    { id: 'bx_b_bepluu',  r: 3, kind: 'badge', icon: 'eq_stove',    name: 'Bếp lửa không tắt' },
+    { id: 'bx_b_daigia',  r: 3, kind: 'badge', icon: 'emo_money',   name: 'Đại gia phố lẩu' },
+    { id: 'bx_b_mattroi', r: 4, kind: 'badge', icon: 'wx_sun',      name: 'Mặt trời phố lẩu' },
+    { id: 'bx_b_kholau',  r: 4, kind: 'badge', icon: 'ui_chest_gold', name: 'Kho báu Lẩu Ơi' },
   ],
 };
 // v1.18 kiểu NỒI LẨU / BÀN LẨU độc quyền Hộp mù: đổi màu lúc vẽ (art/scenes.js tô lại phần inox của nồi, phần gỗ của bàn ghế).
