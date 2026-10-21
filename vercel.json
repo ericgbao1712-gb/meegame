@@ -11,6 +11,10 @@
       "destination": "/web/admin.html"
     },
     {
+      "source": "/admin/games",
+      "destination": "/web/game-admin.html"
+    },
+    {
       "source": "/xoailac",
       "destination": "/web/xoailac/index.html"
     },

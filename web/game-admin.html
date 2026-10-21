@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="vi">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex">
+  <title>Quản lý game · MeeGame</title>
+  <meta name="theme-color" content="#FFF6F8">
+  <link rel="icon" href="/assets/admin-icon-180.png">
+  <link rel="apple-touch-icon" href="/assets/admin-icon-180.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>
+    (() => {
+      try {
+        const saved = localStorage.getItem('meegame_theme');
+        const dark = saved ? saved === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+        if (dark) document.documentElement.classList.add('dark-mode');
+      } catch (_) { }
+    })();
+  </script>
+  <style>
+    /* Trang quản lý Lẩu Ơi! + Xoài Lắc Ơi! — cùng bảng màu với trang Đăng game (/admin).
+       Bố cục: thanh trên (logo · tên · liên kết) → chọn game → 4 tab: Tổng quan / Người chơi / Xếp hạng / Mã quà tặng. */
+    :root {
+      --bg: #FFF6F8; --raised: #FFFFFF; --fill: #FCEAF0; --fill-2: #F8DCE6; --line: #F4DEE5;
+      --ink: #2B1820; --ink-2: #7A5864; --accent: #C21E5C; --on-accent: #FFFFFF; --tint: #FDE1EB; --on-tint: #9A1747;
+      --danger: #C42318; --danger-tint: #FCE9E7; --good: #1F7A4D; --good-tint: #E3F5EA; --warn: #9A5B00; --warn-tint: #FFF1D6;
+      --lau: #D93A2B; --xoai: #5F9A1A;
+      --lift: 0 10px 30px rgba(120, 30, 64, .14), 0 1px 3px rgba(120, 30, 64, .08);
+      --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+      --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+      --ease: cubic-bezier(.2, .8, .2, 1);
+      color-scheme: light;
+    }
+    html.dark-mode {
+      --bg: #170F13; --raised: #22181D; --fill: #2B1F25; --fill-2: #382930; --line: #34262D;
+      --ink: #FBF0F4; --ink-2: #C9A9B5; --accent: #FF8DB4; --on-accent: #3B0A1D; --tint: #3F1F2C; --on-tint: #FFB6CF;
+      --danger: #FF7A6E; --danger-tint: #3A1C19; --good: #6FD69C; --good-tint: #183326; --warn: #FFC56B; --warn-tint: #3A2A10;
+      --lau: #FF7D6B; --xoai: #A9D36A;
+      --lift: 0 12px 34px rgba(0, 0, 0, .55);
+      color-scheme: dark;
+    }
+    *, *::before, *::after { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.5 var(--font); }
+    button, input, select { font: inherit; color: inherit; }
+    [hidden] { display: none !important; }
+    a { color: inherit; }
+    .wrap { width: min(1180px, 100%); margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+    .num { font-variant-numeric: tabular-nums; }
+    .icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+
+    /* thanh trên */
+    .top { position: sticky; top: 0; z-index: 10; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-bottom: 1px solid var(--line); }
+    .top .wrap { display: flex; align-items: center; gap: 12px; padding-block: 10px; }
+    .top img { width: 40px; height: 40px; border-radius: 12px; }
+    .top-title { flex: 1; min-width: 0; }
+    .top-title h1 { margin: 0; font-size: 18px; line-height: 1.2; }
+    .top-title p { margin: 0; font-size: 13px; color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--raised); text-decoration: none; font-size: 14px; font-weight: 600; cursor: pointer; }
+    .pill:hover { background: var(--fill); }
+    @media (max-width: 560px) { .pill span { display: none; } .pill { width: 36px; padding: 0; justify-content: center; } }
+
+    /* nút, ô nhập */
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 36px; padding: 0 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+    .btn:hover { background: var(--fill); }
+    .btn:disabled { opacity: .5; cursor: default; }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+    .btn.primary:hover { filter: brightness(1.06); }
+    .btn.danger { color: var(--danger); border-color: color-mix(in srgb, var(--danger) 35%, var(--line)); }
+    .btn.danger:hover { background: var(--danger-tint); }
+    .btn.solid-danger { background: var(--danger); border-color: var(--danger); color: #fff; }
+    .btn.sm { min-height: 30px; padding: 0 10px; font-size: 13px; border-radius: 8px; }
+    :is(.btn, .pill, .seg button, .tabs button, input, select):focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    input, select { height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--raised); min-width: 0; }
+    input:focus, select:focus { border-color: var(--accent); outline: none; }
+    .field { display: flex; flex-direction: column; gap: 4px; font-size: 13px; font-weight: 600; }
+    .field small { font-weight: 400; color: var(--ink-2); }
+    .two { display: grid; gap: 12px; grid-template-columns: 1fr; }
+    @media (min-width: 560px) { .two { grid-template-columns: 1fr 1fr; } }
+
+    /* chọn game + tab */
+    .bar { display: flex; flex-wrap: wrap; gap: 10px 16px; align-items: center; justify-content: space-between; padding-block: 18px 8px; }
+    .seg { display: inline-flex; padding: 3px; border-radius: 12px; background: var(--fill); gap: 2px; }
+    .seg button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 9px; font-weight: 700; font-size: 14px; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+    .seg button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot.lau { background: var(--lau); } .dot.xoai { background: var(--xoai); }
+    .tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; }
+    .tabs button { border: 0; background: none; padding: 10px 14px 12px; font-weight: 600; font-size: 14px; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+    .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+    .view { padding-block: 18px 64px; }
+
+    /* tổng quan */
+    .stats { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+    .stat { padding: 14px; border-radius: 14px; background: var(--raised); border: 1px solid var(--line); }
+    .stat b { display: block; font-size: 26px; line-height: 1.15; }
+    .stat span { font-size: 13px; color: var(--ink-2); }
+    .stat.alert { border-color: color-mix(in srgb, var(--danger) 40%, var(--line)); }
+    .stat.alert b { color: var(--danger); }
+    .cols { display: grid; gap: 18px; margin-top: 18px; }
+    @media (min-width: 900px) { .cols { grid-template-columns: 1fr 1fr; } }
+    .card { padding: 16px; border-radius: 16px; background: var(--raised); border: 1px solid var(--line); min-width: 0; }
+    .card h2 { margin: 0 0 12px; font-size: 16px; }
+    .bars { display: grid; gap: 8px; }
+    .bar-row { display: grid; grid-template-columns: 84px 1fr 44px; gap: 10px; align-items: center; font-size: 13px; }
+    .bar-row i { display: block; height: 12px; border-radius: 6px; background: var(--fill-2); overflow: hidden; }
+    .bar-row i::after { content: ''; display: block; height: 100%; width: var(--w); background: var(--game, var(--accent)); border-radius: 6px; }
+    .bar-row b { text-align: right; }
+
+    /* danh sách người chơi */
+    .tools { display: grid; gap: 10px; grid-template-columns: 1fr; margin-bottom: 8px; }
+    @media (min-width: 760px) { .tools { grid-template-columns: minmax(0, 1fr) auto auto; } }
+    .chips { display: flex; gap: 6px; flex-wrap: wrap; }
+    .chip { border: 1px solid var(--line); background: var(--raised); height: 34px; padding: 0 12px; border-radius: 999px; font-size: 13px; font-weight: 600; cursor: pointer; }
+    .chip[aria-pressed="true"] { background: var(--tint); color: var(--on-tint); border-color: transparent; }
+    .meta { font-size: 13px; color: var(--ink-2); margin: 6px 0; }
+    .plist { list-style: none; margin: 0; padding: 0; }
+    .prow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 4px 12px; align-items: center; padding: 10px 8px; border-bottom: 1px solid var(--line); cursor: pointer; border-radius: 10px; }
+    .prow:hover { background: var(--fill); }
+    .avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--fill-2); display: grid; place-items: center; font-weight: 700; color: var(--ink-2); overflow: hidden; grid-row: span 2; }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .pname { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .psub { grid-column: 2 / -1; font-size: 13px; color: var(--ink-2); display: flex; flex-wrap: wrap; gap: 2px 12px; }
+    .plv { font-weight: 700; font-size: 14px; }
+    .tag { display: inline-flex; align-items: center; height: 20px; padding: 0 7px; border-radius: 6px; font-size: 11.5px; font-weight: 700; }
+    .tag.red { background: var(--danger-tint); color: var(--danger); }
+    .tag.amber { background: var(--warn-tint); color: var(--warn); }
+    .tag.gray { background: var(--fill-2); color: var(--ink-2); }
+    .tag.green { background: var(--good-tint); color: var(--good); }
+    .more { display: flex; justify-content: center; padding: 14px; }
+    .empty { padding: 28px 8px; text-align: center; color: var(--ink-2); }
+
+    /* chi tiết người chơi (khung trượt) */
+    dialog { border: 0; padding: 0; background: var(--raised); color: var(--ink); box-shadow: var(--lift); }
+    dialog::backdrop { background: rgba(10, 12, 14, .45); }
+    #detail { width: min(560px, 100%); height: 100%; max-height: none; margin: 0 0 0 auto; border-radius: 18px 0 0 18px; }
+    #detail[open] { animation: slideIn .25s var(--ease); }
+    @keyframes slideIn { from { transform: translateX(30px); opacity: 0; } }
+    .d-head { position: sticky; top: 0; background: var(--raised); display: flex; gap: 12px; align-items: center; padding: 16px; border-bottom: 1px solid var(--line); z-index: 1; }
+    .d-head .grow { flex: 1; min-width: 0; }
+    .d-head h2 { margin: 0; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .d-head p { margin: 0; font-size: 13px; color: var(--ink-2); overflow-wrap: anywhere; }
+    .d-body { padding: 16px; display: grid; gap: 16px; }
+    .d-sec h3 { margin: 0 0 8px; font-size: 14px; color: var(--ink-2); text-transform: uppercase; letter-spacing: .06em; }
+    .save-card { padding: 12px; border-radius: 12px; border: 1px solid var(--line); display: grid; gap: 8px; }
+    .save-card header { display: flex; align-items: center; gap: 8px; font-weight: 700; }
+    .kv { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px 12px; font-size: 13px; }
+    .kv span { color: var(--ink-2); display: block; font-size: 12px; }
+    .acts { display: flex; flex-wrap: wrap; gap: 6px; }
+    .mini { list-style: none; margin: 0; padding: 0; font-size: 13px; }
+    .mini li { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px solid var(--line); }
+    .mini li:last-child { border-bottom: 0; }
+
+    /* bảng xếp hạng */
+    .rank { list-style: none; margin: 0; padding: 0; }
+    .rank li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 6px; border-bottom: 1px solid var(--line); }
+    .rank .r { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; background: var(--fill-2); font-weight: 700; font-size: 13px; }
+    .rank li:nth-child(1) .r { background: #F2B53A; color: #3a2600; } .rank li:nth-child(2) .r { background: #B9C3CC; color: #222; } .rank li:nth-child(3) .r { background: #C98A5E; color: #2a1405; }
+
+    /* mã quà tặng */
+    .gift { display: grid; gap: 18px; }
+    @media (min-width: 980px) { .gift { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
+    .gift form { display: grid; gap: 12px; }
+    .code { font: 700 16px/1.2 var(--mono); letter-spacing: .04em; overflow-wrap: anywhere; }
+    .crow { padding: 12px 6px; border-bottom: 1px solid var(--line); display: grid; gap: 6px; }
+    .crow .top-line { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; justify-content: space-between; }
+    .crow.off .code { color: var(--ink-2); text-decoration: line-through; }
+    .crow .who { margin-top: 4px; }
+    .msg { margin: 0; padding: 10px 12px; border-radius: 10px; font-size: 14px; }
+    .msg.error { background: var(--danger-tint); color: var(--danger); }
+
+    /* đăng nhập */
+    .login { max-width: 400px; margin: 48px auto; display: grid; gap: 12px; }
+    .login h2 { margin: 0; }
+    #confirm { width: min(420px, calc(100% - 32px)); border-radius: 18px; }
+    #confirm .box { padding: 18px; display: grid; gap: 12px; }
+    #confirm h2 { margin: 0; font-size: 18px; }
+    #confirm p { margin: 0; color: var(--ink-2); }
+    .toast { position: fixed; left: 50%; bottom: max(20px, env(safe-area-inset-bottom, 0px)); transform: translate(-50%, 20px); padding: 10px 16px; border-radius: 12px; background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s, transform .25s var(--ease); z-index: 50; max-width: calc(100% - 32px); }
+    .toast.show { opacity: 1; transform: translate(-50%, 0); }
+    @media (prefers-reduced-motion: reduce) { #detail[open] { animation: none; } .toast { transition: none; } }
+  </style>
+</head>
+
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-out" viewBox="0 0 24 24"><path d="M14 5H6a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8M10 12h10M16.5 8.5 20 12l-3.5 3.5" /></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16v4zM13.5 6.5l4 4" /></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" /></symbol>
+    <symbol id="i-reload" viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v4h-4" /></symbol>
+  </svg>
+
+  <header class="top">
+    <div class="wrap">
+      <img src="/assets/admin-icon-180.png" alt="" width="40" height="40">
+      <div class="top-title">
+        <h1>Quản lý game</h1>
+        <p id="who">Lẩu Ơi! · Xoài Lắc Ơi!</p>
+      </div>
+      <a class="pill" href="/admin"><svg class="icon"><use href="#i-edit" /></svg><span>Đăng game</span></a>
+      <button class="pill" type="button" id="logout" hidden><svg class="icon"><use href="#i-out" /></svg><span>Thoát</span></button>
+    </div>
+  </header>
+
+  <main>
+    <section class="wrap" id="login-view" hidden>
+      <form class="login card" id="login-form" novalidate>
+        <h2>Đăng nhập quản trị</h2>
+        <p class="meta" style="margin:0">Dùng email và mật khẩu của trang Đăng game.</p>
+        <label class="field">Email<input id="email" type="email" autocomplete="username" required></label>
+        <label class="field">Mật khẩu<input id="password" type="password" autocomplete="current-password" required></label>
+        <p class="msg error" id="login-error" role="alert" hidden></p>
+        <button class="btn primary" id="login-btn" type="submit">Đăng nhập</button>
+      </form>
+    </section>
+
+    <section id="app-view" hidden>
+      <div class="wrap">
+        <div class="bar">
+          <div class="seg" role="group" aria-label="Chọn game">
+            <button type="button" data-game="quanlau" aria-pressed="true"><i class="dot lau"></i>Lẩu Ơi!</button>
+            <button type="button" data-game="xoailac" aria-pressed="false"><i class="dot xoai"></i>Xoài Lắc Ơi!</button>
+          </div>
+          <button class="btn sm" type="button" id="reload"><svg class="icon"><use href="#i-reload" /></svg>Tải lại</button>
+        </div>
+        <nav class="tabs" role="tablist" aria-label="Mục quản lý">
+          <button role="tab" type="button" data-tab="overview" aria-selected="true">Tổng quan</button>
+          <button role="tab" type="button" data-tab="players" aria-selected="false">Người chơi</button>
+          <button role="tab" type="button" data-tab="rank" aria-selected="false">Xếp hạng</button>
+          <button role="tab" type="button" data-tab="codes" aria-selected="false">Mã quà tặng</button>
+        </nav>
+
+        <!-- Tổng quan -->
+        <div class="view" id="tab-overview">
+          <div class="stats" id="stats"></div>
+          <div class="cols">
+            <div class="card"><h2>Người chơi theo cấp</h2><div class="bars" id="levels"></div></div>
+            <div class="card"><h2>Cần kiểm tra</h2><p class="meta" style="margin-top:-6px">Quán bị máy chủ đánh dấu vì tiền hoặc số món tăng bất thường. Đang bị ẩn khỏi bảng xếp hạng.</p><ul class="plist" id="flagged"></ul></div>
+          </div>
+        </div>
+
+        <!-- Người chơi -->
+        <div class="view" id="tab-players" hidden>
+          <div class="tools">
+            <input id="q" type="search" placeholder="Tìm Gmail, tên, tên quán hoặc mã số" aria-label="Tìm người chơi">
+            <div class="chips" role="group" aria-label="Lọc">
+              <button class="chip" type="button" data-filter="all" aria-pressed="true">Tất cả</button>
+              <button class="chip" type="button" data-filter="flagged" aria-pressed="false">Bị đánh dấu</button>
+              <button class="chip" type="button" data-filter="hidden" aria-pressed="false">Đang ẩn</button>
+              <button class="chip" type="button" data-filter="cheat" aria-pressed="false">Dùng bảng thử</button>
+            </div>
+            <select id="sort" aria-label="Sắp xếp">
+              <option value="recent">Mới chơi gần đây</option>
+              <option value="level">Cấp cao nhất</option>
+              <option value="money">Kiếm nhiều tiền nhất</option>
+              <option value="pots">Bán nhiều món nhất</option>
+              <option value="new">Tài khoản mới nhất</option>
+            </select>
+          </div>
+          <p class="meta num" id="p-meta"></p>
+          <ul class="plist" id="players"></ul>
+          <div class="more"><button class="btn" type="button" id="more" hidden>Xem thêm</button></div>
+        </div>
+
+        <!-- Xếp hạng -->
+        <div class="view" id="tab-rank" hidden>
+          <div class="bar" style="padding-top:0">
+            <div class="seg" role="group" aria-label="Xếp theo">
+              <button type="button" data-by="level" aria-pressed="true">Cấp độ</button>
+              <button type="button" data-by="money">Tiền kiếm</button>
+              <button type="button" data-by="pots" id="by-pots">Món bán</button>
+            </div>
+          </div>
+          <p class="meta">Đúng như người chơi thấy trong game: top 50, không gồm quán đang ẩn, bị đánh dấu hoặc dùng bảng thử.</p>
+          <ul class="rank" id="rank"></ul>
+        </div>
+
+        <!-- Mã quà tặng -->
+        <div class="view" id="tab-codes" hidden>
+          <div class="gift">
+            <div class="card">
+              <h2>Tạo mã mới</h2>
+              <form id="gc-form" novalidate>
+                <div class="two">
+                  <label class="field">Mã *<input id="gc-code" maxlength="32" placeholder="TIKTOK1000" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><small>Chữ không dấu, số, - hoặc _.</small></label>
+                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Cả hai game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option></select></label>
+                </div>
+                <div class="two">
+                  <label class="field">Tiền tặng (nghìn đồng)<input id="gc-money" type="number" min="0" step="1" inputmode="numeric" placeholder="0"><small id="gc-money-hint">500 = 500.000đ trong game.</small></label>
+                  <label class="field">XP tặng<input id="gc-xp" type="number" min="0" step="1" inputmode="numeric" placeholder="0"><small>Cộng đúng số này vào thanh XP.</small></label>
+                </div>
+                <div class="two">
+                  <label class="field">Số người được nhận<input id="gc-max" type="number" min="1" step="1" inputmode="numeric" placeholder="Không giới hạn"><small>Để trống = ai nhập cũng nhận.</small></label>
+                  <label class="field">Hết hạn sau ngày<input id="gc-exp" type="date"><small>Để trống = không hết hạn.</small></label>
+                </div>
+                <label class="field">Ghi chú<input id="gc-note" maxlength="120" placeholder="Quà livestream 21/10"></label>
+                <p class="msg error" id="gc-error" role="alert" hidden></p>
+                <button class="btn primary" type="submit" id="gc-save">Tạo mã</button>
+              </form>
+            </div>
+            <div class="card">
+              <h2>Các mã đã tạo <span class="meta num" id="gc-meta"></span></h2>
+              <div id="codes"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <dialog id="detail" aria-labelledby="d-name">
+    <div class="d-head">
+      <div class="avatar" id="d-avatar"></div>
+      <div class="grow"><h2 id="d-name"></h2><p id="d-email"></p></div>
+      <button class="pill" type="button" id="d-close" aria-label="Đóng"><svg class="icon"><use href="#i-close" /></svg></button>
+    </div>
+    <div class="d-body" id="d-body"></div>
+  </dialog>
+
+  <dialog id="confirm">
+    <form method="dialog" class="box">
+      <h2 id="c-title"></h2>
+      <p id="c-text"></p>
+      <label class="field" id="c-type-wrap" hidden>Gõ <b id="c-word"></b> để xác nhận<input id="c-type" autocomplete="off"></label>
+      <div class="acts" style="justify-content:flex-end"><button class="btn" value="cancel">Thôi</button><button class="btn solid-danger" value="ok" id="c-ok">Đồng ý</button></div>
+    </form>
+  </dialog>
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script>
+    (() => {
+      const TOKEN_KEY = 'meegame_admin_token_v1';
+      const $ = (id) => document.getElementById(id);
+      const GAMES = { quanlau: { name: 'Lẩu Ơi!', unit: 'nồi', units: 'Nồi lẩu bán', color: 'var(--lau)' }, xoailac: { name: 'Xoài Lắc Ơi!', unit: 'phần', units: 'Phần xoài bán', color: 'var(--xoai)' } };
+      const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (_) { return d; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) { } } };
+      let game = GAMES[store.get('meegame_admin_game')] ? store.get('meegame_admin_game') : 'quanlau';
+      let tab = 'overview';
+
+      // ---------- tiện ích ----------
+      function h(tag, attrs, ...kids) {
+        const el = document.createElement(tag);
+        for (const [k, v] of Object.entries(attrs || {})) {
+          if (v == null || v === false) continue;
+          if (k === 'class') el.className = v; else if (k === 'text') el.textContent = v;
+          else if (k.startsWith('on')) el.addEventListener(k.slice(2), v); else el.setAttribute(k, v === true ? '' : v);
+        }
+        kids.flat().forEach((c) => c != null && c !== false && el.append(c));
+        return el;
+      }
+      const fmt = (n) => Number(n || 0).toLocaleString('vi-VN');
+      /** tiền trong game tính theo nghìn đồng (k) */
+      const money = (k) => { k = Number(k) || 0; return k >= 1e6 ? (k / 1e6).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' tỷ' : k >= 1000 ? (k / 1000).toLocaleString('vi-VN', { maximumFractionDigits: 1 }) + ' triệu' : fmt(Math.round(k)) + 'k'; };
+      const ago = (ms) => { if (!ms) return '—'; const m = Math.round((Date.now() - ms) / 60000); return m < 1 ? 'vừa xong' : m < 60 ? m + ' phút trước' : m < 1440 ? Math.round(m / 60) + ' giờ trước' : m < 43200 ? Math.round(m / 1440) + ' ngày trước' : new Date(ms).toLocaleDateString('vi-VN'); };
+      const isoDate = (s) => { const d = new Date(s); return isNaN(d) ? '—' : d.toLocaleDateString('vi-VN'); };
+      let toastT;
+      const toast = (t) => { const el = $('toast'); el.textContent = t; el.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('show'), 2600); };
+      const avatar = (p) => p.picture ? h('img', { src: p.picture, alt: '', referrerpolicy: 'no-referrer', loading: 'lazy' }) : (p.name || p.email || '?').charAt(0).toUpperCase();
+
+      async function call(method, r, body, g = game) {
+        const headers = { 'X-MeeGame': '1' };
+        const token = store.get(TOKEN_KEY);
+        if (token) headers.Authorization = 'Bearer ' + token;
+        if (body !== undefined) headers['Content-Type'] = 'application/json';
+        const url = r.startsWith('/api/') ? r : '/api/lau?g=' + encodeURIComponent(g) + '&r=' + r;
+        let res;
+        try { res = await fetch(url, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store' }); } catch (_) { return { error: { status: 0, message: 'Không kết nối được máy chủ. Kiểm tra mạng rồi thử lại.' } }; }
+        let data = null;
+        try { data = await res.json(); } catch (_) { }
+        if (res.ok) return { data };
+        if (res.status === 401 && !r.includes('admin/login')) { store.set(TOKEN_KEY, null); signedOut(data?.message); }
+        return { error: { status: res.status, message: data?.message || 'Máy chủ trả lỗi ' + res.status + '.' } };
+      }
+      function ask({ title, text, ok = 'Đồng ý', word = null }) {
+        return new Promise((resolve) => {
+          const d = $('confirm');
+          $('c-title').textContent = title; $('c-text').textContent = text; $('c-ok').textContent = ok;
+          $('c-type-wrap').hidden = !word; $('c-word').textContent = word || ''; $('c-type').value = '';
+          const sync = () => { $('c-ok').disabled = !!word && $('c-type').value.trim().toUpperCase() !== word; };
+          $('c-type').oninput = sync; sync();
+          d.onclose = () => resolve(d.returnValue === 'ok');
+          d.returnValue = ''; d.showModal();
+          if (word) $('c-type').focus();
+        });
+      }
+
+      // ---------- đăng nhập ----------
+      function signedOut(message) {
+        $('app-view').hidden = true; $('login-view').hidden = false; $('logout').hidden = true;
+        $('who').textContent = 'Lẩu Ơi! · Xoài Lắc Ơi!';
+        $('login-error').textContent = message || ''; $('login-error').hidden = !message;
+      }
+      $('login-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = $('email').value.trim(), password = $('password').value;
+        if (!email || !password) { $('login-error').textContent = 'Nhập email và mật khẩu.'; $('login-error').hidden = false; return; }
+        $('login-btn').disabled = true;
+        const { data, error } = await call('POST', '/api/admin/login', { email, password });
+        $('login-btn').disabled = false;
+        if (error) { $('login-error').textContent = error.message; $('login-error').hidden = false; return; }
+        store.set(TOKEN_KEY, data.token); $('password').value = '';
+        enter();
+      });
+      $('logout').addEventListener('click', async () => { await call('POST', '/api/admin/logout'); store.set(TOKEN_KEY, null); signedOut(); });
+      async function enter() {
+        if (!store.get(TOKEN_KEY)) { signedOut(); return; }
+        const { data, error } = await call('GET', '/api/admin/me');
+        if (error) { if (error.status !== 401) signedOut(error.message); return; }
+        $('who').textContent = 'Quản trị · ' + data.email;
+        $('logout').hidden = false; $('login-view').hidden = true; $('app-view').hidden = false;
+        syncGame(); showTab(tab);
+      }
+
+      // ---------- chọn game / tab ----------
+      document.querySelectorAll('[data-game]').forEach((b) => b.addEventListener('click', () => { game = b.dataset.game; store.set('meegame_admin_game', game); syncGame(); showTab(tab, true); }));
+      function syncGame() {
+        document.querySelectorAll('[data-game]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.game === game)));
+        document.documentElement.style.setProperty('--game', GAMES[game].color);
+        $('by-pots').textContent = game === 'xoailac' ? 'Phần xoài' : 'Nồi lẩu';
+      }
+      document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
+      function showTab(t, reload = true) {
+        tab = t;
+        document.querySelectorAll('[data-tab]').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.tab === t)));
+        for (const id of ['overview', 'players', 'rank', 'codes']) $('tab-' + id).hidden = id !== t;
+        if (!reload) return;
+        if (t === 'overview') loadOverview();
+        if (t === 'players') loadPlayers(true);
+        if (t === 'rank') loadRank();
+        if (t === 'codes') loadCodes();
+      }
+      $('reload').addEventListener('click', () => showTab(tab));
+
+      // ---------- Tổng quan ----------
+      async function loadOverview() {
+        const box = $('stats'); box.textContent = '';
+        const { data, error } = await call('GET', 'admin/stats');
+        if (error) { box.append(h('p', { class: 'msg error', text: error.message })); return; }
+        const tile = (n, label, alert) => h('div', { class: 'stat' + (alert && n > 0 ? ' alert' : '') }, h('b', { class: 'num', text: typeof n === 'number' ? fmt(n) : n }), h('span', { text: label }));
+        box.append(
+          tile(data.saves, 'Người có quán'), tile(data.active1d, 'Chơi trong 24 giờ'), tile(data.active7d, 'Chơi trong 7 ngày'),
+          tile(data.avgLevel.toLocaleString('vi-VN') + ' / ' + data.maxLevel, 'Cấp trung bình / cao nhất'),
+          tile(money(data.moneyEarned), 'Tổng tiền đã kiếm'), tile(data.potsSold, GAMES[game].units),
+          tile(data.flagged, 'Bị đánh dấu', true), tile(data.hidden, 'Đang ẩn khỏi bảng'), tile(data.cheat, 'Từng dùng bảng thử'),
+          tile(data.codesLive, 'Mã quà đang dùng được'), tile(data.redemptions7d, 'Lượt nhận mã (7 ngày)'), tile(data.accounts, 'Tài khoản MeeGame (cả 2 game)'));
+        const max = Math.max(1, ...data.levels.map((l) => l.n));
+        $('levels').textContent = '';
+        data.levels.forEach((l) => $('levels').append(h('div', { class: 'bar-row' }, h('span', { text: 'Cấp ' + l.band }), h('i', { style: '--w:' + (l.n / max * 100) + '%' }), h('b', { class: 'num', text: fmt(l.n) }))));
+        const fl = await call('GET', 'admin/players&filter=flagged&sort=money&limit=8');
+        $('flagged').textContent = '';
+        const list = fl.data?.players || [];
+        if (!list.length) $('flagged').append(h('li', { class: 'empty', text: 'Không có quán nào cần kiểm tra.' }));
+        list.forEach((p) => $('flagged').append(playerRow(p)));
+      }
+
+      // ---------- Người chơi ----------
+      let pFilter = 'all', pOffset = 0, qTimer;
+      document.querySelectorAll('[data-filter]').forEach((b) => b.addEventListener('click', () => {
+        pFilter = b.dataset.filter;
+        document.querySelectorAll('[data-filter]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+        loadPlayers(true);
+      }));
+      $('sort').addEventListener('change', () => loadPlayers(true));
+      $('q').addEventListener('input', () => { clearTimeout(qTimer); qTimer = setTimeout(() => loadPlayers(true), 300); });
+      $('more').addEventListener('click', () => loadPlayers(false));
+      function playerRow(p) {
+        const tags = [p.flagged ? h('span', { class: 'tag red', text: 'Bị đánh dấu' }) : null, p.hidden ? h('span', { class: 'tag gray', text: 'Đang ẩn' }) : null, p.cheat ? h('span', { class: 'tag amber', text: 'Bảng thử' }) : null];
+        return h('li', { class: 'prow', tabindex: '0', role: 'button', onclick: () => openPlayer(p.id), onkeydown: (e) => { if (e.key === 'Enter') openPlayer(p.id); } },
+          h('div', { class: 'avatar' }, avatar(p)),
+          h('div', { class: 'pname', text: (p.shopName || 'Quán') + ' · ' + (p.name || p.email) }),
+          h('div', { class: 'plv num', text: 'Cấp ' + p.level }),
+          h('div', { class: 'psub' }, h('span', { text: p.email }), h('span', { class: 'num', text: 'Ngày ' + fmt(p.day) }), h('span', { class: 'num', text: money(p.moneyEarned) }), h('span', { text: ago(p.updatedAt) }), ...tags));
+      }
+      async function loadPlayers(reset) {
+        if (reset) { pOffset = 0; $('players').textContent = ''; }
+        const q = $('q').value.trim();
+        const { data, error } = await call('GET', `admin/players&filter=${pFilter}&sort=${$('sort').value}&limit=50&offset=${pOffset}` + (q ? '&q=' + encodeURIComponent(q) : ''));
+        if (error) { $('p-meta').textContent = error.message; return; }
+        data.players.forEach((p) => $('players').append(playerRow(p)));
+        pOffset += data.players.length;
+        $('p-meta').textContent = fmt(data.total) + ' người chơi' + (q ? ' khớp "' + q + '"' : '');
+        if (!data.total) $('players').append(h('li', { class: 'empty', text: 'Không có người chơi nào.' }));
+        $('more').hidden = pOffset >= data.total;
+      }
+
+      // chi tiết
+      let openId = null;
+      $('d-close').addEventListener('click', () => $('detail').close());
+      $('detail').addEventListener('click', (e) => { if (e.target === $('detail')) $('detail').close(); });
+      async function openPlayer(id) {
+        openId = id;
+        const d = $('detail');
+        $('d-body').textContent = ''; $('d-body').append(h('p', { class: 'meta', text: 'Đang tải…' }));
+        if (!d.open) d.showModal();
+        const { data, error } = await call('GET', 'admin/players/' + id);
+        $('d-body').textContent = '';
+        if (error) { $('d-body').append(h('p', { class: 'msg error', text: error.message })); return; }
+        const p = data.player;
+        $('d-avatar').textContent = ''; $('d-avatar').append(avatar(p));
+        $('d-name').textContent = p.name || p.email;
+        $('d-email').textContent = p.email + ' · mã số ' + p.id + ' · tạo ' + isoDate(p.createdAt) + ' · đăng nhập ' + isoDate(p.lastLogin);
+        const act = async (g, body, msg, confirmOpts) => {
+          if (confirmOpts && !(await ask(confirmOpts))) return;
+          const { error } = await call('POST', 'admin/players/' + id, body, g);
+          if (error) return toast(error.message);
+          toast(msg);
+          if (body.deleteAccount) $('detail').close(); else openPlayer(id);
+          if (tab === 'players') loadPlayers(true); if (tab === 'overview') loadOverview();
+        };
+        // tài khoản
+        $('d-body').append(h('section', { class: 'd-sec' }, h('h3', { text: 'Tài khoản' }),
+          h('div', { class: 'acts' },
+            p.hidden ? h('button', { class: 'btn sm', type: 'button', text: 'Hiện lại trên bảng xếp hạng', onclick: () => act(game, { hidden: false }, 'Đã hiện lại trên bảng xếp hạng.') })
+              : h('button', { class: 'btn sm', type: 'button', text: 'Ẩn khỏi bảng xếp hạng', onclick: () => act(game, { hidden: true }, 'Đã ẩn khỏi bảng xếp hạng (cả hai game).') }),
+            h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá tài khoản', onclick: () => act(game, { deleteAccount: true }, 'Đã xoá tài khoản.', { title: 'Xoá hẳn tài khoản?', text: 'Xoá quán trên mạng của cả hai game, các bản sao lưu và lịch sử nhận mã của ' + p.email + '. Không lấy lại được. Quán còn lưu trên máy người chơi sẽ tải lên lại nếu họ đăng nhập.', ok: 'Xoá hẳn', word: 'XOA' }) }))));
+        // từng game
+        const saves = h('section', { class: 'd-sec' }, h('h3', { text: 'Quán trong từng game' }));
+        for (const g of ['quanlau', 'xoailac']) {
+          const s = data.saves.find((x) => x.game === g);
+          const head = h('header', {}, h('i', { class: 'dot ' + (g === 'quanlau' ? 'lau' : 'xoai') }), GAMES[g].name);
+          if (!s) { saves.append(h('div', { class: 'save-card' }, head, h('span', { class: 'meta', text: 'Chưa có quán trên mạng.' }))); continue; }
+          const tags = h('div', { class: 'acts' }, s.flagged ? h('span', { class: 'tag red', text: 'Bị đánh dấu: ' + (s.flagReason || '') }) : h('span', { class: 'tag green', text: 'Bình thường' }), s.cheat ? h('span', { class: 'tag amber', text: 'Từng dùng bảng thử' }) : null);
+          saves.append(h('div', { class: 'save-card' }, head,
+            h('div', { class: 'kv num' },
+              h('div', {}, h('span', { text: 'Tên quán' }), s.shopName), h('div', {}, h('span', { text: 'Cấp' }), String(s.level)), h('div', {}, h('span', { text: 'Ngày' }), fmt(s.day)),
+              h('div', {}, h('span', { text: 'Tiền đã kiếm' }), money(s.moneyEarned)), h('div', {}, h('span', { text: GAMES[g].units }), fmt(s.potsSold)), h('div', {}, h('span', { text: 'Lưu lên mạng' }), ago(s.updatedAt))),
+            tags,
+            h('div', { class: 'acts' },
+              s.flagged ? h('button', { class: 'btn sm', type: 'button', text: 'Bỏ đánh dấu', onclick: () => act(g, { flagged: false }, 'Đã bỏ đánh dấu, quán lên lại bảng xếp hạng.') })
+                : h('button', { class: 'btn sm', type: 'button', text: 'Đánh dấu nghi gian lận', onclick: () => act(g, { flagged: true }, 'Đã đánh dấu, quán bị ẩn khỏi bảng.') }),
+              s.cheat ? h('button', { class: 'btn sm', type: 'button', text: 'Bỏ cờ bảng thử', onclick: () => act(g, { cheat: false }, 'Đã bỏ cờ bảng thử.') }) : null,
+              h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá quán trên mạng', onclick: () => act(g, { deleteSave: true }, 'Đã xoá quán ' + GAMES[g].name + ' trên mạng.', { title: 'Xoá quán ' + GAMES[g].name + '?', text: 'Xoá quán và các bản sao lưu trên mạng của game này. Nếu người chơi còn quán trên máy, lần sau mở game quán sẽ tải lên lại.', ok: 'Xoá quán', word: 'XOA' }) }))));
+        }
+        $('d-body').append(saves);
+        // sao lưu
+        const bk = h('section', { class: 'd-sec' }, h('h3', { text: 'Bản sao lưu trên mạng' }));
+        if (!data.backups.length) bk.append(h('p', { class: 'meta', text: 'Chưa có bản sao lưu nào.' }));
+        else {
+          const ul = h('ul', { class: 'mini' });
+          data.backups.forEach((b) => ul.append(h('li', {},
+            h('span', { class: 'num' }, h('i', { class: 'dot ' + (b.game === 'quanlau' ? 'lau' : 'xoai'), style: 'display:inline-block;margin-right:6px' }), 'Cấp ' + b.level + ' · ' + money(b.moneyEarned) + ' · ' + new Date(b.createdAt).toLocaleString('vi-VN')),
+            h('button', { class: 'btn sm', type: 'button', text: 'Khôi phục', onclick: () => act(b.game, { restoreBackup: b.id }, 'Đã khôi phục. Người chơi tải lại game là thấy.', { title: 'Khôi phục bản sao lưu này?', text: 'Quán ' + GAMES[b.game].name + ' trên mạng sẽ quay về cấp ' + b.level + '. Bản hiện tại được cất vào sao lưu nên làm lại được. Người chơi cần tải lại game.', ok: 'Khôi phục' }) }))));
+          bk.append(ul);
+        }
+        $('d-body').append(bk);
+        // mã đã nhận
+        const rd = h('section', { class: 'd-sec' }, h('h3', { text: 'Mã quà đã nhận' }));
+        if (!data.redemptions.length) rd.append(h('p', { class: 'meta', text: 'Chưa nhận mã nào.' }));
+        else { const ul = h('ul', { class: 'mini' }); data.redemptions.forEach((r) => ul.append(h('li', {}, h('span', { class: 'code', style: 'font-size:14px', text: r.code }), h('span', { class: 'meta num', style: 'margin:0', text: GAMES[r.game]?.name + ' · ' + [r.money ? money(r.money) : null, r.xp ? fmt(r.xp) + ' XP' : null].filter(Boolean).join(' + ') + ' · ' + ago(r.createdAt) })))); rd.append(ul); }
+        $('d-body').append(rd);
+      }
+      $('detail').addEventListener('close', () => { openId = null; });
+
+      // ---------- Xếp hạng ----------
+      let by = 'level';
+      document.querySelectorAll('[data-by]').forEach((b) => b.addEventListener('click', () => { by = b.dataset.by; document.querySelectorAll('[data-by]').forEach((x) => x.setAttribute('aria-pressed', String(x === b))); loadRank(); }));
+      async function loadRank() {
+        const ul = $('rank'); ul.textContent = '';
+        const { data, error } = await call('GET', 'leaderboard&by=' + by);
+        if (error) { ul.append(h('li', { class: 'empty', text: error.message })); return; }
+        if (!data.rows.length) ul.append(h('li', { class: 'empty', text: 'Chưa có quán nào trên bảng.' }));
+        const val = (v) => by === 'level' ? 'Cấp ' + v : by === 'money' ? money(v) : fmt(v) + ' ' + GAMES[game].unit;
+        data.rows.forEach((r) => ul.append(h('li', {}, h('span', { class: 'r num', text: r.rank }), h('span', { text: r.shopName + (by !== 'level' ? ' · cấp ' + r.level : '') }), h('b', { class: 'num', text: val(r.value) }))));
+      }
+
+      // ---------- Mã quà tặng ----------
+      const GC_GAME = { '*': 'Cả hai game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!' };
+      const cleanCode = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+      async function loadCodes() {
+        const box = $('codes'); box.textContent = '';
+        const { data, error } = await call('GET', 'admin/codes');
+        if (error) { box.append(h('p', { class: 'msg error', text: error.message })); return; }
+        const list = data.codes || [];
+        $('gc-meta').textContent = list.length ? '· ' + list.length + ' mã' : '';
+        if (!list.length) { box.append(h('p', { class: 'empty', text: 'Chưa có mã nào. Tạo mã đầu tiên ở khung bên cạnh.' })); return; }
+        const now = Date.now();
+        for (const c of list) {
+          const expired = c.expiresAt && c.expiresAt < now, full = c.maxUses != null && c.uses >= c.maxUses;
+          const state = c.disabled ? ['gray', 'Đã khoá'] : expired ? ['gray', 'Hết hạn'] : full ? ['amber', 'Hết lượt'] : ['green', 'Đang dùng được'];
+          const gift = [c.money > 0 ? money(c.money) : null, c.xp > 0 ? fmt(c.xp) + ' XP' : null].filter(Boolean).join(' + ');
+          const who = h('div', { class: 'who', hidden: true });
+          const row = h('div', { class: 'crow' + (c.disabled || expired || full ? ' off' : '') },
+            h('div', { class: 'top-line' }, h('span', { class: 'code', text: c.code }), h('div', { class: 'acts' },
+              h('button', { class: 'btn sm', type: 'button', text: 'Chép', onclick: async () => { try { await navigator.clipboard.writeText(c.code); toast('Đã chép ' + c.code); } catch (_) { toast(c.code); } } }),
+              h('button', { class: 'btn sm', type: 'button', text: 'Ai đã nhận', onclick: () => toggleWho(c.code, who) }),
+              h('button', { class: 'btn sm', type: 'button', text: c.disabled ? 'Mở lại' : 'Khoá', onclick: async () => { const { error } = await call('POST', 'admin/codes/' + encodeURIComponent(c.code), { disabled: !c.disabled }); if (error) return toast(error.message); toast(c.disabled ? 'Đã mở lại ' + c.code : 'Đã khoá ' + c.code); loadCodes(); } }),
+              h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá', onclick: async () => { if (!(await ask({ title: 'Xoá mã ' + c.code + '?', text: 'Người đã nhận quà vẫn giữ quà. Mã sẽ không nhập được nữa.', ok: 'Xoá mã' }))) return; const { error } = await call('POST', 'admin/codes/' + encodeURIComponent(c.code), { delete: true }); if (error) return toast(error.message); toast('Đã xoá ' + c.code); loadCodes(); } }))),
+            h('div', { class: 'acts meta num', style: 'margin:0' }, h('span', { class: 'tag ' + state[0], text: state[1] }), h('span', { text: 'Quà: ' + (gift || '—') }), h('span', { text: GC_GAME[c.game] || c.game }),
+              h('span', { text: 'Đã dùng ' + fmt(c.uses) + (c.maxUses != null ? ' / ' + fmt(c.maxUses) : '') }), c.expiresAt ? h('span', { text: 'Hạn ' + new Date(c.expiresAt).toLocaleDateString('vi-VN') }) : null, c.note ? h('span', { text: c.note }) : null),
+            who);
+          box.append(row);
+        }
+      }
+      async function toggleWho(code, el) {
+        if (!el.hidden) { el.hidden = true; return; }
+        el.hidden = false; el.textContent = 'Đang tải…';
+        const { data, error } = await call('GET', 'admin/codes/' + encodeURIComponent(code));
+        el.textContent = '';
+        if (error) { el.append(h('p', { class: 'msg error', text: error.message })); return; }
+        if (!data.redemptions.length) { el.append(h('p', { class: 'meta', text: 'Chưa ai nhận mã này.' })); return; }
+        const ul = h('ul', { class: 'mini' });
+        data.redemptions.forEach((r) => ul.append(h('li', {}, h('button', { class: 'btn sm', type: 'button', text: r.email, onclick: () => { if (r.email !== '(đã xoá)') { game = r.game; store.set('meegame_admin_game', game); syncGame(); openPlayer(r.playerId); } } }), h('span', { class: 'meta num', style: 'margin:0', text: GAMES[r.game]?.name + ' · ' + ago(r.createdAt) }))));
+        el.append(ul);
+      }
+      $('gc-code').addEventListener('input', () => { const v = cleanCode($('gc-code').value); if (v !== $('gc-code').value) $('gc-code').value = v; });
+      $('gc-money').addEventListener('input', () => { const v = Number($('gc-money').value) || 0; $('gc-money-hint').textContent = v > 0 ? 'Người chơi nhận ' + fmt(v * 1000) + 'đ trong game.' : '500 = 500.000đ trong game.'; });
+      $('gc-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const err = $('gc-error'); err.hidden = true;
+        const code = cleanCode($('gc-code').value), m = Number($('gc-money').value) || 0, xp = Number($('gc-xp').value) || 0;
+        if (code.length < 3) { err.textContent = 'Mã cần ít nhất 3 ký tự.'; err.hidden = false; return; }
+        if (!(m > 0 || xp > 0)) { err.textContent = 'Điền tiền tặng hoặc XP tặng.'; err.hidden = false; return; }
+        const exp = $('gc-exp').value ? new Date($('gc-exp').value + 'T23:59:59').getTime() : null;
+        $('gc-save').disabled = true;
+        const { error } = await call('POST', 'admin/codes', { code, game: $('gc-game').value, money: m, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim() });
+        $('gc-save').disabled = false;
+        if (error) { err.textContent = error.message; err.hidden = false; return; }
+        toast('Đã tạo mã ' + code);
+        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note'].forEach((id) => { $(id).value = ''; });
+        $('gc-money-hint').textContent = '500 = 500.000đ trong game.';
+        loadCodes();
+      });
+
+      enter();
+    })();
+  </script>
+</body>
+
+</html>

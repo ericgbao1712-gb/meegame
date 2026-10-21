@@ -15,8 +15,11 @@
 //   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   Thêm &g=xoailac để dùng cho game Xoài Lắc (cùng bảng players, bản lưu tách theo game).
-//   GET  /api/lau/admin/players            (admin)      → danh sách người chơi để kiểm tra gian lận
-//   POST /api/lau/admin/players/:id        (admin)      { hidden?, flagged? } → ẩn / bỏ đánh dấu
+//   GET  /api/lau/admin/stats              (admin)      → số liệu tổng quan của game (&g=…)
+//   GET  /api/lau/admin/players            (admin)      ?q=&filter=all|flagged|hidden|cheat&sort=recent|money|level|pots|new&limit=&offset=
+//   GET  /api/lau/admin/players/:id        (admin)      → chi tiết: bản lưu từng game, bản sao lưu, mã đã nhận
+//   POST /api/lau/admin/players/:id        (admin)      { hidden?, flagged?, cheat?, restoreBackup?: id, deleteSave?, deleteAccount? }
+//   GET  /api/lau/admin/codes/:code        (admin)      → ai đã nhận mã này
 //
 // Ghi (POST/PUT) phải có header "X-MeeGame: 1": trình duyệt chỉ gửi header lạ từ trang khác sau một lần hỏi CORS,
 // mà API này không trả header CORS nào → trang lạ không giả mạo được yêu cầu (chống CSRF), thêm cookie SameSite=Lax.
@@ -209,6 +212,11 @@ export default async function handler(req, res) {
         return send(res, 200, { code: codeRow(rs.rows[0]) });
       }
       const m = path.match(/^\/admin\/codes\/([A-Za-z0-9_-]{1,32})$/);
+      if (method === 'GET' && m) {
+        const rs = await db.execute({ sql: `SELECT r.player_id, r.game, r.money, r.xp, r.created_at, p.email, p.name FROM gift_redemptions r
+            LEFT JOIN players p ON p.id = r.player_id WHERE r.code = ? ORDER BY r.created_at DESC LIMIT 500`, args: [cleanCode(m[1])] });
+        return send(res, 200, { redemptions: rs.rows.map((r) => ({ playerId: num(r.player_id), email: r.email || '(đã xoá)', name: r.name || '', game: r.game, money: num(r.money), xp: num(r.xp), createdAt: num(r.created_at) })) });
+      }
       if (method === 'POST' && m) {
         const b = await parseBody(req);
         const code = cleanCode(m[1]);
@@ -221,25 +229,114 @@ export default async function handler(req, res) {
       return err(res, 404, 'not_found', 'Không có địa chỉ này.');
     }
 
-    // ── admin: kiểm tra / ẩn người chơi gian lận ──
-    if (path === '/admin/players' || path.startsWith('/admin/players/')) {
+    // ── admin: quản lý người chơi (trang /admin/games) ──
+    if (path === '/admin/stats' || path === '/admin/players' || path.startsWith('/admin/players/')) {
       const admin = await getAdminEmail(db, req);
       if (!admin) return err(res, 401, 'unauthorized', 'Phiên đăng nhập admin đã hết.');
-      if (method === 'GET' && path === '/admin/players') {
-        const rs = await db.execute({
-          sql: `SELECT p.id, p.email, p.name, p.hidden, p.created_at, p.last_login, g.shop_name, g.level, g.money_earned, g.pots_sold,
-                       g.cheat, g.flagged, g.flag_reason, g.updated_at
-                FROM players p LEFT JOIN game_saves g ON g.player_id = p.id AND g.game = ? ORDER BY g.money_earned DESC LIMIT 500`,
-          args: [GAME],
+      const nowMs = Date.now();
+      const one = async (sql, args = []) => { const r = await db.execute({ sql, args }); return r.rows[0] || {}; };
+
+      if (method === 'GET' && path === '/admin/stats') {
+        const a = await one(`SELECT count(*) AS saves, sum(CASE WHEN updated_at > ? THEN 1 ELSE 0 END) AS d1, sum(CASE WHEN updated_at > ? THEN 1 ELSE 0 END) AS d7,
+            sum(flagged) AS flagged, sum(cheat) AS cheat, avg(level) AS avg_level, max(level) AS max_level, sum(money_earned) AS money, sum(pots_sold) AS pots
+            FROM game_saves WHERE game = ?`, [nowMs - 864e5, nowMs - 7 * 864e5, GAME]);
+        const h = await one(`SELECT count(*) AS n FROM players p JOIN game_saves g ON g.player_id = p.id AND g.game = ? WHERE p.hidden = 1`, [GAME]);
+        const acc = await one('SELECT count(*) AS n FROM players');
+        const lv = await db.execute({ sql: `SELECT CASE WHEN level <= 5 THEN '1–5' WHEN level <= 10 THEN '6–10' WHEN level <= 15 THEN '11–15' WHEN level <= 20 THEN '16–20'
+            WHEN level <= 30 THEN '21–30' ELSE '31+' END AS b, count(*) AS n FROM game_saves WHERE game = ? GROUP BY b`, args: [GAME] });
+        const order = ['1–5', '6–10', '11–15', '16–20', '21–30', '31+'];
+        const codes = await one(`SELECT count(*) AS n, sum(CASE WHEN disabled = 0 AND (expires_at IS NULL OR expires_at > ?) AND (max_uses IS NULL OR uses < max_uses) THEN 1 ELSE 0 END) AS live
+            FROM gift_codes WHERE game IN (?, '*')`, [nowMs, GAME]);
+        const red = await one(`SELECT count(*) AS n, sum(CASE WHEN created_at > ? THEN 1 ELSE 0 END) AS d7 FROM gift_redemptions WHERE game = ?`, [nowMs - 7 * 864e5, GAME]);
+        return send(res, 200, {
+          game: GAME, accounts: num(acc.n), saves: num(a.saves), active1d: num(a.d1), active7d: num(a.d7), flagged: num(a.flagged), cheat: num(a.cheat), hidden: num(h.n),
+          avgLevel: Math.round(num(a.avg_level) * 10) / 10, maxLevel: num(a.max_level), moneyEarned: num(a.money), potsSold: num(a.pots),
+          levels: order.map((b) => ({ band: b, n: num((lv.rows.find((r) => r.b === b) || {}).n) })),
+          codes: num(codes.n), codesLive: num(codes.live), redemptions: num(red.n), redemptions7d: num(red.d7),
         });
-        return send(res, 200, { players: rs.rows.map((r) => ({ ...r, id: num(r.id) })) });
       }
+
+      if (method === 'GET' && path === '/admin/players') {
+        const q = String(url.searchParams.get('q') || '').trim().toLowerCase().slice(0, 60);
+        const filter = String(url.searchParams.get('filter') || 'all');
+        const SORT = { money: 'g.money_earned DESC', level: 'g.level DESC, g.xp DESC', recent: 'g.updated_at DESC', pots: 'g.pots_sold DESC', new: 'p.id DESC' };
+        const sort = SORT[url.searchParams.get('sort')] || SORT.recent;
+        const limit = Math.max(1, Math.min(200, Math.floor(num(url.searchParams.get('limit'), 50))));
+        const offset = Math.max(0, Math.floor(num(url.searchParams.get('offset'), 0)));
+        const where = ['1 = 1'], args = [GAME];
+        if (q) { where.push('(lower(p.email) LIKE ? OR lower(p.name) LIKE ? OR lower(g.shop_name) LIKE ? OR CAST(p.id AS TEXT) = ?)'); args.push('%' + q + '%', '%' + q + '%', '%' + q + '%', q); }
+        if (filter === 'flagged') where.push('g.flagged = 1');
+        else if (filter === 'hidden') where.push('p.hidden = 1');
+        else if (filter === 'cheat') where.push('g.cheat = 1');
+        const base = `FROM players p JOIN game_saves g ON g.player_id = p.id AND g.game = ? WHERE ${where.join(' AND ')}`;
+        const total = await one('SELECT count(*) AS n ' + base, args);
+        const rs = await db.execute({
+          sql: `SELECT p.id, p.email, p.name, p.picture, p.hidden, p.created_at, p.last_login, g.shop_name, g.level, g.xp, g.day, g.money_earned, g.pots_sold,
+                       g.cheat, g.flagged, g.flag_reason, g.updated_at ${base} ORDER BY ${sort} LIMIT ${limit} OFFSET ${offset}`,
+          args,
+        });
+        return send(res, 200, { total: num(total.n), players: rs.rows.map((r) => ({
+          id: num(r.id), email: r.email || '', name: r.name || '', picture: r.picture || '', hidden: !!num(r.hidden), createdAt: r.created_at, lastLogin: r.last_login,
+          shopName: r.shop_name, level: num(r.level), xp: num(r.xp), day: num(r.day), moneyEarned: num(r.money_earned), potsSold: num(r.pots_sold),
+          cheat: !!num(r.cheat), flagged: !!num(r.flagged), flagReason: r.flag_reason || '', updatedAt: num(r.updated_at),
+        })) });
+      }
+
       const m = path.match(/^\/admin\/players\/(\d+)$/);
-      if (method === 'POST' && m) {
+      if (!m) return err(res, 404, 'not_found', 'Không có địa chỉ này.');
+      const id = Number(m[1]);
+      const pl = await one('SELECT id, email, name, picture, hidden, created_at, last_login FROM players WHERE id = ?', [id]);
+      if (!pl.id) return err(res, 404, 'not_found', 'Không tìm thấy người chơi này.');
+
+      if (method === 'GET') {
+        const saves = await db.execute({ sql: `SELECT game, shop_name, level, xp, day, money_earned, pots_sold, cheat, flagged, flag_reason, updated_at, client_saved_at
+            FROM game_saves WHERE player_id = ?`, args: [id] });
+        const backups = await db.execute({ sql: `SELECT id, game, level, money_earned, client_saved_at, created_at FROM game_save_backups WHERE player_id = ? ORDER BY id DESC LIMIT 40`, args: [id] });
+        const reds = await db.execute({ sql: 'SELECT code, game, money, xp, created_at FROM gift_redemptions WHERE player_id = ? ORDER BY created_at DESC LIMIT 100', args: [id] });
+        return send(res, 200, {
+          player: { id: num(pl.id), email: pl.email || '', name: pl.name || '', picture: pl.picture || '', hidden: !!num(pl.hidden), createdAt: pl.created_at, lastLogin: pl.last_login },
+          saves: saves.rows.map((r) => ({ game: r.game, shopName: r.shop_name, level: num(r.level), xp: num(r.xp), day: num(r.day), moneyEarned: num(r.money_earned),
+            potsSold: num(r.pots_sold), cheat: !!num(r.cheat), flagged: !!num(r.flagged), flagReason: r.flag_reason || '', updatedAt: num(r.updated_at), savedAt: num(r.client_saved_at) || null })),
+          backups: backups.rows.map((r) => ({ id: num(r.id), game: r.game, level: num(r.level), moneyEarned: num(r.money_earned), savedAt: num(r.client_saved_at) || null, createdAt: num(r.created_at) })),
+          redemptions: reds.rows.map((r) => ({ code: r.code, game: r.game, money: num(r.money), xp: num(r.xp), createdAt: num(r.created_at) })),
+        });
+      }
+
+      if (method === 'POST') {
         const body = await parseBody(req);
-        const id = Number(m[1]);
         if ('hidden' in body) await db.execute({ sql: 'UPDATE players SET hidden = ? WHERE id = ?', args: [body.hidden ? 1 : 0, id] });
-        if ('flagged' in body) await db.execute({ sql: 'UPDATE game_saves SET flagged = ?, flag_reason = CASE WHEN ? = 1 THEN flag_reason ELSE NULL END WHERE player_id = ? AND game = ?', args: [body.flagged ? 1 : 0, body.flagged ? 1 : 0, id, GAME] });
+        if ('flagged' in body) await db.execute({ sql: 'UPDATE game_saves SET flagged = ?, flag_reason = CASE WHEN ? = 1 THEN COALESCE(flag_reason, ?) ELSE NULL END WHERE player_id = ? AND game = ?', args: [body.flagged ? 1 : 0, body.flagged ? 1 : 0, 'Admin đánh dấu', id, GAME] });
+        if ('cheat' in body) await db.execute({ sql: 'UPDATE game_saves SET cheat = ? WHERE player_id = ? AND game = ?', args: [body.cheat ? 1 : 0, id, GAME] });
+        if (body.restoreBackup != null) {
+          // Lấy bản sao lưu cũ làm bản trên mạng. Bản hiện tại được cất vào sao lưu trước, nên làm lại được.
+          const b = await one('SELECT * FROM game_save_backups WHERE id = ? AND player_id = ? AND game = ?', [Math.floor(num(body.restoreBackup)), id, GAME]);
+          if (!b.id) return err(res, 404, 'not_found', 'Không có bản sao lưu này.');
+          let save = null;
+          try { save = JSON.parse(String(b.data)); } catch { save = null; }
+          const sum = saveSummary(save, GAME);
+          if (!sum) return err(res, 400, 'invalid', 'Bản sao lưu này bị hỏng, không khôi phục được.');
+          const cur = await one('SELECT data, client_saved_at, level, money_earned FROM game_saves WHERE player_id = ? AND game = ?', [id, GAME]);
+          if (cur.data) {
+            await db.execute({ sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
+              args: [id, GAME, String(cur.data), cur.client_saved_at, cur.level, cur.money_earned, nowMs] });
+          }
+          await db.execute({
+            sql: `INSERT INTO game_saves (player_id, game, data, client_saved_at, updated_at, shop_name, avatar, level, xp, money_earned, pots_sold, day, cheat, flagged, flag_reason)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
+                  ON CONFLICT(player_id, game) DO UPDATE SET data = excluded.data, client_saved_at = excluded.client_saved_at, updated_at = excluded.updated_at,
+                    shop_name = excluded.shop_name, avatar = excluded.avatar, level = excluded.level, xp = excluded.xp, money_earned = excluded.money_earned,
+                    pots_sold = excluded.pots_sold, day = excluded.day, cheat = excluded.cheat`,
+            args: [id, GAME, String(b.data), sum.client_saved_at, nowMs, sum.shop_name, sum.avatar, sum.level, sum.xp, sum.money_earned, sum.pots_sold, sum.day, sum.cheat],
+          });
+        }
+        if (body.deleteSave) {
+          await db.execute({ sql: 'DELETE FROM game_save_backups WHERE player_id = ? AND game = ?', args: [id, GAME] });
+          await db.execute({ sql: 'DELETE FROM game_saves WHERE player_id = ? AND game = ?', args: [id, GAME] });
+        }
+        if (body.deleteAccount) {
+          for (const t of ['game_save_backups', 'game_saves', 'gift_redemptions']) await db.execute({ sql: `DELETE FROM ${t} WHERE player_id = ?`, args: [id] });
+          await db.execute({ sql: 'DELETE FROM players WHERE id = ?', args: [id] });
+        }
         return send(res, 200, { ok: true });
       }
       return err(res, 404, 'not_found', 'Không có địa chỉ này.');
