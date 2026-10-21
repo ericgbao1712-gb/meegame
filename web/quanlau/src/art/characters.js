@@ -203,26 +203,47 @@ function uniformCanvas(f, flip, key, look, sheet) {
     const vest = sheet === 'staff_quankho', chef = sheet.startsWith('staff_daubep');
     const UH = u.h ?? 4, USK = u.h == null ? 1 : (u.sk ?? 1), UVK = u.h == null ? 1 : (u.vk ?? 1);
     const recolorOn = u.h != null;
-    // hats: the storekeeper's green cap and the chef's white toque take the uniform colour too
-    const hatEnd = Math.ceil(H * (chef ? 0.30 : 0.26));
-    for (let y = 0; y < hatEnd && recolorOn && (vest || chef); y++) for (let x = 0; x < W; x++) {
+    // hats: the storekeeper's green cap takes the uniform colour. v1.18g: mũ đầu bếp giữ màu trắng (owner: "fix lại màu cho đầu bếp")
+    const hatEnd = Math.ceil(H * 0.26);
+    for (let y = 0; y < hatEnd && recolorOn && vest; y++) for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4;
       if (d[i + 3] < 8) continue;
       const [hh, ss, vv] = rgb2hsv(d[i], d[i + 1], d[i + 2]);
       let out = null;
       if (vest && hh >= 55 && hh <= 170 && ss > 0.25 && vv > 0.2) out = hsv2rgb(UH, Math.min(1, ss * USK), Math.min(1, vv * UVK));
-      else if (chef && ss < 0.16 && vv > 0.62) out = hsv2rgb(UH, Math.min(1, 0.42 * USK), Math.min(1, vv * Math.min(1, UVK + 0.1)));
       if (!out) continue;
       d[i] = out[0]; d[i + 1] = out[1]; d[i + 2] = out[2];
     }
+    // v1.18g mũ đầu bếp: giữ trắng, chỉ viền chân mũ (2 px dưới cùng phần trắng) theo màu đồng phục
+    if (chef && recolorOn) {
+      const top = Math.ceil(H * 0.34);
+      const isWhite = (x, y) => { const j = (y * W + x) * 4; if (d[j + 3] < 8) return false; const [, s2, v2] = rgb2hsv(d[j], d[j + 1], d[j + 2]); return s2 < 0.16 && v2 > 0.62; };
+      let low = -1;
+      for (let y = 0; y < top; y++) for (let x = 0; x < W; x++) if (isWhite(x, y)) low = Math.max(low, y);
+      for (let y = Math.max(0, low - 1); y <= low && low > 3; y++) for (let x = 0; x < W; x++) {
+        if (!isWhite(x, y)) continue;
+        const i = (y * W + x) * 4, [, , vv] = rgb2hsv(d[i], d[i + 1], d[i + 2]);
+        const o = hsv2rgb(UH, Math.min(1, 0.7 * USK), Math.min(1, (y === low ? 0.78 : 0.92) * Math.min(1.05, UVK) * vv));
+        d[i] = o[0]; d[i + 1] = o[1]; d[i + 2] = o[2];
+      }
+    }
     // apron / neckerchief / vest: colour, then the pattern (sọc, chấm bi, caro, viền) in the apron's own pixels
-    const r0 = Math.floor(H * (chef ? 0.46 : 0.55)), r1 = Math.ceil(H * 0.90);   // below the chin: chibi heads reach ~half the frame
+    // v1.18g đầu bếp: khăn cổ bắt đầu ngay dưới cằm (~58% khung) — trước đây 46% nên môi, má bị tô màu đồng phục
+    const r0 = Math.floor(H * (chef ? 0.575 : 0.55)), r1 = Math.ceil(H * 0.90);   // below the chin: chibi heads reach ~half the frame
     const mask = new Uint8Array(W * H);
+    const skinAt = (x, y) => {   // da mặt / cổ (môi, má hồng nằm giữa da → không tô)
+      if (x < 0 || y < 0 || x >= W || y >= H) return false;
+      const j = (y * W + x) * 4;
+      if (d[j + 3] < 8) return false;
+      const [h2, s2, v2] = rgb2hsv(d[j], d[j + 1], d[j + 2]);
+      return h2 > 12 && h2 < 42 && s2 > 0.12 && s2 < 0.52 && v2 > 0.7;
+    };
     for (let y = r0; y < r1; y++) for (let x = 0; x < W; x++) {
       const i = (y * W + x) * 4;
       if (d[i + 3] < 8) continue;
       const [hh, ss, vv] = rgb2hsv(d[i], d[i + 1], d[i + 2]);
-      const red = (hh >= 340 || hh <= 16) && ss > 0.42 && vv > 0.42;   // > 0.42: leave the dark-brown outline alone
+      let red = (hh >= 340 || hh <= 16) && ss > 0.42 && vv > 0.42;   // > 0.42: leave the dark-brown outline alone
+      if (red && chef && skinAt(x, y - 1) && (skinAt(x - 1, y) || skinAt(x + 1, y))) red = false;   // môi / má đầu bếp
       const orange = vest && hh > 16 && hh <= 48 && ss > 0.55 && vv > 0.45;
       if (!red && !orange) continue;
       mask[y * W + x] = 1;
