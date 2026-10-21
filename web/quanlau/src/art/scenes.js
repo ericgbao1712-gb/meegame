@@ -219,7 +219,7 @@ function putTableSkin(ctx, key, x, y, seat = -1) {
     key = 'cshape_' + FORM_CHAIR; form = true;
     const k2 = seat >= 0 ? key + SEAT_SUFFIX[seat] : key;
     if (frameOk(P, F[k2])) key = k2;
-  } else if (!chair && FORM_TABLE) key = 'tshape_' + FORM_TABLE;    // v1.18i dáng bàn
+  } else if (!chair && FORM_TABLE) { key = 'tshape_' + FORM_TABLE; form = true; }   // v1.18i dáng bàn (v1.18o: màu bàn chỉ tô phần gỗ → mặt kính, đá, tre giữ nguyên)
   const sk = chair ? (SKIN_CHAIR && CHAIR_SKINS[SKIN_CHAIR]) : (SKIN_TABLE && TABLE_SKINS[SKIN_TABLE]);
   const c = sk ? recolorCanvas(key, null, sk, form ? 'woodonly' : 'wood') : null;
   if (c) putCanvas(ctx, c, F[key], x, y); else put(ctx, key, x, y);
