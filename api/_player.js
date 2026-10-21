@@ -68,6 +68,8 @@ export function ensureSchema(db) {
         note        TEXT,
         created_at  INTEGER NOT NULL
       )`);
+      // v1.18 thẻ thành tích (Hộp mù Lẩu Ơi) hiện trên bảng xếp hạng — thêm cột cho bảng cũ (lỗi "duplicate column" = có rồi)
+      try { await db.execute('ALTER TABLE game_saves ADD COLUMN badge TEXT'); } catch (e) { /* có rồi */ }
       await db.execute(`CREATE TABLE IF NOT EXISTS gift_redemptions (
         code        TEXT NOT NULL,
         player_id   INTEGER NOT NULL,

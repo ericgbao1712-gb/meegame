@@ -175,7 +175,7 @@ export function openChest(G, chestId) {
   addXp(G, xp);
   let deco = null;
   if (c.decoChance && G.rng.chance(c.decoChance)) {
-    const cand = C.DECO.filter((d) => !d.default && !s.deco.owned.includes(d.id) && d.source !== 'login' && (d.minTier || 1) <= s.tier);
+    const cand = C.DECO.filter((d) => !d.default && !s.deco.owned.includes(d.id) && !d.source && (d.minTier || 1) <= s.tier);
     if (cand.length) deco = giveDeco(G, G.rng.pick(cand).id);
   }
   const ingredients = c.ingredientPack ? giveIngredients(G, c.ingredientPack, 2) : 0;

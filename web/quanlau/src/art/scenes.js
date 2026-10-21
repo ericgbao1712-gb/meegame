@@ -5,6 +5,7 @@
 // The renderer draws into a buffer at DETAIL px per world px with integer world coordinates, so sprites blit 1:1.
 // Everything is wrapped so that unknown ids / a missing atlas never throw (the frame just lacks that sprite).
 import { PAL, BROTH } from './palette.js';
+import { POT_SKINS, TABLE_SKINS } from '../config.js';
 import { drawIcon } from './icons.js';
 import { loadAtlas, blit, frameCanvas, DETAIL } from './assets.js';
 import PROPS from './data/props.js';
@@ -158,6 +159,57 @@ function signBox(L, level) {
   return { c, x: Math.round(sg.x - 4), y: Math.round(sg.y + sg.h / 2 - c.height * U / 2) };
 }
 
+// ─────────────────────────────── v1.18 kiểu nồi / bàn Hộp mù (tô lại màu lúc vẽ) ───────────────────────────────
+let SKIN_POT = null, SKIN_TABLE = null;
+/** renderer gọi mỗi khung hình: skin = id trong C.POT_SKINS / C.TABLE_SKINS hoặc null. */
+export function setSkins(pot, table) { SKIN_POT = POT_SKINS[pot] ? pot : null; SKIN_TABLE = TABLE_SKINS[table] ? table : null; }
+const skinCache = new Map();
+function hsv(r, g, b) {
+  const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
+  let h = 0;
+  if (d) h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4;
+  return [((h * 60) + 360) % 360, mx ? d / mx : 0, mx / 255];
+}
+function rgb(h, s, v) {
+  const c = v * s, x = c * (1 - Math.abs(((h / 60) % 2) - 1)), m = v - c;
+  const [r, g, b] = h < 60 ? [c, x, 0] : h < 120 ? [x, c, 0] : h < 180 ? [0, c, x] : h < 240 ? [0, x, c] : h < 300 ? [x, 0, c] : [c, 0, x];
+  return [Math.round((r + m) * 255), Math.round((g + m) * 255), Math.round((b + m) * 255)];
+}
+/** Canvas của một khung sprite đã tô lại: mode 'metal' (inox xám) hoặc 'wood' (gỗ nâu cam). */
+function recolorCanvas(key, base, skin, mode) {
+  if (!skin || !hasDOM || !P.img) return null;
+  const f = F[key];
+  if (!f) return null;
+  const ck = key + '|' + mode + '|' + skin.name + (base ? '|' : '');
+  let c = skinCache.get(ck);
+  if (c) return c;
+  c = canvas(f[2], f[3]);
+  const g = c.getContext('2d');
+  if (base) g.drawImage(base, 0, 0); else { g.imageSmoothingEnabled = false; g.drawImage(P.img, f[0], f[1], f[2], f[3], 0, 0, f[2], f[3]); }
+  const im = g.getImageData(0, 0, f[2], f[3]), d = im.data;
+  const dots = skin.dots ? [parseInt(skin.dots.slice(1, 3), 16), parseInt(skin.dots.slice(3, 5), 16), parseInt(skin.dots.slice(5, 7), 16)] : null;
+  for (let i = 0; i < d.length; i += 4) {
+    if (!d[i + 3]) continue;
+    const [h, s, v] = hsv(d[i], d[i + 1], d[i + 2]);
+    if (v < 0.22) continue;                                         // giữ viền đậm
+    const hit = mode === 'metal' ? s < 0.2 : s > 0.2;   // bàn: mọi phần có màu (gỗ, nhựa đỏ…), chân inox xám giữ nguyên
+    if (!hit) continue;
+    const ns = mode === 'metal' ? skin.s : Math.min(1, skin.s * (0.6 + 0.5 * s));
+    let [r, gg, b] = rgb(skin.h, ns, Math.min(1, v * skin.v));
+    const p = i / 4, x = p % f[2], y = (p / f[2]) | 0;
+    if (dots && (x + y * 2) % 5 === 0 && y > f[3] * 0.45) [r, gg, b] = dots;
+    d[i] = r; d[i + 1] = gg; d[i + 2] = b;
+  }
+  g.putImageData(im, 0, 0);
+  skinCache.set(ck, c);
+  return c;
+}
+/** put() có áp kiểu bàn (gỗ) khi đang đeo. */
+function putTableSkin(ctx, key, x, y) {
+  const c = SKIN_TABLE ? recolorCanvas(key, null, TABLE_SKINS[SKIN_TABLE], 'wood') : null;
+  if (c) putCanvas(ctx, c, F[key], x, y); else put(ctx, key, x, y);
+}
+
 // ─────────────────────────────── stools / tables ───────────────────────────────
 const stoolOf = (style) => 'stool' + clamp(style | 0, 0, 4);
 const tableOf = (style) => 'table' + clamp(style | 0, 0, 4);
@@ -165,7 +217,7 @@ const tableOf = (style) => 'table' + clamp(style | 0, 0, 4);
 /** The back seat's stool lives in the back layer (the guest and the table are drawn over it). */
 function drawBackStools(ctx, L, env) {
   const st = stoolOf(env.up ? env.up.tablestyle : 0);
-  for (const t of L.tables) put(ctx, st, t.x + SEAT[2].dx, t.y + SEAT[2].dy + 2);
+  for (const t of L.tables) putTableSkin(ctx, st, t.x + SEAT[2].dx, t.y + SEAT[2].dy + 2);
 }
 
 // ─────────────────────────────── pot (code-tinted broth) ───────────────────────────────
@@ -174,7 +226,7 @@ const potCache = new Map();
 function potCanvas(key, broth, fillB) {
   const f = F[key], m = F[key + '_m'];
   if (!f || !m || !P.img || !hasDOM) return null;
-  const ck = key + '|' + broth + '|' + fillB;
+  const ck = key + '|' + broth + '|' + fillB + '|' + (SKIN_POT || '');
   let c = potCache.get(ck);
   if (c) return c;
   const w = f[2], h = f[3], B = BROTH[broth] || BROTH.ga;
@@ -182,6 +234,7 @@ function potCanvas(key, broth, fillB) {
   const g = c.getContext('2d');
   g.imageSmoothingEnabled = false;
   g.drawImage(P.img, f[0], f[1], w, h, 0, 0, w, h);
+  if (SKIN_POT) { const sk = recolorCanvas(key, null, POT_SKINS[SKIN_POT], 'metal'); if (sk) { g.clearRect(0, 0, w, h); g.drawImage(sk, 0, 0); } }   // v1.18 kiểu nồi
   if (fillB > 0) {
     const mask = canvas(w, h), mg = mask.getContext('2d');
     mg.drawImage(P.img, m[0], m[1], w, h, 0, 0, w, h);
@@ -428,10 +481,10 @@ export function drawTable(ctx, table, opts = {}) {
     const { x, y } = table, st = clamp(opts.style | 0, 0, 4);
     const sk = stoolOf(st);
     // left / right / front stools tuck in beside and under the table; the back one is in the back layer
-    put(ctx, sk, x + SEAT[0].dx, y + SEAT[0].dy + 2);
-    put(ctx, sk, x + SEAT[1].dx, y + SEAT[1].dy + 2);
-    put(ctx, sk, x + SEAT[3].dx, y + SEAT[3].dy + 1);
-    put(ctx, tableOf(st), x, y);
+    putTableSkin(ctx, sk, x + SEAT[0].dx, y + SEAT[0].dy + 2);
+    putTableSkin(ctx, sk, x + SEAT[1].dx, y + SEAT[1].dy + 2);
+    putTableSkin(ctx, sk, x + SEAT[3].dx, y + SEAT[3].dy + 1);
+    putTableSkin(ctx, tableOf(st), x, y);
     const t = opts.t || 0;
     if (opts.dirty) {
       put(ctx, 'dirty_bowls', x - 7, y - 2 + TOP); put(ctx, 'dirty_plate', x + 5, y - 2 + TOP); put(ctx, 'dirty_cup', x + 9, y - 8 + TOP);
@@ -791,6 +844,29 @@ export function sceneThumbURL(tier, scale = 1) {
     g.imageSmoothingEnabled = true; g.imageSmoothingQuality = 'high';
     const [tx, ty, tw, th] = s.thumb;
     g.drawImage(rec.img, (tx - s.x) * DETAIL, (ty - s.y) * DETAIL, tw * DETAIL, th * DETAIL, 0, 0, c.width, c.height);
+    url = c.toDataURL();
+    urlCache.set(key, url);
+    return url;
+  } catch (e) { return BLANK; }
+}
+
+/** v1.18 ảnh xem trước kiểu nồi / kiểu bàn cho Hộp mù (data URL). */
+export function skinPreviewURL(kind, id, scale = 3) {
+  try {
+    const sc = Math.max(1, Math.round(scale) || 1), key = 'skin:' + kind + ':' + id + '@' + sc;
+    let url = urlCache.get(key);
+    if (url) return url;
+    if (!hasDOM || !P.img) return BLANK;
+    const isPot = kind === 'pot', fk = isPot ? 'pot2_t' : 'table2';
+    const skin = isPot ? POT_SKINS[id] : TABLE_SKINS[id], f = F[fk];
+    if (!skin || !f) return BLANK;
+    let src = recolorCanvas(fk, null, skin, isPot ? 'metal' : 'wood');
+    if (isPot) {   // nồi đang sôi (nước lẩu đỏ) cho dễ nhìn
+      const prev = SKIN_POT; SKIN_POT = id; src = potCanvas(fk, 'thai', 2) || src; SKIN_POT = prev;
+    }
+    const side = Math.max(f[2], f[3]), c = canvas(side * sc, side * sc), g = c.getContext('2d');
+    g.imageSmoothingEnabled = false;
+    g.drawImage(src, Math.round((side - f[2]) / 2) * sc, Math.round((side - f[3]) / 2) * sc, f[2] * sc, f[3] * sc);
     url = c.toDataURL();
     urlCache.set(key, url);
     return url;

@@ -132,8 +132,8 @@ function hireView(body, api, role) {
 // v1.3: đồng phục nhân viên + chủ quán (kiểu tóc + màu tạp dề riêng)
 function swatches(who, cur, api) {
   const s = S(), row = div('uni-row');
-  C.UNIFORMS.forEach((u) => {
-    const locked = (s.level || 1) < u.lv;
+  C.UNIFORMS.filter((u) => !u.box || C.boxHas(s, u.box)).forEach((u) => {   // v1.18 màu Hộp mù: chỉ hiện khi đã rút được
+    const locked = !C.lvOk(s, u, 'lv');
     const b = h('button', { class: 'uni-sw' + (cur === u.id ? ' on' : '') + (locked ? ' locked' : ''), title: u.name + (locked ? ` (Lv ${u.lv})` : ''), 'aria-label': u.name },
       h('i', { style: { background: u.swatch } }), locked ? span('uni-lv', 'Lv' + u.lv) : null);
     b.addEventListener('click', () => {
@@ -167,7 +167,7 @@ function styleView(body, api) {
   body.appendChild(div('card uni', div('uni-head', staffPics, div('grow', h('b', null, 'Đồng phục nhân viên'), span('muted sm', uS.name + ' · tạp dề, mũ, khăn cổ, áo gi-lê'))), swatches('staff', uni.staff, api), span('muted sm', 'Kiểu đồng phục'), styleRow('staff', uni.staffStyle, uni.staff, api)));
   const av = div('uni-av');
   C.AVATARS.forEach((a) => {
-    const locked = (a.lv || 1) > (s.level || 1);
+    const locked = !C.lvOk(s, a, 'lv');   // v1.18 rút trong Hộp mù là dùng được sớm
     const b = h('button', { class: 'uni-avb' + (s.avatar === a.id ? ' on' : '') + (locked ? ' locked' : ''), title: a.name }, pic(lookPreviewURL(makeOwnerLook(a.id, s.tier, uni.owner, uni.ownerStyle), 2)), span('sm', locked ? 'Lv ' + a.lv : a.name));
     b.addEventListener('click', () => { const r = act('setAvatar', a.id); if (r.ok === false) return; sfx('click'); api.rerender(); });
     av.appendChild(b);

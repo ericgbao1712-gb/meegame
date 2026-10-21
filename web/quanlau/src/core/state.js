@@ -58,6 +58,7 @@ export function defaultState(now = Date.now()) {
     viral: { days: 0, mult: 1 }, boost: 1, nextBoost: 1,   // boost = today's TikToker bonus, nextBoost = tomorrow's
     reservations: [],
     lottery: { tickets: 0, bets: 0, list: [], results: {}, nextId: 1 },   // v1.15 vé có số + đoán số
+    box: { got: {}, shards: 0, opened: 0, sinceRare: 0, sinceMyst: 0, freeDay: 0, spent: 0, badge: null, pot: null, table: null, log: [] },   // v1.18 Hộp mù
     quests: { main: 0, mainClaimable: false, daily: { day: 0, list: [], allClaimed: false }, counters: {} },
     login: { lastDate: '', streak: 0, claimedDate: null },
     book: { kinds },
@@ -98,11 +99,14 @@ export function migrate(save, now) {
     const id = from[p] && from[p].id;
     s.quests.main = id ? to.findIndex((q) => q.id === id) : to.length;
   };
-  const L117 = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V117.includes(q.id));
+  const L118 = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V118.includes(q.id));
+  const L117 = L118.filter((q) => !C.MAIN_QUESTS_V117.includes(q.id));
   if (save.started && !(s.flags.ui && s.flags.ui.mqV116)) remapMain(L117.filter((q) => !C.MAIN_QUESTS_V116.includes(q.id)), L117);
   if (s.flags && s.flags.ui) s.flags.ui.mqV116 = true;
-  if (save.started && !(s.flags.ui && s.flags.ui.mqV117)) remapMain(L117, C.MAIN_QUESTS);
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV117)) remapMain(L117, L118);
   if (s.flags && s.flags.ui) s.flags.ui.mqV117 = true;
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV118)) remapMain(L118, C.MAIN_QUESTS);
+  if (s.flags && s.flags.ui) s.flags.ui.mqV118 = true;
   // sanity
   if (!(s.clock >= C.TIME.dayStart)) s.clock = C.TIME.dayStart;
   if (!['prep', 'open', 'closing', 'report'].includes(s.phase)) s.phase = 'prep';

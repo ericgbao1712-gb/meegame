@@ -13,7 +13,7 @@ export const MARKETING_BY_ID = Object.fromEntries(C.MARKETING.map((m) => [m.id, 
 
 export const FEATURE_NAMES = {
   deco: 'Trang trí quán', daily: 'Nhiệm vụ hằng ngày', reservations: 'Đặt bàn trước', mkt_reviewer: 'Mời Food Reviewer',
-  mkt_livestream: 'Livestream bán hàng', speed2: 'Tốc độ ×2', manageMode: 'Chế độ Quản lý', extras: 'Khách gọi thêm', pricing: 'Tự đặt giá bán', tax: 'Đóng thuế', ship: 'Nhận đơn ship', lottery: 'Vé số',
+  mkt_livestream: 'Livestream bán hàng', speed2: 'Tốc độ ×2', manageMode: 'Chế độ Quản lý', extras: 'Khách gọi thêm', pricing: 'Tự đặt giá bán', tax: 'Đóng thuế', ship: 'Nhận đơn ship', lottery: 'Vé số', blindbox: 'Hộp mù',
 };
 
 export const tierDef = (G) => C.TIERS[G.state.tier - 1];
@@ -273,7 +273,7 @@ export function setLevel(G, target) {
 }
 
 export const isPotUnlocked = (G, id) => !!POT[id] && G.state.level >= POT[id].unlockLv;
-export const isIngUnlocked = (G, id) => !!ING[id] && G.state.level >= ING[id].unlockLv && (!ING[id].needs || (G.state.upgrades[ING[id].needs] || 0) > 0);
+export const isIngUnlocked = (G, id) => !!ING[id] && C.lvOk(G.state, ING[id]) && (!ING[id].needs || (G.state.upgrades[ING[id].needs] || 0) > 0);
 /** v1.1 tráng miệng the shop can serve right now (unlocked, equipment bought). */
 // v1.6: a món ăn kèm / tráng miệng the owner switched off in Thực đơn (state.menu[id] === false) is neither ordered nor restocked
 export const offMenu = (G, id) => !!G.state.menu && G.state.menu[id] === false;
@@ -285,7 +285,7 @@ export function sidePrice(G, id) {
   const u = i.needs ? UP[i.needs] : null, lv = u ? (G.state.upgrades[i.needs] || 0) : 1;
   return Math.round(i.extraPrice * (1 + Math.max(0, lv - 1) * ((u && u.sidePer) || 0)));
 }
-export const isDrinkUnlocked = (G, id) => !!DRINK[id] && G.state.level >= DRINK[id].unlockLv;
+export const isDrinkUnlocked = (G, id) => !!DRINK[id] && C.lvOk(G.state, DRINK[id]);   // v1.18 + món Hộp mù
 export const featureUnlocked = (G, key) => (key in C.FEATURES ? G.state.level >= C.FEATURES[key] : true);
 
 // ───────────── shelf life ─────────────

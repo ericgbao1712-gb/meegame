@@ -77,7 +77,15 @@ export function drawDay(G) {
   const s = G.state, L = lot(s), T = LT();
   const today = L.list.filter((x) => x.day === s.day && x.status === 'wait');
   const r = {};
-  for (const t of T.tiers) { r[t.id] = []; for (let i = 0; i < t.count; i++) r[t.id].push(digits(G, t.digits)); }
+  const used = new Set();   // v1.18: giải tư / giải năm (cùng 2 số) không trùng nhau
+  for (const t of T.tiers) {
+    r[t.id] = [];
+    for (let i = 0; i < t.count; i++) {
+      let n = digits(G, t.digits);
+      for (let k = 0; k < 50 && used.has(t.digits + ':' + n); k++) n = digits(G, t.digits);
+      used.add(t.digits + ':' + n); r[t.id].push(n);
+    }
+  }
   L.results[s.day] = r;
   for (const it of today) it.status = 'drawn';
   for (const d of Object.keys(L.results)) if (+d < s.day - T.keepDays) delete L.results[d];

@@ -113,7 +113,7 @@ export function lotteryView(body, api) {
     body.appendChild(resultBoard(d, li.results[d]));
     body.appendChild(div('tk-grid', items.map((it) => ticketEl(it, { onCheck: (id) => doCheck(id, reapi), onClaim: (id, b) => doClaim(id, b, reapi) }))));
   }
-  body.appendChild(noteBox('ui_mom', 'Vé số chơi cho vui thôi nha con: trung bình mua 10 đồng chỉ về lại chừng 5 đồng. Đừng bỏ tiền vốn vô đây!', 'gold'));
+  body.appendChild(noteBox('ui_mom', 'Vé số chơi cho vui thôi nha con: trung bình mua 10 đồng chỉ về lại chừng 8 đồng. Đừng bỏ tiền vốn vô đây!', 'gold'));
 }
 
 /** Chạm vào cô bán vé số. */

@@ -1,15 +1,25 @@
 // v1.16 Bảng "Có gì mới": người chơi đã có quán thấy một lần sau mỗi bản cập nhật lớn (flags.ui.seenNews < NEWS.ver).
 // Người chơi mới (tạo quán sau bản này) không thấy. Mỗi mục có nút đi tới đúng chỗ trong game.
-import { h, div, span, ico } from './dom.js';
+import { h, div, span, ico, store } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import * as C from '../config.js';
 import { frame } from './modals.js';
 import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
-  ver: 117,
+  // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
+  ver: 118,
   title: 'Có gì mới trong Lẩu Ơi!',
+  hero: 'Hộp mù & tab Giải trí!',
   items: [
+    { icon: 'ui_gift', title: 'Hộp mù', lv: C.FEATURES.blindbox, isNew: true,
+      text: `Vào **Quán ▸ Giải trí ▸ Hộp mù**. Mỗi ngày mở **1 hộp miễn phí**. Ra món ăn độc quyền, đồng phục, kiểu chủ quán, **nồi lẩu và bàn ghế** đẹp, **robot phục vụ**, đồ trang trí, và **thẻ thành tích** hiện trên bảng xếp hạng. Sưu tầm đủ ${C.BOX.items.length} món!`,
+      go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
+    { icon: 'ui_ticket', title: 'Tab Giải trí + Giải năm vé số', lv: C.FEATURES.lottery, isNew: true,
+      text: `Vé số và Hộp mù nằm chung tab **Giải trí**. Vé số có thêm **Giải năm ${C.LOTTERY.tiers.find((t) => t.id === 'nam').prize}k**: mua đều tay khoảng 2 ngày là có cơ hội trúng.`,
+      go: ['shop', 'veso'], goLabel: 'Xem Vé số' },
+    { icon: 'ui_xp', title: 'Lên cấp từ Lv 21', lv: 1, isNew: true,
+      text: `Từ **Lv ${C.LEVEL.upFrom}** thanh XP cần thêm **${Math.round((C.LEVEL.upMult - 1) * 100)}%** để quán lớn lên vững hơn.` },
     { icon: 'ui_staff', title: 'Quán chứa tới 12 nhân viên', lv: C.STAFF.slotBonus[0][0],
       text: `Lên **Lv ${C.STAFF.slotBonus.map((x) => x[0]).join(', ')}** mỗi mốc mở thêm 1 chỗ nhân viên. Nhà hàng 2 tầng chứa được tối đa **${C.STAFF.maxSlots} người**. Có nhiệm vụ mới: đủ 10 và 12 nhân viên.`,
       go: ['staff', null], goLabel: 'Xem Nhân viên' },
@@ -35,21 +45,24 @@ const rich = (t) => {   // **đậm**
   return out;
 };
 
+// Đã xem chưa: nhớ cả trong save lẫn trên máy này (save trên mạng cũ hơn kéo về cũng không hiện lại).
+const seenVer = (s) => Math.max(s.flags?.ui?.seenNews | 0, store.get('seenNews', 0) | 0);
 export function openWhatsNew({ force = false } = {}) {
   const s = S();
-  if (!force && (!s.started || (s.flags?.ui?.seenNews | 0) >= NEWS.ver)) return null;
+  if (!force && (!s.started || seenVer(s) >= NEWS.ver)) return null;
   ctx.game.act.setFlag?.('seenNews', NEWS.ver);
+  store.set('seenNews', NEWS.ver);
   const lv = s.level || 1;
   const hd = ctx.modal({
     id: 'whatsnew', cls: 'whatsnew', priority: 25, sound: 'levelup',
     build: (m) => {
       const [head, body] = frame(NEWS.title, { icon: 'ui_gift', onClose: () => m.close('x') });
       body.append(
-        div('wn-hero', span('wn-kick', 'BẢN CẬP NHẬT MỚI'), h('b', null, '12 nhân viên, Đơn ship & Vé số!')),
+        div('wn-hero', span('wn-kick', 'BẢN CẬP NHẬT MỚI'), h('b', null, NEWS.hero)),
         ...NEWS.items.map((it) => div('card wn-item',
           ico(it.icon, 32),
           div('grow',
-            div('wn-t', h('b', null, it.title), span('chip ' + (lv >= it.lv ? 'jade' : 'gold') + ' wn-lv', lv >= it.lv ? 'Đã mở' : 'Mở ở Lv ' + it.lv)),
+            div('wn-t', h('b', null, it.title), it.isNew ? span('chip red wn-lv', 'MỚI') : null, span('chip ' + (lv >= it.lv ? 'jade' : 'gold') + ' wn-lv', lv >= it.lv ? 'Đã mở' : 'Mở ở Lv ' + it.lv)),
             h('p', null, ...rich(it.text)),
             it.go && lv >= it.lv ? h('button', { class: 'btn paper sm', type: 'button', onclick: () => { sfx('click'); m.close('go'); ctx.openSheet(it.go[0], it.go[1] || undefined); } }, it.goLabel + ' ▸') : null))),
         h('p', { class: 'muted sm wn-foot' }, ...rich(NEWS.footer)),
@@ -68,7 +81,7 @@ export function initWhatsNew() {
   const tick = () => {
     try {
       const s = S();
-      if (!s.started || (s.flags?.ui?.seenNews | 0) >= NEWS.ver || tries++ > 400) return;
+      if (!s.started || seenVer(s) >= NEWS.ver || tries++ > 400) return;
       if (document.querySelector(BLOCKERS) || document.hidden) { setTimeout(tick, 700); return; }
       openWhatsNew();
     } catch (e) { console.error('[whatsnew]', e); }

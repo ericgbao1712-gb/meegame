@@ -8,8 +8,8 @@ import { frame } from '../modals.js';
 import { stars, portrait, noteBox } from '../sheets/common.js';
 import { countUp, createTimeline, wxName } from './kit.js';
 
-const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Vé số & đoán số', liquidation: 'Lỗ thanh lý hàng cũ', tax: 'Thuế' };
-const COST_ICON = { ingredients: 'ui_kho', broth: 'ui_fire', drinks: 'drk_trada', salary: 'ui_staff', rent: 'ui_home', marketing: 'ui_megaphone', lottery: 'ui_ticket', liquidation: 'ui_coin', tax: 'ui_book' };
+const COST_LABEL = { ingredients: 'Nguyên liệu', broth: 'Nước lẩu', drinks: 'Nước uống', salary: 'Lương nhân viên', rent: 'Thuê mặt bằng', marketing: 'Quảng bá', lottery: 'Vé số & đoán số', liquidation: 'Lỗ thanh lý hàng cũ', tax: 'Thuế', box: 'Hộp mù' };
+const COST_ICON = { ingredients: 'ui_kho', broth: 'ui_fire', drinks: 'drk_trada', salary: 'ui_staff', rent: 'ui_home', marketing: 'ui_megaphone', lottery: 'ui_ticket', liquidation: 'ui_coin', tax: 'ui_book', box: 'ui_gift' };
 const MINUS = '−';
 
 const money = (v) => fmtMoney(Math.round(v * 1000) / 1000);

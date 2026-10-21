@@ -126,10 +126,11 @@ export const khoSheet = {
     // ---- broth, then ingredients (locked broths are left out: they arrive with their hotpot)
     const row = (ing) => {
       const id = ing.id;
+      if (D.boxHidden(ing)) return;   // v1.18 món Hộp mù chưa có
       const unlocked = D.ingUnlocked(id);
       if (!unlocked) {
         if (ing.broth) return;
-        const need = ing.needs && s.level >= ing.unlockLv ? C.UPGRADES.find((u) => u.id === ing.needs) : null;   // v1.1 tráng miệng
+        const need = ing.needs && C.lvOk(s, ing) ? C.UPGRADES.find((u) => u.id === ing.needs) : null;   // v1.1 tráng miệng
         body.appendChild(div('card ing locked',
           div('ing-top', div('ing-ico', ico(ing.icon, 32, 'dim')), div('ing-name', h('b', null, ing.name), span('muted', need ? `Cần mua ${need.name} (Nâng cấp)` : 'Mở ở Lv ' + ing.unlockLv)), ico('ui_lock', 32))));
         return;
@@ -159,9 +160,9 @@ export const khoSheet = {
     // v1.4 món ăn kèm: what the shop can sell now + the next batch still locked (not all 16 at once)
     {
       const sides = C.INGREDIENTS.filter((i) => i.side);
-      const nextLv = Math.min(...sides.filter((i) => i.unlockLv > (s.level || 1)).map((i) => i.unlockLv), Infinity);
+      const nextLv = Math.min(...sides.filter((i) => !i.box && i.unlockLv > (s.level || 1)).map((i) => i.unlockLv), Infinity);
       body.appendChild(secTitle('Món ăn kèm', 'khách gọi cùng nồi lẩu'));
-      sides.filter((i) => i.unlockLv <= (s.level || 1) || i.unlockLv === nextLv).forEach(row);
+      sides.filter((i) => C.lvOk(s, i) || i.unlockLv === nextLv).forEach(row);
     }
     body.appendChild(secTitle('Tráng miệng', 'khách gọi sau khi ăn lẩu'));
     C.INGREDIENTS.filter((i) => i.dessert).forEach(row);

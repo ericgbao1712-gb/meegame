@@ -66,6 +66,15 @@ export const UNIFORMS = [
   { id: 'reu',       name: 'Xanh rêu',     lv: 22, swatch: '#5e7a46', h: 95, sk: 0.55, vk: 0.72 },
   { id: 'nau',       name: 'Nâu cà phê',   lv: 26, swatch: '#7a4f34', h: 24, sk: 0.62, vk: 0.62 },
   { id: 'den',       name: 'Đen lịch lãm', lv: 34, swatch: '#33303a', h: 260, sk: 0.12, vk: 0.42 },
+  // v1.18 màu ĐỘC QUYỀN Hộp mù (lv 99: chỉ có khi rút được trong Hộp mù)
+  { id: 'bachha',    name: 'Xanh bạc hà',   lv: 99, box: 'bx_u_bachha', swatch: '#7fd1b4', h: 158, sk: 0.5, vk: 1.1 },
+  { id: 'camdao',    name: 'Cam đào',       lv: 99, box: 'bx_u_camdao', swatch: '#f2a07b', h: 18, sk: 0.55, vk: 1.14 },
+  { id: 'datroi',    name: 'Xanh da trời',  lv: 99, box: 'bx_u_datroi', swatch: '#6db6e8', h: 202, sk: 0.62, vk: 1.1 },
+  { id: 'dodo',      name: 'Đỏ đô',         lv: 99, box: 'bx_u_dodo',   swatch: '#8e2234', h: 350, sk: 0.9, vk: 0.6 },
+  { id: 'oaihuong',  name: 'Tím oải hương', lv: 99, box: 'bx_u_oaihuong', swatch: '#b9a2e0', h: 262, sk: 0.42, vk: 1.1 },
+  { id: 'ngoclam',   name: 'Ngọc lam',      lv: 99, box: 'bx_u_ngoclam', swatch: '#1f9e9a', h: 178, sk: 0.85, vk: 0.82 },
+  { id: 'hoanggia',  name: 'Vàng hoàng gia', lv: 99, box: 'bx_u_hoanggia', swatch: '#f4c430', h: 47, sk: 1, vk: 1.18 },
+  { id: 'bacanhkim', name: 'Bạc ánh kim',   lv: 99, box: 'bx_u_bac', swatch: '#c9d0da', h: 218, sk: 0.08, vk: 1.18 },
 ];
 
 // v1.3: uniform pattern styles (combine with any colour). lv = unlock level.
@@ -97,7 +106,7 @@ export const AVATARS = [
   { id: 2, name: 'Đeo kính cận' },
   { id: 3, name: 'Tóc ngắn kẹp' },
 ];
-for (let i = 0; i < OWNER_LOOKS.length; i++) AVATARS.push({ id: 4 + i, name: OWNER_LOOKS[i].name, lv: OWNER_LOOKS[i].lv });   // v1.5
+for (let i = 0; i < OWNER_LOOKS.length; i++) AVATARS.push({ id: 4 + i, name: OWNER_LOOKS[i].name, lv: OWNER_LOOKS[i].lv, box: 'bx_l_' + (4 + i) });   // v1.18 rút trong Hộp mù là dùng được sớm   // v1.5
 
 // ───────────────────────────── INGREDIENTS ─────────────────────────────
 // Display order matters (dock grid is 2×5 in this order).
@@ -137,6 +146,13 @@ export const INGREDIENTS = [
   { id: 'ak_goingosen', name: 'Gỏi ngó sen',          short: 'Ngó sen',  icon: 'ak_goingosen', cost: 14, extraPrice: 55, unlockLv: 15, shelf: 2, side: true, needs: 'banso' },
   { id: 'ak_mienxao',  name: 'Miến xào hải sản',      short: 'Miến xào', icon: 'ak_mienxao',  cost: 16, extraPrice: 60,  unlockLv: 15, shelf: 2, side: true, needs: 'chaochien' },
   { id: 'ak_combo',    name: 'Combo khai vị đặc biệt', short: 'Combo',   icon: 'ak_combo',    cost: 35, extraPrice: 129, unlockLv: 20, shelf: 2, side: true, needs: 'banso' },
+  // v1.18 món ĐỘC QUYỀN Hộp mù (unlockLv 99 = không mở theo cấp; có món trong Hộp mù là bán được — xem lvOk)
+  { id: 'tm_kemtra',   name: 'Kem trà xanh',          short: 'Kem trà',  icon: 'tm_kemtra',   cost: 9,  extraPrice: 32,  unlockLv: 99, shelf: 5, dessert: true, needs: 'tukem', box: 'bx_kemtra' },
+  { id: 'tm_flancf',   name: 'Flan cà phê',           short: 'Flan cf',  icon: 'tm_flancf',   cost: 7,  extraPrice: 26,  unlockLv: 99, shelf: 2, dessert: true, box: 'bx_flancf' },
+  { id: 'tm_kemdau',   name: 'Kem dâu',               short: 'Kem dâu',  icon: 'tm_kemdau',   cost: 10, extraPrice: 38,  unlockLv: 99, shelf: 5, dessert: true, needs: 'tukem', box: 'bx_kemdau' },
+  { id: 'ak_oclen',    name: 'Ốc len xào dừa',        short: 'Ốc len',   icon: 'ak_oclen',    cost: 14, extraPrice: 55,  unlockLv: 99, shelf: 2, side: true, needs: 'xunghap', frozen: true, box: 'bx_oclen' },
+  { id: 'ak_tomchien', name: 'Tôm chiên xù',          short: 'Tôm xù',   icon: 'ak_tomchien', cost: 20, extraPrice: 79,  unlockLv: 99, shelf: 2, side: true, needs: 'chaochien', frozen: true, box: 'bx_tomchien' },
+  { id: 'ak_hauphomai', name: 'Hàu nướng phô mai',    short: 'Hàu phô mai', icon: 'ak_hauphomai', cost: 22, extraPrice: 89, unlockLv: 99, shelf: 2, side: true, needs: 'vinuong', frozen: true, box: 'bx_hauphomai' },
   { id: 'ak_met',      name: 'Mẹt món chiên tổng hợp', short: 'Mẹt chiên', icon: 'ak_met',    cost: 40, extraPrice: 149, unlockLv: 20, shelf: 2, side: true, needs: 'chaochien' },
   { id: 'nl_ga',      name: 'Nước lẩu gà',       short: 'Gà',      icon: 'pot_ga',      cost: 3, extraPrice: 20, unlockLv: 1,  broth: 'ga', shelf: 5 },
   { id: 'nl_nam',     name: 'Nước lẩu nấm',      short: 'Nấm',     icon: 'pot_nam',     cost: 2, extraPrice: 15, unlockLv: 1,  broth: 'nam', shelf: 5 },
@@ -184,6 +200,8 @@ export const DRINKS = [
   { id: 'tratac',   name: 'Trà tắc',   icon: 'drk_tratac',   price: 12, cost: 3,   unlockLv: 2 },
   { id: 'nuocsam',  name: 'Nước sâm',  icon: 'drk_nuocsam',  price: 15, cost: 4,   unlockLv: 4 },
   { id: 'nuocdua',  name: 'Nước dừa',  icon: 'drk_nuocdua',  price: 22, cost: 9,   unlockLv: 7 },
+  { id: 'tradao',   name: 'Trà đào cam sả', icon: 'drk_tradao', price: 25, cost: 7, unlockLv: 99, box: 'bx_tradao' },   // v1.18 Hộp mù
+  { id: 'matcha',   name: 'Trà sữa matcha', icon: 'drk_matcha', price: 32, cost: 10, unlockLv: 99, box: 'bx_matcha' },  // v1.18 Hộp mù
 ];
 // v1.1 tráng miệng: chance a group orders one after the hotpot (× kind taste), minutes to eat it
 export const DESSERT = { chance: 0.42, chanceTuKem: 0.08, eatMin: [4, 7], kinds: { giadinh: 1.5, capdoi: 1.4, sinhvien: 1.2, hoiban: 1.1, khachtay: 1.2, vip: 1.3, vanphong: 0.8, chutu: 0.5 } };
@@ -305,13 +323,14 @@ export const LOTTERY = {
   name: 'Cô bán vé số', ticketPrice: 10, maxPerDay: 5, visitChancePerHour: 0.12,
   // v1.15 vé số có số 6 chữ số, cuối ngày quay kết quả; người chơi tự DÒ vé rồi bấm NHẬN THƯỞNG.
   // Bảng kết quả giống xổ số kiến thiết (rút gọn): vé trúng một giải khi các số CUỐI của vé trùng một số của giải đó.
-  // Một vé chỉ lãnh giải cao nhất. Trúng ~6% số vé; trung bình trả ~55% tiền vé (vé số thật luôn lỗ nha).
+  // Một vé chỉ lãnh giải cao nhất. v1.18 thêm giải năm: trúng ~16% số vé (≈ 2 ngày mua đủ 5 vé là có giải); trung bình trả ~80% tiền vé (vé số thật luôn lỗ nha).
   tiers: [
     { id: 'db',   name: 'Giải đặc biệt', digits: 6, count: 1, prize: 100000 },
     { id: 'nhat', name: 'Giải nhất',     digits: 5, count: 1, prize: 15000 },
     { id: 'nhi',  name: 'Giải nhì',      digits: 4, count: 1, prize: 3000 },
     { id: 'ba',   name: 'Giải ba',       digits: 3, count: 2, prize: 600 },
     { id: 'tu',   name: 'Giải tư',       digits: 2, count: 6, prize: 60 },
+    { id: 'nam',  name: 'Giải năm',      digits: 2, count: 10, prize: 30 },   // v1.18: ~10%/vé → mua đều tay cứ ~2 ngày trúng 1 lần
   ],
   claimDays: 7,           // vé trúng phải lãnh trong 7 ngày (vé thật 30 ngày)
   keepDays: 14,           // vé cũ hơn thì cất khỏi sổ
@@ -514,6 +533,20 @@ export const DECO = [
   { id: 'db_meo',       cat: 'dacbiet', name: 'Mèo thần tài vẫy tay', price: 2500, amb: 7, lv: 7, effect: { tipMult: 1.15 }, desc: 'Vẫy hoài không mỏi. Tip +15%.' },
   { id: 'db_tivi',      cat: 'dacbiet', name: 'Tivi chiếu bóng đá', price: 6000, amb: 10, lv: 11, minTier: 2, effect: { demandMult: 1.1, footballMult: 1.5 }, desc: 'Khách +10%, ngày có trận còn đông hơn.' },
   { id: 'db_beca',      cat: 'dacbiet', name: 'Bể cá Koi',     price: 18000, amb: 16, lv: 22, minTier: 3 },
+  // v1.18 đồ ĐỘC QUYỀN Hộp mù (source 'box': không bán, rút trong Hộp mù rồi vào đây bấm Dùng)
+  { id: 'tuong_clock',   cat: 'tuong', name: 'Đồng hồ treo tường',     price: 0, amb: 4,  source: 'box', box: 'bx_d_clock' },
+  { id: 'tuong_bangmon', cat: 'tuong', name: 'Bảng ghi món trong ngày', price: 0, amb: 5, source: 'box', box: 'bx_d_bangmon' },
+  { id: 'tuong_rem',     cat: 'tuong', name: 'Rèm cửa sổ caro',        price: 0, amb: 5,  source: 'box', box: 'bx_d_rem' },
+  { id: 'tuong_led',     cat: 'tuong', name: 'Biển hiệu đèn LED',      price: 0, amb: 12, source: 'box', box: 'bx_d_led', effect: { demandMult: 1.05 }, desc: 'Sáng rực cả phố. Khách +5%.' },
+  { id: 'cay_trauba',    cat: 'cay', name: 'Chậu trầu bà lá xẻ',       price: 0, amb: 6,  source: 'box', box: 'bx_d_trauba' },
+  { id: 'cay_cau',       cat: 'cay', name: 'Chậu cau góc quán',        price: 0, amb: 6,  source: 'box', box: 'bx_d_cau' },
+  { id: 'db_xeday',      cat: 'dacbiet', name: 'Xe đẩy thức ăn ba tầng', price: 0, amb: 8, source: 'box', box: 'bx_d_xeday', effect: { patienceMult: 1.05 }, desc: 'Khách kiên nhẫn hơn 5%.' },
+  { id: 'db_quaycham',   cat: 'dacbiet', name: 'Quầy nước chấm tự chọn', price: 0, amb: 9, source: 'box', box: 'bx_d_quaycham', effect: { patienceMult: 1.06 }, desc: 'Khách tự pha nước chấm, chờ đỡ sốt ruột. Kiên nhẫn +6%.' },
+  { id: 'db_robot',      cat: 'dacbiet', name: 'Robot phục vụ',          price: 0, amb: 12, source: 'box', box: 'bx_d_robot', effect: { patienceMult: 1.1 }, desc: 'Chạy quanh quán chào khách. Kiên nhẫn +10%.' },
+  { id: 'db_mayphanuoc', cat: 'dacbiet', name: 'Máy pha đồ uống tự động', price: 0, amb: 12, source: 'box', box: 'bx_d_mayphanuoc', effect: { demandMult: 1.06 }, desc: 'Trà trái cây tự rót. Khách +6%.' },
+  { id: 'db_robotmeo',   cat: 'dacbiet', name: 'Robot phục vụ Mèo',      price: 0, amb: 18, source: 'box', box: 'bx_d_robotmeo', effect: { tipMult: 1.2, patienceMult: 1.08 }, desc: 'Meo meo mang món tới bàn. Tip +20%, kiên nhẫn +8%.' },
+  { id: 'db_robotgau',   cat: 'dacbiet', name: 'Robot phục vụ Gấu Trúc', price: 0, amb: 18, source: 'box', box: 'bx_d_robotgau', effect: { demandMult: 1.12 }, desc: 'Ai đi ngang cũng ghé chụp hình. Khách +12%.' },
+  { id: 'db_quaythungan', cat: 'dacbiet', name: 'Quầy thu ngân Mèo Thần Tài', price: 0, amb: 18, source: 'box', box: 'bx_d_quaythungan', effect: { tipMult: 1.25 }, desc: 'Mèo vẫy tay mỗi lần tính tiền. Tip +25%.' },
   { id: 'db_karaoke',   cat: 'dacbiet', name: 'Dàn karaoke',   price: 40000, amb: 20, lv: 31, minTier: 4, effect: { patienceMult: 1.15 }, desc: 'Khách kiên nhẫn hơn 15%. Hàng xóm thì… hơi bực.' },
 ];
 
@@ -551,7 +584,8 @@ export const LEVEL = {
   xpTableMult: 1.5,   // owner 20/10: "+30%" then "tăng xp lên 50%" — every level needs 50% more XP than the table
   lateFrom: 16, lateMult: 2,   // owner 20/10: "exp từ lv 16 tăng gấp đôi" — Lv 16 → 17 and up need twice the XP
   barMult: 1.6 * 1.2 * 1.2,   // owner 21/10: "tăng thanh xp lên 60%" (Lv 32: 46.500 → 74.400), rồi "+20%" (→ 89.280), rồi "+20%" nữa (→ 107.140)
-  xpToNext: (lv) => Math.round(LEVEL.table[Math.max(1, Math.min(lv, LEVEL.table.length)) - 1] * LEVEL.xpTableMult * (lv >= LEVEL.lateFrom ? LEVEL.lateMult : 1) * LEVEL.barMult / 10) * 10,
+  upFrom: 21, upMult: 1.45,   // owner 22/10: "từ level 21 tăng 45% số xp phải làm trong thanh xp"
+  xpToNext: (lv) => Math.round(LEVEL.table[Math.max(1, Math.min(lv, LEVEL.table.length)) - 1] * LEVEL.xpTableMult * (lv >= LEVEL.lateFrom ? LEVEL.lateMult : 1) * LEVEL.barMult * (lv >= LEVEL.upFrom ? LEVEL.upMult : 1) / 10) * 10,
   // XP for a finished table: price/8 + 3/person + 6 if 5★, × tierXp
   xpForGroup: (potPrice, size, stars, tier) => Math.round((potPrice / 8 + 3 * size + (stars >= 5 ? 6 : 0)) * [1, 1.3, 1.7, 2.2, 2.6][tier - 1]),
   thankXp: 2,
@@ -564,6 +598,7 @@ export const FEATURES = {
   pricing: 6,   // v1.14 Thực đơn ▸ Giá bán: tự đặt giá từng món / cả thực đơn (mang từ Xoài Lắc)
   tax: 13,      // v1.14 đóng thuế theo kỳ (quán đã làm ăn ổn định)
   hire_shipper: 11, ship: 11,   // v1.16 nhận đơn ship + thuê Shipper
+  blindbox: 8,  // v1.18 Hộp mù (tab Giải trí, cùng Vé số)
 };
 
 // ───────────────────────────── v1.14 GIÁ BÁN (người chơi tự đặt, mang từ Xoài Lắc v2) ─────────────────────────────
@@ -695,6 +730,7 @@ export const MAIN_QUESTS = [
   { id: 'q14', text: 'Đạt Lv 5',                        type: 'level', target: 5,      reward: { money: 300 } },
   { id: 'qp1', text: 'Tự đặt giá bán một món (Thực đơn ▸ Giá bán, Lv 6)', type: 'setPrice', target: 1, reward: { money: 300 } },   // v1.16
   { id: 'ql1', text: 'Mua vé số rồi dò vé (Lv 7)',      type: 'lotteryChecked', target: 1, reward: { money: 300 } },              // v1.16
+  { id: 'qb1', text: 'Mở thử một Hộp mù (Lv 8)',        type: 'boxOpened', target: 1, reward: { money: 400 } },                   // v1.18
   { id: 'q15', text: 'Mở Quán lẩu trong hẻm',           type: 'tier', target: 2,       reward: { money: 600 }, mom: 'tier2' },
   { id: 'q16', text: 'Có 3 nhân viên',                  type: 'staffCount', target: 3, reward: { money: 500 } },
   { id: 'q17', text: 'Gặp 6 kiểu khách khác nhau',      type: 'kindsMet', target: 6,   reward: { money: 500 } },
@@ -735,6 +771,7 @@ export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 
 // v1.16 nhiệm vụ chính mới: save cũ giữ đúng nhiệm vụ đang làm (đổi chỉ số theo id, xem state.migrate)
 export const MAIN_QUESTS_V116 = ['qp1', 'ql1', 'qs1', 'qs2', 'qt1'];
 export const MAIN_QUESTS_V117 = ['qn1', 'qn2'];
+export const MAIN_QUESTS_V118 = ['qb1'];
 
 // Daily tasks: 3 picked per game day from the pool (only those whose `minLv` ≤ level).
 // target(t) receives tier; reward is a chest tier.
@@ -848,3 +885,114 @@ export const CLOUD = {
   syncSec: 120,          // tự lưu lên mạng tối đa 2 phút / lần khi có thay đổi
   levelSlack: 2,         // bản mới hơn nhưng thấp hơn quá 2 cấp → hỏi người chơi thay vì tự lấy
 };
+
+// ───────────────────────────── v1.18 HỘP MÙ (tab Giải trí) ─────────────────────────────
+// Mỗi hộp ra 1 món sưu tầm theo độ hiếm. Món: món ăn/uống độc quyền (bán được trong quán), màu đồng phục độc quyền
+// (nhân viên + chủ quán), kiểu chủ quán (mở sớm, không cần đợi cấp), thẻ thành tích (đeo lên bảng xếp hạng).
+// Trùng món → mảnh; gom mảnh đổi món còn thiếu. Bảo hiểm: 10 hộp chắc chắn có Hiếm trở lên, 150 hộp chắc chắn có Bí ẩn.
+export const BOX = {
+  price: [80, 150, 400, 900, 1800],   // k / hộp theo cấp quán
+  tenMult: 9,                          // mở 10 hộp = giá 9 hộp
+  freePerDay: 1,
+  rar: [
+    { id: 1, name: 'Thường',   rate: 65, shard: 5,   cost: 20 },
+    { id: 2, name: 'Hiếm',     rate: 28, shard: 15,  cost: 60 },
+    { id: 3, name: 'Cực hiếm', rate: 6,  shard: 40,  cost: 700 },
+    { id: 4, name: 'Bí ẩn',    rate: 1,  shard: 100, cost: 1500 },
+  ],
+  pityRare: 10, pityMyst: 150,
+  items: [
+    // món ăn / uống độc quyền
+    { id: 'bx_kemtra',    r: 1, kind: 'food', ref: 'tm_kemtra',   name: 'Kem trà xanh' },
+    { id: 'bx_tradao',    r: 1, kind: 'drink', ref: 'tradao',     name: 'Trà đào cam sả' },
+    { id: 'bx_flancf',    r: 1, kind: 'food', ref: 'tm_flancf',   name: 'Flan cà phê' },
+    { id: 'bx_oclen',     r: 2, kind: 'food', ref: 'ak_oclen',    name: 'Ốc len xào dừa' },
+    { id: 'bx_kemdau',    r: 2, kind: 'food', ref: 'tm_kemdau',   name: 'Kem dâu' },
+    { id: 'bx_matcha',    r: 2, kind: 'drink', ref: 'matcha',     name: 'Trà sữa matcha' },
+    { id: 'bx_tomchien',  r: 3, kind: 'food', ref: 'ak_tomchien', name: 'Tôm chiên xù' },
+    { id: 'bx_hauphomai', r: 3, kind: 'food', ref: 'ak_hauphomai', name: 'Hàu nướng phô mai' },
+    // màu đồng phục độc quyền (nhân viên + chủ quán)
+    { id: 'bx_u_bachha',  r: 1, kind: 'uniform', ref: 'bachha',  name: 'Áo xanh bạc hà' },
+    { id: 'bx_u_camdao',  r: 1, kind: 'uniform', ref: 'camdao',  name: 'Áo cam đào' },
+    { id: 'bx_u_datroi',  r: 1, kind: 'uniform', ref: 'datroi',  name: 'Áo xanh da trời' },
+    { id: 'bx_u_dodo',    r: 2, kind: 'uniform', ref: 'dodo',    name: 'Áo đỏ đô' },
+    { id: 'bx_u_oaihuong', r: 2, kind: 'uniform', ref: 'oaihuong', name: 'Áo tím oải hương' },
+    { id: 'bx_u_ngoclam', r: 2, kind: 'uniform', ref: 'ngoclam', name: 'Áo ngọc lam' },
+    { id: 'bx_u_hoanggia', r: 3, kind: 'uniform', ref: 'hoanggia', name: 'Áo vàng hoàng gia' },
+    { id: 'bx_u_bac',     r: 4, kind: 'uniform', ref: 'bacanhkim', name: 'Áo bạc ánh kim' },
+    // kiểu chủ quán (mở sớm, không cần đợi cấp) — ref = id trong AVATARS
+    { id: 'bx_l_4',  r: 1, kind: 'look', ref: 4,  name: 'Chị tóc nâu dài' },
+    { id: 'bx_l_5',  r: 1, kind: 'look', ref: 5,  name: 'Chị tóc đen rối' },
+    { id: 'bx_l_6',  r: 2, kind: 'look', ref: 6,  name: 'Chị tạp dề cam' },
+    { id: 'bx_l_7',  r: 2, kind: 'look', ref: 7,  name: 'Cô tóc vàng bồng bềnh' },
+    { id: 'bx_l_8',  r: 2, kind: 'look', ref: 8,  name: 'Cô tóc hồng' },
+    { id: 'bx_l_9',  r: 3, kind: 'look', ref: 9,  name: 'Chị tóc ngang vai' },
+    { id: 'bx_l_10', r: 3, kind: 'look', ref: 10, name: 'Anh tóc đen áo xanh' },
+    { id: 'bx_l_11', r: 4, kind: 'look', ref: 11, name: 'Anh tóc nâu áo be' },
+    // kiểu nồi lẩu (đeo 1 kiểu: mọi nồi trên bàn + trên bếp đổi theo)
+    { id: 'bx_p_inoxden',  r: 1, kind: 'pot', ref: 'inoxden',  name: 'Nồi lẩu inox đen' },
+    { id: 'bx_p_datnung',  r: 1, kind: 'pot', ref: 'datnung',  name: 'Nồi lẩu đất nung' },
+    { id: 'bx_p_mentrang', r: 1, kind: 'pot', ref: 'mentrang', name: 'Nồi lẩu men trắng' },
+    { id: 'bx_p_dong',     r: 2, kind: 'pot', ref: 'dong',     name: 'Nồi lẩu đồng cổ điển' },
+    { id: 'bx_p_gomxanh',  r: 2, kind: 'pot', ref: 'gomxanh',  name: 'Nồi lẩu gốm hoa văn xanh' },
+    { id: 'bx_p_menngoc',  r: 3, kind: 'pot', ref: 'menngoc',  name: 'Nồi lẩu men ngọc' },
+    { id: 'bx_p_hoanggia', r: 4, kind: 'pot', ref: 'hoanggia', name: 'Nồi Lẩu Hoàng Gia' },
+    // kiểu bàn ghế (đeo 1 kiểu cho cả quán)
+    { id: 'bx_t_gosang',   r: 1, kind: 'table', ref: 'gosang',   name: 'Bàn lẩu gỗ sáng' },
+    { id: 'bx_t_mattrang', r: 1, kind: 'table', ref: 'mattrang', name: 'Bàn lẩu mặt trắng' },
+    { id: 'bx_t_matda',    r: 2, kind: 'table', ref: 'matda',    name: 'Bàn lẩu mặt đá' },
+    { id: 'bx_t_occho',    r: 3, kind: 'table', ref: 'occho',    name: 'Bàn lẩu gỗ óc chó' },
+    { id: 'bx_t_ngurthien', r: 4, kind: 'table', ref: 'ngurthien', name: 'Bàn Lẩu Ngự Thiện' },
+    // đồ trang trí (vào Quán ▸ Trang trí bấm Dùng)
+    { id: 'bx_d_clock',    r: 1, kind: 'deco', ref: 'tuong_clock',   name: 'Đồng hồ treo tường' },
+    { id: 'bx_d_bangmon',  r: 1, kind: 'deco', ref: 'tuong_bangmon', name: 'Bảng ghi món trong ngày' },
+    { id: 'bx_d_rem',      r: 1, kind: 'deco', ref: 'tuong_rem',     name: 'Rèm cửa sổ caro' },
+    { id: 'bx_d_trauba',   r: 1, kind: 'deco', ref: 'cay_trauba',    name: 'Chậu trầu bà lá xẻ' },
+    { id: 'bx_d_cau',      r: 1, kind: 'deco', ref: 'cay_cau',       name: 'Chậu cau góc quán' },
+    { id: 'bx_d_led',      r: 2, kind: 'deco', ref: 'tuong_led',     name: 'Biển hiệu đèn LED' },
+    { id: 'bx_d_xeday',    r: 2, kind: 'deco', ref: 'db_xeday',      name: 'Xe đẩy thức ăn ba tầng' },
+    { id: 'bx_d_quaycham', r: 2, kind: 'deco', ref: 'db_quaycham',   name: 'Quầy nước chấm tự chọn' },
+    { id: 'bx_d_robot',    r: 3, kind: 'deco', ref: 'db_robot',      name: 'Robot phục vụ' },
+    { id: 'bx_d_mayphanuoc', r: 3, kind: 'deco', ref: 'db_mayphanuoc', name: 'Máy pha đồ uống tự động' },
+    { id: 'bx_d_robotmeo', r: 4, kind: 'deco', ref: 'db_robotmeo',   name: 'Robot phục vụ Mèo' },
+    { id: 'bx_d_robotgau', r: 4, kind: 'deco', ref: 'db_robotgau',   name: 'Robot phục vụ Gấu Trúc' },
+    { id: 'bx_d_quaythungan', r: 4, kind: 'deco', ref: 'db_quaythungan', name: 'Quầy thu ngân Mèo Thần Tài' },
+    // thẻ thành tích (đeo 1 thẻ, hiện cạnh tên quán trên bảng xếp hạng)
+    { id: 'bx_b_tapsu',   r: 1, kind: 'badge', emoji: '🍲', name: 'Lẩu thủ tập sự' },
+    { id: 'bx_b_chamchi', r: 1, kind: 'badge', emoji: '🧹', name: 'Chủ quán chăm chỉ' },
+    { id: 'bx_b_trada',   r: 1, kind: 'badge', emoji: '🧊', name: 'Fan cứng trà đá' },
+    { id: 'bx_b_cay',     r: 1, kind: 'badge', emoji: '🌶️', name: 'Thánh ăn cay' },
+    { id: 'bx_b_bep',     r: 2, kind: 'badge', emoji: '👩‍🍳', name: 'Bếp trưởng vàng' },
+    { id: 'bx_b_ship',    r: 2, kind: 'badge', emoji: '🛵', name: 'Ông hoàng ship' },
+    { id: 'bx_b_thantai', r: 2, kind: 'badge', emoji: '💰', name: 'Thần tài gõ cửa' },
+    { id: 'bx_b_den',     r: 2, kind: 'badge', emoji: '🏮', name: 'Quán quen của phố' },
+    { id: 'bx_b_vua',     r: 3, kind: 'badge', emoji: '👑', name: 'Vua lẩu Sài Gòn' },
+    { id: 'bx_b_dinh',    r: 3, kind: 'badge', emoji: '🏆', name: 'Lẩu đỉnh nóc' },
+    { id: 'bx_b_rong',    r: 4, kind: 'badge', emoji: '🐉', name: 'Rồng vàng' },
+    { id: 'bx_b_huyen',   r: 4, kind: 'badge', emoji: '💎', name: 'Huyền thoại Lẩu Ơi' },
+  ],
+};
+// v1.18 kiểu NỒI LẨU / BÀN LẨU độc quyền Hộp mù: đổi màu lúc vẽ (art/scenes.js tô lại phần inox của nồi, phần gỗ của bàn ghế).
+// h = màu (độ), s = độ đậm, v = độ sáng (× sáng gốc). Đeo trong Hộp mù, áp dụng cho mọi bàn và bếp.
+export const POT_SKINS = {
+  inoxden:  { name: 'Nồi lẩu inox đen',      h: 230, s: 0.08, v: 0.5 },
+  datnung:  { name: 'Nồi lẩu đất nung',      h: 16,  s: 0.55, v: 0.85 },
+  mentrang: { name: 'Nồi lẩu men trắng',     h: 40,  s: 0.04, v: 1.3 },
+  dong:     { name: 'Nồi lẩu đồng cổ điển',  h: 28,  s: 0.62, v: 1.05 },
+  gomxanh:  { name: 'Nồi lẩu gốm hoa văn xanh', h: 214, s: 0.5, v: 1.05, dots: '#ffffff' },
+  menngoc:  { name: 'Nồi lẩu men ngọc',      h: 160, s: 0.35, v: 1.1 },
+  hoanggia: { name: 'Nồi Lẩu Hoàng Gia',     h: 46,  s: 0.8, v: 1.2, dots: '#fff6c8' },
+};
+export const TABLE_SKINS = {
+  gosang:   { name: 'Bàn lẩu gỗ sáng',      h: 36,  s: 0.42, v: 1.22 },
+  mattrang: { name: 'Bàn lẩu mặt trắng',    h: 35,  s: 0.06, v: 1.45 },
+  matda:    { name: 'Bàn lẩu mặt đá',       h: 210, s: 0.07, v: 1.0 },
+  occho:    { name: 'Bàn lẩu gỗ óc chó',    h: 20,  s: 0.5, v: 0.62 },
+  ngurthien: { name: 'Bàn Lẩu Ngự Thiện',   h: 2,   s: 0.78, v: 0.85 },
+};
+export const BOX_ITEM = Object.fromEntries(BOX.items.map((x) => [x.id, x]));
+export const boxHas = (s, id) => !!(s && s.box && s.box.got && s.box.got[id] > 0);
+/** Món / màu / kiểu đã mở: tới cấp HOẶC (món độc quyền) đã có trong Hộp mù. */
+export const lvOk = (s, it, lvKey = 'unlockLv') => !!it && (((s && s.level) || 1) >= (it[lvKey] || 1) || (!!it.box && boxHas(s, it.box)));
+/** thẻ thành tích đang đeo (leaderboard): id → {emoji, name} */
+export const badgeOf = (id) => { const b = BOX_ITEM[id]; return b && b.kind === 'badge' ? b : null; };

@@ -11,6 +11,7 @@ import { expandView, branchesView } from './expand.js';
 import { leaderboardView } from '../cloud.js';
 import { taxView } from '../tax.js';
 import { lotteryView } from '../lottery.js';
+import { boxView } from '../blindbox.js';
 
 // ------------------------------------------------------------------ Trang trí
 function decoThumb(id, size = 48) {
@@ -32,7 +33,7 @@ function decoView(body, api) {
     const eqDef = C.DECO.find((d) => d.id === eq);
     body.appendChild(secTitle(cat.name, eqDef && !eqDef.default ? 'đang dùng: ' + eqDef.name : 'chưa trang trí'));
     const grid = div('deco-grid');
-    C.DECO.filter((d) => d.cat === cat.id).forEach((d) => {
+    C.DECO.filter((d) => d.cat === cat.id && (!d.box || owned.has(d.id))).forEach((d) => {   // v1.18 đồ Hộp mù: chỉ hiện khi đã rút được
       const isEq = eq === d.id, isOwned = owned.has(d.id);
       const tierLock = (d.minTier || 1) > D.tierNow();
       const lvLock = (d.lv || 1) > (s.level || 1);
@@ -47,7 +48,7 @@ function decoView(body, api) {
         const b = h('button', { class: 'btn paper sm' }, d.default ? 'Gỡ ra' : 'Dùng');
         b.addEventListener('click', () => { const r = act('equipDeco', d.id); if (r.ok === false) return; sfx('click'); ctx.tutorial?.onAction?.('deco'); api.rerender(); });
         act_.appendChild(b);
-      } else if (d.source) act_.appendChild(span('chip', ico('ui_gift', 16), d.source === 'login' ? 'Quà điểm danh' : 'Quà tặng'));
+      } else if (d.source) act_.appendChild(span('chip', ico('ui_gift', 16), d.source === 'login' ? 'Quà điểm danh' : d.source === 'box' ? 'Hộp mù' : 'Quà tặng'));
       else if (tierLock) act_.appendChild(span('chip red', ico('ui_lock', 16), C.TIERS[d.minTier - 1].name));
       else if (lvLock) act_.appendChild(span('chip red', ico('ui_lock', 16), 'Lv ' + d.lv));
       else {
@@ -143,7 +144,7 @@ function mktView(body, api) {
 // ------------------------------------------------------------------ container
 const TABS = [
   { id: 'quests', label: 'Nhiệm vụ', icon: 'ui_quest' },
-  { id: 'veso', label: 'Vé số', icon: 'ui_ticket' },      // v1.15 (ngay sau Nhiệm vụ)
+  { id: 'giaitri', label: 'Giải trí', icon: 'ui_gift' },   // v1.18 Vé số + Hộp mù (ngay sau Nhiệm vụ)
   { id: 'deco', label: 'Trang trí', icon: 'ui_deco' },
   { id: 'reviews', label: 'Đánh giá', icon: 'ui_review' },
   { id: 'book', label: 'Sổ khách', icon: 'ui_book' },
@@ -153,7 +154,19 @@ const TABS = [
   { id: 'tax', label: 'Thuế', icon: 'ui_book' },          // v1.14
   { id: 'rank', label: 'Xếp hạng', icon: 'ui_trophy' },   // v1.8
 ];
-const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView, tax: taxView, veso: lotteryView, rank: leaderboardView };
+const VIEWS = { quests: questsView, deco: decoView, reviews: reviewsView, book: bookView, expand: expandView, mkt: mktView, branches: branchesView, tax: taxView, giaitri: funView, rank: leaderboardView };
+
+// v1.18 tab Giải trí: Vé số + Hộp mù
+let fun = 'veso';
+function funView(body, api) {
+  const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.();
+  const seg = div('seg-row fun-seg');
+  [['veso', '🎟️ Vé số', !!li && (li.waiting > 0 || li.unclaimed > 0)], ['hopmu', '🎁 Hộp mù', !!bi && bi.unlocked && bi.freeLeft > 0]].forEach(([id, label, dot]) => {
+    seg.appendChild(h('button', { class: 'seg' + (fun === id ? ' on' : ''), type: 'button', onclick: () => { if (fun === id) return; fun = id; sfx('click'); api.rerender(); } }, label, dot ? h('i', { class: 'dot' }) : null));
+  });
+  body.appendChild(seg);
+  (fun === 'hopmu' ? boxView : lotteryView)(body, api);
+}
 
 function tabDots() {
   const s = S(); const d = {};
@@ -163,7 +176,7 @@ function tabDots() {
   d.deco = D.featureOn('deco') && C.DECO.some((x) => !x.default && !x.source && x.price > 0 && (x.minTier || 1) <= D.tierNow() && (x.lv || 1) <= (s.level || 1) && !(s.deco?.owned || []).includes(x.id) && s.money >= x.price);
   d.expand = !!G().get?.tierInfo?.()?.canExpand;
   { const b = G().get?.taxInfo?.()?.bill; d.tax = !!b && b.daysLeft <= C.TAX.remindDays; }   // v1.14
-  { const li = G().get?.lotteryInfo?.(); d.veso = !!li && (li.waiting > 0 || li.unclaimed > 0); }   // v1.15
+  { const li = G().get?.lotteryInfo?.(), bi = G().get?.boxInfo?.(); d.giaitri = (!!li && (li.waiting > 0 || li.unclaimed > 0)) || (!!bi && bi.unlocked && bi.freeLeft > 0); }   // v1.15 / v1.18
   return d;
 }
 
@@ -172,9 +185,10 @@ export const shopSheet = {
   icon: 'ui_shop',
   build(body, api) {
     let sub = api.sub;
+    if (sub === 'veso' || sub === 'hopmu') { fun = sub; sub = 'giaitri'; }   // v1.18 link cũ tới Vé số / link Hộp mù
     if (!VIEWS[sub]) sub = 'quests';
     const dots = tabDots();
-    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'veso' && !D.featureOn('lottery') && !(G().get?.lotteryInfo?.()?.list?.length)) })), sub, (id) => api.setSub(id));
+    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'giaitri' && !D.featureOn('lottery') && !D.featureOn('blindbox') && !(G().get?.lotteryInfo?.()?.list?.length)) })), sub, (id) => api.setSub(id));
     VIEWS[sub](body, api);
   },
 };

@@ -43,9 +43,11 @@ export function potPrice(id) {
   return Math.round(p.price * (1 + (lvl - 1) * C.RECIPE.pricePerLevel));
 }
 export const sidePrice = (id) => get('sidePrice', id) ?? ING[id]?.extraPrice ?? 0;   // v1.6
-export const ingUnlocked = (id) => { const v = get('isIngUnlocked', id); return v ?? st().level >= ING[id].unlockLv; };
+export const ingUnlocked = (id) => { const v = get('isIngUnlocked', id); return v ?? C.lvOk(st(), ING[id]); };
+/** v1.18 món / màu độc quyền Hộp mù chưa rút được: ẩn khỏi danh sách (không hiện "Lv 99"). */
+export const boxHidden = (it) => !!(it && it.box) && !C.boxHas(st(), it.box);
 export const potUnlocked = (id) => { const v = get('isPotUnlocked', id); return v ?? st().level >= POT[id].unlockLv; };
-export const drinkUnlocked = (id) => { const v = get('isDrinkUnlocked', id); return v ?? st().level >= DRINK[id].unlockLv; };
+export const drinkUnlocked = (id) => { const v = get('isDrinkUnlocked', id); return v ?? C.lvOk(st(), DRINK[id]); };
 export const featureOn = (key) => { const v = get('unlocked', key); return v ?? st().level >= (C.FEATURES[key] ?? 1); };
 
 export const tierNow = () => st().tier || 1;

@@ -7,4 +7,5 @@ export { CHAR_W, CHAR_H, makeLook, makeOwnerLook, makeStaffLook, drawChar, portr
 export {
   drawSceneBack, sceneDrawables, drawSceneFront, drawTable, drawStove, drawSteam, drawCoinPile,
   drawBubble, drawParticle, drawVehicle, drawWeather, drawCanopy, drawLighting, decoIconURL, sceneThumbURL,
+  setSkins, skinPreviewURL,   // v1.18 Hộp mù
 } from './scenes.js';

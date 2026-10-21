@@ -17,6 +17,7 @@ import * as rain from './rain.js';
 import { createGetters } from './getters.js';
 import { fmtMoney, fmtDuration } from './format.js';
 import * as lottery from './lottery.js';
+import * as box from './box.js';
 import * as ship from './ship.js';
 
 const STEP = 0.1;            // max real seconds per simulation sub-step
@@ -202,7 +203,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
-      state.flags.ui.seenNews = 117;   // v1.16 người chơi mới không cần bảng "Có gì mới"
+      state.flags.ui.seenNews = 118;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),
@@ -259,6 +260,10 @@ export function createGame(save, opts = {}) {
     placeBet: wrap((num, amount) => lottery.placeBet(G, num, amount)),   // v1.15 Đoán số
     checkTickets: wrap((id) => lottery.checkTickets(G, id)),            // v1.15 dò vé
     claimPrize: wrap((id) => lottery.claimPrize(G, id)),                // v1.15 nhận thưởng
+    openBox: wrap((n, free) => box.openBox(G, n, free)),                // v1.18 Hộp mù
+    exchangeBox: wrap((id) => box.exchangeBox(G, id)),
+    setBadge: wrap((id) => box.setBadge(G, id)),
+    equipBox: wrap((id, on) => box.equipBox(G, id, on)),
     setAutoRestock: wrap((on) => {
       if (on && !(state.upgrades.supplier > 0 || mods(G).hasQuankho)) return fail('locked', 'Cần mua Mối chợ đầu mối hoặc thuê Quản kho trước nha.');
       state.autoRestock = !!on;
@@ -339,7 +344,7 @@ export function createGame(save, opts = {}) {
     toggleExtraItem: wrap((id) => {
       const it = C.INGREDIENTS.find((i) => i.id === id && (i.side || i.dessert));
       if (!it) return fail('unknown', 'Không có món này.');
-      if (state.level < it.unlockLv) return fail('locked', `${it.name} mở ở Lv ${it.unlockLv} nha!`);
+      if (!C.lvOk(state, it)) return fail('locked', it.box ? `${it.name} có trong Hộp mù nha!` : `${it.name} mở ở Lv ${it.unlockLv} nha!`);
       const on = state.menu[id] === false;
       state.menu[id] = on;
       return { ok: true, on };
@@ -389,7 +394,7 @@ export function createGame(save, opts = {}) {
       const u = C.UNIFORMS.find((x) => x.id === id);
       if (!u) return fail('unknown', 'Không có màu này.');
       if (who !== 'staff' && who !== 'owner') return fail('who', 'Chọn nhân viên hoặc chủ quán nha.');
-      if (state.level < u.lv) return fail('locked', `Màu ${u.name} mở ở Lv ${u.lv} nha!`);
+      if (!C.lvOk(state, u, 'lv')) return fail('locked', u.box ? `Màu ${u.name} có trong Hộp mù nha!` : `Màu ${u.name} mở ở Lv ${u.lv} nha!`);
       if (!state.uniform || typeof state.uniform !== 'object') state.uniform = { staff: 'do', owner: 'do' };
       state.uniform[who] = id;
       G.emit('uniform', { who, id });
@@ -407,7 +412,7 @@ export function createGame(save, opts = {}) {
     setAvatar: wrap((n) => {
       const a = Math.floor(Number(n));
       if (!(a >= 0 && a < C.AVATARS.length)) return fail('unknown', 'Không có kiểu này.');
-      if ((C.AVATARS[a].lv || 1) > state.level) return fail('locked', `Kiểu này mở ở Lv ${C.AVATARS[a].lv} nha!`);
+      if (!C.lvOk(state, C.AVATARS[a], 'lv')) return fail('locked', `Kiểu này mở ở Lv ${C.AVATARS[a].lv} (hoặc rút trong Hộp mù) nha!`);
       state.avatar = a;
       G.emit('uniform', { who: 'owner' });
       return { ok: true };

@@ -68,7 +68,14 @@ export function saveSummary(save, game = DEFAULT_GAME) {
     days_played: Math.max(0, Math.floor(num(stats.daysPlayed))),
     client_saved_at: Math.floor(num(save.savedAt)) || null,
     cheat: save.flags && save.flags.ui && save.flags.ui.cheat ? 1 : 0,
+    badge: badgeOf(save),
   };
+}
+/** v1.18 thẻ thành tích đang đeo (id món Hộp mù dạng bx_b_xxx, phải có trong bộ sưu tập). */
+function badgeOf(save) {
+  const b = save && save.box && typeof save.box === 'object' ? save.box : null;
+  const id = b && typeof b.badge === 'string' ? b.badge : '';
+  return /^bx_b_[a-z0-9_]{1,24}$/.test(id) && b.got && num(b.got[id]) > 0 ? id : null;
 }
 
 /** Anti-cheat: is the jump from the previous cloud save (or from nothing) believable? → reason string or null. */
@@ -157,7 +164,7 @@ export default async function handler(req, res) {
       const col = BOARD_VALUE[by];
       const where = 'g.game = ? AND g.cheat = 0 AND g.flagged = 0 AND p.hidden = 0';
       const rs = await db.execute({
-        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold FROM game_saves g
+        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge FROM game_saves g
               JOIN players p ON p.id = g.player_id WHERE ${where} ORDER BY ${BOARDS[by]}, g.updated_at ASC LIMIT 50`,
         args: [GAME],
       });
@@ -180,7 +187,7 @@ export default async function handler(req, res) {
       }
       const rows = rs.rows.map((r, i) => ({
         rank: i + 1, shopName: r.shop_name, avatar: num(r.avatar), level: num(r.level),
-        value: num(r[col]), me: pid != null && num(r.player_id) === pid,
+        value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null,
       }));
       return send(res, 200, { by, rows, me });
     }
@@ -455,6 +462,7 @@ export default async function handler(req, res) {
         args: [pid, GAME, data, sum.client_saved_at, nowMs, sum.shop_name, sum.avatar, sum.level, sum.xp, sum.money_earned,
           sum.pots_sold, sum.day, sum.cheat, flagged, reason],
       });
+      try { await db.execute({ sql: 'UPDATE game_saves SET badge = ? WHERE player_id = ? AND game = ?', args: [sum.badge, pid, GAME] }); } catch (e) { /* cột cũ chưa có: bỏ qua */ }   // v1.18
       return send(res, 200, { ok: true, cloud: meta({ ...sum, updated_at: nowMs }), listed: !flagged && !sum.cheat && !num(p.hidden) });
     }
 

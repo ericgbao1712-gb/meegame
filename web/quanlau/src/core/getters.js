@@ -7,6 +7,7 @@ import {
 } from './economy.js';
 import { refuseChance } from './customers.js';
 import { lotteryInfo } from './lottery.js';
+import { boxInfo } from './box.js';
 import { shipInfo } from './ship.js';
 import { staffSlots, roleUnlocked, roleCount, candidatesOf } from './staff.js';
 import { trayStatus } from './kitchen.js';
@@ -225,6 +226,7 @@ export function createGetters(G) {
   return {
     priceInfo, taxInfo, menuPriceDemand: () => menuPriceDemand(G),
     lotteryInfo: () => lotteryInfo(G),   // v1.15
+    boxInfo: () => boxInfo(G),           // v1.18
     shipInfo: () => shipInfo(G),         // v1.16
     level, kho, buyPrice,
     liquidateQuote: (id, n) => liquidateQuote(G, id, n),   // v1.10 thanh lý
