@@ -129,7 +129,7 @@ const LAYOUTS = {
     lane: { y: 326 },
     aisles: [59, 105, 151], serviceY: 232, serviceY2: 72,
     spawn: [{ x: -16, y: 326 }, { x: 208, y: 326 }],
-    waitSpots: [{ x: 80, y: 322, facing: 'up' }, { x: 94, y: 322, facing: 'up' }, { x: 108, y: 322, facing: 'up' }, { x: 122, y: 322, facing: 'up' }, { x: 66, y: 322, facing: 'up' }],
+    waitSpots: [{ x: 94, y: 322, facing: 'up' }, { x: 108, y: 322, facing: 'up' }, { x: 122, y: 322, facing: 'up' }, { x: 136, y: 322, facing: 'up' }, { x: 150, y: 322, facing: 'up' }],
     tables: [
       table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280), table(174, 280),
       table(36, 88, 2), table(82, 88, 2), table(128, 88, 2), table(36, 116, 2), table(82, 116, 2), table(128, 116, 2),
@@ -143,9 +143,9 @@ const LAYOUTS = {
     },
     staffSpots: {
       waiter: [{ x: 150, y: 234 }, { x: 59, y: 265 }, { x: 105, y: 265 }, { x: 59, y: 102 }, { x: 105, y: 102 }],
-      cashier: { x: 16, y: 294 }, quankho: { x: 30, y: 231, facing: 'left' }, manager: { x: 140, y: 240 },   // v1.7: quầy thu ngân ra góc trước bên trái (trước kẹt giữa các bàn ở lối cổng)
+      cashier: { x: 68, y: 297 }, quankho: { x: 30, y: 231, facing: 'left' }, manager: { x: 140, y: 240 },   // v1.18r quầy vào trong cổng (trước nằm trên hàng rào)   // v1.7: quầy thu ngân ra góc trước bên trái (trước kẹt giữa các bàn ở lối cổng)
     },
-    props: [{ id: 'haitang_counter', x: 80, y: 224 }, { id: 'haitang_cashier_desk', x: 16, y: 300 }, { id: 'haitang_balcony', x: 96, y: 148 }],
+    props: [{ id: 'haitang_counter', x: 80, y: 224 }, { id: 'haitang_cashier_desk', x: 68, y: 311 }, { id: 'haitang_balcony', x: 96, y: 148 }],
     deco: {
       den: [{ x: 16, y: 192, w: 140 }, { x: 24, y: 34, w: 140 }],
       cay: [{ x: 10, y: 262 }, { x: 22, y: 130 }],
@@ -153,7 +153,7 @@ const LAYOUTS = {
       dacbiet: [{ x: 156, y: 228 }],   // v1.7: góc sau bên phải cạnh tủ, không còn chắn chân cầu thang (trước: 170,236)
     },
     decoMore: { tuong: [{ x: 24, y: 44 }, { x: 128, y: 44 }], floor: [{ x: 158, y: 104 }, { x: 104, y: 66 }] },
-    equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 16, y: 293 }, tarp: null, kho: { x: 14, y: 222 } },
+    equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 68, y: 304 }, tarp: null, kho: { x: 14, y: 222 } },
     sign: { x: 28, y: 157, w: 136, h: 13 },
     gate: { x: 105, y: 312, yIn: 266 },  // v1.3: front fence opening spans x 57…135 → cross on the middle aisle
     street: { y: 346 },
