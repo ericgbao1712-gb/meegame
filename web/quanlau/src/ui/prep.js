@@ -110,7 +110,7 @@ export function mountPrep(root) {
       const row = div('pchips');
       ms.forEach((m) => {
         const done = !!s.marketingToday?.[m.id];
-        const cost = m.cost * (m.scale ? C.TIER_MULT[(s.tier || 1) - 1] : 1);
+        const cost = C.marketingCost(m, s.tier || 1);
         row.appendChild(h('button', { class: 'mchip' + (done ? ' done' : ''), onclick: () => { if (done) return; const r = act('buyMarketing', m.id); if (r.ok !== false) { sfx('cash'); ctx.toast(m.name + ' xong rồi!', 'good', m.icon); } render(); } },
           ico(m.icon, 32), div('mcq', span('mcn', m.name.replace('Khuyến mãi giảm 10%', 'Giảm 10%').replace('Livestream bán hàng', 'Livestream').replace('Mời Food Reviewer', 'Mời Reviewer').replace('Phát tờ rơi', 'Tờ rơi')), span('mcc', done ? 'Đã làm ✓' : (cost ? fmtShort(cost) : 'Miễn phí')))));
       });

@@ -117,11 +117,10 @@ function bookView(body) {
 function mktView(body, api) {
   const s = S();
   const prep = s.phase === 'prep';
-  const mult = C.TIER_MULT[Math.max(0, D.tierNow() - 1)] || 1;
   if (!prep) body.appendChild(noteBox('ui_clock', 'Quảng bá chỉ chạy được **vào buổi sáng** trước khi mở hàng nha.', 'gold'));
   if ((s.viral?.days || 0) > 0 && (s.viral?.mult || 1) >= 1) body.appendChild(noteBox('ui_fire', `Quán đang nổi trên mạng! Khách đông ×${String(s.viral.mult).replace('.', ',')} thêm ${s.viral.days} ngày.`, 'jade'));
   C.MARKETING.forEach((m) => {
-    const cost = m.cost * (m.scale ? mult : 1);
+    const cost = C.marketingCost(m, D.tierNow());
     const locked = s.level < m.unlockLv;
     const done = !!s.marketingToday?.[m.id];
     const card = div('card mkt' + (locked ? ' locked' : done ? ' jade' : ''));

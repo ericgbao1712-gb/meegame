@@ -16,7 +16,6 @@ import { rollDaily, autoClaimDailies, counter } from './quests.js';
 import { clearStove, dressStoves } from './kitchen.js';
 
 const fail = (reason, msg) => ({ ok: false, reason, msg });
-const TM = (G) => C.TIER_MULT[G.state.tier - 1];
 
 // ───────────── weather / events / forecast ─────────────
 export function rollWeather(G, prev) {
@@ -239,7 +238,7 @@ export function buyMarketing(G, id) {
   if (s.phase !== 'prep') return fail('phase', 'Quảng bá được vào buổi sáng thôi nha.');
   if (s.level < def.unlockLv) return fail('locked', `${def.name} mở ở Lv ${def.unlockLv} nha!`);
   if (s.marketingToday[id]) return fail('done', 'Hôm nay làm rồi nha.');
-  const cost = def.cost * (def.scale ? TM(G) : 1);
+  const cost = C.marketingCost(def, s.tier);
   if (s.money + 1e-9 < cost) return fail('money', `Cần ${fmtMoney(cost)} để ${def.name.toLowerCase()} nha.`);
   spend(G, 'marketing', cost, 'marketing');
   s.marketingToday[id] = true;

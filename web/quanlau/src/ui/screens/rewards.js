@@ -47,7 +47,7 @@ export function openTierUp(p = {}) {
       const gains = [];
       if (pt) {
         if (nt.maxTables !== pt.maxTables) gains.push(['Bàn tối đa', pt.maxTables, nt.maxTables]);
-        if (nt.kho !== pt.kho) gains.push(['Kho chứa', pt.kho, nt.kho]);
+        if (nt.kho + (nt.khoBonus || 0) !== pt.kho + (pt.khoBonus || 0)) gains.push(['Kho chứa', pt.kho + (pt.khoBonus || 0), nt.kho + (nt.khoBonus || 0)]);
       }
       return div('mbody cel',
         div('rays'),

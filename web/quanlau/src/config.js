@@ -481,10 +481,10 @@ export const DECO = [
 // ───────────────────────────── TIERS (restaurants) ─────────────────────────────
 export const TIERS = [
   { id: 1, scene: 'vihe',    name: 'Quán lẩu vỉa hè',      cost: 0,      require: null,
-    startTables: 2, maxTables: 4,  startStoves: 2, maxStoves: 2, waitSpots: 2, kho: 100, rent: 0,   demand: 1.0, ambCap: 20, covered: false,
+    startTables: 2, maxTables: 4,  startStoves: 2, maxStoves: 2, waitSpots: 2, kho: 100, khoBonus: 50 /* v1.6d +50 chỗ */, rent: 0,   demand: 1.0, ambCap: 20, covered: false,
     desc: 'Hai bộ bàn nhựa đỏ trước hiên nhà, một bếp ga mini và rất nhiều quyết tâm.' },
   { id: 2, scene: 'hem',     name: 'Quán lẩu trong hẻm',   cost: 2500,   require: { level: 8, rating: 3.6 },
-    startTables: 5, maxTables: 7,  startStoves: 2, maxStoves: 3, waitSpots: 3, kho: 210, rent: 80,  demand: 1.5, ambCap: 40, covered: false /* v1.3: the hẻm courtyard is open — pull the tarp until the mặt phố */,
+    startTables: 5, maxTables: 7,  startStoves: 2, maxStoves: 3, waitSpots: 3, kho: 210, khoBonus: 50 /* v1.6d +50 chỗ */, rent: 80,  demand: 1.5, ambCap: 40, covered: false /* v1.3: the hẻm courtyard is open — pull the tarp until the mặt phố */,
     desc: 'Thuê nguyên căn nhà trong hẻm. Dây điện chằng chịt, hàng xóm thân thiện, khách quen đông dần.' },
   { id: 3, scene: 'mapho',   name: 'Nhà hàng lẩu mặt phố', cost: 15000,  require: { level: 16, rating: 4.0 },
     startTables: 7, maxTables: 10, startStoves: 3, maxStoves: 4, waitSpots: 4, kho: 400, rent: 300, demand: 2.1, ambCap: 65, covered: true,
@@ -562,9 +562,17 @@ export const EVENTS = [
 export const MARKETING = [
   { id: 'toroi',      name: 'Phát tờ rơi',        icon: 'ui_megaphone', cost: 100,  scale: true, demand: 1.35, unlockLv: 1, desc: 'Khách +35% trong ngày.' },
   { id: 'giamgia',    name: 'Khuyến mãi giảm 10%', icon: 'ui_gift',     cost: 0,    demand: 1.5, priceMult: 0.9, unlockLv: 2, desc: 'Khách +50%, giá giảm 10% trong ngày.' },
-  { id: 'reviewer',   name: 'Mời Food Reviewer',  icon: 'ui_review',    cost: 800,  scale: true, unlockLv: 6, desc: 'Chắc chắn có reviewer ghé hôm nay.' },
-  { id: 'livestream', name: 'Livestream bán hàng', icon: 'ui_music',    cost: 1500, scale: true, demand: 1.7, xp: 200, unlockLv: 10, desc: 'Khách +70% và +XP.' },
+  // v1.6d: giá theo cấp quán (tierCosts) thay cho cost × TIER_MULT (×3, ×8, ×20 tăng nhanh hơn doanh thu: livestream ở
+  // nhà hàng 2 tầng từng tốn 30 tr ≈ 1,5 ngày doanh thu). Giờ reviewer ≈ 9%, livestream ≈ 17% doanh thu một ngày.
+  { id: 'reviewer',   name: 'Mời Food Reviewer',  icon: 'ui_review',    cost: 600,  tierCosts: [600, 1000, 1400, 1800, 2200], unlockLv: 6, desc: 'Chắc chắn có reviewer ghé hôm nay.' },
+  { id: 'livestream', name: 'Livestream bán hàng', icon: 'ui_music',    cost: 1200, tierCosts: [1200, 2000, 2800, 3600, 4500], demand: 1.7, xp: 200, unlockLv: 10, desc: 'Khách +70% và +XP.' },
 ];
+/** v1.6d: what a marketing action costs at a given shop tier */
+export function marketingCost(m, tier) {
+  const t = Math.max(1, tier | 0);
+  if (m.tierCosts) return m.tierCosts[Math.min(t, m.tierCosts.length) - 1];
+  return m.cost * (m.scale ? TIER_MULT[Math.min(t, TIER_MULT.length) - 1] : 1);
+}
 export const VIRAL = { days: 2, demand: 1.6, badDemand: 0.8 };
 
 // v1.4 món ăn kèm: chance a group adds a side dish to its hotpot order (a second one for groups of 3+)

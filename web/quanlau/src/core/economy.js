@@ -78,7 +78,8 @@ export function khoInfo(G) {
   let used = 0;
   for (const k in s.inventory) used += s.inventory[k];
   const up = UP.kho;
-  const cap = Math.round(tierDef(G).kho * (up.capMult[s.upgrades.kho] || 1));
+  const t = tierDef(G);
+  const cap = Math.round(t.kho * (up.capMult[s.upgrades.kho] || 1)) + (t.khoBonus || 0);   // v1.6d: +50 chỗ ở quán cấp 1–2
   return { used, cap };
 }
 

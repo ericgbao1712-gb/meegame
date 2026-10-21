@@ -54,7 +54,7 @@ export function expandView(body, api) {
 
   const stats = div('card xstats');
   stats.appendChild(statLine('Bàn tối đa', cur.maxTables, next.maxTables));
-  stats.appendChild(statLine('Kho chứa', cur.kho, next.kho));
+  stats.appendChild(statLine('Kho chứa', cur.kho + (cur.khoBonus || 0), next.kho + (next.khoBonus || 0)));
   stats.appendChild(statLine('Lượng khách', cur.demand, next.demand, (v) => '×' + vnNum(v)));
   stats.appendChild(statLine('Tiền thuê / ngày', cur.rent, next.rent, (v) => (v ? fmtShort(v) : '0')));
   body.appendChild(stats);
