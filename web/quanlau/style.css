@@ -1497,3 +1497,19 @@ button.hchip:active { transform: translateY(2px); }
 .gd-out.win .num { color: var(--jade-2); font-size: 18px; } .gd-out.lose .num { color: var(--red-2); font-size: 18px; }
 .gd-note, .gd-mom { display: block; text-align: center; }
 @media (prefers-reduced-motion: reduce) { .ticket.just, .tk-d.hit { animation: none; } }
+
+/* ───────────── v1.16 đơn ship + bảng "Có gì mới" ───────────── */
+.tk.ship { box-shadow: 0 0 0 2px #3f8fd8, 0 3px 0 2px #2b6aa6; }
+.tk.ship .tb { background: #3f8fd8; color: #fff; padding: 1px 4px; border-radius: 4px; }
+.whatsnew .mbody > * + * { margin-top: 10px; }
+.wn-hero { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 14px 12px; border-radius: 16px; text-align: center;
+  background: linear-gradient(135deg, #e3574a, #f0a23a); color: #fff; }
+.wn-kick { font: 900 11px/1 var(--f-body); letter-spacing: .14em; opacity: .9; }
+.wn-hero b { font: 400 22px/1.15 var(--f-display); text-shadow: 0 2px 0 rgba(120, 30, 10, .35); }
+.card.wn-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; }
+.wn-item .grow { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; align-items: flex-start; }
+.wn-t { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.wn-t b { font: 800 15px/1.25 var(--f-body); }
+.wn-lv { font-size: 11px; padding: 1px 8px; }
+.wn-item p { margin: 0; font: 600 13.5px/1.45 var(--f-body); color: var(--ink); }
+.wn-foot { text-align: center; }

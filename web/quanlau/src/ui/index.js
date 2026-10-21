@@ -19,6 +19,7 @@ import { mountDebug } from './debug.js';
 import { initCloud } from './cloud.js';
 import { initTax } from './tax.js';
 import { initLottery, openLady } from './lottery.js';
+import { initWhatsNew, openWhatsNew } from './whatsnew.js';
 
 function ensure(id, parent, tag = 'div') {
   let el = document.getElementById(id);
@@ -68,7 +69,8 @@ export function mountUI(game, { renderer, audio } = {}) {
   const debug = mountDebug();
   try { initCloud(game); } catch (e) { console.error('[ui] cloud', e); }
   try { initTax(game); } catch (e) { console.error('[ui] tax', e); }   // v1.14
-  try { initLottery(game); } catch (e) { console.error('[ui] lottery', e); }   // v1.15   // v1.8
+  try { initLottery(game); } catch (e) { console.error('[ui] lottery', e); }   // v1.15
+  try { initWhatsNew(); } catch (e) { console.error('[ui] whatsnew', e); }   // v1.16 bảng Có gì mới   // v1.8
 
   // ---- layout vars: HUD / nav / dock heights → CSS, then tell the renderer
   const setVars = () => {

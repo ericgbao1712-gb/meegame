@@ -174,7 +174,7 @@ export const shopSheet = {
     let sub = api.sub;
     if (!VIEWS[sub]) sub = 'quests';
     const dots = tabDots();
-    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'veso' && !D.featureOn('lottery')) })), sub, (id) => api.setSub(id));
+    api.tabs(TABS.map((t) => ({ ...t, dot: !!dots[t.id], locked: (t.id === 'branches' && D.tierNow() < 5) || (t.id === 'tax' && !D.featureOn('tax')) || (t.id === 'veso' && !D.featureOn('lottery') && !(G().get?.lotteryInfo?.()?.list?.length)) })), sub, (id) => api.setSub(id));
     VIEWS[sub](body, api);
   },
 };

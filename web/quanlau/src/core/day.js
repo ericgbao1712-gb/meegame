@@ -13,6 +13,7 @@ import { startDay, beginClosing, resetCustomers, collectCoins, spawnGroup } from
 import { resetWorkers, syncWorkers } from './workers.js';
 import { genCandidates } from './staff.js';
 import { buyTicket, drawDay } from './lottery.js';
+import { shipDayEnd } from './ship.js';
 import { rollDaily, autoClaimDailies, counter } from './quests.js';
 import { clearStove, dressStoves } from './kitchen.js';
 
@@ -159,6 +160,7 @@ export function buildReport(G) {
     forecast: forecastInfo(G), reservationsTomorrow: s.reservations.map((r) => Object.assign({}, r)),
     goalHint: '', money: s.money,
     priceLost: t.priceLost || 0,                                       // v1.14
+    ship: { orders: t.shipOrders || 0, delivered: t.shipDelivered || 0, cancelled: t.shipCancelled || 0, revenue: t.shipRevenue || 0 },   // v1.16
     tax: s.tax ? { bill: s.tax.bill ? Object.assign({}, s.tax.bill) : null, base: s.tax.base, since: s.tax.since } : null,
   };
   rep.goalHint = goalHint(G);
@@ -169,6 +171,7 @@ export function buildReport(G) {
 export function finishDay(G) {
   const s = G.state, w = G.world, t = s.today;
   // leftovers: collect every pile, send everybody home, empty the stoves
+  shipDayEnd(G);                                   // v1.16 đơn ship đang chạy thì giao luôn
   for (const tb of w.tables) if (tb.coins) collectCoins(G, tb.idx, 'staff');
   resetCustomers(G);
   for (const st of w.stoves) clearStove(st);

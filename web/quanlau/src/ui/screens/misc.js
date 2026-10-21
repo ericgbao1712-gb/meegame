@@ -146,6 +146,7 @@ export function openSettings() {
             onYes: () => { resetEverything(); },
           });
         } }, ico('ui_trash', 16), 'Xóa save, chơi lại từ đầu'),
+        h('button', { class: 'btn paper sm block', type: 'button', onclick: () => { sfx('click'); m.close('x'); import('../whatsnew.js').then((w) => w.openWhatsNew({ force: true })); } }, ico('ui_gift', 16), 'Có gì mới?'),   // v1.16
         span('set-ver', 'Phiên bản ' + C.VERSION));
     },
   });

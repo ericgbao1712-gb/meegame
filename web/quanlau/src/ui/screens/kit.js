@@ -68,16 +68,17 @@ export function confettiFor(handle, opts = {}) {
 export const UNLOCK_LABEL = { pot: 'Món lẩu mới', ingredient: 'Nguyên liệu mới', drink: 'Đồ uống mới', role: 'Nhân viên mới', feature: 'Tính năng mới', tier: 'Mở rộng quán', dessert: 'Món tráng miệng mới', side: 'Món ăn kèm mới', equip: 'Thiết bị mới', deco: 'Đồ trang trí mới', uniform: 'Đồng phục mới', look: 'Kiểu nhân vật mới', cust: 'Khách hàng mới' };
 export const FEATURE_NAME = {
   deco: 'Trang trí quán', daily: 'Nhiệm vụ ngày', reservations: 'Khách đặt bàn', mkt_reviewer: 'Mời Food Reviewer', mkt_livestream: 'Livestream bán hàng',
-  speed2: 'Tăng tốc ×2', manageMode: 'Chế độ quản lý', extras: 'Khách gọi thêm món', lottery: 'Cô bán vé số',
+  speed2: 'Tăng tốc ×2', manageMode: 'Chế độ quản lý', extras: 'Khách gọi thêm món', lottery: 'Vé số + Đoán số',
+  pricing: 'Tự đặt giá bán', tax: 'Đóng thuế', ship: 'Nhận đơn ship',   // v1.14–1.16
 };
-const FEATURE_ICON = { deco: 'ui_deco', daily: 'ui_quest', reservations: 'ui_reserve', mkt_reviewer: 'ui_review', mkt_livestream: 'ui_music', speed2: 'ui_speed', manageMode: 'ui_staff', extras: 'ui_menu', lottery: 'ui_ticket' };
+const FEATURE_ICON = { deco: 'ui_deco', daily: 'ui_quest', reservations: 'ui_reserve', mkt_reviewer: 'ui_review', mkt_livestream: 'ui_music', speed2: 'ui_speed', manageMode: 'ui_staff', extras: 'ui_menu', lottery: 'ui_ticket', pricing: 'ui_coin', tax: 'ui_book', ship: 'eq_truck' };
 
 export function unlockIcon(u) {
   switch (u.type) {
     case 'pot': return D.POT[u.id]?.icon || 'ui_menu';
     case 'ingredient': return D.ING[u.id]?.icon || 'ui_kho';
     case 'drink': return D.DRINK[u.id]?.icon || 'drk_trada';
-    case 'role': return 'role_' + u.id;
+    case 'role': return u.id === 'shipper' ? 'eq_truck' : 'role_' + u.id;
     case 'feature': return FEATURE_ICON[u.id] || 'ui_star';
     case 'tier': return 'ui_shop';
     case 'dessert': return D.ING[u.id]?.icon || 'tm_kem';

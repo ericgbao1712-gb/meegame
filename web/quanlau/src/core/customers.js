@@ -641,7 +641,7 @@ function startLeaving(G, g, moodMin, angry, reason) {
   G.emit('customerLeft', { groupId: g.id, angry, reason });
 }
 
-function payCoins(G, info, by, x, y, tableIdx = -1) {
+export function payCoins(G, info, by, x, y, tableIdx = -1) {   // v1.16 export: đơn ship cũng tính tiền qua đây
   const s = G.state;
   addMoney(G, info.amount, 'collect', x, y);
   s.today.revenue = round2(s.today.revenue + info.base);

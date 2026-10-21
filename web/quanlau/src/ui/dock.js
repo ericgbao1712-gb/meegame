@@ -60,7 +60,8 @@ export function mountDock(root, sceneUi) {
   }
   function updateTicket(r, t, trayId) {
     const ratio = Math.max(0, Math.min(1, 1 - (t.waited || 0) / (t.patience || 1)));
-    setText(r.num, 'B' + ((t.tableIdx ?? 0) + 1));
+    setText(r.num, t.ship ? 'Ship' : t.tableIdx < 0 ? 'Về' : 'B' + ((t.tableIdx ?? 0) + 1));   // v1.16 phiếu ship / mang về
+    setClass(r.el, 'ship', !!t.ship);
     if (t.extra) { setIco(r.exI, ING[t.extra]?.icon || 'ing_ga', 32); r.exI.width = r.exI.height = 32; setClass(r.exI, 'big', true); r.potI.style.display = 'none'; r.plus.style.display = ''; }
     else { setIco(r.potI, POT[t.pot]?.icon || 'pot_ga', 32); r.potI.style.display = ''; r.exI.style.display = 'none'; r.plus.style.display = 'none'; }
     if (t.extra) r.exI.style.display = '';

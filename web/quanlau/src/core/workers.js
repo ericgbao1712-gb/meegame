@@ -7,6 +7,7 @@ import { UP, mods, consumeIngredient, featureUnlocked, ING, quankhoDeliver } fro
 import { findTicket, missingIngredients, needsDrinks } from './kitchen.js';
 import { onTicketServed, collectCoins } from './customers.js';
 import { staffJob } from './staff.js';
+import { pickUp, deliver, orderOf } from './ship.js';
 
 // ───────────── speed helpers ─────────────
 export const managing = (G) => G.state.ownerMode === 'manage' && featureUnlocked(G, 'manageMode');
@@ -34,6 +35,7 @@ function homeOf(G, m) {
   if (m.role === 'phucvu') return L.staffSpots.waiter[ord % L.staffSpots.waiter.length];
   if (m.role === 'daubep') return L.kitchen.chefSpots[ord % L.kitchen.chefSpots.length];
   if (m.role === 'thungan') return L.staffSpots.cashier || L.staffSpots.waiter[0];
+  if (m.role === 'shipper') { const ws = L.staffSpots.waiter; return ws[(ws.length - 1 - ord % ws.length + ws.length) % ws.length]; }   // v1.16 đứng gần cửa
   return L.staffSpots.quankho || L.kitchen.ownerHome;
 }
 
@@ -79,7 +81,7 @@ function releaseTask(G, a) {
     const tk = findTicket(G, t.tid);
     if (tk && tk.claimedBy === a.id) {
       if (tk.status === 'chef') { tk.status = 'new'; tk.claimedBy = 0; }
-      else if (tk.status === 'carrying') { tk.status = 'ready'; tk.claimedBy = 0; }
+      else if (tk.status === 'carrying' || (tk.ship && tk.status === 'ready')) { tk.status = 'ready'; tk.claimedBy = 0; }
     }
   }
   if (t.type === 'collect') { const tb = w.tables[t.idx]; if (tb && tb.claimedBy === a.id) tb.claimedBy = 0; }
@@ -124,6 +126,7 @@ export function updateWorkers(G, dtMin) {
       case 'daubep': tickChef(G, a, m, dtMin, open); break;
       case 'thungan': tickStander(G, a, dtMin, 'idle'); break;
       case 'quankho': tickQuankho(G, a, m, dtMin); break;
+      case 'shipper': tickShipper(G, a, m, dtMin, open); break;   // v1.16
       default: tickStander(G, a, dtMin, 'write');
     }
   }
@@ -144,7 +147,7 @@ const walkDist = (L, a, p) => (floorOf(L, a.y) === floorOf(L, p.y) ? Math.abs(a.
 function assignDeliveries(G) {
   const w = G.world, s = G.state, L = w.layout;
   for (const t of w.tickets) {
-    if (t.status !== 'ready' || t.claimedBy) continue;
+    if (t.status !== 'ready' || t.claimedBy || t.ship) continue;   // v1.16 phiếu ship do Shipper lấy
     let best = null, bd = Infinity;
     for (const m of s.staff) {
       if (m.role !== 'phucvu') continue;
@@ -287,6 +290,54 @@ function tickQuankho(G, a, m, dtMin) {
     quankhoDeliver(G, trip.list);
     goHome(G, a, 'write');
   }
+}
+
+// ───────────── shipper: lấy phiếu ship ở quầy → chạy ra đường giao → về (v1.16) ─────────────
+function tickShipper(G, a, m, dtMin, open) {
+  const w = G.world, L = w.layout, task = a.task;
+  if (task && task.type === 'ship') {
+    const sp = L.spawn[task.gate || 0];
+    if (task.stage === 'toPickup') {
+      const t = findTicket(G, task.tid);
+      if (!t || t.status === 'dead' || t.status === 'done') { a.task = null; a.carry = null; return; }
+      if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
+      const o = pickUp(G, t, a);
+      if (!o) { a.task = null; return; }
+      task.oid = o.id; task.stage = 'toGate'; a.carry = 'box';
+      walkTo(G, a, sp.x, sp.y);
+      return;
+    }
+    if (task.stage === 'toGate') {
+      if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
+      task.stage = 'away'; a.hidden = true; a.pose = 'idle';
+      task.timer = G.rng.range(C.SHIP.tripMin[0], C.SHIP.tripMin[1]) / staffSpeed(G, m);
+      return;
+    }
+    if (task.stage === 'away') {
+      task.timer -= dtMin;
+      if (task.timer > 0) return;
+      deliver(G, orderOf(G, task.oid));
+      staffJob(G, m);
+      task.stage = 'back'; a.hidden = false; a.carry = null; a.x = sp.x; a.y = sp.y; a.path = null;
+      return;
+    }
+    // back
+    if (!a.path && a.home && (Math.abs(a.x - a.home.x) > 1.5 || Math.abs(a.y - a.home.y) > 1.5)) walkTo(G, a, a.home.x, a.home.y);
+    if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
+    a.task = null;
+  }
+  if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
+  a.hidden = false;
+  if (open) {
+    const t = w.tickets.find((x) => x.ship && x.status === 'ready' && !x.claimedBy);
+    if (t) {
+      t.claimedBy = a.id;
+      a.task = { type: 'ship', stage: 'toPickup', tid: t.id, gate: G.rng.int(0, L.spawn.length - 1), timer: 0, oid: 0 };
+      walkTo(G, a, L.kitchen.pickup.x, L.kitchen.pickup.y);
+      return;
+    }
+  }
+  goHome(G, a, 'idle');
 }
 
 // ───────────── chef ─────────────

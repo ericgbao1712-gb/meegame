@@ -279,6 +279,28 @@ export const CUSTOMERS = {
 };
 
 // Ambient NPC (not a customer): cô bán vé số
+// ───────────────────────────── v1.16 ĐƠN SHIP ─────────────────────────────
+// Có Shipper thì trong giờ bán có đơn ship gọi tới (số đơn ≈ share × lượng khách vãng lai). Phiếu ship lên bếp như phiếu
+// thường (đầu bếp hoặc bạn tự nấu); nấu xong Shipper ra quầy lấy, chạy ra đường giao rồi về. Khách trả tiền món + phí ship.
+// Sao đánh giá theo tổng thời gian từ lúc gọi tới lúc nhận (hứa giao trong promiseMin phút).
+export const SHIP = {
+  share: 0.28, perShipper: 2,            // đơn đang chạy tối đa = số shipper × perShipper
+  patience: 70,                          // phút game chờ bếp nấu + shipper lấy; quá thì khách hủy đơn
+  tripMin: [9, 15],                      // phút game chạy đi giao rồi về (chia cho tốc độ shipper)
+  fee: 15,                               // phí ship (k) khách trả thêm
+  drinkChance: 0.45, sideChance: 0.3,
+  promiseMin: 55, starsAt: [[40, 5], [55, 4], [75, 3], [Infinity, 2]],   // tổng phút (từ lúc gọi tới lúc nhận) → sao
+  tipChance: 0.35, tip: [5, 15],
+  reviewChance: 0.25,
+  reviews: {
+    5: ['Lẩu tới nơi còn nóng hổi, shipper dễ thương!', 'Giao nhanh xỉu, nước lẩu vẫn sôi khi bắc lên bếp nhà mình.', 'Đặt ship mà ngon như ăn tại quán!'],
+    4: ['Giao hơi lâu xíu nhưng lẩu ngon.', 'Đóng gói kỹ, không đổ giọt nào.'],
+    3: ['Chờ ship lâu quá, đói meo.', 'Lẩu tới hơi nguội rồi.'],
+    2: ['Giao trễ cả tiếng, lần sau chắc ra quán ăn.', 'Đơn tới trễ quá trời.'],
+    cancel: ['Đặt ship chờ mãi không thấy, hủy luôn!', 'Quán nhận đơn rồi mà không giao, buồn ghê.'],
+  },
+};
+
 export const LOTTERY = {
   name: 'Cô bán vé số', ticketPrice: 10, maxPerDay: 5, visitChancePerHour: 0.12,
   // v1.15 vé số có số 6 chữ số, cuối ngày quay kết quả; người chơi tự DÒ vé rồi bấm NHẬN THƯỞNG.
@@ -332,6 +354,7 @@ export const STAFF = {
     daubep:  { name: 'Đầu bếp',  icon: 'ui_fire',  unlockLv: 3,  minTier: 1, max: 99, desc: 'Nấu nước lẩu và soạn mâm cho từng phiếu.' },
     thungan: { name: 'Thu ngân', icon: 'ui_coin',  unlockLv: 9,  minTier: 2, max: 1,  desc: 'Khách kiên nhẫn hơn 20%, tip nhiều hơn.' },
     quankho: { name: 'Quản kho', icon: 'ui_kho',   unlockLv: 17, minTier: 3, max: 1,  desc: 'Mỗi sáng tự nhập đủ hàng, không mất phí giao.' },
+    shipper: { name: 'Shipper',  icon: 'eq_truck', unlockLv: 11, minTier: 1, max: 3,  desc: 'Có shipper thì quán nhận đơn ship qua điện thoại. Bếp nấu xong, shipper chạy xe giao lẩu tận nhà, khách trả thêm phí ship.' },
   },
   slotsByTier: [2, 4, 6, 9, 9],
   rarityWeights: [40, 30, 18, 9, 3],          // ★1..★5
@@ -533,9 +556,11 @@ export const LEVEL = {
 // Feature flags unlocked by level (hotpots/ingredients/drinks unlock by their own unlockLv).
 export const FEATURES = {
   hire_phucvu: 2, hire_daubep: 3, deco: 4, daily: 4, reservations: 6, mkt_reviewer: 6,
-  hire_thungan: 9, mkt_livestream: 10, hire_quankho: 17, speed2: 5, manageMode: 9, extras: 3, lottery: 3,
-  pricing: 3,   // v1.14 Thực đơn ▸ Giá bán: tự đặt giá từng món / cả thực đơn (mang từ Xoài Lắc)
-  tax: 5,       // v1.14 đóng thuế theo kỳ
+  hire_thungan: 9, mkt_livestream: 10, hire_quankho: 17, speed2: 5, manageMode: 9, extras: 3, lottery: 7,
+  // v1.16 sắp xếp lại (Lv 3 quá dồn): giá bán Lv 6, vé số Lv 7, ship Lv 11, thuế Lv 13
+  pricing: 6,   // v1.14 Thực đơn ▸ Giá bán: tự đặt giá từng món / cả thực đơn (mang từ Xoài Lắc)
+  tax: 13,      // v1.14 đóng thuế theo kỳ (quán đã làm ăn ổn định)
+  hire_shipper: 11, ship: 11,   // v1.16 nhận đơn ship + thuê Shipper
 };
 
 // ───────────────────────────── v1.14 GIÁ BÁN (người chơi tự đặt, mang từ Xoài Lắc v2) ─────────────────────────────
@@ -665,6 +690,8 @@ export const MAIN_QUESTS = [
   { id: 'q12', text: 'Lãi một ngày từ 800.000đ',        type: 'dayProfit', target: 800, reward: { money: 200 } },
   { id: 'q13', text: 'Nâng công thức bất kỳ lên cấp 2', type: 'recipeLevel', target: 2, reward: { money: 200 } },
   { id: 'q14', text: 'Đạt Lv 5',                        type: 'level', target: 5,      reward: { money: 300 } },
+  { id: 'qp1', text: 'Tự đặt giá bán một món (Thực đơn ▸ Giá bán, Lv 6)', type: 'setPrice', target: 1, reward: { money: 300 } },   // v1.16
+  { id: 'ql1', text: 'Mua vé số rồi dò vé (Lv 7)',      type: 'lotteryChecked', target: 1, reward: { money: 300 } },              // v1.16
   { id: 'q15', text: 'Mở Quán lẩu trong hẻm',           type: 'tier', target: 2,       reward: { money: 600 }, mom: 'tier2' },
   { id: 'q16', text: 'Có 3 nhân viên',                  type: 'staffCount', target: 3, reward: { money: 500 } },
   { id: 'q17', text: 'Gặp 6 kiểu khách khác nhau',      type: 'kindsMet', target: 6,   reward: { money: 500 } },
@@ -677,8 +704,11 @@ export const MAIN_QUESTS = [
   { id: 'q24', text: 'Trang trí đủ 4 ô',                type: 'decoEquipped', target: 4, reward: { money: 2500 } },
   { id: 'q25', text: 'Doanh thu một ngày từ 8 triệu',   type: 'dayRevenue', target: 8000, reward: { money: 3000 } },
   { id: 'q26', text: 'Mở khoá Lẩu chua cay (Lv 11)',    type: 'level', target: 11,     reward: { money: 3000 } },
+  { id: 'qs1', text: 'Thuê Shipper để nhận đơn ship',   type: 'hire:shipper', target: 1, reward: { money: 2500 } },              // v1.16
+  { id: 'qs2', text: 'Giao 20 đơn ship',                type: 'shipDelivered', target: 20, reward: { money: 5000 } },            // v1.16
   { id: 'qd1', text: 'Mua Tủ kem để bán tráng miệng',   type: 'upgrade:tukem', target: 1, reward: { money: 3000 } },
   { id: 'qd2', text: 'Bán 20 phần tráng miệng',          type: 'dessertsSold', target: 20, reward: { money: 5000 } },
+  { id: 'qt1', text: 'Đóng thuế lần đầu (Lv 13, Quán ▸ Thuế)', type: 'taxPaid', target: 1, reward: { money: 4000 } },          // v1.16
   { id: 'q27', text: 'Đạt combo x10',                   type: 'combo', target: 10,     reward: { money: 3000 } },
   { id: 'q28', text: 'Gặp đủ 10 kiểu khách',            type: 'kindsMet', target: 10,  reward: { money: 5000 } },
   { id: 'q29', text: 'Mở Nhà hàng lẩu 2 tầng',          type: 'tier', target: 4,       reward: { money: 10000 }, mom: 'tier4' },
@@ -697,6 +727,8 @@ export const MAIN_QUESTS = [
 ];
 // v1.1: quests inserted into the main chain; old saves move their pointer past them (state.js migrate)
 export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 }];
+// v1.16 nhiệm vụ chính mới: save cũ giữ đúng nhiệm vụ đang làm (đổi chỉ số theo id, xem state.migrate)
+export const MAIN_QUESTS_V116 = ['qp1', 'ql1', 'qs1', 'qs2', 'qt1'];
 
 // Daily tasks: 3 picked per game day from the pool (only those whose `minLv` ≤ level).
 // target(t) receives tier; reward is a chest tier.
@@ -713,6 +745,7 @@ export const DAILY_POOL = [
   { id: 'd_sides',   text: 'Bán {n} món ăn kèm',            type: 'sidesSold', target: (t) => [4, 8, 14, 20, 20][t - 1], chest: 'wood', minLv: 2 },
   { id: 'd_dessert', text: 'Bán {n} phần tráng miệng',      type: 'dessertsSold', target: (t) => [4, 8, 14, 20, 20][t - 1], chest: 'silver', minLv: 12 },
   { id: 'd_thank',   text: 'Cảm ơn {n} đánh giá',           type: 'thank',      target: () => 3, chest: 'wood' },
+  { id: 'd_ship',    text: 'Giao {n} đơn ship',             type: 'shipDelivered', target: (t) => [3, 5, 8, 12, 12][t - 1], chest: 'silver', minLv: 11, needs: 'shipper' },   // v1.16
 ];
 // v1.7: từ Lv 10 XP nhận từ nhiệm vụ (rương nhiệm vụ ngày + mục tiêu chính) ×1.6
 // v1.11b: trả lại như v1.9 (bản v1.10 hiểu nhầm yêu cầu "tăng exp 60%" — ý chủ game là thanh XP, xem LEVEL.barMult)

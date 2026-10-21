@@ -74,7 +74,7 @@ export function rollDaily(G) {
   const s = G.state, d = s.quests.daily;
   d.day = s.day; d.allClaimed = false; d.list = [];
   if (!featureUnlocked(G, 'daily')) return;
-  const pool = C.DAILY_POOL.filter((p) => (p.minLv || 1) <= s.level);
+  const pool = C.DAILY_POOL.filter((p) => (p.minLv || 1) <= s.level && (!p.needs || s.staff.some((m) => m.role === p.needs)));   // v1.16 needs: cần có nhân viên đó
   const picks = G.rng.shuffle(pool.slice()).slice(0, 3);
   d.list = picks.map((p) => ({ id: p.id, target: p.type === 'noAngryUntil' ? noAngryTarget() : p.target(s.tier), progress: 0, claimed: false, notified: false }));
 }
@@ -96,6 +96,7 @@ function dailyProgress(G, e) {
     case 'sidesSold': return t.sidesSold || 0;
     case 'dayRevenue': return t.revenue;
     case 'thank': return t.thanked;
+    case 'shipDelivered': return t.shipDelivered || 0;   // v1.16
     case 'noAngryUntil': {
       if (t.noAngryUntil != null && t.noAngryUntil < 18 * 60) return 0; // failed
       if (s.phase === 'prep' && s.clock <= C.TIME.dayStart) return 0;

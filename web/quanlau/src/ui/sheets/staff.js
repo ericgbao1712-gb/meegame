@@ -8,7 +8,7 @@ import { makeStaffLook, makeOwnerLook, lookPreviewURL } from '../../art/index.js
 import { secTitle, noteBox, celebrate, floatAt, costBtn, stars, statRow, portrait, lockCard } from './common.js';
 
 const SC = C.STAFF;
-const roleIcon = (r) => 'role_' + r;
+const roleIcon = (r) => (r === 'shipper' ? 'eq_truck' : 'role_' + r);   // v1.16 chưa có icon role_shipper
 const traitOf = (id) => SC.traits.find((t) => t.id === id) || null;
 const STAT = [['spd', 'Nhanh nhẹn'], ['skl', 'Tay nghề'], ['chm', 'Dễ thương']];
 
@@ -74,7 +74,7 @@ function teamView(body, api) {
     body.appendChild(personCard(m, {
       hired: true,
       onFire: () => ctx.confirm({
-        title: `Cho ${m.name} nghỉ?`, text: 'Bạn sẽ không được hoàn lại tiền thuê, và phải trả công tuyển người mới nha.', yes: 'Cho nghỉ', no: 'Giữ lại', danger: true, icon: 'role_' + m.role,
+        title: `Cho ${m.name} nghỉ?`, text: 'Bạn sẽ không được hoàn lại tiền thuê, và phải trả công tuyển người mới nha.', yes: 'Cho nghỉ', no: 'Giữ lại', danger: true, icon: roleIcon(m.role),
         onYes: () => { const r = act('fire', m.id); if (r.ok !== false) api.rerender(); },
       }),
     }));

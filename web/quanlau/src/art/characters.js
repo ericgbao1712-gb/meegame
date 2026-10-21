@@ -31,6 +31,7 @@ const STAFF_SHEETS = {
   daubep: ['staff_daubep_f', 'staff_daubep_m'],
   thungan: ['staff_thungan'],
   quankho: ['staff_quankho'],
+  shipper: ['cust_shipper'],   // v1.16 nhân viên Shipper: áo khoác + mũ bảo hiểm
 };
 const KIND_SHEETS = {
   sinhvien: ['cust_sinhvien_m', 'cust_sinhvien_f'],

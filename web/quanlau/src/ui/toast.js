@@ -1,9 +1,9 @@
 // Toasts (max 2), Má messages (queued), review popups, banners — and the game events that feed them.
 import * as C from '../config.js';
-import { fmtShort } from '../core/format.js';
+import { fmtShort, fmtMoney } from '../core/format.js';
 import { h, div, span, ico, rich } from './dom.js';
 import { ctx, sfx } from './ctx.js';
-import { ING, DRINK } from './data.js';
+import { ING, DRINK, POT } from './data.js';
 
 export function stars(n, size = 16) {
   const w = span('stars');
@@ -99,6 +99,10 @@ export function mountToasts({ toastRoot, sceneUi }) {
   on('mom', (p) => ctx.mom(p.text));
   on('review', (p) => { const r = p.review || p; if (r && (r.stars >= 4 || r.stars <= 2)) ctx.reviewPop(r); });
   on('rush', (p) => { if (p.on) ctx.banner('GIỜ CAO ĐIỂM! KHÁCH ĐÔNG!', 'red'); });
+  // v1.16 đơn ship
+  on('shipOrder', (p) => { const o = p.order || {}; const n = (o.drinks || []).length; ctx.toast(`Có đơn ship: ${POT[o.pot]?.name || 'Lẩu'}${n ? ` + ${n} nước` : ''}. Nấu xong Shipper đi giao!`, 'info', 'eq_truck'); });
+  on('shipDelivered', (p) => ctx.toast(`Shipper giao xong đơn ${POT[p.order?.pot]?.name || ''} (${p.mins} phút, ${p.stars}★) +${fmtMoney(p.amount)}`, p.stars >= 4 ? 'good' : 'info', 'eq_truck'));
+  on('shipCancelled', () => ctx.toast('Khách hủy đơn ship vì chờ lâu quá!', 'bad', 'eq_truck'));
   on('lotteryLady', (p) => { if (p.on) ctx.toast('Cô bán vé số ghé quán kìa — chạm vào cô để mua vé nha!', 'info', 'ui_ticket'); });
   on('stockLow', (p) => ctx.toast(`Sắp hết ${ING[p.ing]?.name?.toLowerCase() || 'hàng'} rồi!`, 'bad', ING[p.ing]?.icon));
   on('stockOut', (p) => ctx.toast(`Hết ${ING[p.ing]?.name?.toLowerCase() || 'hàng'}! Mở Kho nhập thêm nha.`, 'bad', ING[p.ing]?.icon));

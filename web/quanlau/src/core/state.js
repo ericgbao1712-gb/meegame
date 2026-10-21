@@ -13,6 +13,7 @@ export function newToday() {
     comboMax: 0, newKinds: [], bestReviewId: null, noAngryUntil: null,
     stars: 0, rated: 0, lost: 0,            // star sum / count of finished groups, walk-aways
     priceLost: 0, priceRefused: {},         // v1.14 nhóm khách chê đắt bỏ về (theo món)
+    shipOrders: 0, shipDelivered: 0, shipCancelled: 0, shipRevenue: 0, shipStars: 0,   // v1.16 đơn ship
     usage: {},                              // ingredients consumed today (→ usageYesterday)
     ratingBefore: 3.5, levelBefore: 1, lotteryWon: 0, lotteryTickets: 0,
   };
@@ -91,6 +92,14 @@ export function migrate(save, now) {
     if (shift) { s.quests.main = p + shift; s.quests.mainClaimable = false; }
   }
   if (s.flags && s.flags.ui) s.flags.ui.mqV11 = true;
+  // v1.16: thêm nhiệm vụ chính (C.MAIN_QUESTS_V116). Save cũ đang làm nhiệm vụ nào thì vẫn đúng nhiệm vụ đó.
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV116)) {
+    const oldList = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V116.includes(q.id));
+    const p = s.quests.main | 0;
+    const id = oldList[p] && oldList[p].id;
+    s.quests.main = id ? C.MAIN_QUESTS.findIndex((q) => q.id === id) : C.MAIN_QUESTS.length;
+  }
+  if (s.flags && s.flags.ui) s.flags.ui.mqV116 = true;
   // sanity
   if (!(s.clock >= C.TIME.dayStart)) s.clock = C.TIME.dayStart;
   if (!['prep', 'open', 'closing', 'report'].includes(s.phase)) s.phase = 'prep';

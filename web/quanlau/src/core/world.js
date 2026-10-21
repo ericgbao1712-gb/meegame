@@ -29,6 +29,7 @@ export function createWorld(G) {
     closingFor: 0,
     fanTokens: [],              // per stove
     lotteryT: 0, vesoLeft: 0,
+    shipOrders: [], shipAcc: 0, shipNext: 1,   // v1.16 đơn ship trong ngày
     cookPoseT: 0,               // owner shows the 'cook' pose while > 0
     pauses: new Set(),
     branchAcc: 0, branchAccT: 0,

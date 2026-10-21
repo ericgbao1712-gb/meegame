@@ -109,6 +109,9 @@ function build(m, rep) {
       h('p', null, fc.text || (wxName(fc.weather) ? 'Ngày mai: ' + wxName(fc.weather) + '.' : '')),
       fev || resv ? div('chips', fev ? span('chip gold', ico('ui_star', 16), fev.name) : null, resv ? span('chip jade', ico('ui_reserve', 16), `${resv} bàn đặt trước`) : null) : null)));
 
+  // v1.16 đơn ship
+  const shp = rep.ship || {};
+  if (shp.orders > 0) sec(noteBox('eq_truck', `**Đơn ship:** giao ${shp.delivered}/${shp.orders} đơn, thu **${fmtMoney(shp.revenue)}**${shp.cancelled ? ` · ${shp.cancelled} đơn bị hủy vì chờ lâu` : ''}.`, shp.cancelled ? 'red' : 'jade'));
   // v1.15 vé số: tối nay quay, sáng mai dò
   if ((lot.tickets || 0) + (lot.bets || 0) > 0) sec(noteBox('ui_ticket', `Đã quay xổ số! ${lot.tickets ? `**${lot.tickets} vé số**` : ''}${lot.tickets && lot.bets ? ' và ' : ''}${lot.bets ? `**${lot.bets} phiếu đoán số**` : ''} chờ dò. Sáng mai vào **Quán ▸ Vé số** để dò và nhận thưởng nha.`, 'gold'));
   // v1.14 thuế + khách chê đắt

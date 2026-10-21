@@ -17,6 +17,7 @@ import * as rain from './rain.js';
 import { createGetters } from './getters.js';
 import { fmtMoney, fmtDuration } from './format.js';
 import * as lottery from './lottery.js';
+import * as ship from './ship.js';
 
 const STEP = 0.1;            // max real seconds per simulation sub-step
 const fail = (reason, msg) => ({ ok: false, reason, msg });
@@ -64,7 +65,7 @@ export function createGame(save, opts = {}) {
   const world = createWorld(G);
   G.world = world;
   world.rushOn = false;
-  G.hooks.ticketExpired = (t) => customers.ticketExpired(G, t);
+  G.hooks.ticketExpired = (t) => (t.ship ? ship.cancelOrder(G, t) : customers.ticketExpired(G, t));   // v1.16
   G.on('stockLow', () => G.mom('lowStock'));
   G.on('stockOut', () => G.mom('lowStock'));
 
@@ -113,6 +114,7 @@ export function createGame(save, opts = {}) {
     rain.rainTick(G, dtMin, customers.angryLeave);
     workers.updateWorkers(G, dtMin);
     quankhoTick(G, dtMin);
+    ship.shipTick(G, dtMin);   // v1.16 đơn ship
     day.updateLottery(G, dtMin);
     if (s.phase === 'open' && s.clock >= C.TIME.dayEnd) {
       if (w.rushOn) { w.rushOn = false; G.emit('rush', { on: false }); }
@@ -200,6 +202,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
+      state.flags.ui.seenNews = 116;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),

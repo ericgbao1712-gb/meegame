@@ -13,7 +13,7 @@ export const MARKETING_BY_ID = Object.fromEntries(C.MARKETING.map((m) => [m.id, 
 
 export const FEATURE_NAMES = {
   deco: 'Trang trí quán', daily: 'Nhiệm vụ hằng ngày', reservations: 'Đặt bàn trước', mkt_reviewer: 'Mời Food Reviewer',
-  mkt_livestream: 'Livestream bán hàng', speed2: 'Tốc độ ×2', manageMode: 'Chế độ Quản lý', extras: 'Khách gọi thêm', lottery: 'Vé số',
+  mkt_livestream: 'Livestream bán hàng', speed2: 'Tốc độ ×2', manageMode: 'Chế độ Quản lý', extras: 'Khách gọi thêm', pricing: 'Tự đặt giá bán', tax: 'Đóng thuế', ship: 'Nhận đơn ship', lottery: 'Vé số',
 };
 
 export const tierDef = (G) => C.TIERS[G.state.tier - 1];

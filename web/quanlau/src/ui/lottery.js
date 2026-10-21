@@ -85,9 +85,9 @@ function openBigWin(total) {
 
 /** Quán ▸ Vé số */
 export function lotteryView(body, api) {
-  if (!D.featureOn('lottery')) { body.appendChild(lockCard('Vé số', `Mở ở Lv ${C.FEATURES.lottery}. Lúc đó cô bán vé số sẽ ghé quán.`, 'ui_ticket')); return; }
   const li = info();
   if (!li) return;
+  if (!D.featureOn('lottery') && !li.list.length) { body.appendChild(lockCard('Vé số', `Mở ở Lv ${C.FEATURES.lottery}. Lúc đó cô bán vé số sẽ ghé quán.`, 'ui_ticket')); return; }
   const reapi = { rerender: () => api.rerender() };
   // hành động nhanh
   const acts = [];
