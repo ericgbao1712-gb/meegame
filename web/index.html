@@ -243,6 +243,12 @@ main { padding-bottom: 8px; }
 .chip[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); }
 .chip[aria-pressed="true"] small { color: var(--on-accent); color: color-mix(in srgb, var(--on-accent) 80%, var(--accent)); }
 .chip:active { transform: scale(.96); }
+/* Tab MeeGame: luôn nổi bật (viền + nền hồng nhạt), bấm vào thì đậm màu thương hiệu */
+.chip-mee { background: color-mix(in srgb, var(--accent) 14%, var(--fill)); color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); font-weight: 800; }
+.chip-mee small { color: var(--accent); }
+.chip-mee:hover { background: color-mix(in srgb, var(--accent) 24%, var(--fill)); }
+.chip-mee .mee-star { font-size: 13px; line-height: 1; }
+.chip-mee[aria-pressed="true"] { background: var(--accent); color: var(--on-accent); box-shadow: 0 2px 8px color-mix(in srgb, var(--accent) 45%, transparent); }
 .chip { transition: background .15s, color .15s, transform .15s var(--ease); }
 /* Đầu mỗi thể loại: ô biểu tượng + tên + số game, mỗi thể loại một màu */
 .group { --c: var(--accent); }
@@ -515,6 +521,7 @@ body.settings-open { overflow: hidden; }
       headAsk: 'Gợi ý cho bạn', noteAsk: (n, q) => `${n} game hợp với “${q}”`,
       emptyAsk: q => `Chưa tìm ra game hợp với “${q}”. Thử kể khác đi, ví dụ “bán hàng” hay “trồng rau”.`,
       tabAll: 'Tất cả', tabNew: 'Mới', tabHot: 'Hot', tabsLabel: 'Chọn mục', barLabel: 'Tìm và lọc game',
+      tabMee: 'MeeGame', headMee: 'Game của MeeGame', noteMee: n => `${n} game do MeeGame làm`, emptyMee: 'Chưa có game nào của MeeGame trong danh sách.',
       headAll: 'Tất cả game', headNew: 'Mới lên kệ', headHot: 'Đang hot',
       noteAll: n => `${n} game · chia theo thể loại`, noteCat: n => `${n} game · xếp A → Z`,
       catAll: 'Tất cả', catOther: 'Khác', catsLabel: 'Chọn thể loại', noteNew: n => `${n} game · thêm trong 5 ngày qua`, noteHot: n => `${n} game · top 8 theo lượt bấm`,
@@ -551,6 +558,7 @@ body.settings-open { overflow: hidden; }
       headAsk: 'Picked for you', noteAsk: (n, q) => `${n} games for “${q}”`,
       emptyAsk: q => `Nothing fits “${q}” yet. Try other words, like “shop” or “farm”.`,
       tabAll: 'All', tabNew: 'New', tabHot: 'Hot', tabsLabel: 'Choose a section', barLabel: 'Search and filter games',
+      tabMee: 'MeeGame', headMee: 'MeeGame originals', noteMee: n => `${n} ${n === 1 ? 'game' : 'games'} made by MeeGame`, emptyMee: 'No MeeGame originals in the list yet.',
       headAll: 'All games', headNew: 'Just added', headHot: 'Trending',
       noteAll: n => `${n} games · by category`, noteCat: n => `${n} games · A → Z`,
       catAll: 'All', catOther: 'Other', catsLabel: 'Choose a category', noteNew: n => `${n} games · added in the last 5 days`, noteHot: n => `${n} games · top 8 by plays`,
@@ -643,12 +651,24 @@ body.settings-open { overflow: hidden; }
   let played = new Set();
   try { played = new Set(JSON.parse(store.get(PLAYED_KEY) || '[]')); } catch (_) {}
   let freshPlay = null;
-  // view: 'all' | 'new' | 'hot' | mã thể loại | 'other'. ask: kết quả của ô mô tả (null = chưa hỏi).
+  // view: 'all' | 'mee' | 'new' | 'hot' | mã thể loại | 'other'. ask: kết quả của ô mô tả (null = chưa hỏi).
   let view = 'all';
   let ask = null;
   const catLabel = key => { const c = CATS.find(x => x.key === key); return c ? c[lang] : t('catOther'); };
   const catOrder = key => { const i = CATS.findIndex(x => x.key === key); return i < 0 ? CATS.length : i; };
 
+  // Tab MeeGame: tự gom game nằm trên tên miền của MeeGame (meegame.io.vn/<tên game>, tên miền phụ, meegame.shop cũ,
+  // hoặc cùng tên miền với trang đang mở) và game có chữ "meegame" trong tên / tên gọi khác.
+  const MEE_HOSTS = ['meegame.io.vn', 'meegame.shop'];
+  function isMee(g) {
+    let host = '';
+    try { host = new URL(g.url).hostname.replace(/^www\./, ''); } catch (_) {}
+    const own = location.hostname.replace(/^www\./, '');
+    if (MEE_HOSTS.some(d => host === d || host.endsWith('.' + d))) return true;
+    if (own && host === own && !/^(localhost|127\.)/.test(own)) return true;
+    return /meegame/i.test(g.name + ' ' + g.aliases);
+  }
+  const meeList = () => games.filter(isMee).sort(byName);
   const countFor = g => Number(counts[g.key] || 0);
   function isRecent(g) {
     if (!g.added) return false;
@@ -762,7 +782,9 @@ body.settings-open { overflow: hidden; }
     const hotN = countsState === 'ok' ? hotList().length : 0;
     const chip = (key, label, n) => h('button', { class: 'chip', type: 'button', 'aria-pressed': String(!ask && view === key), onclick: () => setView(key) },
       label, n ? h('small', { class: 'num', text: n }) : null);
-    box.replaceChildren(chip('all', t('catAll'), games.length), chip('new', t('tabNew'), recentList().length), chip('hot', t('tabHot'), hotN),
+    const mee = h('button', { class: 'chip chip-mee', type: 'button', 'aria-pressed': String(!ask && view === 'mee'), onclick: () => setView('mee') },
+      h('span', { class: 'mee-star', 'aria-hidden': 'true', text: '★' }), t('tabMee'), h('small', { class: 'num', text: meeList().length }));
+    box.replaceChildren(chip('all', t('catAll'), games.length), mee, chip('new', t('tabNew'), recentList().length), chip('hot', t('tabHot'), hotN),
       h('span', { class: 'cats-sep', 'aria-hidden': 'true' }),
       ...CATS.filter(c => counts[c.key]).map(c => chip(c.key, c[lang], counts[c.key])),
       ...(counts[''] ? [chip('other', t('catOther'), counts[''])] : []));
@@ -818,6 +840,12 @@ body.settings-open { overflow: hidden; }
       meta.textContent = t('noteHot', hot.length);
       nodes = hot.length ? [h('ol', { class: 'entries' }, hot.map((g, i) => entry(g, { rank: i + 1, showCat: true })))]
         : [empty(countsState === 'loading' ? t('chartLoading') : countsState === 'error' ? t('chartError') : t('emptyHot'), t('backToAll'), () => setView('all'))];
+    } else if (view === 'mee') {
+      const list = meeList();
+      title.textContent = t('headMee');
+      meta.textContent = t('noteMee', list.length);
+      nodes = list.length ? [h('ul', { class: 'entries' }, list.map(g => entry(g, { hotSet, showCat: true })))]
+        : [empty(t('emptyMee'), t('backToAll'), () => setView('all'))];
     } else if (view !== 'all') {
       const list = games.filter(g => inCat(g, view)).sort(byName);
       title.textContent = view === 'other' ? t('catOther') : catLabel(view);
@@ -869,7 +897,7 @@ body.settings-open { overflow: hidden; }
     clearTimeout(toastTimer); toastTimer = setTimeout(() => el.classList.remove('show'), 2400);
   }
   document.getElementById('random').addEventListener('click', () => {
-    const pool = ask ? ask.items : view === 'new' ? recentList() : view === 'hot' ? hotList() : view !== 'all' ? games.filter(g => inCat(g, view)) : games;
+    const pool = ask ? ask.items : view === 'new' ? recentList() : view === 'hot' ? hotList() : view === 'mee' ? meeList() : view !== 'all' ? games.filter(g => inCat(g, view)) : games;
     const list = pool.length ? pool : games;
     const g = list[Math.floor(Math.random() * list.length)];
     if (!g) return;
