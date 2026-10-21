@@ -581,6 +581,9 @@ export const SIDE = { chance: 0.5, second: 0.3 };
 // v1.2: hired quản kho restocks mid-service when an ingredient on the menu drops to lowAt portions
 // v1.9: quản kho đi chợ sớm hơn (sắp hết = còn ≤ lowAt phần HOẶC không đủ bán horizonMin phút tới theo tốc độ bán
 // hôm nay), đi bộ ra chợ thật, tripMin phút sau mang hàng về (trả tiền lúc về). Mua đủ bán ~buyMin phút, ít nhất minBuy.
+// v1.10 thanh lý hàng cũ (mang từ Xoài Lắc v2.6): Cô Ba đầu hẻm mua lại hàng tồn buổi sáng (trước khi mở hàng), lô cũ
+// nhất trước, theo % giá vốn: rates[min(số ngày còn hạn, 2)] — 0 = hết hạn sau hôm nay. Luôn thấp hơn giá mua.
+export const LIQUIDATE = { buyer: 'Cô Ba đầu hẻm', rates: [0.35, 0.5, 0.6] };
 export const QUANKHO_RUN = { lowAt: 6, horizonMin: 120, cooldown: 10, minBuy: 15, buyMin: 240, usageShare: 0.5, tripMin: 6, runMult: 2 };
 
 // ───────────────────────────── OFFLINE & CHAIN ─────────────────────────────

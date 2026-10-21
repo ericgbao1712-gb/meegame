@@ -10,6 +10,7 @@
 //   POST /api/lau/save/delete                           → xóa quán trên mạng (+ các bản sao lưu) để chơi lại từ đầu
 //   POST /api/lau/auth/unlink                           → hủy liên kết Gmail: xóa quán + bản sao lưu + tài khoản, xóa cookie
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
+//   Thêm &g=xoailac để dùng cho game Xoài Lắc (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/players            (admin)      → danh sách người chơi để kiểm tra gian lận
 //   POST /api/lau/admin/players/:id        (admin)      { hidden?, flagged? } → ẩn / bỏ đánh dấu
 //
@@ -20,7 +21,9 @@ import {
   ensureSchema, verifyGoogleIdToken, makeSessionCookie, clearSessionCookie, sessionPlayerId, send, err,
 } from './_player.js';
 
-const GAME = 'quanlau';
+// Các game dùng chung API này (chọn bằng &g=…, mặc định Lẩu Ơi). Cùng tài khoản / cookie MeeGame cho mọi game.
+const GAMES = new Set(['quanlau', 'xoailac']);
+const DEFAULT_GAME = 'quanlau';
 const MAX_SAVE_BYTES = 400 * 1024;
 const MIN_PUT_GAP_MS = 8 * 1000;          // chống spam: tối đa ~1 lần lưu / 8 giây
 const KEEP_BACKUPS = 10;
@@ -33,17 +36,17 @@ const BOARDS = { level: 'level DESC, xp DESC', money: 'money_earned DESC', pots:
 const BOARD_VALUE = { level: 'level', money: 'money_earned', pots: 'pots_sold' };
 
 const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
-const cleanName = (s) => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24) || 'Quán Lẩu';
+const cleanName = (s, def = 'Quán Lẩu') => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24) || def;
 
-/** Pulls the leaderboard columns out of a save; null when it is not a playable Lẩu Ơi! save. */
-export function saveSummary(save) {
+/** Pulls the leaderboard columns out of a save; null when it is not a playable save (same shape for every game). */
+export function saveSummary(save, game = DEFAULT_GAME) {
   if (!save || typeof save !== 'object' || Array.isArray(save) || !save.started) return null;
   const level = Math.floor(num(save.level));
   const money = num(save.money, -1);
   if (!(level >= 1 && level <= 99) || !(money >= 0) || !Number.isFinite(money)) return null;
   const stats = save.stats && typeof save.stats === 'object' ? save.stats : {};
   return {
-    shop_name: cleanName(save.shopName),
+    shop_name: cleanName(save.shopName, game === 'xoailac' ? 'Xe Xoài Lắc' : 'Quán Lẩu'),
     avatar: Math.max(0, Math.min(99, Math.floor(num(save.avatar)))),
     level,
     xp: Math.max(0, num(save.xp)),
@@ -81,7 +84,7 @@ async function playerOf(db, req) {
 }
 const publicPlayer = (p) => ({ id: Number(p.id), name: p.name || '', email: p.email || '', picture: p.picture || '' });
 
-async function cloudRow(db, pid, full = false) {
+async function cloudRow(db, pid, GAME, full = false) {
   const rs = await db.execute({
     sql: `SELECT ${full ? 'data, ' : ''}client_saved_at, updated_at, shop_name, level, xp, money_earned, pots_sold, day, flagged, cheat
           FROM game_saves WHERE player_id = ? AND game = ?`,
@@ -97,6 +100,7 @@ export default async function handler(req, res) {
   const r = String(url.searchParams.get('r') || '').replace(/^\/+|\/+$/g, '');
   const path = r ? '/' + r : (url.pathname.replace(/\/+$/, '').replace(/^\/api\/lau/, '') || '/');
   const method = req.method;
+  const GAME = GAMES.has(url.searchParams.get('g')) ? url.searchParams.get('g') : DEFAULT_GAME;
 
   if (method === 'OPTIONS') { res.writeHead(204); return res.end(); }   // không mở CORS cho trang khác
   if (['POST', 'PUT', 'PATCH', 'DELETE'].includes(method) && req.headers['x-meegame'] !== '1') {
@@ -128,7 +132,7 @@ export default async function handler(req, res) {
       const p = rs.rows[0];
       let cookie;
       try { cookie = makeSessionCookie(Number(p.id)); } catch (e) { console.error('[lau] session', e.message); return err(res, 503, 'config_error', 'Đăng nhập chưa được cấu hình xong.'); }
-      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, Number(p.id))) }, { 'Set-Cookie': cookie });
+      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, Number(p.id), GAME)) }, { 'Set-Cookie': cookie });
     }
     if (method === 'POST' && path === '/auth/logout') {
       return send(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookie() });
@@ -200,7 +204,7 @@ export default async function handler(req, res) {
     const pid = Number(p.id);
 
     if (method === 'GET' && path === '/auth/me') {
-      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid)) });
+      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid, GAME)) });
     }
 
     // ── v1.10: xóa dữ liệu / hủy liên kết Gmail ──
@@ -219,7 +223,7 @@ export default async function handler(req, res) {
     }
 
     if (method === 'GET' && path === '/save') {
-      const row = await cloudRow(db, pid, true);
+      const row = await cloudRow(db, pid, GAME, true);
       if (!row) return send(res, 200, { save: null, cloud: null });
       let save = null;
       try { save = JSON.parse(String(row.data)); } catch { save = null; }
@@ -229,12 +233,12 @@ export default async function handler(req, res) {
     if (method === 'PUT' && path === '/save') {
       const body = await parseBody(req);
       const save = body && body.save;
-      const sum = saveSummary(save);
+      const sum = saveSummary(save, GAME);
       if (!sum) return err(res, 400, 'invalid', 'Tiến trình không hợp lệ.');
       const data = JSON.stringify(save);
       if (Buffer.byteLength(data) > MAX_SAVE_BYTES) return err(res, 413, 'too_big', 'Tiến trình quá lớn.');
       const nowMs = Date.now();
-      const prev = await cloudRow(db, pid, true);
+      const prev = await cloudRow(db, pid, GAME, true);
       if (prev && !body.force && nowMs - num(prev.updated_at) < MIN_PUT_GAP_MS) {
         return err(res, 429, 'too_fast', 'Vừa lưu xong, đợi chút nha.');
       }

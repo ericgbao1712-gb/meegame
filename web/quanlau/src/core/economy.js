@@ -31,7 +31,7 @@ export function addMoney(G, delta, reason = '', x, y) {
   const before = s.money;
   s.money = Math.max(0, round2(s.money + delta));
   const applied = round2(s.money - before);
-  if (applied > 0 && reason !== 'debug' && s.stats) s.stats.moneyEarned = round2((s.stats.moneyEarned || 0) + applied);   // v1.8: bảng xếp hạng
+  if (applied > 0 && reason !== 'debug' && reason !== 'liquidation' && s.stats) s.stats.moneyEarned = round2((s.stats.moneyEarned || 0) + applied);   // v1.8: bảng xếp hạng
   if (applied !== 0) G.emit('money', { delta: applied, total: s.money, reason, x, y });
   return applied;
 }
@@ -226,6 +226,54 @@ function takeLots(s, id, n) {
   while (n > 0 && L.length) { const k = Math.min(n, L[0].n); L[0].n -= k; n -= k; if (L[0].n <= 0) L.shift(); }
 }
 /** Put n portions into the kho (dated today). */
+// ───────────── v1.10 thanh lý hàng cũ (mang từ Xoài Lắc) ─────────────
+// Lô hàng Lẩu Ơi không nhớ giá mua → vốn mỗi phần = giá chợ hôm nay (không tính phí giao).
+const unitBasis = (s, id) => (ING[id] ? ING[id].cost : 0) * (s.market.mult[id] ?? 1);
+const liqRate = (s, lot) => C.LIQUIDATE.rates[clamp(lot.e - s.day, 0, C.LIQUIDATE.rates.length - 1)];
+/** What Cô Ba would pay for the oldest n portions of `id` (n defaults to everything). */
+export function liquidateQuote(G, id, n) {
+  const s = G.state;
+  if (!ING[id]) return { ok: false, n: 0, money: 0, basis: 0, groups: [] };
+  const have = Math.max(0, Math.floor(s.inventory[id] || 0));
+  if (n == null) n = have;
+  n = Math.max(0, Math.min(Math.floor(n), have));
+  let left = n, money = 0, basis = 0;
+  const groups = [];                                        // by days left: { left, n, rate, money }
+  const b = unitBasis(s, id);
+  for (const lot of lotsOf(s, id)) {
+    if (left <= 0) break;
+    const k = Math.min(left, lot.n), r = liqRate(s, lot), dl = Math.max(0, lot.e - s.day);
+    money += k * b * r; basis += k * b; left -= k;
+    const g = groups.find((x) => x.left === dl);
+    if (g) { g.n += k; g.money += k * b * r; } else groups.push({ left: dl, n: k, rate: r, money: k * b * r });
+  }
+  if (left > 0) { money += left * b * C.LIQUIDATE.rates[0]; basis += left * b; left = 0; }   // phần không có lô (save cũ): giá thấp nhất
+  return { ok: n > 0, n, money: round2(money), basis: round2(basis), groups };
+}
+/** Portions of `id` whose date runs out after today (the ones worth selling first). */
+export function oldStock(G, id) {
+  const s = G.state;
+  let n = 0;
+  for (const l of lotsOf(s, id)) if (l.e <= s.day) n += l.n;
+  return n;
+}
+/** Sell the oldest n portions of `id` back to the market. Morning only. */
+export function liquidate(G, id, n) {
+  const s = G.state;
+  if (!ING[id]) return { ok: false, reason: 'unknown', msg: 'Không có món hàng này.' };
+  if (s.phase !== 'prep') return { ok: false, reason: 'phase', msg: `${C.LIQUIDATE.buyer} chỉ mua lại hàng buổi sáng, trước khi mở hàng nha.` };
+  const q = liquidateQuote(G, id, n);
+  if (!q.ok) return { ok: false, reason: 'empty', msg: 'Kho không còn món này để bán.' };
+  takeLots(s, id, q.n);
+  s.inventory[id] = Math.max(0, (s.inventory[id] || 0) - q.n);
+  addMoney(G, q.money, 'liquidation');
+  const loss = round2(Math.max(0, q.basis - q.money));
+  s.today.costs.liquidation = round2((s.today.costs.liquidation || 0) + loss);
+  G.counter('liquidated', q.n);
+  resetStockWarn(G, id);
+  return { ok: true, n: q.n, money: q.money, basis: q.basis, loss };
+}
+
 export function addStock(G, id, n) {
   if (!(n > 0)) return;
   const s = G.state;

@@ -3,6 +3,7 @@ import * as C from '../config.js';
 import {
   ING, POT, UP, xpNeed, tierDef, builtTables, allTables, builtStoves, khoInfo, buyPrice as baseBuyPrice, potPrice, masteryStars,
   ambienceOf, featureUnlocked, isPotUnlocked, isIngUnlocked, isDrinkUnlocked, salaryTotal, staffSalary, sidePrice,
+  liquidateQuote, oldStock,
 } from './economy.js';
 import { staffSlots, roleUnlocked, roleCount, candidatesOf } from './staff.js';
 import { trayStatus } from './kitchen.js';
@@ -188,6 +189,8 @@ export function createGetters(G) {
 
   return {
     level, kho, buyPrice,
+    liquidateQuote: (id, n) => liquidateQuote(G, id, n),   // v1.10 thanh lý
+    oldStock: (id) => oldStock(G, id),
     buyPriceBase: (id) => baseBuyPrice(G, id),
     potPrice: (id) => potPrice(G, id),
     ambience: () => ambienceOf(G),

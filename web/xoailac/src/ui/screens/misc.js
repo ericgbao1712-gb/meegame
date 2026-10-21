@@ -7,7 +7,7 @@ import { fmtMoney, fmtDuration, fmtRating } from '../../core/format.js';
 import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
-import { openBackup, openRestore } from '../backup.js';
+import { accountPanel, resetProgress } from '../cloud.js';
 import { songPicker } from '../songs.js';
 import { countUp, confettiFor, unlockIcon, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
@@ -108,14 +108,8 @@ function dayLenCard() {
     div('seg-row daylen', btns));
 }
 
-async function resetEverything() {
-  try { const m = await import('../../storage.js'); await m.clearSave?.(); } catch (e) { /* ignore */ }
-  try { localStorage.removeItem('xoai-lac/save/v1'); } catch (e) { /* ignore */ }
-  // keep autosave / pagehide from writing the old game back before the reload
-  try { ctx.game.serialize = () => null; } catch (e) { /* ignore */ }
-  ctx.toast('Đã xóa sạch. Mình làm lại từ đầu nha!', 'info', 'ui_trash');
-  setTimeout(() => { try { localStorage.removeItem('xoai-lac/save/v1'); } catch (e) { /* ignore */ } try { location.reload(); } catch (e) { /* ignore */ } }, 700);
-}
+// v2.7: xóa cả bản trên mạng nếu đã liên kết Gmail (không thì mở lại game quán cũ trên mạng tự tải về)
+function resetEverything() { return resetProgress(); }
 
 /** v2.6.16 Settings → "Đóng cửa sớm": end today's selling now (only while the shop is open). Guests already at the
  *  counter are still served, nobody new comes in, then the day report shows as usual. */
@@ -175,18 +169,14 @@ export function openSettings() {
         div('card set-card',
           span('sl-l', 'Tên quán'),
           div('set-name', name, saveName)),
-        div('card set-card',
-          div('set-row', ico('ui_chest_gold', 32), div('grow', span('sl-l', 'Sao lưu tiến trình'), span('muted sm', 'Lấy mã (hoặc file) để đổi máy, chơi lại vẫn giữ nguyên quán'))),
-          div('set-bk',
-            h('button', { class: 'btn jade sm', onclick: () => { sfx('click'); openBackup(); } }, 'Tạo mã sao lưu'),
-            h('button', { class: 'btn paper sm', onclick: () => { sfx('click'); openRestore(); } }, 'Khôi phục'))),
+        div('card set-card', accountPanel()),   // v2.7 liên kết Gmail
         div('card set-card',
           div('set-about', ico('ui_home', 32), div('grow', h('b', null, 'Xoài Lắc Ơi!'), span('muted sm', 'Game quản lý xe xoài lắc pixel. Cảm ơn bạn đã ghé xe nha!'))),
           div('set-soon', span('sl-l', 'Sắp ra mắt'), div('soon-row', C.NEXT_GAMES.map((g) => span('chip jade', ico('ui_star', 16), g))))),
         h('button', { class: 'btn red sm block', onclick: () => {
           ctx.confirm({
             title: 'Xóa hết và chơi lại?', icon: 'ui_trash', danger: true, yes: 'Xóa hết', no: 'Thôi, giữ lại',
-            text: 'Toàn bộ tiến trình (tiền, cấp độ, nhân viên…) sẽ mất sạch và không lấy lại được nha.',
+            text: 'Toàn bộ tiến trình (tiền, cấp độ, nhân viên…) trên máy này và trên mạng (nếu đã liên kết Gmail) sẽ mất sạch, không lấy lại được nha.',
             input: { word: 'XÓA', hint: 'Gõ XÓA để xác nhận' },
             onYes: () => { resetEverything(); },
           });

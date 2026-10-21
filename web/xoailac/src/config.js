@@ -923,3 +923,13 @@ export const PERKS = [
   { lv: 40, id: 'f_flower_lan', name: 'Chậu lan tím', icon: 'ui_deco', facade: { cat: 'flower', id: 'lan' }, desc: 'Trang trí mới: chậu lan tím sang trọng.' },
 ];
 export const MASTERY = { fromLv: 41, chest: 'gold', ticketEvery: 5 };   // each level ≥ 41: a gold chest; every 5th also a ★3+ hiring ticket
+
+// v2.7 liên kết Gmail + lưu lên mạng + bảng xếp hạng (dùng chung API/tài khoản MeeGame với Lẩu Ơi, xem ui/cloud.js)
+export const CLOUD = {
+  clientId: '279939367302-c932eltrgmjda8jdj3vm15t2hh6lg42t.apps.googleusercontent.com',
+  api: '/api/lau',
+  game: 'xoailac',
+  requireLogin: true,    // chủ game 21/10: Xoài Lắc cũng bắt đăng nhập Gmail mới chơi (như Lẩu Ơi); mất mạng thì cho chơi tạm
+  syncSec: 120,          // tự lưu lên mạng tối đa 2 phút / lần khi có thay đổi
+  levelSlack: 2,         // bản mới hơn nhưng thấp hơn quá 2 cấp → hỏi người chơi thay vì tự lấy
+};

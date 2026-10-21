@@ -3,7 +3,7 @@ import { h, div, span, ico } from '../dom.js';
 import { ctx, act, sfx, S } from '../ctx.js';
 import * as D from '../data.js';
 import * as C from '../../config.js';
-import { fmtShort } from '../../core/format.js';
+import { fmtShort, fmtMoney } from '../../core/format.js';
 import { secTitle, noteBox, celebrate, floatAt, toggle, unitPrice } from './common.js';
 
 function packBtn(id, label, n, price, free, money, rowEl, api) {
@@ -26,11 +26,72 @@ function packBtn(id, label, n, price, free, money, rowEl, api) {
   return b;
 }
 
+const g = () => ctx.game.get || {};
+
+// ---------------------------------------------------------------- v1.10 Thanh lý hàng cũ (mang từ Xoài Lắc v2.6)
+const RATE_TXT = (r) => Math.round(r * 100) + '% vốn';
+const LEFT_TXT = (d) => (d <= 0 ? 'hết hạn sau hôm nay' : d === 1 ? 'còn 1 ngày' : `còn ${d} ngày`);
+function liquidateView(body, api) {
+  const s = S(), L = C.LIQUIDATE;
+  const morning = s.phase === 'prep';
+  const ids = C.INGREDIENTS.map((i) => i.id).filter((id) => D.stock(id) > 0);
+  const quote = (id, n) => g().liquidateQuote?.(id, n) || { ok: false, n: 0, money: 0, basis: 0, groups: [] };
+  const old = (id) => g().oldStock?.(id) || 0;
+  body.appendChild(noteBox('ui_coin', `**${L.buyer}** mua lại hàng tồn, lô cũ nhất trước. Giá thu: hàng **${LEFT_TXT(0)}** ${RATE_TXT(L.rates[0])}, **còn 1 ngày** ${RATE_TXT(L.rates[1])}, **còn lâu hơn** ${RATE_TXT(L.rates[2])}. Luôn thấp hơn giá mua: bán là chịu lỗ, nhưng đỡ hơn để hư bỏ.`, ''));
+  if (!morning) body.appendChild(noteBox('ui_lock', `Chỉ thanh lý được **buổi sáng, trước khi mở hàng** (${L.buyer} ở chợ).`, 'gold'));
+  if (!ids.length) { body.appendChild(div('nodata', 'Kho trống, không có gì để thanh lý.')); return; }
+
+  const sell = (id, n, btn) => {
+    const r = act('liquidate', id, n);
+    if (r.ok === false) { sfx('error'); return; }
+    sfx('cash'); if (btn) floatAt(btn, '+' + fmtShort(r.money), '#2f9a8a');
+    ctx.toast(`Đã bán ${r.n} phần ${D.ING[id].name.toLowerCase()}: thu ${fmtMoney(r.money)} (lỗ ${fmtMoney(r.loss)} so với vốn)`, 'info', 'ui_coin');
+    api.rerender();
+  };
+  // everything that expires after today, in one go
+  const oldIds = ids.filter((id) => old(id) > 0);
+  if (oldIds.length) {
+    let n = 0, money = 0, basis = 0;
+    for (const id of oldIds) { const q = quote(id, old(id)); n += q.n; money += q.money; basis += q.basis; }
+    const all = h('button', { class: 'btn red sm', disabled: !morning }, `Bán hết · +${fmtShort(money)}`);
+    all.addEventListener('click', () => ctx.confirm({
+      title: 'Thanh lý hàng sắp hết hạn?', icon: 'ui_coin', yes: 'Bán hết', no: 'Thôi',
+      text: `Bán ${n} phần (${oldIds.length} món) ${LEFT_TXT(0)}: thu ${fmtMoney(money)}, vốn ${fmtMoney(basis)}. Không mua lại được với giá này đâu nha.`,
+      onYes: () => { let got = 0, lost = 0; for (const id of oldIds) { const r = act('liquidate', id, old(id)); if (r.ok !== false) { got += r.money; lost += r.loss; } } sfx('cash'); ctx.toast(`Đã thanh lý hàng sắp hạn: thu ${fmtMoney(got)} (lỗ ${fmtMoney(lost)})`, 'info', 'ui_coin'); api.rerender(); },
+    }));
+    body.appendChild(div('card lq-sum red', ico('ui_clock', 32),
+      div('grow', h('b', null, `${n} phần ${LEFT_TXT(0)}`), span('muted sm', `Thu về ${fmtMoney(money)} · vốn ${fmtMoney(basis)}`)), all));
+  }
+  body.appendChild(secTitle('Hàng trong kho', 'lô cũ bán trước'));
+  ids.sort((a, b) => (old(b) > 0) - (old(a) > 0) || D.stock(b) - D.stock(a));
+  for (const id of ids) {
+    const def = D.ING[id], have = D.stock(id), o = old(id);
+    const one = quote(id, 1);
+    const unitNow = one.n ? one.money : 0, basisNow = one.n ? one.basis : 0;
+    const chips = quote(id).groups.map((gp) => span('chip' + (gp.left <= 0 ? ' red' : gp.left === 1 ? ' gold' : ''), `${gp.n} ${LEFT_TXT(gp.left)} · ${RATE_TXT(gp.rate)}`));
+    const btn = (label, n) => {
+      const q = quote(id, n);
+      const b = h('button', { class: 'btn paper sm lq-b', disabled: !morning || !q.ok }, label, span('lq-m', '+' + fmtShort(q.money)));
+      b.addEventListener('click', () => sell(id, n, b));
+      return b;
+    };
+    const btns = div('lq-btns', btn('Bán 1', 1), have >= 5 ? btn('Bán 5', 5) : null, o > 0 && o !== have ? btn(`Bán ${o} sắp hạn`, o) : null, btn(`Bán hết ${have}`, have));
+    body.appendChild(div('card lq-row' + (o > 0 ? ' old' : ''),
+      div('lq-top', ico(def.icon, 32), div('grow', h('b', null, def.name),
+        span('muted sm', `Kho ${have} phần · lô cũ nhất thu ${fmtShort(unitNow)}/phần (vốn ${fmtShort(basisNow)})`)), span('num lq-n', String(have))),
+      div('lq-chips', ...chips), btns));
+  }
+}
+
 export const khoSheet = {
   title: 'Kho hàng',
   icon: 'ui_kho',
   build(body, api) {
-    api.noTabs();
+    // v1.10: hai tab — nhập hàng (như cũ) và thanh lý hàng cũ
+    const hasOld = S().phase === 'prep' && C.INGREDIENTS.some((i) => (g().oldStock?.(i.id) || 0) > 0);
+    const sub = api.sub === 'thanhly' ? 'thanhly' : 'nhap';
+    api.tabs([{ id: 'nhap', label: 'Nhập hàng', icon: 'ui_kho' }, { id: 'thanhly', label: 'Thanh lý', icon: 'ui_coin', dot: hasOld }], sub, (id) => api.setSub(id));
+    if (sub === 'thanhly') { liquidateView(body, api); return; }
     const s = S();
     const info = D.khoInfo();
     const free = Math.max(0, info.cap - info.used);
@@ -41,7 +102,7 @@ export const khoSheet = {
 
     // ---- capacity
     body.appendChild(div('card cap' + (free === 0 ? ' red' : ''),
-      div('cap-top', ico('ui_kho', 32), div('cap-t', h('b', null, khoName), span('muted', free === 0 ? 'Kho đầy rồi nha!' : `Còn trống ${free} phần`)),
+      div('cap-top', ico('ui_kho', 32), div('cap-t', h('b', null, khoName), span('muted', free === 0 ? 'Kho đầy rồi nha! Bán bớt hàng cũ ở tab Thanh lý.' : `Còn trống ${free} phần`)),
         div('cap-n', span('num', String(info.used)), span('num dim', '/' + info.cap))),
       div('bar ' + (pct >= 100 ? 'red' : pct > 80 ? '' : 'leaf'), h('i', { style: { '--p': pct } }))));
 

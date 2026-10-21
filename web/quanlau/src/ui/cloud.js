@@ -176,14 +176,6 @@ export function openGate({ offline = false } = {}) {
   const errEl = span('bk-err', '');
   const small = (label, fn) => h('button', { class: 'cl-gate-alt', type: 'button', onclick: () => { sfx('click'); fn(); } }, label);
   const alts = div('cl-gate-alts',
-    small('Có mã sao lưu? Khôi phục quán cũ ▸', () => {
-      import('./backup.js').then((m) => {
-        const coach = document.getElementById('coach-root');
-        const back = (on) => { gateEl && gateEl.classList.toggle('behind', on); coach && coach.classList.toggle('behind', on); };
-        back(true);
-        if (!m.openRestore({ onClose: () => back(false) })) back(false);
-      });
-    }),
     offline ? small('Mất mạng? Chơi tạm, đăng nhập sau ▸', () => closeGate()) : null,
     h('a', { class: 'cl-gate-alt', href: '/privacy', target: '_blank', rel: 'noopener' }, 'Chính sách bảo mật'));
   const card = div('cl-gate-card',

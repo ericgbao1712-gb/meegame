@@ -2,7 +2,7 @@
 import * as C from '../config.js';
 import { mergeDefaults, clone } from './util.js';
 
-export const COST_KEYS = ['ingredients', 'broth', 'drinks', 'salary', 'rent', 'marketing', 'lottery'];
+export const COST_KEYS = ['ingredients', 'broth', 'drinks', 'salary', 'rent', 'marketing', 'lottery', 'liquidation'];   // v1.10 liquidation = lỗ thanh lý so với vốn
 
 export function newToday() {
   const costs = {};

@@ -5,7 +5,7 @@ import { createRng } from './rng.js';
 import { migrate } from './state.js';
 import { createWorld, syncLayout } from './world.js';
 import {
-  UP, DECO_BY_ID, POT, tierDef, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots,
+  UP, DECO_BY_ID, POT, tierDef, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate,
 } from './economy.js';
 import * as kitchen from './kitchen.js';
 import * as customers from './customers.js';
@@ -210,6 +210,7 @@ export function createGame(save, opts = {}) {
     serve: wrap(() => kitchen.serveAct(G)),
     collect: wrap((tableIdx) => customers.collectCoins(G, tableIdx, 'player')),
     buyIngredient: wrap((ing, qty) => buyIngredient(G, ing, qty)),
+    liquidate: wrap((id, n) => liquidate(G, id, n)),   // v1.10 thanh lý
     setAutoRestock: wrap((on) => {
       if (on && !(state.upgrades.supplier > 0 || mods(G).hasQuankho)) return fail('locked', 'Cần mua Mối chợ đầu mối hoặc thuê Quản kho trước nha.');
       state.autoRestock = !!on;

@@ -15,6 +15,7 @@ import './sheets/index.js';
 import { installModalScreens } from './screens/index.js';
 import { createTutorial } from './tutorial.js';
 import { mountDebug } from './debug.js';
+import { initCloud } from './cloud.js';
 
 function ensure(id, parent, tag = 'div') {
   let el = document.getElementById(id);
@@ -62,6 +63,7 @@ export function mountUI(game, { renderer, audio } = {}) {
   installModalScreens();
   ctx.tutorial = createTutorial({ coachRoot });
   const debug = mountDebug();
+  try { initCloud(game); } catch (e) { console.error('[ui] cloud', e); }   // v2.7 liên kết Gmail
 
   // ---- layout vars: HUD / nav / dock heights → CSS, then tell the renderer
   const setVars = () => {

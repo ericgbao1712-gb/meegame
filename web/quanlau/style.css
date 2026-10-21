@@ -1266,3 +1266,17 @@ button.hchip:active { transform: translateY(2px); }
 .cl-gate-alts { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 2px; }
 .cl-gate-alt { padding: 6px 8px; font: 700 12px/1.2 var(--f-body); color: var(--ink-3); text-decoration: underline; background: none; }
 .cl-gate-card .bk-err:empty { display: none; }
+
+/* v1.10 thanh lý hàng cũ (mang từ Xoài Lắc) */
+.card.lq-sum { display: flex; flex-direction: row; align-items: center; gap: 10px; padding: 10px 12px; }
+.card.lq-sum .grow, .lq-top .grow { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 1px; }
+.card.lq-row { display: flex; flex-direction: column; gap: 6px; padding: 10px 12px; }
+.card.lq-row.old { box-shadow: 0 0 0 2px #f2b8a8, 0 3px 0 var(--sand-2); }
+.lq-top { display: flex; align-items: center; gap: 10px; }
+.lq-n { font-size: 20px; }
+.lq-chips { display: flex; flex-wrap: wrap; gap: 4px; }
+.lq-chips .chip { font-size: 11px; padding: 2px 8px; }
+.lq-btns { display: flex; flex-wrap: wrap; gap: 6px; }
+.lq-b { display: inline-flex; flex-direction: column; align-items: center; gap: 0; padding: 5px 10px 7px; line-height: 1.1; }
+.lq-b .lq-m { font: 800 11px/1 var(--f-body); color: #2a8a5c; }
+.lq-b:disabled { opacity: .45; }

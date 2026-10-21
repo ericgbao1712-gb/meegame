@@ -3,7 +3,6 @@
 import * as C from '../config.js';
 import { h, div, span, ico, rich, clear } from './dom.js';
 import { ctx, S, G, sfx } from './ctx.js';
-import { openRestore } from './backup.js';
 import { POT, ING } from './data.js';
 import { portrait } from './sheets/common.js';
 import { makeOwnerLook } from '../art/index.js';
@@ -368,8 +367,7 @@ export function createTutorial({ coachRoot }) {
         div('in-head', ico('ui_shop', 48), h('b', null, 'Chủ quán là ai nè?')),
         div('av-grid', cards),
         div('in-field', h('label', { class: 'in-lbl' }, 'Đặt tên quán nha'), input, span('in-help', 'Tối đa 24 chữ. Sau này đổi trong Cài đặt cũng được.')),
-        go,
-        h('button', { class: 'in-restore', type: 'button', onclick: () => { sfx('click'); root.classList.add('behind'); if (!openRestore({ onClose: () => root.classList.remove('behind') })) root.classList.remove('behind'); } }, 'Có mã sao lưu? Khôi phục quán cũ ▸'));
+        go);   // v1.10/v2.7: bỏ mã sao lưu — giữ quán bằng liên kết Gmail
       el.appendChild(setup);
     }
   }

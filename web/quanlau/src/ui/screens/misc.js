@@ -7,7 +7,6 @@ import { fmtMoney, fmtDuration, fmtRating } from '../../core/format.js';
 import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
-import { openBackup, openRestore } from '../backup.js';
 import { accountPanel, resetProgress } from '../cloud.js';
 import { countUp, confettiFor, unlockPic, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
@@ -134,11 +133,6 @@ export function openSettings() {
           span('sl-l', 'Tên quán'),
           div('set-name', name, saveName)),
         div('card set-card', accountPanel()),   // v1.8 đăng nhập Google
-        div('card set-card',
-          div('set-row', ico('ui_chest_gold', 32), div('grow', span('sl-l', 'Sao lưu tiến trình'), span('muted sm', 'Lấy mã (hoặc file) để đổi máy, chơi lại vẫn giữ nguyên quán'))),
-          div('set-bk',
-            h('button', { class: 'btn jade sm', onclick: () => { sfx('click'); openBackup(); } }, 'Tạo mã sao lưu'),
-            h('button', { class: 'btn paper sm', onclick: () => { sfx('click'); openRestore(); } }, 'Khôi phục'))),
         div('card set-card',
           div('set-about', ico('ui_home', 32), div('grow', h('b', null, 'Lẩu Ơi!'), span('muted sm', 'Game quản lý quán lẩu pixel. Cảm ơn bạn đã ghé quán nha!'),
             span('set-credit', 'Ý tưởng game: ', h('b', null, 'Đèo Thiên Ân')))),

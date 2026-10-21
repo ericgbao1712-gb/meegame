@@ -479,6 +479,12 @@ export function createGame(save, opts = {}) {
     },
   };
 
+  // v2.7: dùng chế độ thử (#debug) thì quán bị đánh dấu → không lên bảng xếp hạng
+  for (const k of Object.keys(act.debug || {})) {
+    const f = act.debug[k];
+    act.debug[k] = (...a) => { state.flags.ui.cheat = true; return f(...a); };
+  }
+
   const game = {
     state, world, cfg: C,
     update,
