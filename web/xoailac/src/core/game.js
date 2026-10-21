@@ -243,6 +243,14 @@ export function createGame(save, opts = {}) {
     serve: wrap((grade) => kitchen.serveAct(G, grade)),
     collect: wrap((tableIdx) => customers.collectCoins(G, tableIdx, 'player')),
     buyIngredient: wrap((ing, qty) => buyIngredient(G, ing, qty)),
+    // v1.13 / v2.9: quà từ mã quà tặng (máy chủ đã kiểm tra mã). XP cộng đúng số ghi trên mã (không nhân xpGainMult).
+    redeemReward: wrap((money, xp) => {
+      const m = Math.max(0, Number(money) || 0), x = Math.max(0, Number(xp) || 0);
+      if (!(m > 0 || x > 0)) return fail('empty', 'Mã này không có quà.');
+      if (m > 0) addMoney(G, m, 'code');
+      if (x > 0) addXp(G, x / (C.LEVEL.xpGainMult || 1));
+      return { ok: true, money: m, xp: x };
+    }),
     buySupply: wrap((id, qty) => buySupply(G, id, qty)),
     orderSupplies: wrap((supId, items) => placeOrder(G, supId, items)),
     setSupplier: wrap((id) => {

@@ -5,7 +5,47 @@ import { h, div, span, ico, rich, clear } from './dom.js';
 import { ctx, S, G, sfx } from './ctx.js';
 import { POT, ING } from './data.js';
 import { portrait } from './sheets/common.js';
-import { makeOwnerLook } from '../art/index.js';
+import { makeOwnerLook, makeLook, drawTable, drawChar } from '../art/index.js';
+import { loadAtlas, frameCanvas } from '../art/assets.js';
+import PROPS from '../art/data/props.js';
+
+// ------------------------------------------------------------------ v1.12 bìa mở đầu (cover)
+// Nền = cảnh hiên nhà pixel của quán vỉa hè, đèn lồng đỏ đung đưa, bàn nhựa đỏ có nồi lẩu sôi bốc khói,
+// hai vị khách đang ăn + chủ quán bưng mâm. Vẽ bằng chính sprite của game (không thêm ảnh mới).
+const COVER_W = 100, COVER_H = 54, COVER_K = 4;     // world px, buffer px per world px (= 2 × DETAIL → sprite px ×2)
+function propImg(name, scale, cls) {
+  try {
+    const c = frameCanvas(loadAtlas('props.png'), PROPS.frames[name], scale);
+    return c ? h('img', { class: cls, src: c.toDataURL(), alt: '', draggable: 'false' }) : null;
+  } catch (e) { return null; }
+}
+function coverHero() {
+  const cv = h('canvas', { class: 'cv-hero', width: COVER_W * COVER_K, height: COVER_H * COVER_K, 'aria-hidden': 'true' });
+  const g = cv.getContext('2d');
+  const owner = makeOwnerLook(0, 1);
+  const guestA = makeLook('sinhvien', 3, 0), guestB = makeLook('sinhvien', 8, 1);
+  const tbl = { x: 42, y: 40 };
+  let raf = 0, t0 = 0;
+  const paint = (t) => {
+    g.setTransform(COVER_K, 0, 0, COVER_K, 0, 0);
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, COVER_W, COVER_H);
+    drawChar(g, guestB, tbl.x, tbl.y - 8, { pose: 'eat', facing: 'down', t: t + 0.4 });
+    drawTable(g, tbl, { pot: 'ga', boiling: true, plates: 4, drinks: 2, t, plateIngs: ['ga', 'nam', 'rau', 'mi'] });
+    drawChar(g, guestA, tbl.x - 16, tbl.y + 3, { pose: 'eat', facing: 'right', t });
+    drawChar(g, owner, 80, tbl.y + 8, { pose: 'idle', facing: 'left', t, carry: 'tray' });
+  };
+  const loop = (ms) => {
+    if (!cv.isConnected) { if (t0) return; }     // not mounted yet on the first frame
+    if (!t0) t0 = ms;
+    paint((ms - t0) / 1000);
+    if (!ctx.reduced) raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  cv.stop = () => cancelAnimationFrame(raf);
+  return cv;
+}
+const SCENE_URL = new URL('../../assets/scenes/vihe.png', import.meta.url).href;
 
 // ------------------------------------------------------------------ pixel pointing hand (no art dependency)
 const HAND = [
@@ -304,7 +344,12 @@ export function createTutorial({ coachRoot }) {
     introOn = true;
     ctx.pauseFor?.('intro');
     const lines = Array.isArray(C.START.intro) ? C.START.intro : [];
-    const el = div('intro');
+    const el = div('intro cover');
+    el.style.setProperty('--cv-scene', `url("${SCENE_URL}")`);
+    // v1.12 bìa: nền cảnh + đèn lồng + hơi khói + đốm lửa bay
+    el.append(div('cv-scene'), div('cv-glow'),
+      div('cv-lanterns', propImg('den_long_do', 3, 'cv-lan l'), propImg('den_long_do', 3, 'cv-lan r')),
+      div('cv-embers', ...Array.from({ length: 10 }, (_, i) => h('i', { style: { '--i': i } }))));
     root.appendChild(el);
     hideCoach();
 
@@ -316,12 +361,15 @@ export function createTutorial({ coachRoot }) {
     };
 
     // ---- stage 1: story
-    const logo = div('in-logo', h('b', null, 'LẨU ƠI!'), span('in-sub', 'Quán lẩu nhà mình'));
+    const logo = div('in-logo',
+      div('cv-steam', h('i'), h('i'), h('i')),
+      h('b', null, 'LẨU ƠI!'), span('in-sub', 'Quán lẩu nhà mình'));
+    const hero = div('cv-stage', coverHero(), div('cv-pot-steam', h('i'), h('i'), h('i'), h('i')));
     const mom = div('in-mom', ico('ui_mom', 48));
     const text = h('p', { class: 'in-text' }, '');
     const dots = div('in-dots', ...lines.map(() => h('i')));
     const hint = span('in-hint', 'Chạm để tiếp ▶');
-    const story = div('in-story', logo, div('in-card', mom, text), dots, hint, h('button', { class: 'in-skip', type: 'button' }, 'Bỏ qua ▸'));
+    const story = div('in-story', div('cv-box', logo, hero), div('cv-bottom', div('in-card', mom, text), div('cv-foot', dots, hint)), h('button', { class: 'in-skip', type: 'button' }, 'Bỏ qua ▸'));
     el.appendChild(story);
 
     let li = 0, ci = 0, timer = 0, typing = false;
@@ -348,6 +396,8 @@ export function createTutorial({ coachRoot }) {
     // ---- stage 2: avatar + name
     function toSetup() {
       clearTimeout(timer);
+      try { hero.querySelector('canvas')?.stop?.(); } catch (e) { /* ignore */ }
+      el.classList.add('setup');
       story.remove();
       let pick = 0;
       const cards = C.AVATARS.filter((a) => !a.lv).map((a) => {   // v1.3: hair variants unlock later (Lv 25+)
@@ -381,6 +431,41 @@ export function createTutorial({ coachRoot }) {
     }
   }
 
+  // ------------------------------------------------------------------ v1.13 trang chào khi vào lại game
+  // Người chơi đã có quán: mỗi lần mở game hiện tranh bìa (cảnh hiên nhà + bàn lẩu bốc khói) trong khung tròn
+  // như một đĩa lẩu, tên game đè lên mép dưới, tên quán + cấp, nút "Bắt đầu chơi". Nằm trên cả màn đăng nhập.
+  function runSplash() {
+    const s = S();
+    try { ctx.pauseFor?.('splash'); } catch (e) { /* ignore */ }
+    const el = div('splash cover');
+    el.style.setProperty('--cv-scene', `url("${SCENE_URL}")`);
+    const heroCv = coverHero();
+    const plate = div('sp-plate', div('sp-win', div('cv-box', div('cv-stage', heroCv, div('cv-pot-steam', h('i'), h('i'), h('i'), h('i'))))),
+      div('sp-herb l', propImg('cay_mai', 2, '')), div('sp-herb r', propImg('plant_flower', 2, '')));
+    const title = div('sp-title', div('cv-steam', h('i'), h('i'), h('i')), h('b', null, 'LẨU ƠI!'), span('sp-sub', 'Quán lẩu nhà mình'));
+    const who = span('sp-who', `${s.shopName || C.START.shopName} · Cấp ${s.level || 1} · Ngày ${s.day || 1}`);
+    const btn = h('button', { class: 'sp-play', type: 'button' }, 'Bắt đầu chơi');
+    el.append(div('cv-scene'), div('sp-rays'),
+      div('cv-lanterns', propImg('den_long_do', 3, 'cv-lan l'), propImg('den_long_do', 3, 'cv-lan r')),
+      div('cv-embers', ...Array.from({ length: 10 }, (_, i) => h('i', { style: { '--i': i } }))),
+      div('sp-col', plate, title, who, btn));
+    (document.getElementById('app') || document.body).appendChild(el);
+    let gone = false;
+    const go = () => {
+      if (gone) return;
+      gone = true;
+      sfx('confirm');
+      try { heroCv.stop?.(); } catch (e) { /* ignore */ }
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 380);
+      try { ctx.resumeFor?.('splash'); } catch (e) { /* ignore */ }
+    };
+    btn.addEventListener('click', go);
+    const onKey = (e) => { if (gone) { document.removeEventListener('keydown', onKey); return; } if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => { try { btn.focus({ preventScroll: true }); } catch (e) { /* ignore */ } });
+  }
+
   // ------------------------------------------------------------------ public API
   return {
     boot() {
@@ -388,6 +473,7 @@ export function createTutorial({ coachRoot }) {
         wireEvents();
         const s = S();
         if (!s.started) { runIntro(); return; }
+        runSplash();   // v1.13
         active = true;
         if (!tut().done && (tut().step || 0) < 1) setStep(1);
       } catch (e) { console.error('[tutorial] boot', e); }

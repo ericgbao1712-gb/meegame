@@ -7,7 +7,7 @@ import { fmtMoney, fmtDuration, fmtRating } from '../../core/format.js';
 import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
-import { accountPanel, resetProgress } from '../cloud.js';
+import { accountPanel, resetProgress, giftCodePanel } from '../cloud.js';
 import { countUp, confettiFor, unlockPic, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
 /** self-updating switch (the shared `toggle` needs a rebuild to flip) */
@@ -132,7 +132,8 @@ export function openSettings() {
         div('card set-card',
           span('sl-l', 'Tên quán'),
           div('set-name', name, saveName)),
-        div('card set-card', accountPanel()),   // v1.8 đăng nhập Google
+        div('card set-card', accountPanel()),
+        div('card set-card', giftCodePanel()),   // v1.13 mã quà tặng   // v1.8 đăng nhập Google
         div('card set-card',
           div('set-about', ico('ui_home', 32), div('grow', h('b', null, 'Lẩu Ơi!'), span('muted sm', 'Game quản lý quán lẩu pixel. Cảm ơn bạn đã ghé quán nha!'),
             span('set-credit', 'Ý tưởng game: ', h('b', null, 'Đèo Thiên Ân')))),

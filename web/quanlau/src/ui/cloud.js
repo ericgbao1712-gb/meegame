@@ -13,7 +13,7 @@ import { h, div, span, ico } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
-import { fmtShort } from '../core/format.js';
+import { fmtShort, fmtMoney } from '../core/format.js';
 
 const CL = C.CLOUD;
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
@@ -370,6 +370,48 @@ export function openAccount({ onClose } = {}) {
     id: 'account', cls: 'backup', queue: false, priority: 30, onClose,
     build: (m) => frame('Tài khoản Google', { icon: 'ui_heart', onClose: () => m.close('x') }, div('card set-card', accountPanel())),
   });
+}
+
+// ───────────── v1.13 mã quà tặng (Cài đặt) ─────────────
+/** Đổi mã trên máy chủ (mỗi tài khoản 1 lần / mã) rồi cộng tiền + XP vào quán và lưu lên mạng luôn. */
+export async function redeemCode(raw) {
+  const code = String(raw || '').trim();
+  if (!code) return { ok: false, msg: 'Nhập mã trước nha.' };
+  if (!st.player) return { ok: false, msg: 'Đăng nhập Gmail rồi mới nhập mã được nha.' };
+  if (!S().started) return { ok: false, msg: 'Mở quán trước rồi nhập mã nha.' };
+  const r = await api('POST', '/code/redeem', { code });
+  if (r.status === 0) return { ok: false, msg: 'Mất mạng rồi, thử lại sau nha.' };
+  if (r.status !== 200 || !r.json?.ok) return { ok: false, msg: r.json?.message || 'Mã chưa đúng, kiểm tra lại nha.' };
+  const res = ctx.game.act.redeemReward?.(r.json.money, r.json.xp);
+  if (!res || res.ok === false) return { ok: false, msg: res?.msg || 'Chưa nhận được quà, thử lại nha.' };
+  setTimeout(() => upload({ force: true }), 400);
+  const parts = [];
+  if (r.json.money > 0) parts.push(fmtMoney(r.json.money));
+  if (r.json.xp > 0) parts.push(Math.round(r.json.xp).toLocaleString('vi-VN') + ' XP');
+  return { ok: true, msg: 'Nhận quà thành công: +' + parts.join(' và +') + '!' };
+}
+
+export function giftCodePanel() {
+  const box = div('cl-gift');
+  const input = h('input', { class: 'tinput', type: 'text', maxlength: '32', autocomplete: 'off', autocapitalize: 'characters', spellcheck: 'false', placeholder: 'Ví dụ: MEEGAME2026', 'aria-label': 'Mã quà tặng' });
+  const note = span('muted sm', '');
+  const btn = h('button', { class: 'btn jade sm' }, ico('ui_gift', 16), 'Nhận quà');
+  const submit = async () => {
+    if (btn.disabled) return;
+    sfx('click');
+    btn.disabled = true; note.textContent = 'Đang kiểm tra mã…'; note.className = 'muted sm';
+    const r = await redeemCode(input.value);
+    btn.disabled = false;
+    note.textContent = r.msg; note.className = r.ok ? 'cl-gift-ok' : 'bk-err';
+    if (r.ok) { input.value = ''; sfx('cash'); ctx.toast(r.msg, 'good', 'ui_gift'); }
+  };
+  btn.addEventListener('click', submit);
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });
+  input.addEventListener('input', () => { const v = input.value.toUpperCase(); if (v !== input.value) input.value = v; });
+  box.append(
+    div('set-row', ico('ui_gift', 32), div('grow', span('sl-l', 'Nhập mã quà tặng'), span('muted sm', 'Mã từ MeeGame (TikTok, sự kiện…) tặng tiền và XP. Mỗi tài khoản dùng mỗi mã 1 lần.'))),
+    div('set-name', input, btn), note);
+  return box;
 }
 
 // ───────────── UI: bảng xếp hạng (Quán ▸ Xếp hạng) ─────────────

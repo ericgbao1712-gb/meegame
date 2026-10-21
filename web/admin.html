@@ -482,6 +482,64 @@
       color: var(--on-tint);
     }
 
+    /* v1.13 Mã quà tặng */
+    .gift-desk {
+      grid-column: 1 / -1;
+      display: grid;
+      gap: 20px;
+      padding-top: 8px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (min-width: 1100px) {
+      .gift-desk {
+        grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
+        gap: 40px;
+        align-items: start;
+      }
+    }
+
+    .gc-help {
+      margin: 0;
+      color: var(--ink-2);
+      font-size: 14px;
+    }
+
+    .gc-rows {
+      margin: 8px 0 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .gc-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 6px 12px;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .gc-row.is-off .gc-code {
+      color: var(--ink-2);
+      text-decoration: line-through;
+    }
+
+    .gc-code {
+      margin: 0;
+      font: 700 17px/1.2 ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+      letter-spacing: .04em;
+      overflow-wrap: anywhere;
+    }
+
+    .gc-row .row-meta {
+      grid-column: 1 / -1;
+    }
+
+    .gc-row .row-actions {
+      grid-column: auto;
+    }
+
     /* Bàn làm việc */
     .desk {
       display: grid;
@@ -938,6 +996,52 @@
         </div>
         <ul class="rows" id="rows"></ul>
       </section>
+
+      <!-- v1.13 Mã quà tặng (Lẩu Ơi / Xoài Lắc) -->
+      <section class="gift-desk" aria-labelledby="gc-title">
+        <form class="panel" id="gc-form" novalidate>
+          <div class="panel-head">
+            <h2 id="gc-title">Mã quà tặng</h2>
+          </div>
+          <div class="panel-body">
+            <p class="gc-help">Người chơi nhập mã trong Cài đặt của game để nhận tiền và XP. Mỗi tài khoản Gmail dùng mỗi mã một lần.</p>
+            <div class="two">
+              <label class="field"><span>Mã *</span><input id="gc-code" required maxlength="32" placeholder="Ví dụ: TIKTOK1000"
+                  autocomplete="off" spellcheck="false" style="text-transform:uppercase"><small>Chữ không dấu, số, - hoặc _. Ít nhất 3 ký tự.</small></label>
+              <label class="field"><span>Dùng cho game</span><select class="pick" id="gc-game">
+                  <option value="*">Cả hai game</option>
+                  <option value="quanlau">Lẩu Ơi!</option>
+                  <option value="xoailac">Xoài Lắc Ơi!</option>
+                </select></label>
+            </div>
+            <div class="two">
+              <label class="field"><span>Tiền tặng (nghìn đồng)</span><input id="gc-money" type="number" min="0" step="1" inputmode="numeric"
+                  placeholder="0"><small id="gc-money-hint">Ví dụ 500 = 500.000đ trong game.</small></label>
+              <label class="field"><span>XP tặng</span><input id="gc-xp" type="number" min="0" step="1" inputmode="numeric"
+                  placeholder="0"><small>Cộng đúng số này vào thanh XP.</small></label>
+            </div>
+            <div class="two">
+              <label class="field"><span>Số lượt dùng tối đa</span><input id="gc-max" type="number" min="1" step="1" inputmode="numeric"
+                  placeholder="Không giới hạn"><small>Tổng số người được nhận. Để trống = không giới hạn.</small></label>
+              <label class="field"><span>Hết hạn sau ngày</span><input id="gc-exp" type="date"><small>Để trống = không hết hạn.</small></label>
+            </div>
+            <label class="field"><span>Ghi chú</span><input id="gc-note" maxlength="120" placeholder="Ví dụ: quà livestream 21/10"></label>
+            <p class="msg error" id="gc-error" role="alert" hidden></p>
+            <div class="actions">
+              <button class="btn primary" type="submit" id="gc-save"><svg class="icon">
+                  <use href="#i-plus" />
+                </svg><span>Tạo mã</span></button>
+            </div>
+          </div>
+        </form>
+        <section aria-labelledby="gc-list-title">
+          <div class="list-head">
+            <h2 id="gc-list-title">Các mã đã tạo</h2>
+            <p class="num" id="gc-meta"></p>
+          </div>
+          <ul class="gc-rows" id="gc-rows"></ul>
+        </section>
+      </section>
     </section>
   </main>
 
@@ -1009,6 +1113,7 @@
         const token = session.get();
         if (token) headers.Authorization = 'Bearer ' + token;
         if (body !== undefined) headers['Content-Type'] = 'application/json';
+        if (path.startsWith('/api/lau')) headers['X-MeeGame'] = '1';   // API game yêu cầu header này cho lệnh ghi
         let res;
         try {
           res = await fetch(API + path, { method, headers, body: body === undefined ? undefined : JSON.stringify(body), cache: 'no-store' });
@@ -1071,7 +1176,73 @@
         show('desk-view');
         resetForm();
         await load();
+        loadCodes();
       }
+
+      // ---------- v1.13 Mã quà tặng ----------
+      const GC_GAME = { '*': 'Cả hai game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!' };
+      const cleanCode = v => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+      const moneyText = k => (Number(k) >= 1000 ? (Number(k) / 1000).toLocaleString('vi-VN', { maximumFractionDigits: 2 }) + ' triệu' : fmt(k) + 'k');
+      let codes = [];
+      async function loadCodes() {
+        const { data, error } = await call('GET', '/api/lau?r=admin/codes');
+        if (error) { $('gc-meta').textContent = error.message; return; }
+        codes = data.codes || [];
+        renderCodes();
+      }
+      function renderCodes() {
+        const list = $('gc-rows'); list.textContent = '';
+        $('gc-meta').textContent = codes.length ? codes.length + ' mã' : '';
+        if (!codes.length) { list.append(h('li', { class: 'empty', text: 'Chưa có mã nào. Tạo mã đầu tiên ở khung bên cạnh.' })); return; }
+        const now = Date.now();
+        for (const c of codes) {
+          const expired = c.expiresAt && c.expiresAt < now, full = c.maxUses != null && c.uses >= c.maxUses;
+          const gift = [c.money > 0 ? moneyText(c.money) : null, c.xp > 0 ? fmt(c.xp) + ' XP' : null].filter(Boolean).join(' + ');
+          const state = c.disabled ? 'Đã khóa' : expired ? 'Hết hạn' : full ? 'Hết lượt' : 'Đang dùng được';
+          const toggle = h('button', { class: 'btn', type: 'button', text: c.disabled ? 'Mở lại' : 'Khóa', onclick: async () => {
+            const { error } = await call('POST', '/api/lau?r=admin/codes/' + encodeURIComponent(c.code), { disabled: !c.disabled });
+            if (error) return toast(error.message);
+            toast(c.disabled ? 'Đã mở lại mã ' + c.code : 'Đã khóa mã ' + c.code); loadCodes();
+          } });
+          const copy = h('button', { class: 'btn', type: 'button', text: 'Chép mã', onclick: async () => {
+            try { await navigator.clipboard.writeText(c.code); toast('Đã chép ' + c.code); } catch (_) { toast(c.code); }
+          } });
+          const del = h('button', { class: 'btn danger', type: 'button', text: 'Xoá', onclick: async () => {
+            if (!confirm('Xoá hẳn mã ' + c.code + '? Người đã nhận quà vẫn giữ quà.')) return;
+            const { error } = await call('POST', '/api/lau?r=admin/codes/' + encodeURIComponent(c.code), { delete: true });
+            if (error) return toast(error.message);
+            toast('Đã xoá mã ' + c.code); loadCodes();
+          } });
+          list.append(h('li', { class: 'gc-row' + (c.disabled || expired || full ? ' is-off' : '') },
+            h('p', { class: 'gc-code', text: c.code }),
+            h('div', { class: 'row-actions' }, copy, toggle, del),
+            h('p', { class: 'row-meta' },
+              h('span', { class: 'mark', text: state }),
+              h('span', { text: 'Quà: ' + (gift || '—') }),
+              h('span', { text: GC_GAME[c.game] || c.game }),
+              h('span', { class: 'num', text: 'Đã dùng ' + fmt(c.uses) + (c.maxUses != null ? ' / ' + fmt(c.maxUses) : '') }),
+              c.expiresAt ? h('span', { text: 'Hạn ' + new Date(c.expiresAt).toLocaleDateString('vi-VN') }) : null,
+              c.note ? h('span', { text: c.note }) : null)));
+        }
+      }
+      $('gc-code').addEventListener('input', () => { const v = cleanCode($('gc-code').value); if (v !== $('gc-code').value) $('gc-code').value = v; });
+      $('gc-money').addEventListener('input', () => { const v = Number($('gc-money').value) || 0; $('gc-money-hint').textContent = v > 0 ? 'Người chơi nhận ' + fmt(v * 1000) + 'đ trong game.' : 'Ví dụ 500 = 500.000đ trong game.'; });
+      $('gc-form').addEventListener('submit', async e => {
+        e.preventDefault();
+        const err = $('gc-error'); err.hidden = true;
+        const code = cleanCode($('gc-code').value), money = Number($('gc-money').value) || 0, xp = Number($('gc-xp').value) || 0;
+        if (code.length < 3) { err.textContent = 'Mã cần ít nhất 3 ký tự.'; err.hidden = false; $('gc-code').focus(); return; }
+        if (!(money > 0 || xp > 0)) { err.textContent = 'Điền tiền tặng hoặc XP tặng.'; err.hidden = false; $('gc-money').focus(); return; }
+        const exp = $('gc-exp').value ? new Date($('gc-exp').value + 'T23:59:59').getTime() : null;
+        $('gc-save').disabled = true;
+        const { error } = await call('POST', '/api/lau?r=admin/codes', { code, game: $('gc-game').value, money, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim() });
+        $('gc-save').disabled = false;
+        if (error) { err.textContent = error.message; err.hidden = false; return; }
+        toast('Đã tạo mã ' + code);
+        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note'].forEach(id => { $(id).value = ''; });
+        $('gc-money-hint').textContent = 'Ví dụ 500 = 500.000đ trong game.';
+        loadCodes();
+      });
 
       // ---------- Dữ liệu ----------
       async function load() {

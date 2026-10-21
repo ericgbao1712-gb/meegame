@@ -7,7 +7,7 @@ import { fmtMoney, fmtDuration, fmtRating } from '../../core/format.js';
 import { frame } from '../modals.js';
 import { showPopover } from '../popover.js';
 import { openLogin } from './rewards.js';
-import { accountPanel, resetProgress } from '../cloud.js';
+import { accountPanel, resetProgress, giftCodePanel } from '../cloud.js';
 import { songPicker } from '../songs.js';
 import { countUp, confettiFor, unlockIcon, unlocksAtLevel, UNLOCK_LABEL, vibrate } from './kit.js';
 
@@ -169,7 +169,8 @@ export function openSettings() {
         div('card set-card',
           span('sl-l', 'Tên quán'),
           div('set-name', name, saveName)),
-        div('card set-card', accountPanel()),   // v2.7 liên kết Gmail
+        div('card set-card', accountPanel()),
+        div('card set-card', giftCodePanel()),   // v1.13 mã quà tặng   // v2.7 liên kết Gmail
         div('card set-card',
           div('set-about', ico('ui_home', 32), div('grow', h('b', null, 'Xoài Lắc Ơi!'), span('muted sm', 'Game quản lý xe xoài lắc pixel. Cảm ơn bạn đã ghé xe nha!'))),
           div('set-soon', span('sl-l', 'Sắp ra mắt'), div('soon-row', C.NEXT_GAMES.map((g) => span('chip jade', ico('ui_star', 16), g))))),

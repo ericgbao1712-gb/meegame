@@ -5,7 +5,46 @@ import { h, div, span, ico, rich, clear } from './dom.js';
 import { ctx, S, G, sfx } from './ctx.js';
 import { POT, ING } from './data.js';
 import { portrait } from './sheets/common.js';
-import { makeOwnerLook } from '../art/index.js';
+import { makeOwnerLook, makeLook, drawTable, drawChar } from '../art/index.js';
+import { loadAtlas, blit } from '../art/assets.js';
+import PROPS from '../art/data/props.js';
+
+// ------------------------------------------------------------------ v2.8 bìa mở đầu (cover)
+// Nền = cổng trường dưới tán phượng đỏ, cánh phượng rơi, xe kính đầy xoài dưới dù sọc, chủ quán đang lắc,
+// hai học trò ngồi bàn nhựa đỏ ăn xoài lắc. Vẽ bằng chính sprite của game (không thêm ảnh mới).
+const COVER_W = 112, COVER_H = 62, COVER_K = 4;     // world px, buffer px per world px (= 2 × DETAIL → sprite px ×2)
+function coverHero() {
+  const cv = h('canvas', { class: 'cv-hero', width: COVER_W * COVER_K, height: COVER_H * COVER_K, 'aria-hidden': 'true' });
+  const g = cv.getContext('2d');
+  const P = loadAtlas('props.png'), F = PROPS.frames;
+  const put = (name, x, y) => { if (F[name]) blit(g, P, F[name], x, y); };
+  const putTop = (name, x, y) => { const f = F[name]; if (f) blit(g, P, f, x, y + (f[5] - 1) / 2); };
+  const owner = makeOwnerLook(0, 1);
+  const guestA = makeLook('sinhvien', 3, 0), guestB = makeLook('sinhvien', 8, 1);
+  const tbl = { x: 84, y: 48 };
+  let raf = 0, t0 = 0;
+  const paint = (t) => {
+    g.setTransform(COVER_K, 0, 0, COVER_K, 0, 0);
+    g.imageSmoothingEnabled = false;
+    g.clearRect(0, 0, COVER_W, COVER_H);
+    drawChar(g, owner, 36, 40, { pose: 'cook', facing: 'left', t });          // đứng sau xe, lắc xoài
+    put('cart_kinh', 28, 52);
+    putTop('umbrella', 30, 4);
+    drawChar(g, guestB, tbl.x, tbl.y - 8, { pose: 'eat', facing: 'down', t: t + 0.4 });
+    drawTable(g, tbl, { pot: true, style: 0, drinks: 2, t });
+    drawChar(g, guestA, tbl.x - 16, tbl.y + 3, { pose: 'eat', facing: 'right', t });
+  };
+  const loop = (ms) => {
+    if (!cv.isConnected && t0) return;
+    if (!t0) t0 = ms;
+    paint((ms - t0) / 1000);
+    if (!ctx.reduced) raf = requestAnimationFrame(loop);
+  };
+  raf = requestAnimationFrame(loop);
+  cv.stop = () => cancelAnimationFrame(raf);
+  return cv;
+}
+const SCENE_URL = new URL('../../assets/scenes/front_vihe.png', import.meta.url).href;
 
 // ------------------------------------------------------------------ pixel pointing hand (no art dependency)
 const HAND = [
@@ -295,7 +334,11 @@ export function createTutorial({ coachRoot }) {
     introOn = true;
     ctx.pauseFor?.('intro');
     const lines = Array.isArray(C.START.intro) ? C.START.intro : [];
-    const el = div('intro');
+    const el = div('intro cover');
+    el.style.setProperty('--cv-scene', `url("${SCENE_URL}")`);
+    // v2.8 bìa: cổng trường + cánh phượng rơi
+    el.append(div('cv-scene'), div('cv-glow'),
+      div('cv-petals', ...Array.from({ length: 14 }, (_, i) => h('i', { style: { '--i': i } }))));
     root.appendChild(el);
     hideCoach();
 
@@ -307,12 +350,14 @@ export function createTutorial({ coachRoot }) {
     };
 
     // ---- stage 1: story
-    const logo = div('in-logo', h('b', null, 'XOÀI LẮC', h('br'), 'ƠI!'), span('in-sub', 'Xe xoài lắc nhà mình'));
+    const logo = div('in-logo', h('b', null, 'XOÀI LẮC', h('br'), 'ƠI!'), span('in-sub', 'Xe xoài lắc nhà mình'),
+      ico('fr_xoai', 48, 'cv-mango l'), ico('fr_coc', 40, 'cv-mango r'));
+    const hero = div('cv-stage', coverHero(), div('cv-shake', h('i'), h('i'), h('i')));
     const mom = div('in-mom', ico('ui_mom', 48));
     const text = h('p', { class: 'in-text' }, '');
     const dots = div('in-dots', ...lines.map(() => h('i')));
     const hint = span('in-hint', 'Chạm để tiếp ▶');
-    const story = div('in-story', logo, div('in-card', mom, text), dots, hint, h('button', { class: 'in-skip', type: 'button' }, 'Bỏ qua ▸'));
+    const story = div('in-story', div('cv-box', logo, hero), div('cv-bottom', div('in-card', mom, text), div('cv-foot', dots, hint)), h('button', { class: 'in-skip', type: 'button' }, 'Bỏ qua ▸'));
     el.appendChild(story);
 
     let li = 0, ci = 0, timer = 0, typing = false;
@@ -339,6 +384,8 @@ export function createTutorial({ coachRoot }) {
     // ---- stage 2: avatar + name
     function toSetup() {
       clearTimeout(timer);
+      try { hero.querySelector('canvas')?.stop?.(); } catch (e) { /* ignore */ }
+      el.classList.add('setup');
       story.remove();
       let pick = 0;
       const cards = C.AVATARS.map((a) => {
@@ -372,6 +419,40 @@ export function createTutorial({ coachRoot }) {
     }
   }
 
+  // ------------------------------------------------------------------ v2.9 trang chào khi vào lại game
+  // Người chơi đã có xe xoài: mỗi lần mở game hiện tranh bìa (cổng trường + xe xoài + học trò) trong khung tròn
+  // như một dĩa xoài lắc, tên game đè lên mép dưới, tên quán + cấp, nút "Bắt đầu chơi". Nằm trên cả màn đăng nhập.
+  function runSplash() {
+    const s = S();
+    try { ctx.pauseFor?.('splash'); } catch (e) { /* ignore */ }
+    const el = div('splash cover');
+    el.style.setProperty('--cv-scene', `url("${SCENE_URL}")`);
+    const heroCv = coverHero();
+    const plate = div('sp-plate', div('sp-win', div('cv-box', div('cv-stage', heroCv, div('cv-shake', h('i'), h('i'), h('i'))))),
+      ico('fr_xoai', 64, 'sp-fruit l'), ico('fr_coc', 48, 'sp-fruit r'));
+    const title = div('sp-title', h('b', null, 'XOÀI LẮC', h('br'), 'ƠI!'), span('sp-sub', 'Xe xoài lắc nhà mình'));
+    const who = span('sp-who', `${s.shopName || C.START.shopName} · Cấp ${s.level || 1} · Ngày ${s.day || 1}`);
+    const btn = h('button', { class: 'sp-play', type: 'button' }, 'Bắt đầu chơi');
+    el.append(div('cv-scene'), div('sp-rays'), div('sp-awning'),
+      div('cv-petals', ...Array.from({ length: 14 }, (_, i) => h('i', { style: { '--i': i } }))),
+      div('sp-col', plate, title, who, btn));
+    (document.getElementById('app') || document.body).appendChild(el);
+    let gone = false;
+    const go = () => {
+      if (gone) return;
+      gone = true;
+      sfx('confirm');
+      try { heroCv.stop?.(); } catch (e) { /* ignore */ }
+      el.classList.add('out');
+      setTimeout(() => el.remove(), 380);
+      try { ctx.resumeFor?.('splash'); } catch (e) { /* ignore */ }
+    };
+    btn.addEventListener('click', go);
+    const onKey = (e) => { if (gone) { document.removeEventListener('keydown', onKey); return; } if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } };
+    document.addEventListener('keydown', onKey);
+    requestAnimationFrame(() => { try { btn.focus({ preventScroll: true }); } catch (e) { /* ignore */ } });
+  }
+
   // ------------------------------------------------------------------ public API
   return {
     boot() {
@@ -379,6 +460,7 @@ export function createTutorial({ coachRoot }) {
         wireEvents();
         const s = S();
         if (!s.started) { runIntro(); return; }
+        runSplash();   // v2.9
         active = true;
         if (!tut().done && (tut().step || 0) < 1) setStep(1);
       } catch (e) { console.error('[tutorial] boot', e); }

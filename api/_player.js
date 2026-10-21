@@ -55,6 +55,28 @@ export function ensureSchema(db) {
         created_at       INTEGER NOT NULL
       )`);
       await db.execute('CREATE INDEX IF NOT EXISTS game_save_backups_pg ON game_save_backups (player_id, game, id)');
+      // v1.13 mã quà tặng (gift code): admin tạo mã, người chơi nhập trong Cài đặt → nhận tiền + XP, mỗi tài khoản 1 lần / mã
+      await db.execute(`CREATE TABLE IF NOT EXISTS gift_codes (
+        code        TEXT PRIMARY KEY,
+        game        TEXT NOT NULL DEFAULT '*',
+        money       REAL NOT NULL DEFAULT 0,
+        xp          REAL NOT NULL DEFAULT 0,
+        max_uses    INTEGER,
+        uses        INTEGER NOT NULL DEFAULT 0,
+        expires_at  INTEGER,
+        disabled    INTEGER NOT NULL DEFAULT 0,
+        note        TEXT,
+        created_at  INTEGER NOT NULL
+      )`);
+      await db.execute(`CREATE TABLE IF NOT EXISTS gift_redemptions (
+        code        TEXT NOT NULL,
+        player_id   INTEGER NOT NULL,
+        game        TEXT NOT NULL,
+        money       REAL NOT NULL DEFAULT 0,
+        xp          REAL NOT NULL DEFAULT 0,
+        created_at  INTEGER NOT NULL,
+        PRIMARY KEY (code, player_id, game)
+      )`);
     })().catch((e) => { schemaReady = null; throw e; });
   }
   return schemaReady;

@@ -9,6 +9,10 @@
 //                                base = updatedAt của bản trên mạng mà máy này đồng bộ lần cuối; khác → 409
 //   POST /api/lau/save/delete                           → xóa quán trên mạng (+ các bản sao lưu) để chơi lại từ đầu
 //   POST /api/lau/auth/unlink                           → hủy liên kết Gmail: xóa quán + bản sao lưu + tài khoản, xóa cookie
+//   POST /api/lau/code/redeem   { code }                → đổi mã quà tặng: { money, xp } (mỗi tài khoản 1 lần / mã / game)
+//   GET  /api/lau/admin/codes              (admin)      → danh sách mã quà tặng
+//   POST /api/lau/admin/codes              (admin)      { code, game, money, xp, maxUses, expiresAt, note } → tạo mã
+//   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   Thêm &g=xoailac để dùng cho game Xoài Lắc (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/players            (admin)      → danh sách người chơi để kiểm tra gian lận
@@ -32,10 +36,15 @@ const RATE_K_PER_SEC = 2500;              // tiền kiếm được tối đa ~2
 const GRACE_SEC = 15 * 60;
 const FIRST_UPLOAD_PER_DAY = 1.5e6;       // lần đầu đưa lên: tối đa ~1,5 tỷ / ngày trong game đã chơi
 const POTS_PER_SEC = 3;
+const FAILS = new Map();                  // v1.13: đếm lần nhập sai mã quà tặng (theo instance function)
 const BOARDS = { level: 'level DESC, xp DESC', money: 'money_earned DESC', pots: 'pots_sold DESC' };
 const BOARD_VALUE = { level: 'level', money: 'money_earned', pots: 'pots_sold' };
 
 const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
+const cleanCode = (c) => String(c || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
+const CODE_MAX_MONEY = 1e7, CODE_MAX_XP = 1e7;   // chặn gõ nhầm số quá lớn
+const codeRow = (r) => ({ code: r.code, game: r.game, money: num(r.money), xp: num(r.xp), maxUses: r.max_uses == null ? null : num(r.max_uses),
+  uses: num(r.uses), expiresAt: r.expires_at == null ? null : num(r.expires_at), disabled: !!num(r.disabled), note: r.note || '', createdAt: num(r.created_at) });
 const cleanName = (s, def = 'Quán Lẩu') => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24) || def;
 
 /** Pulls the leaderboard columns out of a save; null when it is not a playable save (same shape for every game). */
@@ -172,6 +181,46 @@ export default async function handler(req, res) {
       return send(res, 200, { by, rows, me });
     }
 
+    // ── admin: mã quà tặng ──
+    if (path === '/admin/codes' || path.startsWith('/admin/codes/')) {
+      const admin = await getAdminEmail(db, req);
+      if (!admin) return err(res, 401, 'unauthorized', 'Phiên đăng nhập admin đã hết.');
+      if (method === 'GET' && path === '/admin/codes') {
+        const rs = await db.execute('SELECT * FROM gift_codes ORDER BY created_at DESC LIMIT 500');
+        return send(res, 200, { codes: rs.rows.map(codeRow) });
+      }
+      if (method === 'POST' && path === '/admin/codes') {
+        const b = await parseBody(req);
+        const code = cleanCode(b.code);
+        if (code.length < 3) return err(res, 400, 'invalid', 'Mã cần ít nhất 3 ký tự (chữ không dấu, số, - hoặc _).', {}, 'code');
+        const game = ['quanlau', 'xoailac', '*'].includes(b.game) ? b.game : '*';
+        const money = Math.max(0, num(b.money)), xp = Math.max(0, Math.round(num(b.xp)));
+        if (!(money > 0 || xp > 0)) return err(res, 400, 'invalid', 'Mã phải tặng tiền hoặc XP.', {}, 'money');
+        if (money > CODE_MAX_MONEY || xp > CODE_MAX_XP) return err(res, 400, 'invalid', 'Số tiền / XP quá lớn.', {}, 'money');
+        const maxUses = b.maxUses == null || b.maxUses === '' ? null : Math.max(1, Math.floor(num(b.maxUses, 1)));
+        const expiresAt = b.expiresAt ? Math.floor(num(b.expiresAt)) || null : null;
+        const dup = await db.execute({ sql: 'SELECT code FROM gift_codes WHERE code = ?', args: [code] });
+        if (dup.rows.length) return err(res, 409, 'exists', 'Mã này đã có rồi.', {}, 'code');
+        await db.execute({
+          sql: 'INSERT INTO gift_codes (code, game, money, xp, max_uses, uses, expires_at, disabled, note, created_at) VALUES (?, ?, ?, ?, ?, 0, ?, 0, ?, ?)',
+          args: [code, game, money, xp, maxUses, expiresAt, String(b.note || '').slice(0, 120) || null, Date.now()],
+        });
+        const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
+        return send(res, 200, { code: codeRow(rs.rows[0]) });
+      }
+      const m = path.match(/^\/admin\/codes\/([A-Za-z0-9_-]{1,32})$/);
+      if (method === 'POST' && m) {
+        const b = await parseBody(req);
+        const code = cleanCode(m[1]);
+        if (b.delete) { await db.execute({ sql: 'DELETE FROM gift_codes WHERE code = ?', args: [code] }); return send(res, 200, { ok: true }); }
+        if ('disabled' in b) await db.execute({ sql: 'UPDATE gift_codes SET disabled = ? WHERE code = ?', args: [b.disabled ? 1 : 0, code] });
+        const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
+        if (!rs.rows.length) return err(res, 404, 'not_found', 'Không có mã này.');
+        return send(res, 200, { code: codeRow(rs.rows[0]) });
+      }
+      return err(res, 404, 'not_found', 'Không có địa chỉ này.');
+    }
+
     // ── admin: kiểm tra / ẩn người chơi gian lận ──
     if (path === '/admin/players' || path.startsWith('/admin/players/')) {
       const admin = await getAdminEmail(db, req);
@@ -205,6 +254,40 @@ export default async function handler(req, res) {
 
     if (method === 'GET' && path === '/auth/me') {
       return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid, GAME)) });
+    }
+
+    // ── v1.13: đổi mã quà tặng ──
+    if (method === 'POST' && path === '/code/redeem') {
+      const b = await parseBody(req);
+      const code = cleanCode(b.code);
+      if (code.length < 3) return err(res, 400, 'invalid', 'Mã chưa đúng, kiểm tra lại nha.');
+      // chống dò mã: tối đa 10 lần nhập sai / 10 phút / tài khoản (đếm trong bảng giới hạn nhẹ trong bộ nhớ function)
+      const key = pid + ':' + GAME, now = Date.now();
+      const tries = (FAILS.get(key) || []).filter((t) => now - t < 10 * 60e3);
+      if (tries.length >= 10) return err(res, 429, 'too_many', 'Nhập sai nhiều quá, đợi 10 phút rồi thử lại nha.');
+      const fail = (status, code2, msg) => { tries.push(now); FAILS.set(key, tries); return err(res, status, code2, msg); };
+      const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
+      const c = rs.rows[0];
+      if (!c || num(c.disabled) || (c.game !== '*' && c.game !== GAME)) return fail(404, 'not_found', 'Mã không đúng hoặc không dùng được cho game này.');
+      const had = await db.execute({ sql: 'SELECT 1 FROM gift_redemptions WHERE code = ? AND player_id = ? AND game = ?', args: [code, pid, GAME] });
+      if (had.rows.length) return err(res, 409, 'redeemed', 'Bạn đã nhận quà của mã này rồi nha.');
+      if (c.expires_at != null && num(c.expires_at) < now) return fail(410, 'expired', 'Mã này hết hạn rồi.');
+      if (c.max_uses != null && num(c.uses) >= num(c.max_uses)) return fail(410, 'used_up', 'Mã này đã hết lượt dùng.');
+      const upd = await db.execute({
+        sql: 'UPDATE gift_codes SET uses = uses + 1 WHERE code = ? AND disabled = 0 AND (max_uses IS NULL OR uses < max_uses)',
+        args: [code],
+      });
+      if (upd.rowsAffected === 0) return fail(410, 'used_up', 'Mã này đã hết lượt dùng.');
+      try {
+        await db.execute({
+          sql: 'INSERT INTO gift_redemptions (code, player_id, game, money, xp, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+          args: [code, pid, GAME, num(c.money), num(c.xp), now],
+        });
+      } catch (e) {   // nhập 2 lần cùng lúc: lần sau trả lại lượt dùng
+        await db.execute({ sql: 'UPDATE gift_codes SET uses = uses - 1 WHERE code = ?', args: [code] });
+        return err(res, 409, 'redeemed', 'Bạn đã nhận quà của mã này rồi nha.');
+      }
+      return send(res, 200, { ok: true, code, money: num(c.money), xp: num(c.xp) });
     }
 
     // ── v1.10: xóa dữ liệu / hủy liên kết Gmail ──
