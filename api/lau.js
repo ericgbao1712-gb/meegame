@@ -1,4 +1,5 @@
 // Lẩu Ơi! — đăng nhập Google, lưu tiến trình lên mạng, bảng xếp hạng.
+// Gọi bằng /api/lau?r=<đường dẫn>, ví dụ /api/lau?r=auth/google (vercel.json cũng chuyển /api/lau/<đường dẫn> về đây).
 //
 //   POST /api/lau/auth/google   { credential }          → đăng nhập, đặt cookie phiên
 //   GET  /api/lau/auth/me                               → người chơi + thông tin bản lưu trên mạng
@@ -12,10 +13,10 @@
 //
 // Ghi (POST/PUT) phải có header "X-MeeGame: 1": trình duyệt chỉ gửi header lạ từ trang khác sau một lần hỏi CORS,
 // mà API này không trả header CORS nào → trang lạ không giả mạo được yêu cầu (chống CSRF), thêm cookie SameSite=Lax.
-import { getDb, parseBody, getAdminEmail, nowIso } from '../_db.js';
+import { getDb, parseBody, getAdminEmail, nowIso } from './_db.js';
 import {
   ensureSchema, verifyGoogleIdToken, makeSessionCookie, clearSessionCookie, sessionPlayerId, send, err,
-} from '../_player.js';
+} from './_player.js';
 
 const GAME = 'quanlau';
 const MAX_SAVE_BYTES = 400 * 1024;
@@ -89,7 +90,10 @@ async function cloudRow(db, pid, full = false) {
 
 export default async function handler(req, res) {
   const url = new URL(req.url, 'https://' + (req.headers.host || 'localhost'));
-  const path = url.pathname.replace(/\/+$/, '').replace(/^\/api\/lau/, '') || '/';
+  // Một file duy nhất (/api/lau?r=auth/google …): Vercel không chạy file catch-all [...slug].js lồng trong thư mục
+  // với dự án không dùng Next.js → trước đây /api/lau/auth/google trả 404 dạng HTML (lỗi "Đăng nhập chưa được").
+  const r = String(url.searchParams.get('r') || '').replace(/^\/+|\/+$/g, '');
+  const path = r ? '/' + r : (url.pathname.replace(/\/+$/, '').replace(/^\/api\/lau/, '') || '/');
   const method = req.method;
 
   if (method === 'OPTIONS') { res.writeHead(204); return res.end(); }   // không mở CORS cho trang khác

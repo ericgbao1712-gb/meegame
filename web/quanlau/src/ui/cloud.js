@@ -1,7 +1,6 @@
 // v1.8 Đăng nhập Google + lưu tiến trình lên mạng + bảng xếp hạng.
+// v1.8b: BẮT BUỘC đăng nhập để chơi (màn chắn cl-gate). Chỉ khi máy chủ / mạng hỏng mới cho chơi tạm.
 //
-// - Không đăng nhập vẫn chơi bình thường (save trong trình duyệt như cũ). Thư viện Google chỉ được tải khi người
-//   chơi mở phần Tài khoản, hoặc khi máy này đã từng đăng nhập.
 // - Đăng nhập: Google Identity Services trả về "ID token" → POST /api/lau/auth/google → server đặt cookie phiên.
 // - Lúc bấm đăng nhập: quán đang chơi dở được GIỮ NGUYÊN, chơi tiếp và bắt đầu sao lưu lên mạng ngay.
 //   (Chỉ khi máy này chưa có quán nào — màn mở đầu — mới lấy quán từ mạng về.) Nếu quán trên mạng cao hơn quán đang
@@ -34,7 +33,9 @@ async function api(method, path, body, opts = {}) {
   const init = { method, credentials: 'same-origin', headers: {}, keepalive: !!opts.keepalive };
   if (method !== 'GET') { init.headers['X-MeeGame'] = '1'; init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(body || {}); }
   let r;
-  try { r = await fetch(CL.api + path, init); } catch (e) { return { status: 0, json: null }; }
+  const [route, query] = path.replace(/^\//, '').split('?');
+  const href = CL.api + '?r=' + encodeURIComponent(route) + (query ? '&' + query : '');   // một function duy nhất: /api/lau?r=…
+  try { r = await fetch(href, init); } catch (e) { return { status: 0, json: null }; }
   let json = null;
   try { json = await r.json(); } catch (e) { /* not json: no API here */ }
   return { status: r.status, json };
@@ -56,7 +57,7 @@ function loadGis() {
   return gisP;
 }
 let gisInit = false;
-async function renderGoogleButton(box) {
+async function renderGoogleButton(box, { big = false } = {}) {
   try {
     const g = await loadGis();
     if (!gisInit) {
@@ -67,10 +68,10 @@ async function renderGoogleButton(box) {
       gisInit = true;
     }
     box.textContent = '';
-    g.accounts.id.renderButton(box, { type: 'standard', theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', locale: 'vi', width: Math.min(280, Math.max(200, box.clientWidth || 260)) });
+    g.accounts.id.renderButton(box, { type: 'standard', theme: big ? 'filled_blue' : 'outline', size: 'large', text: big ? 'continue_with' : 'signin_with', shape: 'pill', locale: 'vi', logo_alignment: 'left', width: Math.min(big ? 340 : 280, Math.max(200, box.clientWidth || 260)) });
   } catch (e) {
     box.textContent = '';
-    box.appendChild(span('muted sm', 'Chưa tải được nút Google. Kiểm tra mạng rồi mở lại Cài đặt nha.'));
+    box.appendChild(span('muted sm', 'Chưa tải được nút Google. Kiểm tra mạng rồi tải lại trang nha.'));
   }
 }
 
@@ -81,11 +82,12 @@ export async function signIn(credential) {
   const r = await api('POST', '/auth/google', { credential });
   st.busy = false;
   if (r.status !== 200 || !r.json?.player) {
-    st.lastErr = r.json?.message || 'Đăng nhập chưa được, thử lại nha.';
+    st.lastErr = r.json?.message || ('Đăng nhập chưa được (mã lỗi ' + r.status + '), thử lại nha.');
     ctx.toast(st.lastErr, 'bad'); emit(); return;
   }
   st.player = r.json.player; st.cloud = r.json.cloud; st.lastErr = '';
   lsSet(SEEN_KEY, '1');
+  closeGate();
   sfx('confirm');
   ctx.toast('Đã đăng nhập ' + (st.player.email || st.player.name) + '!', 'good', 'ui_check');
   emit();
@@ -97,8 +99,51 @@ export async function signOut() {
   await api('POST', '/auth/logout', {});
   try { window.google?.accounts?.id?.disableAutoSelect?.(); } catch (e) { /* ignore */ }
   st.player = null; st.cloud = null; lsSet(SEEN_KEY, null);
-  ctx.toast('Đã đăng xuất. Quán vẫn được lưu trong máy này nha.', 'info', 'ui_info');
+  ctx.toast('Đã đăng xuất. Đăng nhập lại để chơi tiếp nha.', 'info', 'ui_info');
   emit();
+  ctx.closeModals?.(); ctx.closeSheet?.();
+  openGate();
+}
+
+// ───────────── màn chắn: phải đăng nhập mới chơi tiếp ─────────────
+let gateEl = null;
+export function openGate({ offline = false } = {}) {
+  if (gateEl || st.player) return;
+  try { ctx.pauseFor('gate'); } catch (e) { /* ignore */ }
+  const started = !!S().started;
+  const gbtn = div('cl-gate-g', span('muted sm', 'Đang tải nút Google…'));
+  const errEl = span('bk-err', '');
+  const small = (label, fn) => h('button', { class: 'cl-gate-alt', type: 'button', onclick: () => { sfx('click'); fn(); } }, label);
+  const alts = div('cl-gate-alts',
+    small('Có mã sao lưu? Khôi phục quán cũ ▸', () => {
+      import('./backup.js').then((m) => {
+        const coach = document.getElementById('coach-root');
+        const back = (on) => { gateEl && gateEl.classList.toggle('behind', on); coach && coach.classList.toggle('behind', on); };
+        back(true);
+        if (!m.openRestore({ onClose: () => back(false) })) back(false);
+      });
+    }),
+    offline ? small('Mất mạng? Chơi tạm, đăng nhập sau ▸', () => closeGate()) : null,
+    h('a', { class: 'cl-gate-alt', href: '/privacy', target: '_blank', rel: 'noopener' }, 'Chính sách bảo mật'));
+  const card = div('cl-gate-card',
+    h('b', { class: 'cl-gate-t' }, 'Lẩu Ơi!'),
+    span('cl-gate-s', started
+      ? 'Đăng nhập Google để chơi tiếp. Quán đang chơi được giữ nguyên và tự sao lưu lên mạng.'
+      : 'Đăng nhập Google để bắt đầu. Quán được lưu trên mạng, đổi máy vẫn chơi tiếp.'),
+    gbtn, errEl,
+    offline ? span('bk-err', 'Chưa kết nối được máy chủ MeeGame.') : null,
+    span('muted xs cl-gate-note', 'Game chỉ lấy tên, email, ảnh đại diện để nhận ra bạn. Bảng xếp hạng chỉ hiện tên quán.'),
+    alts);
+  const upd = () => { if (!gateEl) { st.listeners.delete(upd); return; } errEl.textContent = st.busy ? 'Đang đăng nhập…' : (st.lastErr || ''); };
+  st.listeners.add(upd);
+  gateEl = div('cl-gate', card);
+  (document.getElementById('app') || document.body).appendChild(gateEl);
+  requestAnimationFrame(() => renderGoogleButton(gbtn, { big: true }));
+}
+function closeGate() {
+  if (!gateEl) return;
+  gateEl.remove(); gateEl = null;
+  try { ctx.resumeFor('gate'); } catch (e) { /* ignore */ }
 }
 
 // ───────────── sync ─────────────
@@ -214,14 +259,13 @@ export function initCloud(game) {
   game.on('dayEnd', soon);
   game.on('tierUp', soon);
   document.addEventListener('visibilitychange', () => { if (document.hidden && st.player && sigOf(S()) !== st.lastSig) syncNow('hidden'); });
-  // Đã từng đăng nhập trên máy này → hỏi server xem phiên còn không (cookie httpOnly, JS không đọc được).
-  if (lsGet(SEEN_KEY)) {
-    api('GET', '/auth/me').then((r) => {
-      st.ready = true;
-      if (r.status === 200 && r.json?.player) { st.player = r.json.player; st.cloud = r.json.cloud; emit(); reconcile('boot'); }
-      else { if (r.status === 401) lsSet(SEEN_KEY, null); st.offline = r.status === 0; emit(); }
-    });
-  } else st.ready = true;
+  // Phiên đăng nhập nằm trong cookie httpOnly (JS không đọc được) → hỏi server. Chưa đăng nhập → màn chắn.
+  api('GET', '/auth/me').then((r) => {
+    st.ready = true;
+    if (r.status === 200 && r.json?.player) { st.player = r.json.player; st.cloud = r.json.cloud; lsSet(SEEN_KEY, '1'); emit(); reconcile('boot'); return; }
+    if (r.status === 401) { lsSet(SEEN_KEY, null); emit(); openGate(); return; }
+    st.offline = true; emit(); openGate({ offline: true });   // mất mạng / máy chủ lỗi: không khóa người chơi lại
+  });
 }
 
 // ───────────── UI: account panel (Cài đặt + màn mở đầu) ─────────────
@@ -231,7 +275,7 @@ const timeAgo = (ms) => {
   return d < 1 ? 'vừa xong' : d < 60 ? d + ' phút trước' : d < 1440 ? Math.round(d / 60) + ' giờ trước' : new Date(ms).toLocaleDateString('vi-VN');
 };
 
-export function accountPanel({ compact = false } = {}) {
+export function accountPanel({ compact = false, gate = false } = {}) {
   const box = div('cl-acc');
   const add = (...k) => box.append(...k.filter(Boolean));
   const draw = () => {
@@ -239,8 +283,8 @@ export function accountPanel({ compact = false } = {}) {
     if (!st.player) {
       const gbtn = div('cl-gbtn', span('muted sm', 'Đang tải nút Google…'));
       add(
-        div('set-row', ico('ui_heart', 32), div('grow', span('sl-l', 'Lưu quán lên mạng'),
-          span('muted sm', 'Đăng nhập Google để đổi máy vẫn chơi tiếp và lên bảng xếp hạng. Không bắt buộc.'))),
+        gate ? null : div('set-row', ico('ui_heart', 32), div('grow', span('sl-l', 'Tài khoản Google'),
+          span('muted sm', 'Đăng nhập để chơi tiếp, đổi máy vẫn giữ quán và lên bảng xếp hạng.'))),
         gbtn,
         st.lastErr ? span('bk-err', st.lastErr) : null,
         compact ? null : span('muted xs', 'Game chỉ lấy tên, email, ảnh đại diện để nhận ra bạn. Bảng xếp hạng chỉ hiện tên quán. '),

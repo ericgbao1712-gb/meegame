@@ -3,6 +3,10 @@
   "trailingSlash": false,
   "rewrites": [
     {
+      "source": "/api/lau/(.*)",
+      "destination": "/api/lau?r=$1"
+    },
+    {
       "source": "/admin",
       "destination": "/web/admin.html"
     },

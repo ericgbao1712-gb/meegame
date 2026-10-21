@@ -4,7 +4,6 @@ import * as C from '../config.js';
 import { h, div, span, ico, rich, clear } from './dom.js';
 import { ctx, S, G, sfx } from './ctx.js';
 import { openRestore } from './backup.js';
-import { openAccount } from './cloud.js';
 import { POT, ING } from './data.js';
 import { portrait } from './sheets/common.js';
 import { makeOwnerLook } from '../art/index.js';
@@ -379,8 +378,7 @@ export function createTutorial({ coachRoot }) {
         div('av-grid', cards),
         div('in-field', h('label', { class: 'in-lbl' }, 'Đặt tên quán nha'), input, span('in-help', 'Tối đa 24 chữ. Sau này đổi trong Cài đặt cũng được.')),
         go,
-        h('button', { class: 'in-restore', type: 'button', onclick: () => { sfx('click'); root.classList.add('behind'); if (!openRestore({ onClose: () => root.classList.remove('behind') })) root.classList.remove('behind'); } }, 'Có mã sao lưu? Khôi phục quán cũ ▸'),
-        h('button', { class: 'in-restore', type: 'button', onclick: () => { sfx('click'); root.classList.add('behind'); if (!openAccount({ onClose: () => root.classList.remove('behind') })) root.classList.remove('behind'); } }, 'Đã lưu quán trên mạng? Đăng nhập Google ▸'));
+        h('button', { class: 'in-restore', type: 'button', onclick: () => { sfx('click'); root.classList.add('behind'); if (!openRestore({ onClose: () => root.classList.remove('behind') })) root.classList.remove('behind'); } }, 'Có mã sao lưu? Khôi phục quán cũ ▸'));
       el.appendChild(setup);
     }
   }
