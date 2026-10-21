@@ -14,6 +14,7 @@ import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
 import { fmtShort, fmtMoney } from '../core/format.js';
+import { countUp, confettiFor, vibrate } from './screens/kit.js';
 
 const CL = C.CLOUD;
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
@@ -373,7 +374,7 @@ export function openAccount({ onClose } = {}) {
 }
 
 // ───────────── v1.13 mã quà tặng (Cài đặt) ─────────────
-/** Đổi mã trên máy chủ (mỗi tài khoản 1 lần / mã) rồi cộng tiền + XP vào quán và lưu lên mạng luôn. */
+/** Kiểm tra + ghi nhận mã trên máy chủ (mỗi tài khoản 1 lần / mã). Quà CHƯA cộng: openGiftReward() cộng khi bấm "Nhận quà". */
 export async function redeemCode(raw) {
   const code = String(raw || '').trim();
   if (!code) return { ok: false, msg: 'Nhập mã trước nha.' };
@@ -382,13 +383,53 @@ export async function redeemCode(raw) {
   const r = await api('POST', '/code/redeem', { code });
   if (r.status === 0) return { ok: false, msg: 'Mất mạng rồi, thử lại sau nha.' };
   if (r.status !== 200 || !r.json?.ok) return { ok: false, msg: r.json?.message || 'Mã chưa đúng, kiểm tra lại nha.' };
-  const res = ctx.game.act.redeemReward?.(r.json.money, r.json.xp);
-  if (!res || res.ok === false) return { ok: false, msg: res?.msg || 'Chưa nhận được quà, thử lại nha.' };
-  setTimeout(() => upload({ force: true }), 400);
-  const parts = [];
-  if (r.json.money > 0) parts.push(fmtMoney(r.json.money));
-  if (r.json.xp > 0) parts.push(Math.round(r.json.xp).toLocaleString('vi-VN') + ' XP');
-  return { ok: true, msg: 'Nhận quà thành công: +' + parts.join(' và +') + '!' };
+  return { ok: true, gift: { code: r.json.code || code.toUpperCase(), money: Math.max(0, +r.json.money || 0), xp: Math.max(0, +r.json.xp || 0), note: r.json.note || '' } };
+}
+
+const giftText = (g) => [g.money > 0 ? '+' + fmtMoney(g.money) : null, g.xp > 0 ? '+' + Math.round(g.xp).toLocaleString('vi-VN') + ' XP' : null].filter(Boolean).join(' và ');
+
+/** v1.13b: thông báo lớn khi nhập mã đúng — nội dung quà + nút "Nhận quà". Bấm nhận (hoặc đóng bằng bất kỳ cách nào)
+ *  thì mới cộng tiền + XP, đóng luôn Cài đặt, tiền bay về ô tiền, rồi lưu lên mạng. Máy chủ đã ghi nhận mã nên quà không bao giờ mất. */
+export function openGiftReward(gift) {
+  let applied = false;
+  const apply = () => {
+    if (applied) return;
+    applied = true;
+    const res = ctx.game.act.redeemReward?.(gift.money, gift.xp);
+    if (!res || res.ok === false) { ctx.toast(res?.msg || 'Chưa cộng được quà, mở lại game thử nha.', 'bad'); return; }
+    try { if (gift.money > 0) ctx.fx?.coins({ x: window.innerWidth / 2, y: window.innerHeight * 0.45 }, ctx.moneyAnchor?.(), Math.min(gift.money, 5000), () => ctx.flashMoney?.()); } catch (e) { /* ignore */ }
+    ctx.toast('Đã nhận quà ' + giftText(gift) + '!', 'good', 'ui_gift');
+    setTimeout(() => upload({ force: true }), 500);
+  };
+  const handle = ctx.modal({
+    id: 'giftcode', cls: 'celebrate giftcode', priority: 40, queue: false, dismissible: false, sound: 'whoosh',
+    build: (m) => {
+      const rows = [];
+      if (gift.money > 0) {
+        const v = span('num gc-v', fmtMoney(0));
+        setTimeout(() => { if (!m.closed) countUp(v, gift.money, { dur: 1100, fmt: (x) => fmtMoney(Math.round(x)) }); }, 300);
+        rows.push(div('gc-item money', ico('ui_coin', 48), div('gc-t', span('gc-l', 'Tiền'), v)));
+      }
+      if (gift.xp > 0) {
+        const v = span('num gc-v', '0 XP');
+        setTimeout(() => { if (!m.closed) countUp(v, gift.xp, { dur: 1100, fmt: (x) => Math.round(x).toLocaleString('vi-VN') + ' XP' }); }, 450);
+        rows.push(div('gc-item xp', ico('ui_xp', 48), div('gc-t', span('gc-l', 'Kinh nghiệm'), v)));
+      }
+      return div('mbody cel',
+        div('rays on'),
+        div('cel-top', ico('ui_gift', 64), span('cel-kicker', 'MÃ ' + gift.code), h('b', { class: 'cel-title' }, 'QUÀ TẶNG!')),
+        h('p', { class: 'cel-sub gc-note' }, gift.note || 'MeeGame gửi tặng bạn món quà nhỏ. Chơi vui nha!'),
+        div('gc-items', rows),
+        h('button', { class: 'btn red lg block gc-take', onclick: () => { sfx('cash'); m.close('take'); } }, ico('ui_check', 24), 'Nhận quà'));
+    },
+    onClose: () => {
+      // đóng luôn Cài đặt, rồi mới cộng quà (để bảng Lên cấp, nếu có, hiện ra sau cùng)
+      setTimeout(() => { try { ctx.closeModals?.(); ctx.closeSheet?.(); } catch (e) { /* ignore */ } apply(); }, 0);
+    },
+  });
+  if (!handle) { apply(); return null; }
+  try { confettiFor(handle, { count: 90 }); vibrate([30, 50, 30]); } catch (e) { /* ignore */ }
+  return handle;
 }
 
 export function giftCodePanel() {
@@ -402,8 +443,10 @@ export function giftCodePanel() {
     btn.disabled = true; note.textContent = 'Đang kiểm tra mã…'; note.className = 'muted sm';
     const r = await redeemCode(input.value);
     btn.disabled = false;
-    note.textContent = r.msg; note.className = r.ok ? 'cl-gift-ok' : 'bk-err';
-    if (r.ok) { input.value = ''; sfx('cash'); ctx.toast(r.msg, 'good', 'ui_gift'); }
+    if (!r.ok) { note.textContent = r.msg; note.className = 'bk-err'; sfx('error'); return; }
+    input.value = ''; note.textContent = 'Mã đúng! Bấm "Nhận quà" để nhận ' + giftText(r.gift) + '.'; note.className = 'cl-gift-ok';
+    sfx('confirm');
+    openGiftReward(r.gift);
   };
   btn.addEventListener('click', submit);
   input.addEventListener('keydown', (e) => { if (e.key === 'Enter') { e.preventDefault(); submit(); } });

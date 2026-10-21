@@ -1381,3 +1381,14 @@ button.hchip:active { transform: translateY(2px); }
 .cl-gift { display: flex; flex-direction: column; gap: 10px; }
 .cl-gift .tinput { text-transform: uppercase; letter-spacing: .08em; font-weight: 800; }
 .cl-gift-ok { font: 800 13px/1.3 var(--f-body); color: var(--jade-2, #2a8a5c); }
+
+/* v1.13b thông báo lớn khi nhận quà từ mã */
+.giftcode .gc-note { max-width: 30ch; margin: 0 auto; font-size: 15px; color: var(--ink); text-align: center; }
+.gc-items { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+.gc-item { display: flex; align-items: center; gap: 12px; padding: 10px 16px 12px 12px; border-radius: 18px; background: #fff1c6;
+  box-shadow: 0 0 0 2px var(--line), 0 3px 0 2px var(--line), inset 0 -5px 0 0 #f6d57a, inset 0 3px 0 0 rgba(255, 255, 255, .6); }
+.gc-item.xp { background: #e2f3d6; box-shadow: 0 0 0 2px var(--line), 0 3px 0 2px var(--line), inset 0 -5px 0 0 #b9dea0, inset 0 3px 0 0 rgba(255, 255, 255, .6); }
+.gc-t { display: flex; flex-direction: column; align-items: flex-start; min-width: 0; }
+.gc-l { font: 800 12px/1.2 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
+.gc-v { font-size: 30px; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
+.gc-take { gap: 8px; }

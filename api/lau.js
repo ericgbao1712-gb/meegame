@@ -385,7 +385,7 @@ export default async function handler(req, res) {
         await db.execute({ sql: 'UPDATE gift_codes SET uses = uses - 1 WHERE code = ?', args: [code] });
         return err(res, 409, 'redeemed', 'Bạn đã nhận quà của mã này rồi nha.');
       }
-      return send(res, 200, { ok: true, code, money: num(c.money), xp: num(c.xp) });
+      return send(res, 200, { ok: true, code, money: num(c.money), xp: num(c.xp), note: c.note || '' });
     }
 
     // ── v1.10: xóa dữ liệu / hủy liên kết Gmail ──
