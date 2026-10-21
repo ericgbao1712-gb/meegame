@@ -5,7 +5,7 @@
 // The renderer draws into a buffer at DETAIL px per world px with integer world coordinates, so sprites blit 1:1.
 // Everything is wrapped so that unknown ids / a missing atlas never throw (the frame just lacks that sprite).
 import { PAL, BROTH } from './palette.js';
-import { POT_SKINS, TABLE_SKINS } from '../config.js';
+import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES } from '../config.js';
 import { drawIcon } from './icons.js';
 import { loadAtlas, blit, frameCanvas, DETAIL } from './assets.js';
 import PROPS from './data/props.js';
@@ -160,9 +160,13 @@ function signBox(L, level) {
 }
 
 // ─────────────────────────────── v1.18 kiểu nồi / bàn Hộp mù (tô lại màu lúc vẽ) ───────────────────────────────
-let SKIN_POT = null, SKIN_TABLE = null;
-/** renderer gọi mỗi khung hình: skin = id trong C.POT_SKINS / C.TABLE_SKINS hoặc null. */
-export function setSkins(pot, table) { SKIN_POT = POT_SKINS[pot] ? pot : null; SKIN_TABLE = TABLE_SKINS[table] ? table : null; }
+let SKIN_POT = null, SKIN_TABLE = null, SKIN_CHAIR = null;
+/** renderer gọi mỗi khung hình: skin = id trong C.POT_SKINS / C.TABLE_SKINS / C.CHAIR_SKINS hoặc null. */
+let FORM_TABLE = null, FORM_CHAIR = null;
+export function setSkins(pot, table, chair, tform, cform) {
+  SKIN_POT = POT_SKINS[pot] ? pot : null; SKIN_TABLE = TABLE_SKINS[table] ? table : null; SKIN_CHAIR = CHAIR_SKINS[chair] ? chair : null;
+  FORM_TABLE = TABLE_SHAPES[tform] && F['tshape_' + tform] ? tform : null; FORM_CHAIR = CHAIR_SHAPES[cform] && F['cshape_' + cform] ? cform : null;
+}
 const skinCache = new Map();
 function hsv(r, g, b) {
   const mx = Math.max(r, g, b), mn = Math.min(r, g, b), d = mx - mn;
@@ -204,9 +208,13 @@ function recolorCanvas(key, base, skin, mode) {
   skinCache.set(ck, c);
   return c;
 }
-/** put() có áp kiểu bàn (gỗ) khi đang đeo. */
+/** put() có áp kiểu bàn / kiểu ghế khi đang đeo (v1.18h: ghế 'stool*' theo màu ghế, bàn 'table*' theo màu bàn). */
 function putTableSkin(ctx, key, x, y) {
-  const c = SKIN_TABLE ? recolorCanvas(key, null, TABLE_SKINS[SKIN_TABLE], 'wood') : null;
+  const chair = key.startsWith('stool');
+  if (chair && FORM_CHAIR) key = 'cshape_' + FORM_CHAIR;          // v1.18i dáng ghế
+  else if (!chair && FORM_TABLE) key = 'tshape_' + FORM_TABLE;    // v1.18i dáng bàn
+  const sk = chair ? (SKIN_CHAIR && CHAIR_SKINS[SKIN_CHAIR]) : (SKIN_TABLE && TABLE_SKINS[SKIN_TABLE]);
+  const c = sk ? recolorCanvas(key, null, sk, 'wood') : null;
   if (c) putCanvas(ctx, c, F[key], x, y); else put(ctx, key, x, y);
 }
 
@@ -857,10 +865,11 @@ export function skinPreviewURL(kind, id, scale = 3) {
     let url = urlCache.get(key);
     if (url) return url;
     if (!hasDOM || !P.img) return BLANK;
-    const isPot = kind === 'pot', fk = isPot ? 'pot2_t' : 'table2';
-    const skin = isPot ? POT_SKINS[id] : TABLE_SKINS[id], f = F[fk];
-    if (!skin || !f) return BLANK;
-    let src = recolorCanvas(fk, null, skin, isPot ? 'metal' : 'wood');
+    const isPot = kind === 'pot', isForm = kind === 'tform' || kind === 'cform';
+    const fk = isPot ? 'pot2_t' : kind === 'chair' ? 'stool2' : kind === 'tform' ? 'tshape_' + id : kind === 'cform' ? 'cshape_' + id : 'table2';
+    const skin = isPot ? POT_SKINS[id] : kind === 'chair' ? CHAIR_SKINS[id] : kind === 'table' ? TABLE_SKINS[id] : null, f = F[fk];
+    if ((!skin && !isForm) || !f) return BLANK;
+    let src = isForm ? frameCanvas(P, f, 1) : recolorCanvas(fk, null, skin, isPot ? 'metal' : 'wood');
     if (isPot) {   // nồi đang sôi (nước lẩu đỏ) cho dễ nhìn
       const prev = SKIN_POT; SKIN_POT = id; src = potCanvas(fk, 'thai', 2) || src; SKIN_POT = prev;
     }

@@ -15,11 +15,11 @@ const RAR = C.BOX.rar;
 const RCLS = ['', 'r1', 'r2', 'r3', 'r4'];
 const KIND = {
   food: 'Món ăn mới', drink: 'Đồ uống mới', uniform: 'Đồng phục', look: 'Kiểu chủ quán', pot: 'Kiểu nồi lẩu',
-  table: 'Kiểu bàn ghế', deco: 'Đồ trang trí', badge: 'Thẻ thành tích',
+  table: 'Màu bàn', chair: 'Màu ghế', tform: 'Dáng bàn', cform: 'Dáng ghế', deco: 'Đồ trang trí', badge: 'Thẻ thành tích',
 };
 const FILTERS = [
   { id: 'all', label: 'Tất cả' }, { id: 'mon', label: 'Món', kinds: ['food', 'drink'] }, { id: 'ao', label: 'Trang phục', kinds: ['uniform', 'look'] },
-  { id: 'noi', label: 'Nồi & bàn', kinds: ['pot', 'table'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
+  { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
 let curSet = 'hop';   // v1.18e chỉ còn Hộp mù (Túi mù đã gộp vào)
@@ -48,14 +48,14 @@ export function itemPic(it, size = 40) {
       case 'drink': return ico(D.DRINK[it.ref]?.icon || 'drk_trada', size);
       case 'uniform': return img(lookPreviewURL(makeStaffLook('phucvu', 1, it.ref, 'tron'), 2), size, 'bx-look');
       case 'look': return img(lookPreviewURL(makeOwnerLook(it.ref, Math.max(1, S().tier || 1)), 2), size, 'bx-look');
-      case 'pot': case 'table': return img(skinPreviewURL(it.kind, it.ref, 3), size);
+      case 'pot': case 'table': case 'chair': case 'tform': case 'cform': return img(skinPreviewURL(it.kind, it.ref, 3), size);
       case 'deco': return img(decoIconURL(it.ref, Math.max(1, Math.round(size / 24))), size);
       case 'badge': return medal(it, size);
       default: return ico('ui_gift', size);
     }
   } catch (e) { return ico('ui_gift', size); }
 }
-const equipped = (it, bi) => (it.kind === 'badge' && bi.badge === it.id) || (it.kind === 'pot' && bi.pot === it.ref) || (it.kind === 'table' && bi.table === it.ref);
+const equipped = (it, bi) => (it.kind === 'badge' && bi.badge === it.id) || (it.kind === 'pot' && bi.pot === it.ref) || (it.kind === 'table' && bi.table === it.ref) || (it.kind === 'chair' && bi.chair === it.ref) || (it.kind === 'tform' && bi.tform === it.ref) || (it.kind === 'cform' && bi.cform === it.ref);
 
 /** Quán ▸ Giải trí ▸ Hộp mù */
 export function boxView(body, api, set = 'hop') {
@@ -162,7 +162,7 @@ function hintFor(news) {
   if (k.has('food') || k.has('drink')) t.push('Món mới đã lên Thực đơn (món ăn kèm, tráng miệng cần dụng cụ bếp tương ứng).');
   if (k.has('deco')) t.push('Đồ trang trí mới: vào Quán ▸ Trang trí bấm Dùng.');
   if (k.has('uniform') || k.has('look')) t.push('Trang phục mới: vào Nhân viên ▸ Đồng phục.');
-  if (k.has('pot') || k.has('table')) t.push('Kiểu nồi / bàn: chạm vào món trong bộ sưu tập để dùng.');
+  if (k.has('pot') || k.has('table') || k.has('chair') || k.has('tform') || k.has('cform')) t.push('Kiểu nồi / bàn / ghế: chạm vào món trong bộ sưu tập để dùng.');
   if (k.has('badge')) t.push('Thẻ thành tích hiện cạnh tên quán trên bảng xếp hạng.');
   return t.join(' ');
 }
@@ -178,7 +178,7 @@ function openItem(it, api) {
       const rer = () => { m.close('ok'); api.rerender(); };
       const btns = [];
       if (n) {
-        if (['badge', 'pot', 'table'].includes(it.kind)) {
+        if (['badge', 'pot', 'table', 'chair', 'tform', 'cform'].includes(it.kind)) {
           const on = equipped(it, bi);
           btns.push(h('button', { class: 'btn ' + (on ? 'paper' : 'jade') + ' block', type: 'button', onclick: () => { const r = act('equipBox', it.id, !on); if (r.ok !== false) { sfx('confirm'); rer(); } } }, on ? 'Thôi dùng' : it.kind === 'badge' ? 'Đeo lên bảng xếp hạng' : 'Dùng cho cả quán'));
         }
@@ -206,7 +206,10 @@ function describe(it) {
     case 'uniform': return 'Màu đồng phục độc quyền, chọn cho nhân viên hoặc chủ quán.';
     case 'look': return 'Kiểu chủ quán dùng được ngay, không cần đợi tới cấp.';
     case 'pot': return 'Mọi nồi lẩu trên bàn và trên bếp đổi sang kiểu này.';
-    case 'table': return 'Bàn ghế cả quán đổi sang kiểu này.';
+    case 'table': return 'Mọi bàn lẩu trong quán đổi sang màu này (ghế chọn riêng ở Màu ghế).';
+    case 'chair': return 'Mọi ghế ngồi quanh bàn đổi sang màu này (bàn chọn riêng ở Màu bàn).';
+    case 'tform': return 'Mọi bàn trong quán đổi sang dáng này. Dùng chung được với Màu bàn.';
+    case 'cform': return 'Mọi ghế quanh bàn đổi sang dáng này. Dùng chung được với Màu ghế.';
     case 'deco': { const d = C.DECO.find((x) => x.id === it.ref); return `Trang trí ${C.DECO_CATS.find((c) => c.id === d?.cat)?.name.toLowerCase() || ''}, không khí +${d?.amb || 0}.` + (d?.desc ? ' ' + d.desc : ''); }
     case 'badge': return 'Thẻ thành tích: đeo lên là hiện cạnh tên quán trên bảng xếp hạng.';
     default: return '';

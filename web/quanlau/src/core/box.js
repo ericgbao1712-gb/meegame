@@ -21,6 +21,9 @@ export function boxState(s) {
   if (b.badge && !C.badgeOf(b.badge)) b.badge = null;
   if (b.pot && !C.POT_SKINS[b.pot]) b.pot = null;           // kiểu nồi đang dùng (ref trong C.POT_SKINS)
   if (b.table && !C.TABLE_SKINS[b.table]) b.table = null;   // kiểu bàn đang dùng
+  if (b.chair && !C.CHAIR_SKINS[b.chair]) b.chair = null;   // v1.18h kiểu ghế đang dùng
+  if (b.tform && !C.TABLE_SHAPES[b.tform]) b.tform = null;  // v1.18i dáng bàn / dáng ghế
+  if (b.cform && !C.CHAIR_SHAPES[b.cform]) b.cform = null;
   if (!Array.isArray(b.log)) b.log = [];                  // 20 món gần nhất
   // v1.18e gộp Túi mù vào Hộp mù: số túi đã mở / tiền đã chi cộng dồn vào Hộp mù (một lần)
   if (b.tui && typeof b.tui === 'object') {
@@ -64,6 +67,9 @@ function grant(G, item) {
     if (item.kind === 'badge' && !b.badge) b.badge = item.id;   // thẻ đầu tiên tự đeo luôn
     if (item.kind === 'pot' && !b.pot) b.pot = item.ref;          // kiểu nồi / bàn đầu tiên tự dùng luôn
     if (item.kind === 'table' && !b.table) b.table = item.ref;
+    if (item.kind === 'chair' && !b.chair) b.chair = item.ref;
+    if (item.kind === 'tform' && !b.tform) b.tform = item.ref;
+    if (item.kind === 'cform' && !b.cform) b.cform = item.ref;
     if (item.kind === 'deco' && s.deco && Array.isArray(s.deco.owned) && !s.deco.owned.includes(item.ref)) s.deco.owned.push(item.ref);
   }
   return { id: item.id, r: item.r, dup, shards };
@@ -120,7 +126,7 @@ export function exchangeBox(G, id) {
 /** Dùng / bỏ một món đeo được: thẻ thành tích (bảng xếp hạng), kiểu nồi, kiểu bàn. on=false để bỏ. */
 export function equipBox(G, id, on = true) {
   const b = boxState(G.state), it = C.BOX_ITEM[id];
-  if (!it || !['badge', 'pot', 'table'].includes(it.kind)) return fail('unknown', 'Món này không đeo được.');
+  if (!it || !['badge', 'pot', 'table', 'chair', 'tform', 'cform'].includes(it.kind)) return fail('unknown', 'Món này không đeo được.');
   if (!(b.got[id] > 0)) return fail('locked', 'Chưa có món này, rút Hộp mù để nhận nha.');
   const key = it.kind === 'badge' ? 'badge' : it.kind, val = it.kind === 'badge' ? id : it.ref;
   b[key] = on ? val : null;
@@ -140,6 +146,6 @@ export function boxInfo(G, set = 'hop') {
     freeLeft: b.freeDay === s.day ? 0 : 1, shards: all.shards, opened: b.opened, owned, total,
     rareIn: Math.max(1, P.pityRare - b.sinceRare), epicIn: Math.max(1, (P.pityEpic || 0) - b.sinceEpic), mystIn: Math.max(1, P.pityMyst - b.sinceMyst),
     rareAt: b.sinceRare, epicAt: b.sinceEpic, mystAt: b.sinceMyst,
-    got: Object.assign({}, all.got), badge: all.badge || null, pot: all.pot || null, table: all.table || null, spent: b.spent,
+    got: Object.assign({}, all.got), badge: all.badge || null, pot: all.pot || null, table: all.table || null, chair: all.chair || null, tform: all.tform || null, cform: all.cform || null, spent: b.spent,
   };
 }

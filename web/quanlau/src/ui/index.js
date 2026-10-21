@@ -44,6 +44,14 @@ export function mountUI(game, { renderer, audio } = {}) {
   const fxRoot = ensure('fx-root', app);
   const coachRoot = ensure('coach-root', app);
   const popRoot = ensure('pop-root', app);
+  // v1.18h: bảng (sheet) kết thúc đúng mép trên thanh menu dưới — đo chiều cao thật thay cho 62px cố định
+  // (trên iPhone thanh menu cao hơn vài px nên thẻ cuối trong bảng bị các nút che mất mép dưới)
+  try {
+    const fitNav = () => { const h = nav.offsetHeight; if (h > 30) app.style.setProperty('--nav-h', h + 'px'); };
+    fitNav();
+    if (typeof ResizeObserver !== 'undefined') new ResizeObserver(fitNav).observe(nav);
+    window.addEventListener('resize', fitNav);
+  } catch (e) { /* giữ giá trị CSS */ }
   ctx.el = { app, hud, wrap, sceneUi, dock, nav, sheetRoot, modalRoot, toastRoot, fxRoot, coachRoot, pop: popRoot };
   window.matchMedia?.('(prefers-reduced-motion: reduce)')?.addEventListener?.('change', (e) => { ctx.reduced = e.matches; });
 

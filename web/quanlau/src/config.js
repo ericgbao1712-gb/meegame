@@ -964,12 +964,30 @@ export const BOX = {
     { id: 'bx_p_gomxanh',  r: 2, kind: 'pot', ref: 'gomxanh',  name: 'Nồi lẩu gốm hoa văn xanh' },
     { id: 'bx_p_menngoc',  r: 3, kind: 'pot', ref: 'menngoc',  name: 'Nồi lẩu men ngọc' },
     { id: 'bx_p_hoanggia', r: 4, kind: 'pot', ref: 'hoanggia', name: 'Nồi Lẩu Hoàng Gia' },
-    // kiểu bàn ghế (đeo 1 kiểu cho cả quán)
+    // kiểu BÀN (mặt bàn + chân bàn, đeo 1 kiểu cho cả quán)
     { id: 'bx_t_gosang',   r: 1, kind: 'table', ref: 'gosang',   name: 'Bàn lẩu gỗ sáng' },
     { id: 'bx_t_mattrang', r: 1, kind: 'table', ref: 'mattrang', name: 'Bàn lẩu mặt trắng' },
     { id: 'bx_t_matda',    r: 2, kind: 'table', ref: 'matda',    name: 'Bàn lẩu mặt đá' },
     { id: 'bx_t_occho',    r: 3, kind: 'table', ref: 'occho',    name: 'Bàn lẩu gỗ óc chó' },
     { id: 'bx_t_ngurthien', r: 4, kind: 'table', ref: 'ngurthien', name: 'Bàn Lẩu Ngự Thiện' },
+    // v1.18h kiểu GHẾ (đẩu ngồi quanh bàn, đeo 1 kiểu cho cả quán)
+    { id: 'bx_g_gosang',   r: 1, kind: 'chair', ref: 'gosang',   name: 'Ghế gỗ sáng' },
+    { id: 'bx_g_trang',    r: 1, kind: 'chair', ref: 'trang',    name: 'Ghế nhựa trắng' },
+    { id: 'bx_g_xanhla',   r: 1, kind: 'chair', ref: 'xanhla',   name: 'Ghế nhựa xanh lá' },
+    { id: 'bx_g_xanhduong', r: 2, kind: 'chair', ref: 'xanhduong', name: 'Ghế nhựa xanh dương' },
+    { id: 'bx_g_hong',     r: 2, kind: 'chair', ref: 'hong',     name: 'Ghế hồng pastel' },
+    { id: 'bx_g_occho',    r: 3, kind: 'chair', ref: 'occho',    name: 'Ghế gỗ óc chó' },
+    { id: 'bx_g_vang',     r: 4, kind: 'chair', ref: 'vang',     name: 'Ghế Rồng Vàng' },
+    // v1.18i DÁNG bàn / ghế (đeo 1 dáng cho cả quán, kết hợp được với màu)
+    { id: 'bx_tf_tron',   r: 1, kind: 'tform', ref: 'tron',   name: 'Bàn tròn một chân' },
+    { id: 'bx_tf_tre',    r: 1, kind: 'tform', ref: 'tre',    name: 'Bàn tre' },
+    { id: 'bx_tf_kinh',   r: 2, kind: 'tform', ref: 'kinh',   name: 'Bàn mặt kính chân sắt' },
+    { id: 'bx_tf_bepam',  r: 3, kind: 'tform', ref: 'bepam',  name: 'Bàn lẩu bếp âm' },
+    { id: 'bx_cf_tre',    r: 1, kind: 'cform', ref: 'tre',    name: 'Ghế đẩu tre' },
+    { id: 'bx_cf_dem',    r: 1, kind: 'cform', ref: 'dem',    name: 'Ghế có đệm' },
+    { id: 'bx_cf_tua',    r: 2, kind: 'cform', ref: 'tua',    name: 'Ghế tựa lưng' },
+    { id: 'bx_cf_tuadem', r: 3, kind: 'cform', ref: 'tuadem', name: 'Ghế tựa lưng có đệm' },
+    { id: 'bx_cf_banh',   r: 4, kind: 'cform', ref: 'banh',   name: 'Ghế bành nhung' },
     // đồ trang trí (vào Quán ▸ Trang trí bấm Dùng)
     { id: 'bx_d_clock',    r: 1, kind: 'deco', ref: 'tuong_clock',   name: 'Đồng hồ treo tường' },
     { id: 'bx_d_bangmon',  r: 1, kind: 'deco', ref: 'tuong_bangmon', name: 'Bảng ghi món trong ngày' },
@@ -1043,6 +1061,30 @@ export const POT_SKINS = {
   gomxanh:  { name: 'Nồi lẩu gốm hoa văn xanh', h: 214, s: 0.5, v: 1.05, dots: '#ffffff' },
   menngoc:  { name: 'Nồi lẩu men ngọc',      h: 160, s: 0.35, v: 1.1 },
   hoanggia: { name: 'Nồi Lẩu Hoàng Gia',     h: 46,  s: 0.8, v: 1.2, dots: '#fff6c8' },
+};
+// v1.18h: màu GHẾ tách riêng khỏi màu BÀN (owner: "chỉ mới có màu ghế, tạo thêm cả màu bàn")
+export const CHAIR_SKINS = {
+  gosang:   { name: 'Ghế gỗ sáng',          h: 36,  s: 0.42, v: 1.22 },
+  trang:    { name: 'Ghế nhựa trắng',       h: 35,  s: 0.05, v: 1.45 },
+  xanhla:   { name: 'Ghế nhựa xanh lá',     h: 110, s: 0.6,  v: 1.0 },
+  xanhduong: { name: 'Ghế nhựa xanh dương', h: 212, s: 0.65, v: 1.0 },
+  hong:     { name: 'Ghế hồng pastel',      h: 340, s: 0.38, v: 1.25 },
+  occho:    { name: 'Ghế gỗ óc chó',        h: 20,  s: 0.5,  v: 0.62 },
+  vang:     { name: 'Ghế Rồng Vàng',        h: 46,  s: 0.85, v: 1.15 },
+};
+// v1.18i DÁNG bàn / ghế (vẽ riêng, art: tshape_* / cshape_*) — dùng chung được với màu bàn / màu ghế
+export const TABLE_SHAPES = {
+  tron:  { name: 'Bàn tròn một chân' },
+  tre:   { name: 'Bàn tre' },
+  kinh:  { name: 'Bàn mặt kính chân sắt' },
+  bepam: { name: 'Bàn lẩu bếp âm' },
+};
+export const CHAIR_SHAPES = {
+  tre:    { name: 'Ghế đẩu tre' },
+  dem:    { name: 'Ghế có đệm' },
+  tua:    { name: 'Ghế tựa lưng' },
+  tuadem: { name: 'Ghế tựa lưng có đệm' },
+  banh:   { name: 'Ghế bành nhung' },
 };
 export const TABLE_SKINS = {
   gosang:   { name: 'Bàn lẩu gỗ sáng',      h: 36,  s: 0.42, v: 1.22 },

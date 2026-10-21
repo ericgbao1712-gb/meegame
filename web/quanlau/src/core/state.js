@@ -58,7 +58,7 @@ export function defaultState(now = Date.now()) {
     viral: { days: 0, mult: 1 }, boost: 1, nextBoost: 1,   // boost = today's TikToker bonus, nextBoost = tomorrow's
     reservations: [],
     lottery: { tickets: 0, bets: 0, list: [], results: {}, nextId: 1 },   // v1.15 vé có số + đoán số
-    box: { got: {}, shards: 0, opened: 0, sinceRare: 0, sinceEpic: 0, sinceMyst: 0, freeDay: 0, spent: 0, badge: null, pot: null, table: null, log: [] },   // v1.18 Hộp mù
+    box: { got: {}, shards: 0, opened: 0, sinceRare: 0, sinceEpic: 0, sinceMyst: 0, freeDay: 0, spent: 0, badge: null, pot: null, table: null, chair: null, tform: null, cform: null, log: [] },   // v1.18 Hộp mù
     quests: { main: 0, mainClaimable: false, daily: { day: 0, list: [], allClaimed: false }, counters: {} },
     login: { lastDate: '', streak: 0, claimedDate: null },
     book: { kinds },

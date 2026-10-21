@@ -1681,3 +1681,5 @@ button.hchip:active { transform: translateY(2px); }
 .bx-pitys .bx-pity { padding: 7px 12px; }
 .seg-row.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 .fun-seg.three .seg { font-size: 12px; gap: 4px; }
+/* v1.18h: chừa thêm chỗ dưới cùng bảng để thẻ cuối không sát / lẫn vào thanh menu */
+.sbody-inner { padding-bottom: calc(26px + var(--sab, 0px)); }
