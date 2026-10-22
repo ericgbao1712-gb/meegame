@@ -8,7 +8,7 @@
 // drawn with blit() at a world position lands 1:1 on buffer pixels (crisp, no resampling).
 // Keep DETAIL in sync with `DETAIL` in src/render/renderer.js.
 export const DETAIL = 2;
-export const ASSET_VER = 'l23b';   // v1.18n: icons.png + props.png có thêm khung mới (Hộp mù) — PHẢI tăng khi đổi PNG
+export const ASSET_VER = 'l23c';   // v1.18n: icons.png + props.png có thêm khung mới (Hộp mù) — PHẢI tăng khi đổi PNG
 /** khung có nằm trong ảnh đã tải không (ảnh cũ trong bộ nhớ đệm + dữ liệu khung mới → Safari báo lỗi drawImage) */
 export const frameOk = (rec, f) => !!(rec && rec.img && f) && f[0] + f[2] <= (rec.img.naturalWidth || rec.img.width) && f[1] + f[3] <= (rec.img.naturalHeight || rec.img.height);
 
