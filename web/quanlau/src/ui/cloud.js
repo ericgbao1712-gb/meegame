@@ -377,12 +377,12 @@ export function accountPanel({ compact = false, gate = false } = {}) {
         h('button', { class: 'btn jade sm', onclick: async (e) => {
           sfx('click');
           const b = e.currentTarget;
-          const data = await pickSquareImage(160);
+          const data = await pickSquareImage(384);
           if (!data) return;
           if (b) b.disabled = true;
           const r = await api('POST', '/admin-pic', { image: data });
           if (b) b.disabled = false;
-          if (r.status !== 200) { ctx.toast(r.json?.message || 'Chưa đổi được ảnh, thử lại nha.', 'bad'); return; }
+          if (r.status !== 200) { ctx.toast(r.json?.message || (r.status === 413 ? 'Ảnh lớn quá, chọn ảnh khác nha.' : 'Chưa đổi được ảnh, thử lại nha.'), 'bad'); return; }
           st.player.adminPic = r.json.adminPic || data; for (const k in boardCache) delete boardCache[k];
           ctx.toast('Đã đổi ảnh khung admin!', 'good', 'ui_check'); emit(); draw();
         } }, ico('ui_heart', 16), 'Đổi ảnh khung admin'),

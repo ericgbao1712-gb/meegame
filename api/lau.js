@@ -366,7 +366,7 @@ export default async function handler(req, res) {
       if (!isAdminPlayerEmail(p.email)) return err(res, 403, 'forbidden', 'Chỉ tài khoản admin mới đổi được ảnh này.');
       const b = await parseBody(req);
       const img = b && b.image == null ? null : String((b && b.image) || '');
-      if (img !== null && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 150000)) return err(res, 400, 'bad_image', 'Ảnh không hợp lệ hoặc quá lớn (tối đa ~100KB).');
+      if (img !== null && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 1500000)) return err(res, 400, 'bad_image', 'Ảnh không hợp lệ hoặc quá lớn (tối đa ~1MB sau khi nén).');   // v1.25d nâng giới hạn ~100KB → ~1MB
       await db.execute({ sql: 'UPDATE players SET admin_pic = ? WHERE id = ?', args: [img, pid] });
       return send(res, 200, { ok: true, adminPic: img || '' });
     }

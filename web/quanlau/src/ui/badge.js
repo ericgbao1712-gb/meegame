@@ -47,7 +47,7 @@ export function adminFrame(inner, { size = 44 } = {}) {
   return el;
 }
 /** chọn ảnh từ máy → cắt vuông giữa, thu nhỏ size×size, nén JPEG → data URL (null nếu bỏ chọn / lỗi) */
-export function pickSquareImage(size = 160) {
+export function pickSquareImage(size = 384) {   // v1.25d ảnh nét hơn (384×384)
   return new Promise((resolve) => {
     const inp = document.createElement('input');
     inp.type = 'file'; inp.accept = 'image/*';
@@ -61,8 +61,8 @@ export function pickSquareImage(size = 160) {
           const g = c.getContext('2d'), m = Math.min(im.naturalWidth, im.naturalHeight);
           g.imageSmoothingQuality = 'high';
           g.drawImage(im, (im.naturalWidth - m) / 2, (im.naturalHeight - m) / 2, m, m, 0, 0, size, size);
-          let q = 0.86, out = c.toDataURL('image/jpeg', q);
-          while (out.length > 140000 && q > 0.4) { q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+          let q = 0.92, out = c.toDataURL('image/jpeg', q);
+          while (out.length > 1400000 && q > 0.5) { q -= 0.08; out = c.toDataURL('image/jpeg', q); }   // v1.25d tối đa ~1MB
           resolve(out);
         } catch (e) { resolve(null); }
         URL.revokeObjectURL(url);
