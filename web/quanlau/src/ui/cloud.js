@@ -385,7 +385,7 @@ export function accountPanel({ compact = false, gate = false } = {}) {
           if (r.status !== 200) { ctx.toast(r.json?.message || (r.status === 413 ? 'Ảnh lớn quá, chọn ảnh khác nha.' : 'Chưa đổi được ảnh, thử lại nha.'), 'bad'); return; }
           st.player.adminPic = r.json.adminPic || data; for (const k in boardCache) delete boardCache[k];
           ctx.toast('Đã đổi ảnh khung admin!', 'good', 'ui_check'); emit(); draw();
-        } }, ico('ui_heart', 16), 'Đổi ảnh khung admin'),
+        } }, 'Đổi ảnh khung'),
         p.adminPic ? h('button', { class: 'btn paper sm', onclick: async () => {
           sfx('click');
           const r = await api('POST', '/admin-pic', { image: null });
