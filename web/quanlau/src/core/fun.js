@@ -70,16 +70,17 @@ export function funRate(G, id) {
   return r;
 }
 
+// v1.20b lên lầu karaoke bằng cầu thang chung của quán (giữa quán ăn và khu giải trí), không còn cầu thang riêng
 function pathIn(G, id, spot, startX) {
   const N = G.world.layout.fun.nav, pts = [{ x: startX, y: N.walkY }, { x: N.gateX, y: N.walkY }, { x: N.gateX, y: N.inY }];
-  if (fl(id) === 2) { pts.push({ x: N.stairX, y: N.inY }, { x: N.stairX, y: N.stairBot }, { x: N.stairX, y: N.stairTop }, { x: N.stairX, y: N.upY }); pts.push({ x: spot.x, y: N.upY }); }
+  if (fl(id) === 2) { for (const p of N.up) pts.push({ x: p[0], y: p[1] }); pts.push({ x: spot.x, y: N.upY }); }
   else pts.push({ x: spot.x, y: N.inY });
   pts.push({ x: spot.x, y: spot.y });
   return pts;
 }
 function pathOut(G, id, a, endX) {
   const N = G.world.layout.fun.nav, pts = [{ x: a.x, y: a.y }];
-  if (fl(id) === 2) pts.push({ x: a.x, y: N.upY }, { x: N.stairX, y: N.upY }, { x: N.stairX, y: N.stairTop }, { x: N.stairX, y: N.stairBot }, { x: N.stairX, y: N.inY });
+  if (fl(id) === 2) { pts.push({ x: a.x, y: N.upY }); for (let i = N.up.length - 1; i >= 0; i--) pts.push({ x: N.up[i][0], y: N.up[i][1] }); }
   else pts.push({ x: a.x, y: N.inY });
   pts.push({ x: N.gateX, y: N.inY }, { x: N.gateX, y: N.walkY }, { x: endX, y: N.walkY });
   return pts;

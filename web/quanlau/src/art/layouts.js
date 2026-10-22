@@ -167,14 +167,15 @@ const LAYOUTS = {
       waiters: [{ x: -50, y: 247 }, { x: -50, y: 86 }], view: [-100, 292], leftOnly: true },
     // v1.19 phòng giải trí bên phải: vùng trong phòng (world px) theo tầng, khách tham quan đứng / ngồi khi quán mở
     fun: {
-      rooms: { 1: { x0: 201, x1: 304, y0: 186, y1: 295 }, 2: { x0: 201, x1: 304, y0: 16, y1: 136 } },
+      rooms: { 1: { x0: 189, x1: 304, y0: 186, y1: 295 }, 2: { x0: 189, x1: 304, y0: 16, y1: 136 } },
       view: 312,
       // v1.20 khách mua vé: đi vỉa hè → cổng riêng → (cầu thang bên phải lên lầu) → chỗ chơi
-      nav: { spawnR: 344, spawnL: -124, walkY: 326, gateX: 274, inY: 282, stairX: 297, stairBot: 280, stairTop: 132, upY: 124,
-        hide: { x0: 288, x1: 306, y0: 136, y1: 198 } },
+      nav: { spawnR: 344, spawnL: -124, walkY: 326, gateX: 274, inY: 282, upY: 124,
+        up: [[186, 282], [178, 258], [178, 198], [160, 148], [194, 128]],   // cầu thang chung của quán (stairs.bottom → via → top) rồi sang lầu karaoke
+        hide: { x0: 165, x1: 192, y0: 149, y1: 199 } },
       spots: {
         1: [{ x: 238, y: 232, pose: 'cheer', need: 'gt_phong' }, { x: 249, y: 232, pose: 'cheer', need: 'gt_phong' },
-          { x: 244, y: 258, facing: 'up' }, { x: 274, y: 262, facing: 'up', need: 'gt_mayanh' }, { x: 226, y: 288, pose: 'cheer', need: 'gt_gapthu' },
+          { x: 244, y: 258, facing: 'up' }, { x: 288, y: 262, facing: 'up', need: 'gt_mayanh' }, { x: 226, y: 288, pose: 'cheer', need: 'gt_gapthu' },
           { x: 218, y: 262, facing: 'left' }, { x: 258, y: 276, facing: 'up' }, { x: 230, y: 250, facing: 'right' }],
         2: [{ x: 246, y: 72, pose: 'cheer', need: 'gt_sankhau' }, { x: 224, y: 110, pose: 'sit', need: 'gt_sofa', sortY: 113 }, { x: 240, y: 110, pose: 'sit', need: 'gt_sofa', sortY: 113 },
           { x: 262, y: 100, pose: 'cheer' }, { x: 276, y: 112, pose: 'cheer' }, { x: 256, y: 122, facing: 'up' }, { x: 270, y: 124, pose: 'sit', need: 'gt_gheluoi' },
