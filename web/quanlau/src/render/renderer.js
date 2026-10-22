@@ -21,6 +21,7 @@ const TAP_PX = 6;                 // CSS px: below this a press is a tap, above 
 const SLOP = 8;                   // generous world-px hit slop (§7)
 
 // y-sort entry kinds
+const funLooks = [], funDraws = [], funOpts = {};
 const K_DRAW = 0, K_TABLE = 1, K_STOVE = 2, K_ACTOR = 3, K_COINS = 4, K_PED = 5, K_VEH = 6;
 
 export function createRenderer(canvas, game) {
@@ -489,7 +490,7 @@ export function createRenderer(canvas, game) {
     env.t = time; env.clock = s.clock; env.day = s.day; env.weather = wxNow; env.event = s.event; env.tier = s.tier;
     setSkins(s.box && s.box.pot, s.box && s.box.table, s.box && s.box.chair, s.box && s.box.tform, s.box && s.box.cform);
     setSitLift(sitLiftFor(s.upgrades.tablestyle, s.box && s.box.cform));   // v1.18q dáng ngồi theo ghế   // v1.18 kiểu nồi / bàn Hộp mù
-    env.layout = L; env.up = s.upgrades; env.deco = s.deco.equipped; env.decoMore = s.deco.more || []; env.open = s.phase === 'open' || s.phase === 'closing';
+    env.layout = L; env.up = s.upgrades; env.deco = s.deco.equipped; env.decoMore = s.deco.more || []; env.fun = s.deco.fun || []; env.funLevel = L.funLevel | 0; env.funAvail = s.tier >= 4; env.open = s.phase === 'open' || s.phase === 'closing';
     env.shopName = s.shopName; env.city = s.location;   // v1.7 dời quán
     { // v1.2: the equipped lamp lights the whole shop — a little by day (CSS brightness), more at night (drawLighting)
       const den = DECO.find((d) => d.id === s.deco.equipped.den);
@@ -509,6 +510,21 @@ export function createRenderer(canvas, game) {
     poolN = 0; list.length = 0;
     const drawables = sceneDrawables(s.tier, env);
     if (drawables) for (let i = 0; i < drawables.length; i++) push(K_DRAW, drawables[i].y, drawables[i]);
+    // v1.19 khách chơi phòng giải trí (chỉ khi quán mở, tầng đó đã mở, có món cần)
+    if (L.fun && env.open && env.funLevel > 0) {
+      const placed = env.fun;
+      for (let i = 0; i < L.fun.npcs.length; i++) {
+        const n = L.fun.npcs[i];
+        if (n.floor > env.funLevel || (n.need && !placed.includes(n.need))) continue;
+        if (!funLooks[i]) funLooks[i] = makeLook(n.kind, n.seed, n.idx);
+        const d = funDraws[i] || (funDraws[i] = { y: 0, draw: (ctx) => {
+          funOpts.pose = n.pose; funOpts.facing = n.facing; funOpts.alpha = 1; funOpts.carry = null; funOpts.t = time + i * 0.61;
+          drawChar(ctx, funLooks[i], n.x, n.y, funOpts);
+        } });
+        d.y = n.sortY != null ? n.sortY : n.y;
+        push(K_DRAW, d.y, d);
+      }
+    }
     for (let i = 0; i < w.tables.length; i++) {
       const t = w.tables[i];
       push(K_TABLE, t.y, t);

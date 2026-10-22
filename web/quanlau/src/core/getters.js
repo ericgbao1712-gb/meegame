@@ -48,6 +48,7 @@ export function createGetters(G) {
 
   // ───────────── upgrades ─────────────
   function levelNames(up) {
+    if (up.levelsHaitang && (G.state.tier || 1) >= 4) return up.levelsHaitang;   // v1.19
     if (up.levels) return up.levels;
     if (GENERIC_NAMES[up.id]) return GENERIC_NAMES[up.id];
     return null;

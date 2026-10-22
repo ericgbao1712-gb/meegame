@@ -1,7 +1,7 @@
 // Main quests, daily tasks, chests, login streak, reviews (TECH_SPEC §6.13).
 import * as C from '../config.js';
 import { clamp, dateKey, prevDateKey } from './util.js';
-import { addMoney, addXp, addStock, featureUnlocked, isPotUnlocked, isIngUnlocked, khoInfo, DECO_BY_ID } from './economy.js';
+import { addMoney, addXp, addStock, featureUnlocked, isPotUnlocked, isIngUnlocked, khoInfo, DECO_BY_ID, funPlaced } from './economy.js';
 
 const fail = (reason, msg) => ({ ok: false, reason, msg });
 const DAILY_BY_ID = Object.fromEntries(C.DAILY_POOL.map((d) => [d.id, d]));
@@ -50,8 +50,10 @@ export function mainProgress(G, q) {
     case 'combo': return s.combo.best;
     case 'dessertsSold': return s.stats.dessertsSold || 0;
     case 'sidesSold': return s.stats.sidesSold || 0;
+    case 'funPlaced': return funPlaced(s).length;   // v1.19
     default:
       if (t.startsWith('potsSoldOf:')) return s.stats.potsSoldOf[t.slice(11)] || 0;
+      if (t.startsWith('upgLvl:')) return s.upgrades[t.slice(7)] || 0;   // v1.19 cấp nâng cấp hiện có (save cũ đã mua vẫn tính)
       return s.quests.counters[t] || 0;
   }
 }
@@ -155,6 +157,7 @@ function giveDeco(G, id) {
   const s = G.state, d = DECO_BY_ID[id];
   if (!d) return null;
   if (!s.deco.owned.includes(id)) s.deco.owned.push(id);
+  if (d.fun) { if (!Array.isArray(s.deco.fun)) s.deco.fun = []; if (!s.deco.fun.includes(id)) s.deco.fun.push(id); G.modsDirty = true; return id; }   // v1.19 bày luôn vào phòng
   const cur = DECO_BY_ID[s.deco.equipped[d.cat]];
   if (!cur || cur.default) s.deco.equipped[d.cat] = id;
   G.modsDirty = true;
@@ -192,11 +195,12 @@ export function claimMain(G) {
   if (xp) addXp(G, xp);
   let deco = null;
   if (r.deco) deco = giveDeco(G, r.deco);
+  for (const id of r.decos || []) { const g = giveDeco(G, id); if (g && !deco) deco = g; }   // v1.19 nhiều món
   s.quests.main++;
   s.quests.mainClaimable = false;
   if (q.mom && !/^tier\d/.test(q.mom)) G.mom(q.mom);   // tier lines are shown by the tier-up modal
   updateQuests(G);
-  return { ok: true, reward: { money: r.money || 0, xp, deco, ingredients: 0 } };
+  return { ok: true, reward: { money: r.money || 0, xp, deco, decos: r.decos || null, ingredients: 0 } };
 }
 
 export function claimDaily(G, i) {

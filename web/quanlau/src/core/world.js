@@ -2,7 +2,7 @@
 import * as C from '../config.js';
 import { getLayout } from '../art/layouts.js';
 import { route, floorOf } from './routing.js';
-import { builtTables, builtStoves, builtWing } from './economy.js';
+import { builtTables, builtStoves, builtWing, builtFun } from './economy.js';
 
 export function createWorld(G) {
   return {
@@ -43,7 +43,7 @@ export const nid = (w) => w.nextId++;
 export function syncLayout(G, rebuild = false) {
   const w = G.world, s = G.state;
   const nT = builtTables(G), nS = builtStoves(G);
-  w.layout = getLayout(s.tier, { tables: nT, stoves: nS, wing: builtWing(G) });
+  w.layout = getLayout(s.tier, { tables: nT, stoves: nS, wing: builtWing(G), fun: builtFun(G) });
   const L = w.layout;
   if (rebuild) { w.tables.length = 0; w.stoves.length = 0; w.fanTokens.length = 0; }
   for (let i = 0; i < L.tables.length; i++) {

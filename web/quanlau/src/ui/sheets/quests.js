@@ -20,6 +20,7 @@ function rewardChips(r) {
   if (r?.money) out.push(span('chip gold', ico('ui_coin', 16), span('num', fmtShort(r.money))));
   if (r?.xp) out.push(span('chip jade', ico('ui_xp', 16), span('num', questXp(D.levelInfo().level, r.xp) * (C.LEVEL.xpGainMult || 1) + ' XP')));
   if (r?.deco) out.push(span('chip', ico('ui_deco', 16), C.DECO.find((d) => d.id === r.deco)?.name || 'Trang trí'));
+  if (r?.decos?.length) out.push(span('chip', ico('ui_hopmu', 16), r.decos.length + ' đồ giải trí'));   // v1.19
   return out;
 }
 
@@ -86,7 +87,7 @@ function loginStrip(api) {
   rewards.forEach((r) => {
     const past = r.day < cur || (r.day === cur && claimedToday);
     const today = r.day === cur && !claimedToday;
-    const icon = r.deco ? 'ui_deco' : r.staffTicket ? 'ui_ticket' : r.ingredients ? 'ui_kho' : 'ui_coin';
+    const icon = r.decos ? 'ui_hopmu' : r.deco ? 'ui_deco' : r.staffTicket ? 'ui_ticket' : r.ingredients ? 'ui_kho' : 'ui_coin';
     strip.appendChild(div('ld' + (past ? ' past' : '') + (today ? ' today' : ''), span('dn', 'N' + r.day), ico(icon, 32, past ? 'dim' : ''), past ? span('mk', ico('ui_check', 16)) : null));
   });
   const card = div('card login');

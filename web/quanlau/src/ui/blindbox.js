@@ -19,7 +19,7 @@ const KIND = {
 };
 const FILTERS = [
   { id: 'all', label: 'Tất cả' }, { id: 'mon', label: 'Món', kinds: ['food', 'drink'] }, { id: 'ao', label: 'Trang phục', kinds: ['uniform', 'look'] },
-  { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
+  { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'gt', label: 'Giải trí', kinds: ['deco'], grp: 'giaitri' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
 let gridAnim = true;   // v1.18k: lưới chỉ chạy hiệu ứng nảy khi mới mở tab, không chạy lại sau mỗi lần mở hộp

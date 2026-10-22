@@ -429,7 +429,12 @@ export const UPGRADES = [
   // v1.1 khu mở rộng hai bên: the neighbour shophouses become dining space (from Nhà hàng mặt phố); each level = 2 tables
   { id: 'canh', cat: 'banghe', name: 'Mở rộng hai bên', icon: 'eq_table', costs: [60000, 180000], minTier: [3, 3], minLv: [22, 30],
     levels: ['Chưa mở', 'Thuê hiên hai bên · +2 bàn', 'Mở cả hai dãy · +4 bàn'], amb: 3,
+    levelsHaitang: ['Chưa mở', 'Dãy bên trái tầng trệt · +2 bàn', 'Thêm lầu dãy bên trái · +2 bàn'],   // v1.19 nhà hàng 2 lầu: bên phải là phòng giải trí
     desc: 'Thuê hiên của hai căn bên cạnh làm chỗ ngồi: thêm bàn, có tủ chén và chỗ đứng cho phục vụ. Cần kê đủ bàn trong quán trước.' },
+  // v1.19 phòng giải trí: khối 2 tầng bên phải nhà hàng 2 lầu (trệt Photo Studio, lầu Karaoke). Khách chờ bàn vào chơi.
+  { id: 'giaitri', cat: 'banghe', name: 'Phòng giải trí', icon: 'ui_hopmu', costs: [150000, 350000], minTier: [4, 4], minLv: [28, 32],
+    levels: ['Chưa mở', 'Photo Studio · tầng trệt', 'Karaoke · trên lầu'], amb: 6, patiencePer: 0.06, demandPer: 0.04,
+    desc: 'Mở khối 2 tầng bên hông quán: chụp ảnh, hát karaoke. Khách chờ bàn đỡ sốt ruột, khách tới đông hơn. Bày đồ giải trí vào phòng ở Quán ▸ Trang trí.' },
   { id: 'tablestyle', cat: 'banghe', name: 'Bàn ghế xịn', icon: 'eq_table', costs: [500, 3000, 12000, 40000], minTier: [1, 2, 3, 4], minLv: [3, 9, 18, 28],
     levels: ['Nhựa đỏ', 'Inox', 'Gỗ thông', 'Gỗ lim', 'Đá cẩm thạch'], amb: 4, patiencePer: 0.08,
     desc: 'Khách ngồi êm hơn thì kiên nhẫn hơn, quán cũng sang hơn.' },
@@ -507,6 +512,7 @@ export const DECO_CATS = [
   { id: 'cay',     name: 'Cây' },
   { id: 'tuong',   name: 'Tường' },
   { id: 'dacbiet', name: 'Đặc biệt' },
+  { id: 'giaitri', name: 'Phòng giải trí' },   // v1.19 bày nhiều món cùng lúc, mỗi món có chỗ riêng trong phòng
 ];
 // v1.18p đặt nhiều đồ trang trí cùng lúc: hiệu ứng nhân dồn nhưng tối đa (khách ×1,4 · tip ×1,6 · kiên nhẫn ×1,5)
 export const DECO_CAP = { demand: 1.4, tip: 1.6, patience: 1.5 };
@@ -571,6 +577,19 @@ export const DECO = [
   { id: 'db_bachvi', cat: 'dacbiet', name: 'Cỗ Máy Nước Dùng Bách Vị', price: 0, amb: 18, source: 'box', box: 'bt_bachvi', effect: { demandMult: 1.1, patienceMult: 1.05 }, desc: 'Bốn bình nước dùng tự pha. Khách +10%, kiên nhẫn +5%.' },
   { id: 'db_xuongvien', cat: 'dacbiet', name: 'Xưởng Viên Thả Lẩu', price: 0, amb: 18, source: 'box', box: 'bt_xuongvien', effect: { tipMult: 1.15 }, desc: 'Viên cá, viên tôm ra liên tục. Tip +15%.' },
   { id: 'db_phatra', cat: 'dacbiet', name: 'Máy Pha Trà Thượng Hạng', price: 0, amb: 18, source: 'box', box: 'bt_phatra', effect: { tipMult: 1.1, patienceMult: 1.08 }, desc: 'Ấm men ngọc rót trà mời khách. Tip +10%, kiên nhẫn +8%.' },
+  // v1.19 ĐỒ PHÒNG GIẢI TRÍ (bản demo): mở bằng nhiệm vụ phòng giải trí hoặc rút Hộp mù; fun = tầng + chỗ đặt (world px)
+  { id: 'gt_phong', cat: 'giaitri', name: 'Phông chụp + vòm hoa giấy', price: 0, amb: 8, source: 'box', box: 'bx_gt_phong', fun: { floor: 1, x: 230, y: 236 }, effect: { demandMult: 1.04 }, desc: 'Góc sống ảo của quán. Khách +4%.' },
+  { id: 'gt_denvong', cat: 'giaitri', name: 'Đèn vòng chụp ảnh', price: 0, amb: 3, source: 'box', box: 'bx_gt_denvong', fun: { floor: 1, x: 246, y: 252 }, effect: { tipMult: 1.03 }, desc: 'Ảnh lung linh, khách vui tip thêm. Tip +3%.' },
+  { id: 'gt_bongbay', cat: 'giaitri', name: 'Chùm bóng bay', price: 0, amb: 3, source: 'box', box: 'bx_gt_bongbay', fun: { floor: 1, x: 270, y: 290 }, effect: { patienceMult: 1.02 }, desc: 'Kiên nhẫn +2%.' },
+  { id: 'gt_polaroid', cat: 'giaitri', name: 'Tường ảnh polaroid', price: 0, amb: 4, source: 'box', box: 'bx_gt_polaroid', fun: { floor: 1, x: 270, y: 199, wall: true }, effect: { patienceMult: 1.03 }, desc: 'Khách ngắm ảnh trong lúc chờ. Kiên nhẫn +3%.' },
+  { id: 'gt_mayanh', cat: 'giaitri', name: 'Máy chụp ảnh lấy liền (to)', price: 0, amb: 8, source: 'box', box: 'bx_gt_mayanh', fun: { floor: 1, x: 272, y: 252 }, effect: { demandMult: 1.05 }, desc: 'Khách +5%.' },
+  { id: 'gt_gapthu', cat: 'giaitri', name: 'Máy gắp thú', price: 0, amb: 6, source: 'box', box: 'bx_gt_gapthu', fun: { floor: 1, x: 230, y: 288 }, effect: { patienceMult: 1.05 }, desc: 'Trẻ em mê lắm. Kiên nhẫn +5%.' },
+  { id: 'gt_neon', cat: 'giaitri', name: 'Bảng neon KARAOKE', price: 0, amb: 4, source: 'box', box: 'bx_gt_neon', fun: { floor: 2, x: 222, y: 33, wall: true }, effect: { demandMult: 1.02 }, desc: 'Khách +2%.' },
+  { id: 'gt_disco', cat: 'giaitri', name: 'Quả cầu disco', price: 0, amb: 4, source: 'box', box: 'bx_gt_disco', fun: { floor: 2, x: 264, y: 24, wall: true }, effect: { tipMult: 1.03 }, desc: 'Tip +3%.' },
+  { id: 'gt_sankhau', cat: 'giaitri', name: 'Sân khấu karaoke', price: 0, amb: 12, source: 'box', box: 'bx_gt_sankhau', fun: { floor: 2, x: 232, y: 84 }, effect: { demandMult: 1.06, patienceMult: 1.04 }, desc: 'Màn hình, loa, micro đủ bộ. Khách +6%, kiên nhẫn +4%.' },
+  { id: 'gt_quaynuoc', cat: 'giaitri', name: 'Quầy nước karaoke', price: 0, amb: 6, source: 'box', box: 'bx_gt_quaynuoc', fun: { floor: 2, x: 272, y: 80 }, effect: { tipMult: 1.05 }, desc: 'Tip +5%.' },
+  { id: 'gt_sofa', cat: 'giaitri', name: 'Sofa đỏ + bàn trà', price: 0, amb: 6, source: 'box', box: 'bx_gt_sofa', fun: { floor: 2, x: 236, y: 120 }, effect: { patienceMult: 1.05 }, desc: 'Khách ngồi chờ thoải mái. Kiên nhẫn +5%.' },
+  { id: 'gt_gheluoi', cat: 'giaitri', name: 'Ghế lười', price: 0, amb: 3, source: 'box', box: 'bx_gt_gheluoi', fun: { floor: 2, x: 272, y: 126 }, effect: { patienceMult: 1.02 }, desc: 'Kiên nhẫn +2%.' },
   { id: 'db_karaoke',   cat: 'dacbiet', name: 'Dàn karaoke',   price: 40000, amb: 20, lv: 31, minTier: 4, effect: { patienceMult: 1.15 }, desc: 'Khách kiên nhẫn hơn 15%. Hàng xóm thì… hơi bực.' },
 ];
 
@@ -775,6 +794,12 @@ export const MAIN_QUESTS = [
   { id: 'q27', text: 'Đạt combo x10',                   type: 'combo', target: 10,     reward: { money: 3000 } },
   { id: 'q28', text: 'Gặp đủ 10 kiểu khách',            type: 'kindsMet', target: 10,  reward: { money: 5000 } },
   { id: 'q29', text: 'Mở Nhà hàng lẩu 2 tầng',          type: 'tier', target: 4,       reward: { money: 10000 }, mom: 'tier4' },
+  // v1.19 phòng giải trí + dãy bên — mỗi nhiệm vụ tặng đồ trang trí trong bản demo
+  { id: 'qg1', text: 'Mở Photo Studio bên hông quán (Lv 28)', type: 'upgLvl:giaitri', target: 1, reward: { money: 20000, decos: ['gt_phong', 'gt_denvong', 'gt_bongbay'] } },
+  { id: 'qg2', text: 'Bày 3 món trong phòng giải trí',  type: 'funPlaced', target: 3, reward: { money: 15000, decos: ['gt_polaroid', 'gt_mayanh'] } },
+  { id: 'qg3', text: 'Mở thêm bàn trên lầu dãy bên',    type: 'upgLvl:canh', target: 2, reward: { money: 20000, decos: ['gt_gapthu'] } },
+  { id: 'qg4', text: 'Mở phòng Karaoke trên lầu (Lv 32)', type: 'upgLvl:giaitri', target: 2, reward: { money: 30000, decos: ['gt_sankhau', 'gt_neon', 'gt_disco'] } },
+  { id: 'qg5', text: 'Bày đủ 9 món trong phòng giải trí', type: 'funPlaced', target: 9, reward: { money: 50000, decos: ['gt_sofa', 'gt_gheluoi', 'gt_quaynuoc'] } },
   { id: 'q30', text: 'Có 8 nhân viên',                  type: 'staffCount', target: 8, reward: { money: 8000 } },
   { id: 'qn1', text: 'Có 10 nhân viên',                 type: 'staffCount', target: 10, reward: { money: 15000 } },           // v1.17
   { id: 'q31', text: 'Mở khoá Lẩu thập cẩm Nhà Mình',   type: 'level', target: 18,     reward: { money: 10000 } },
@@ -796,6 +821,7 @@ export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 
 export const MAIN_QUESTS_V116 = ['qp1', 'ql1', 'qs1', 'qs2', 'qt1'];
 export const MAIN_QUESTS_V117 = ['qn1', 'qn2'];
 export const MAIN_QUESTS_V118 = ['qb1'];
+export const MAIN_QUESTS_V119 = ['qg1', 'qg2', 'qg3', 'qg4', 'qg5'];
 
 // Daily tasks: 3 picked per game day from the pool (only those whose `minLv` ≤ level).
 // target(t) receives tier; reward is a chest tier.
@@ -1026,6 +1052,19 @@ export const BOX = {
     { id: 'bt_bachvi', grp: 'bep', r: 4, kind: 'deco', ref: 'db_bachvi', name: 'Cỗ Máy Nước Dùng Bách Vị' },
     { id: 'bt_xuongvien', grp: 'bep', r: 4, kind: 'deco', ref: 'db_xuongvien', name: 'Xưởng Viên Thả Lẩu' },
     { id: 'bt_phatra', grp: 'bep', r: 4, kind: 'deco', ref: 'db_phatra', name: 'Máy Pha Trà Thượng Hạng' },
+    // v1.19 đồ phòng giải trí (grp 'giaitri')
+    { id: 'bx_gt_phong', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_phong', name: 'Phông chụp + vòm hoa giấy' },
+    { id: 'bx_gt_denvong', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_denvong', name: 'Đèn vòng chụp ảnh' },
+    { id: 'bx_gt_bongbay', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_bongbay', name: 'Chùm bóng bay' },
+    { id: 'bx_gt_polaroid', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_polaroid', name: 'Tường ảnh polaroid' },
+    { id: 'bx_gt_mayanh', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_mayanh', name: 'Máy chụp ảnh lấy liền (to)' },
+    { id: 'bx_gt_gapthu', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_gapthu', name: 'Máy gắp thú' },
+    { id: 'bx_gt_neon', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_neon', name: 'Bảng neon KARAOKE' },
+    { id: 'bx_gt_disco', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_disco', name: 'Quả cầu disco' },
+    { id: 'bx_gt_sankhau', grp: 'giaitri', r: 4, kind: 'deco', ref: 'gt_sankhau', name: 'Sân khấu karaoke' },
+    { id: 'bx_gt_quaynuoc', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_quaynuoc', name: 'Quầy nước karaoke' },
+    { id: 'bx_gt_sofa', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_sofa', name: 'Sofa đỏ + bàn trà' },
+    { id: 'bx_gt_gheluoi', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_gheluoi', name: 'Ghế lười' },
     // thẻ thành tích (đeo 1 thẻ, hiện cạnh tên quán trên bảng xếp hạng)
     { id: 'bx_b_tapsu',   r: 1, kind: 'badge', icon: 'pot_ga', name: 'Lẩu thủ tập sự' },
     { id: 'bx_b_chamchi', r: 1, kind: 'badge', icon: 'ui_clock', name: 'Chủ quán chăm chỉ' },

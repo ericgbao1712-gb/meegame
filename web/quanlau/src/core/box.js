@@ -73,6 +73,7 @@ function grant(G, item) {
     if (item.kind === 'tform' && !b.tform) b.tform = item.ref;
     if (item.kind === 'cform' && !b.cform) b.cform = item.ref;
     if (item.kind === 'deco' && s.deco && Array.isArray(s.deco.owned) && !s.deco.owned.includes(item.ref)) s.deco.owned.push(item.ref);
+    if (item.kind === 'deco' && item.grp === 'giaitri' && s.deco) { if (!Array.isArray(s.deco.fun)) s.deco.fun = []; if (!s.deco.fun.includes(item.ref)) s.deco.fun.push(item.ref); }   // v1.19 bày sẵn (hiện khi tầng đó mở)
   }
   return { id: item.id, r: item.r, dup, shards };
 }

@@ -21,9 +21,17 @@ function decoThumb(id, size = 48) {
   return img;
 }
 
+let decoTab = 'quan';   // v1.19b tab nhỏ trong Trang trí: đồ của quán / đồ phòng Karaoke & Photo
 function decoView(body, api) {
   const s = S();
   if (!D.featureOn('deco')) { body.appendChild(lockCard('Trang trí quán', `Mở ở Lv ${C.FEATURES.deco}. Đèn lồng, cây kiểng, tranh Đông Hồ… làm quán xinh hơn, khách vui hơn.`, 'ui_deco')); return; }
+  const funOwned = (s.deco?.owned || []).filter((id) => C.DECO.some((d) => d.id === id && d.cat === 'giaitri')).length;
+  const tabs = div('bx-filter deco-tabs');
+  [['quan', 'Trang trí quán'], ['fun', `Karaoke & Photo${funOwned ? ' · ' + funOwned : ''}`]].forEach(([id, label]) => tabs.appendChild(h('button', {
+    class: 'chip' + (decoTab === id ? ' ink' : ''), type: 'button', onclick: () => { if (decoTab === id) return; decoTab = id; sfx('click'); api.rerender(); },
+  }, label)));
+  body.appendChild(tabs);
+  if (decoTab === 'fun') { funDecoSection(body, api, s, new Set(s.deco?.owned || [])); return; }
   const amb = G().get?.ambience?.() ?? 0;
   body.appendChild(div('card amb', ico('ui_heart', 32), div('grow', div('amb-t', h('b', null, 'Không khí quán'), span('num', Math.round(amb * 100) + '%')),
     div('bar ' + (amb > 0.66 ? '' : 'jade'), h('i', { style: { '--p': amb * 100 } })), span('muted sm', 'Không khí đẹp thì khách kiên nhẫn và tip nhiều hơn.')),));
@@ -34,6 +42,7 @@ function decoView(body, api) {
     div('grow', h('b', null, 'Đặt thêm nhiều món'), span('muted sm', 'Mỗi loại có 1 món chính. Bấm "Đặt thêm" để bày thêm món khác vào chỗ trống. Hiệu ứng cộng dồn, có giới hạn.')),
     div('deco-slots', span('chip', 'Tường ', span('num', `${mi.wall.used}/${mi.wall.max}`)), span('chip', 'Sàn ', span('num', `${mi.floor.used}/${mi.floor.max}`)))));
   C.DECO_CATS.forEach((cat) => {
+    if (cat.id === 'giaitri') return;   // nằm ở tab nhỏ "Karaoke & Photo"
     const eq = s.deco?.equipped?.[cat.id];
     const eqDef = C.DECO.find((d) => d.id === eq);
     body.appendChild(secTitle(cat.name, eqDef && !eqDef.default ? 'đang dùng: ' + eqDef.name : 'chưa trang trí'));
@@ -79,6 +88,41 @@ function decoView(body, api) {
     });
     body.appendChild(grid);
   });
+}
+
+// v1.19 Phòng giải trí (nhà hàng 2 lầu, dãy bên phải): bày được tất cả cùng lúc, mỗi món nằm đúng chỗ của nó
+function funDecoSection(body, api, s, owned) {
+  const lvl = (s.tier || 1) >= 4 ? Math.min(2, s.upgrades?.giaitri | 0) : 0;
+  const placed = new Set(s.deco?.fun || []);
+  const items = C.DECO.filter((d) => d.cat === 'giaitri');
+  const nOn = items.filter((d) => placed.has(d.id) && owned.has(d.id) && d.fun.floor <= lvl).length;
+  body.appendChild(div('card amb', ico('ui_hopmu', 32), div('grow', div('amb-t', h('b', null, 'Phòng Karaoke & Photo'), span('num', `${nOn}/${items.length}`)),
+    span('muted sm', 'Đồ bày đúng chỗ trong phòng bên phải quán, bày hết cùng lúc được. Nhận từ Nhiệm vụ Level và Hộp mù.'))));
+  if (!lvl) body.appendChild(div('card amb', ico('ui_hopmu', 32), div('grow', h('b', null, 'Phòng giải trí bên phải quán'),
+    span('muted sm', (s.tier || 1) >= 4 ? 'Mở ở mục Nâng cấp ▸ Phòng giải trí (Photo Studio tầng trệt, Karaoke trên lầu).' : 'Có ở Nhà hàng 2 lầu. Đồ nhận từ Nhiệm vụ Level và Hộp mù.'))));
+  for (const fl of [2, 1]) {
+  body.appendChild(secTitle(fl === 2 ? 'Phòng Karaoke · trên lầu' : 'Photo Studio · tầng trệt', fl <= lvl ? 'đã mở' : 'chưa mở'));
+  const grid = div('deco-grid');
+  for (const d of items.filter((x) => x.fun.floor === fl)) {
+    const has = owned.has(d.id), on = has && placed.has(d.id), flOpen = d.fun.floor <= lvl;
+    const card = div('card deco' + (on && flOpen ? ' on' : '') + (!has ? ' locked' : ''));
+    card.appendChild(div('deco-pic', decoThumb(d.id, 48), span('chip amb', d.fun.floor === 1 ? 'Trệt' : 'Lầu')));
+    card.appendChild(h('b', { class: 'dn' }, d.name));
+    if (d.desc) card.appendChild(span('muted sm dd', d.desc));
+    const act_ = div('deco-act');
+    if (!has) act_.appendChild(span('chip', ico('ui_gift', 16), 'Nhiệm vụ · Hộp mù'));
+    else if (!flOpen) act_.appendChild(span('chip red', ico('ui_lock', 16), d.fun.floor === 1 ? 'Chưa mở phòng' : 'Chưa mở lầu'));
+    else {
+      if (on) act_.appendChild(span('chip jade', ico('ui_check', 16), 'Đang bày'));
+      const b = h('button', { class: 'btn ' + (on ? 'paper' : 'jade') + ' sm' }, on ? 'Cất' : 'Bày');
+      b.addEventListener('click', () => { const r = act('placeFun', d.id, !on); if (r.ok === false) return; sfx(on ? 'click' : 'confirm'); api.rerender(); });
+      act_.appendChild(b);
+    }
+    card.appendChild(act_);
+    grid.appendChild(card);
+  }
+  body.appendChild(grid);
+  }
 }
 
 // ------------------------------------------------------------------ Đánh giá

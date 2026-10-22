@@ -42,7 +42,7 @@ export default {
     cool: { ceil: [{ x: 96, y: 36 }], ac: [{ x: 186, y: 40 }] },
   },
   haitang: {
-    file: 'scenes/haitang.png', art: [110, 148, 513, 895], x: -60, y: -84, w: 624, h: 1008, thumb: [0, 110, 192, 128], fill: '#8a7aa4',
+    file: 'scenes/haitang.png', wingR: true, art: [110, 148, 513, 895], x: -60, y: -84, w: 624, h: 1008, thumb: [0, 110, 192, 128], fill: '#8a7aa4',
     counters: ['counter_c', 'counter_wood', 'counter_b', 'counter_a', 'counter_c'],
     props: [
       { k: 'menuboard', x: 142, y: 314 }, { k: 'cat', x: 168, y: 318 }, { k: 'bin', x: 190, y: 322 },

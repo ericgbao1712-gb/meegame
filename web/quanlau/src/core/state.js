@@ -48,7 +48,7 @@ export function defaultState(now = Date.now()) {
     inventory, lots: {}, expired: null, market, autoRestock: false, usageYesterday: {},
     recipes, menu,
     upgrades,
-    deco: { owned: defaults.map((d) => d.id), equipped, more: [] },   // v1.18p more = đồ đặt thêm (ngoài món chính mỗi loại)
+    deco: { owned: defaults.map((d) => d.id), equipped, more: [], fun: [] },   // v1.19 fun = đồ đang bày trong phòng giải trí   // v1.18p more = đồ đặt thêm (ngoài món chính mỗi loại)
     staff: [], candidates: { day: 0, list: [] }, staffTickets: 0, ownerMode: 'work', nextStaffId: 1, nextCid: 1,
     rating: { recent: [], avg: C.RATING.prior, count: 0 },
     reviews: [], nextReviewId: 1, combo: { best: 0 },
@@ -99,14 +99,17 @@ export function migrate(save, now) {
     const id = from[p] && from[p].id;
     s.quests.main = id ? to.findIndex((q) => q.id === id) : to.length;
   };
-  const L118 = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V118.includes(q.id));
+  const L119 = C.MAIN_QUESTS.filter((q) => !C.MAIN_QUESTS_V119.includes(q.id));
+  const L118 = L119.filter((q) => !C.MAIN_QUESTS_V118.includes(q.id));
   const L117 = L118.filter((q) => !C.MAIN_QUESTS_V117.includes(q.id));
   if (save.started && !(s.flags.ui && s.flags.ui.mqV116)) remapMain(L117.filter((q) => !C.MAIN_QUESTS_V116.includes(q.id)), L117);
   if (s.flags && s.flags.ui) s.flags.ui.mqV116 = true;
   if (save.started && !(s.flags.ui && s.flags.ui.mqV117)) remapMain(L117, L118);
   if (s.flags && s.flags.ui) s.flags.ui.mqV117 = true;
-  if (save.started && !(s.flags.ui && s.flags.ui.mqV118)) remapMain(L118, C.MAIN_QUESTS);
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV118)) remapMain(L118, L119);
   if (s.flags && s.flags.ui) s.flags.ui.mqV118 = true;
+  if (save.started && !(s.flags.ui && s.flags.ui.mqV119)) remapMain(L119, C.MAIN_QUESTS);
+  if (s.flags && s.flags.ui) s.flags.ui.mqV119 = true;
   // sanity
   if (!(s.clock >= C.TIME.dayStart)) s.clock = C.TIME.dayStart;
   if (!['prep', 'open', 'closing', 'report'].includes(s.phase)) s.phase = 'prep';

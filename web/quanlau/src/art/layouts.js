@@ -162,8 +162,24 @@ const LAYOUTS = {
     // Before, the top point was the ROOF stair (178,70): people walked up the balcony rail and the roof steps.
     // While inside `hide` (behind the awning / facade band) the walker is not drawn.
     stairs: { bottom: { x: 178, y: 258 }, via: { x: 178, y: 198 }, top: { x: 160, y: 148 }, hide: { x0: 165, y0: 149, y1: 199 } },
-    wing: { tables: [table(-30, 262, 1), table(222, 262, 1), table(-72, 262, 1), table(264, 262, 1)], aisles: [-10, 202], y: 248,
-      waiters: [{ x: -50, y: 247 }, { x: 242, y: 247 }], view: [-100, 292] },
+    // v1.19: bên trái = dãy bàn 2 tầng (cấp 1 trệt, cấp 2 lầu); bên phải = phòng giải trí (art/scenes.js, fun)
+    wing: { tables: [table(-30, 262, 1), table(-72, 262, 1), table(-30, 100, 2), table(-72, 100, 2)], aisles: [-10], y: 248,
+      waiters: [{ x: -50, y: 247 }, { x: -50, y: 86 }], view: [-100, 292], leftOnly: true },
+    // v1.19 phòng giải trí bên phải: vùng trong phòng (world px) theo tầng, khách tham quan đứng / ngồi khi quán mở
+    fun: {
+      rooms: { 1: { x0: 207, x1: 286, y0: 196, y1: 293 }, 2: { x0: 207, x1: 286, y0: 23, y1: 136 } },
+      view: 304,
+      npcs: [
+        { floor: 1, x: 224, y: 240, pose: 'cheer', facing: 'down', need: 'gt_phong', kind: 'capdoi', seed: 3, idx: 0 },
+        { floor: 1, x: 236, y: 240, pose: 'cheer', facing: 'down', need: 'gt_phong', kind: 'capdoi', seed: 3, idx: 1 },
+        { floor: 1, x: 232, y: 266, pose: 'idle', facing: 'up', kind: 'hoiban', seed: 7, idx: 0 },
+        { floor: 1, x: 246, y: 290, pose: 'cheer', facing: 'down', need: 'gt_gapthu', kind: 'giadinh', seed: 5, idx: 2 },
+        { floor: 2, x: 246, y: 80, pose: 'cheer', facing: 'down', need: 'gt_sankhau', kind: 'hoiban', seed: 9, idx: 1 },
+        { floor: 2, x: 226, y: 121, sortY: 121, pose: 'sit', facing: 'down', need: 'gt_sofa', kind: 'vanphong', seed: 4, idx: 0 },
+        { floor: 2, x: 240, y: 121, sortY: 121, pose: 'sit', facing: 'down', need: 'gt_sofa', kind: 'sinhvien', seed: 2, idx: 0 },
+        { floor: 2, x: 268, y: 112, pose: 'cheer', facing: 'down', kind: 'capdoi', seed: 6, idx: 1 },
+      ],
+    },
   },
 };
 
@@ -171,16 +187,21 @@ const SCENE_BY_TIER = { 1: 'vihe', 2: 'hem', 3: 'mapho', 4: 'haitang', 5: 'haita
 
 // Returns the layout for a tier. `tables`/`stoves` = how many are currently built;
 // the returned arrays are sliced to those counts (order = build order).
-export function getLayout(tier, { tables = Infinity, stoves = Infinity, wing = 0 } = {}) {
+export function getLayout(tier, { tables = Infinity, stoves = Infinity, wing = 0, fun = 0 } = {}) {
   const base = LAYOUTS[SCENE_BY_TIER[tier]];
   const W = base.wing && wing > 0 ? base.wing : null;
+  const FN = base.fun && fun > 0 ? base.fun : null;   // v1.19
+  let viewX = W ? W.view.slice() : null;
+  if (W && W.leftOnly) viewX[1] = base.w + 4;
+  if (FN) viewX = [viewX ? viewX[0] : -4, FN.view];
   return {
     ...base,
     // v1.1: wing tables come after every in-shop table (the wing is only sold once those are all built)
     tables: base.tables.slice(0, tables).concat(W ? W.tables.slice(0, wing * 2) : []),
     aisles: W ? base.aisles.concat(W.aisles) : base.aisles,
     wingY: W ? W.y : null,
-    viewX: W ? W.view : null,
+    viewX,
+    funLevel: base.fun ? fun : 0,
     staffSpots: W ? { ...base.staffSpots, waiter: base.staffSpots.waiter.concat(W.waiters) } : base.staffSpots,
     kitchen: {
       ...base.kitchen,

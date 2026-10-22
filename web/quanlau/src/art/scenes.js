@@ -7,6 +7,30 @@
 import { PAL, BROTH } from './palette.js';
 import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES, DECO } from '../config.js';
 const DECO_CAT = Object.fromEntries(DECO.map((d) => [d.id, d.cat]));
+const DECO_FUN = Object.fromEntries(DECO.filter((d) => d.fun).map((d) => [d.id, d.fun]));
+/** v1.19 phòng giải trí: tầng chưa mở kéo cửa cuốn + nơ đỏ "sắp khai trương"; tầng đã mở vẽ đồ treo tường */
+function drawFunBack(ctx, L, env) {
+  const FN = L && L.fun;
+  if (!FN || !env.funAvail) return;
+  for (const fl of [1]) {                 // v1.19c lầu chưa xây thì ảnh nền đã là sân thượng, chỉ tầng trệt cần cửa cuốn
+    const r = FN.rooms[fl];
+    if ((env.funLevel | 0) >= fl) continue;
+    const w = r.x1 - r.x0, h = r.y1 - r.y0;
+    ctx.fillStyle = '#8f8a98'; ctx.fillRect(r.x0, r.y0, w, h);
+    for (let y = r.y0; y < r.y1; y += 3) { ctx.fillStyle = '#6d6878'; ctx.fillRect(r.x0, y, w, 0.5); ctx.fillStyle = '#b4afbe'; ctx.fillRect(r.x0, y + 0.5, w, 0.5); }
+    ctx.fillStyle = '#4a2e21'; ctx.fillRect(r.x0, r.y1 - 2, w, 2);
+    const cx = r.x0 + w / 2, cy = r.y0 + h * 0.42;                      // ruy băng + nơ đỏ
+    ctx.fillStyle = '#e8504a'; ctx.fillRect(r.x0, cy - 2, w, 4); ctx.fillRect(cx - 2, r.y0, 4, h - 2);
+    ctx.fillStyle = '#b8343a'; ctx.fillRect(r.x0, cy + 1.5, w, 0.5);
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - 10, cy - 7); ctx.lineTo(cx - 10, cy + 7); ctx.closePath(); ctx.fillStyle = '#e8504a'; ctx.fill();
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 10, cy - 7); ctx.lineTo(cx + 10, cy + 7); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ffd25a'; ctx.fillRect(cx - 2.5, cy - 2.5, 5, 5);
+  }
+  if ((env.funLevel | 0) > 0) for (const id of env.fun || []) {
+    const d = DECO_FUN[id];
+    if (d && d.wall && d.floor <= env.funLevel && F[id]) putTop(ctx, id, d.x, d.y);
+  }
+}
 /** v1.18p đồ đặt thêm → [{id, slot}] theo chỗ của quán (tường / sàn), hết chỗ thì không vẽ */
 function moreSlots(env, kind) {
   const L = env.layout, M = (L && L.decoMore) || {}, slots = kind === 'wall' ? (M.tuong || []) : (M.floor || []);
@@ -36,6 +60,9 @@ for (const id of Object.keys(SCENES)) BG[id] = loadAtlas(SCENES[id].file);   // 
 // v1.1 khu mở rộng hai bên: a painted neighbour wing per scene (tools/art/lau_wings.py); right side = mirrored
 const WING = {};
 for (const id of Object.keys(SCENES)) WING[id] = loadAtlas('scenes/' + id + '_wing.png');
+// v1.19 cảnh có bên phải vẽ riêng (nhà hàng 2 lầu: phòng giải trí) thay vì lật ảnh bên trái
+const WINGR = {};
+for (const id of Object.keys(SCENES)) if (SCENES[id].wingR) WINGR[id] = { 1: loadAtlas('scenes/' + id + '_wing_r1.png'), 2: loadAtlas('scenes/' + id + '_wing_r.png') };   // v1.19c 1 tầng (sân thượng) / 2 tầng (karaoke)
 export const WING_PX = 320, WING_PERIOD = 96;            // wing width / seamless band (sprite px)
 
 let warned = false;
@@ -87,8 +114,9 @@ function mirrorFill(g, c, horizontal, dir, edge, band, to, a0, a1) {
   }
   g.restore();
 }
-function bgFor(id, city) {
-  const ck = cityTheme(city) ? id + '|' + city : id;          // v1.7: one composite per (scene, city)
+function bgFor(id, city, fl = 0) {
+  const fk = WINGR[id] ? (fl >= 2 ? 2 : 1) : 0;
+  const ck = (cityTheme(city) ? id + '|' + city : id) + (fk ? '|f' + fk : '');          // v1.7: one composite per (scene, city); v1.19c + số tầng phòng giải trí
   let e = bgExt[ck];
   if (e !== undefined) return e;
   const rec = BG[id], sc = SCENES[id];
@@ -108,10 +136,17 @@ function bgFor(id, city) {
       const WP = wg.width;                                       // v1.2: 320 px wings (perspective floor)
       g.drawImage(wg, L - WP, M);
       for (let x = L - WP - WING_PERIOD; x > -WING_PERIOD; x -= WING_PERIOD) g.drawImage(wg, 0, 0, WING_PERIOD, wg.height, x, M, WING_PERIOD, wg.height);
-      g.save(); g.translate(Rr * 2, 0); g.scale(-1, 1);     // mirrored about the art's right edge
-      g.drawImage(wg, Rr - WP, M);
-      for (let x = Rr - WP - WING_PERIOD; x > Rr - (W - Rr) - WING_PERIOD; x -= WING_PERIOD) g.drawImage(wg, 0, 0, WING_PERIOD, wg.height, x, M, WING_PERIOD, wg.height);
-      g.restore();
+      const wr = WINGR[id] && WINGR[id][fk] && WINGR[id][fk].img;
+      if (wr) {                                                   // v1.19 bên phải vẽ riêng, không lật
+        const RP = wr.width;
+        g.drawImage(wr, Rr + 1, M);
+        for (let x = Rr + 1 + RP; x < W; x += WING_PERIOD) g.drawImage(wr, RP - WING_PERIOD, 0, WING_PERIOD, wr.height, x, M, WING_PERIOD, wr.height);
+      } else {
+        g.save(); g.translate(Rr * 2, 0); g.scale(-1, 1);     // mirrored about the art's right edge
+        g.drawImage(wg, Rr - WP, M);
+        for (let x = Rr - WP - WING_PERIOD; x > Rr - (W - Rr) - WING_PERIOD; x -= WING_PERIOD) g.drawImage(wg, 0, 0, WING_PERIOD, wg.height, x, M, WING_PERIOD, wg.height);
+        g.restore();
+      }
     } else {
       mirrorFill(g, c, true, -1, L, BAND_X, 0, M, M + ih);
       mirrorFill(g, c, true, +1, Rr, BAND_X, W, M, M + ih);
@@ -310,7 +345,7 @@ export function drawSceneBack(ctx, tier, env, view) {
     const L = env.layout;
     if (!L) return;
     const sc = SCENES[L.scene];
-    const e = bgFor(L.scene, env.city);
+    const e = bgFor(L.scene, env.city, env.funLevel | 0);
     ctx.fillStyle = (sc && sc.fill) || PAL.stone;
     ctx.fillRect(view.x0, view.y0, view.x1 - view.x0, view.y1 - view.y0);
     if (e) ctx.drawImage(e.c, e.dx, e.dy, e.c.width * U, e.c.height * U);
@@ -319,6 +354,7 @@ export function drawSceneBack(ctx, tier, env, view) {
     // wall hangings (tường)
     if (dc.tuong && F[dc.tuong]) for (const s of (L.deco.tuong || [])) putTop(ctx, dc.tuong, s.x, s.y);
     for (const m of moreSlots(env, 'wall')) putTop(ctx, m.id, m.slot.x, m.slot.y);   // v1.18p đồ treo tường đặt thêm
+    drawFunBack(ctx, L, env);   // v1.19 phòng giải trí: cửa cuốn tầng chưa mở + đồ treo tường
     // wall-mounted air conditioner
     if (lvl(up.cooling) >= 3 && sc && sc.cool) for (const a of sc.cool.ac) put(ctx, 'aircon', a.x, a.y);
     // shop sign
@@ -429,7 +465,7 @@ export function sceneDrawables(tier, env) {
     const L = env.layout;
     if (!L) return [];
     const up = env.up || {}, dc = env.deco || {};
-    const key = [L.scene, tier, L.kitchen.stoves.length, lvl(up.kho), lvl(up.cooler), lvl(up.cooling), lvl(up.speaker), lvl(up.pos), dc.cay, dc.dacbiet, (env.decoMore || []).join(',')].join('|');
+    const key = [L.scene, tier, L.kitchen.stoves.length, lvl(up.kho), lvl(up.cooler), lvl(up.cooling), lvl(up.speaker), lvl(up.pos), dc.cay, dc.dacbiet, (env.decoMore || []).join(','), env.funLevel | 0, (env.fun || []).join(',')].join('|');
     if (sceneDrawables.key === key && sceneDrawables.layout === L) return sceneDrawables.list;
     const sc = SCENES[L.scene] || {}, list = [], E = L.equip || {};
     // kitchen counters under every built stove
@@ -451,6 +487,10 @@ export function sceneDrawables(tier, env) {
     if (dc.cay && F[dc.cay]) for (const s of (L.deco.cay || [])) list.push({ y: s.y, draw: (ctx) => put(ctx, dc.cay, s.x, s.y) });
     if (dc.dacbiet && F[dc.dacbiet]) for (const s of (L.deco.dacbiet || [])) list.push({ y: s.y, draw: (ctx) => put(ctx, dc.dacbiet, s.x, s.y) });
     for (const m of moreSlots(env, 'floor')) list.push({ y: m.slot.y, draw: (ctx) => put(ctx, m.id, m.slot.x, m.slot.y) });   // v1.18p đồ đặt sàn thêm
+    if (L.fun && env.funLevel > 0) for (const id of env.fun || []) {                       // v1.19 đồ đặt sàn phòng giải trí
+      const d = DECO_FUN[id];
+      if (d && !d.wall && d.floor <= env.funLevel && F[id]) list.push({ y: d.y, draw: (ctx) => put(ctx, id, d.x, d.y) });
+    }
     // static decor of the scene
     for (const p of (sc.props || [])) list.push({ y: p.y, draw: (ctx) => put(ctx, p.k, p.x, p.y) });
     sceneDrawables.key = key; sceneDrawables.layout = L; sceneDrawables.list = list;

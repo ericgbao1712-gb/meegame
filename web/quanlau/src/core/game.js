@@ -5,7 +5,7 @@ import { createRng } from './rng.js';
 import { migrate } from './state.js';
 import { createWorld, syncLayout } from './world.js';
 import {
-  UP, DECO_BY_ID, POT, tierDef, decoSlotKind, decoMoreInfo, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
+  UP, DECO_BY_ID, POT, tierDef, decoSlotKind, decoMoreInfo, builtFun, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
 } from './economy.js';
 import * as kitchen from './kitchen.js';
 import * as customers from './customers.js';
@@ -203,7 +203,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
-      state.flags.ui.seenNews = 118;   // v1.16 người chơi mới không cần bảng "Có gì mới"
+      state.flags.ui.seenNews = 119;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),
@@ -280,7 +280,7 @@ export function createGame(save, opts = {}) {
       addMoney(G, -info.cost, 'upgrade');
       state.upgrades[id]++;
       G.modsDirty = true;
-      if (id === 'table' || id === 'canh') { syncLayout(G, false); }
+      if (id === 'table' || id === 'canh' || id === 'giaitri') { syncLayout(G, false); }
       if (id === 'tudong') extendFrozenLots(G, 1);
       const pos = unitPos(id) || {};
       G.counter('upgrade:' + id, 1);
@@ -314,6 +314,20 @@ export function createGame(save, opts = {}) {
       state.deco.equipped[d.cat] = id;
       if (Array.isArray(state.deco.more)) state.deco.more = state.deco.more.filter((x) => x !== id);   // thành món chính thì bỏ khỏi đồ đặt thêm
       G.modsDirty = true;
+      return { ok: true };
+    }),
+    // v1.19 bày / cất đồ trong phòng giải trí (mỗi món có chỗ riêng, bày được tất cả)
+    placeFun: wrap((id, on = true) => {
+      const d = DECO_BY_ID[id];
+      if (!d || !d.fun) return fail('unknown', 'Món này không bày trong phòng giải trí.');
+      if (!Array.isArray(state.deco.fun)) state.deco.fun = [];
+      if (!on) { state.deco.fun = state.deco.fun.filter((x) => x !== id); G.modsDirty = true; return { ok: true }; }
+      if (!state.deco.owned.includes(id)) return fail('notOwned', 'Chưa có món này, làm nhiệm vụ phòng giải trí hoặc rút Hộp mù nha.');
+      const lvl = builtFun(G);
+      if (lvl < d.fun.floor) return fail('closed', d.fun.floor === 2 ? 'Mở phòng Karaoke trên lầu trước nha (Nâng cấp ▸ Phòng giải trí).' : 'Mở Photo Studio trước nha (Nâng cấp ▸ Phòng giải trí).');
+      if (!state.deco.fun.includes(id)) state.deco.fun.push(id);
+      G.modsDirty = true;
+      G.counter('funPlace', 1);
       return { ok: true };
     }),
     // v1.18p đặt thêm / cất đồ trang trí (ngoài món chính mỗi loại), theo số chỗ trống của quán

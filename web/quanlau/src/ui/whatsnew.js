@@ -8,17 +8,20 @@ import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
-  ver: 118,
+  ver: 119,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Hộp mù & tab Giải trí!',
+  hero: 'Phòng giải trí 2 lầu!',
   items: [
-    { icon: 'ui_hopmu', title: 'Hộp mù', lv: C.FEATURES.blindbox, isNew: true,
+    { icon: 'ui_hopmu', title: 'Phòng giải trí + dãy bên 2 lầu', lv: 28, isNew: true,
+      text: 'Nhà hàng 2 lầu mở rộng hai bên: **bên trái** thêm bàn ăn ở tầng trệt và **trên lầu**, **bên phải** là **Phòng giải trí**: Photo Studio tầng trệt, Karaoke trên lầu. 12 món đồ mới (phông chụp, đèn vòng, sân khấu, sofa, quả cầu disco…) nhận từ **Nhiệm vụ Level** và **Hộp mù**. Bày ở **Quán ▸ Trang trí ▸ Phòng giải trí**.',
+      go: ['shop', 'deco'], goLabel: 'Xem Phòng giải trí' },
+    { icon: 'ui_hopmu', title: 'Hộp mù', lv: C.FEATURES.blindbox,
       text: `Vào **Quán ▸ Giải trí ▸ Hộp mù**. Mỗi ngày mở **1 hộp miễn phí**. Ra món ăn độc quyền, đồng phục, kiểu chủ quán, **nồi lẩu và bàn ghế** đẹp, **robot phục vụ**, **đồ bếp và máy móc** (máy thái thịt, máy bán nước, Xưởng Viên Thả Lẩu…), đồ trang trí, và **thẻ thành tích** hiện trên bảng xếp hạng. Sưu tầm đủ ${C.BOX.items.length} món!`,
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
-    { icon: 'ui_ticket', title: 'Tab Giải trí + Giải năm vé số', lv: C.FEATURES.lottery, isNew: true,
+    { icon: 'ui_ticket', title: 'Tab Giải trí + Giải năm vé số', lv: C.FEATURES.lottery,
       text: `Vé số và Hộp mù nằm chung tab **Giải trí**. Vé số có thêm **Giải năm ${C.LOTTERY.tiers.find((t) => t.id === 'nam').prize}k**: mua đều tay khoảng 2 ngày là có cơ hội trúng.`,
       go: ['shop', 'veso'], goLabel: 'Xem Vé số' },
-    { icon: 'ui_xp', title: 'Lên cấp từ Lv 21', lv: 1, isNew: true,
+    { icon: 'ui_xp', title: 'Lên cấp từ Lv 21', lv: 1,
       text: `Từ **Lv ${C.LEVEL.upFrom}** thanh XP cần thêm **${Math.round((C.LEVEL.upMult - 1) * 100)}%** để quán lớn lên vững hơn.` },
     { icon: 'ui_staff', title: 'Quán chứa tới 12 nhân viên', lv: C.STAFF.slotBonus[0][0],
       text: `Lên **Lv ${C.STAFF.slotBonus.map((x) => x[0]).join(', ')}** mỗi mốc mở thêm 1 chỗ nhân viên. Nhà hàng 2 tầng chứa được tối đa **${C.STAFF.maxSlots} người**. Có nhiệm vụ mới: đủ 10 và 12 nhân viên.`,

@@ -22,6 +22,13 @@ export const builtTables = (G) => { const t = tierDef(G); return Math.min(t.maxT
 /** v1.1: every table in use, in-shop + khu mở rộng (2 per wing level from tier 3). */
 export const allTables = (G) => builtTables(G) + 2 * (G.state.tier >= 3 ? Math.min(2, G.state.upgrades.canh || 0) : 0);
 export const builtWing = (G) => (G.state.tier >= 3 ? Math.min(2, G.state.upgrades.canh || 0) : 0);   // v1.1 khu mở rộng hai bên
+/** v1.19 phòng giải trí (nhà hàng 2 lầu): 0 chưa mở · 1 Photo Studio (trệt) · 2 + Karaoke (lầu) */
+export const builtFun = (G) => (G.state.tier >= 4 ? Math.min(2, G.state.upgrades.giaitri || 0) : 0);
+/** món giải trí đang bày (chỉ tính tầng đã mở) */
+export function funPlaced(s) {
+  const lvl = s.tier >= 4 ? Math.min(2, (s.upgrades && s.upgrades.giaitri) || 0) : 0;
+  return (s.deco.fun || []).filter((id) => { const d = DECO_BY_ID[id]; return d && d.fun && s.deco.owned.includes(id) && d.fun.floor <= lvl; });
+}
 export const builtStoves = (G) => { const t = tierDef(G); return Math.min(t.maxStoves, t.startStoves + (G.state.upgrades.stove || 0)); };
 
 // ───────────── money ─────────────
@@ -193,9 +200,9 @@ export function mods(G) {
   decoDemand = Math.min(decoDemand, C.DECO_CAP.demand); decoTip = Math.min(decoTip, C.DECO_CAP.tip); decoPatience = Math.min(decoPatience, C.DECO_CAP.patience);
   const cashier = staff.some((m) => m.role === 'thungan');
   G._mods = {
-    patience: (1 + up.tablestyle * UP.tablestyle.patiencePer + up.speaker * UP.speaker.patiencePer) * (cashier ? 1.2 : 1) * (has('hat') ? 1.1 : 1) * decoPatience,
+    patience: (1 + up.tablestyle * UP.tablestyle.patiencePer + up.speaker * UP.speaker.patiencePer + builtFun(G) * UP.giaitri.patiencePer) * (cashier ? 1.2 : 1) * (has('hat') ? 1.1 : 1) * decoPatience,
     tip: (up.pos > 0 ? UP.pos.tipMult : 1) * decoTip * (has('ngot') ? 1.25 : 1),
-    demand: (1 + up.sign * UP.sign.demandPer) * decoDemand * Math.pow(1.05, count('tiktok')),
+    demand: (1 + up.sign * UP.sign.demandPer + builtFun(G) * UP.giaitri.demandPer) * decoDemand * Math.pow(1.05, count('tiktok')),
     footballMult: decoFootball,
     cashier,
     hasWaiter: staff.some((m) => m.role === 'phucvu'),
@@ -211,10 +218,11 @@ export function decoInUse(s) {
   const out = [];
   for (const cat of Object.keys(s.deco.equipped || {})) if (s.deco.equipped[cat]) out.push(s.deco.equipped[cat]);
   for (const id of s.deco.more || []) if (!out.includes(id)) out.push(id);
+  for (const id of funPlaced(s)) if (!out.includes(id)) out.push(id);   // v1.19
   return out;
 }
 /** chỗ đặt thêm: 'wall' (đồ treo tường) / 'floor' (cây, đồ đặc biệt); đèn không đặt thêm */
-export const decoSlotKind = (d) => (!d || d.default || d.cat === 'den' ? null : d.cat === 'tuong' ? 'wall' : 'floor');
+export const decoSlotKind = (d) => (!d || d.default || d.cat === 'den' || d.cat === 'giaitri' ? null : d.cat === 'tuong' ? 'wall' : 'floor');
 export function decoMoreInfo(G) {
   const s = G.state, L = G.world && G.world.layout, M = (L && L.decoMore) || { tuong: [], floor: [] };
   const used = { wall: 0, floor: 0 };
@@ -226,7 +234,7 @@ export function ambienceOf(G) {
   const s = G.state, up = s.upgrades;
   let a = 0;
   for (const id of decoInUse(s)) a += (DECO_BY_ID[id] || {}).amb || 0;
-  a += up.tablestyle * UP.tablestyle.amb + up.cooling * UP.cooling.amb + up.speaker * UP.speaker.amb + up.sign * UP.sign.amb;
+  a += (s.tier >= 4 ? Math.min(2, up.giaitri || 0) : 0) * UP.giaitri.amb + up.tablestyle * UP.tablestyle.amb + up.cooling * UP.cooling.amb + up.speaker * UP.speaker.amb + up.sign * UP.sign.amb;
   return clamp(a / tierDef(G).ambCap, 0, 1);
 }
 
