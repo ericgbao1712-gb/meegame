@@ -13,7 +13,7 @@ import { h, div, span, ico } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
-import { badgePlate, badgeRowCls, adminTag, adminFrame } from './badge.js';
+import { badgePlate, badgeRowCls, adminTag, adminFrame, pickSquareImage } from './badge.js';
 import { portraitURL, makeOwnerLook } from '../art/index.js';
 import { fmtShort, fmtMoney } from '../core/format.js';
 import { countUp, confettiFor, vibrate } from './screens/kit.js';
@@ -363,10 +363,32 @@ export function accountPanel({ compact = false, gate = false } = {}) {
     }
     const p = st.player, c = st.cloud;
     let pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
-    if (p.admin) pic = adminFrame(pic, { size: 44 });   // v1.25 khung hoàng gia cho admin
+    if (p.admin) {                                                  // v1.25b ảnh riêng của admin (tải lên) thay ảnh Google
+      if (p.adminPic) pic = h('img', { class: 'cl-pic', src: p.adminPic, alt: '', width: 40, height: 40 });
+      pic = adminFrame(pic, { size: 56 });
+    }   // v1.25 khung hoàng gia cho admin
     const saveBtn = h('button', { class: 'btn jade sm', onclick: async () => { sfx('click'); saveBtn.disabled = true; const ok = await upload({ force: false }); saveBtn.disabled = false; ctx.toast(ok ? 'Đã lưu lên mạng!' : (st.lastErr || 'Vừa lưu rồi, đợi chút nha.'), ok ? 'good' : 'info', ok ? 'ui_check' : 'ui_info'); } }, 'Lưu ngay');
     add(
       div('set-row', pic, div('grow', h('b', null, p.name || p.email), p.admin ? adminTag() : null, span('muted sm', p.email || ''))),
+      p.admin ? div('set-bk adm-pic-row',
+        h('button', { class: 'btn jade sm', onclick: async (e) => {
+          sfx('click');
+          const b = e.currentTarget;
+          const data = await pickSquareImage(160);
+          if (!data) return;
+          if (b) b.disabled = true;
+          const r = await api('POST', '/admin-pic', { image: data });
+          if (b) b.disabled = false;
+          if (r.status !== 200) { ctx.toast(r.json?.message || 'Chưa đổi được ảnh, thử lại nha.', 'bad'); return; }
+          st.player.adminPic = r.json.adminPic || data; for (const k in boardCache) delete boardCache[k];
+          ctx.toast('Đã đổi ảnh khung admin!', 'good', 'ui_check'); emit(); draw();
+        } }, ico('ui_heart', 16), 'Đổi ảnh khung admin'),
+        p.adminPic ? h('button', { class: 'btn paper sm', onclick: async () => {
+          sfx('click');
+          const r = await api('POST', '/admin-pic', { image: null });
+          if (r.status !== 200) { ctx.toast(r.json?.message || 'Chưa bỏ được ảnh.', 'bad'); return; }
+          st.player.adminPic = ''; for (const k in boardCache) delete boardCache[k]; emit(); draw();
+        } }, 'Dùng ảnh Google') : null) : null,
       span('muted sm cl-stat', st.busy ? 'Đang lưu…' : c ? `Trên mạng: ${c.shopName || 'Quán'} · cấp ${c.level} · lưu ${timeAgo(c.updatedAt)}` : 'Chưa có bản trên mạng.'),
       st.lastErr ? span('bk-err', st.lastErr) : null,
       div('set-bk', saveBtn,
@@ -500,7 +522,7 @@ export function leaderboardView(body, api2) {
     if (!data) { list.appendChild(span('muted sm', 'Chưa tải được bảng xếp hạng (cần mạng).')); return; }
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
-      const av = r.admin ? (() => { const im = h('img', { class: 'pix', alt: '', width: 36, height: 36 }); try { im.src = portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 40 }); })() : null;
+      const av = r.admin ? (() => { const im = h('img', { class: r.adminPic ? '' : 'pix', alt: '', width: 36, height: 36 }); try { im.src = r.adminPic || portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 48 }); })() : null;
       list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : badgeRowCls(r.badge)),
         span('cl-rank num', String(r.rank)), av,
         div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, badgePlate(r.badge), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),

@@ -37,11 +37,39 @@ export function adminTag({ big = false } = {}) {
   el.title = 'Quản trị viên MeeGame';
   return el;
 }
-/** khung avatar hoàng gia bọc quanh ảnh (img / phần tử bất kỳ) */
+/** khung avatar hoàng gia (v1.25b: bỏ vương miện) — viền vàng kép chạm hoa văn, 4 đá quý, dải ruy băng chữ ADMIN ở chân khung */
 export function adminFrame(inner, { size = 44 } = {}) {
   const el = span('adm-frame');
   el.style.setProperty('--sz', size + 'px');
-  el.append(span('adm-ring'), inner || span(''), span('adm-gem g1'), span('adm-gem g2'), span('adm-gem g3'));
-  el.appendChild(crownSvg('adm-crown top'));
+  el.append(span('adm-ring'), span('adm-ring2'), inner || span(''),
+    span('adm-gem g1'), span('adm-gem g2'), span('adm-gem g3'), span('adm-gem g4'),
+    span('adm-ribbon', span('adm-rb-txt', 'ADMIN')));
   return el;
+}
+/** chọn ảnh từ máy → cắt vuông giữa, thu nhỏ size×size, nén JPEG → data URL (null nếu bỏ chọn / lỗi) */
+export function pickSquareImage(size = 160) {
+  return new Promise((resolve) => {
+    const inp = document.createElement('input');
+    inp.type = 'file'; inp.accept = 'image/*';
+    inp.onchange = () => {
+      const f = inp.files && inp.files[0];
+      if (!f) { resolve(null); return; }
+      const url = URL.createObjectURL(f), im = new Image();
+      im.onload = () => {
+        try {
+          const c = document.createElement('canvas'); c.width = c.height = size;
+          const g = c.getContext('2d'), m = Math.min(im.naturalWidth, im.naturalHeight);
+          g.imageSmoothingQuality = 'high';
+          g.drawImage(im, (im.naturalWidth - m) / 2, (im.naturalHeight - m) / 2, m, m, 0, 0, size, size);
+          let q = 0.86, out = c.toDataURL('image/jpeg', q);
+          while (out.length > 140000 && q > 0.4) { q -= 0.1; out = c.toDataURL('image/jpeg', q); }
+          resolve(out);
+        } catch (e) { resolve(null); }
+        URL.revokeObjectURL(url);
+      };
+      im.onerror = () => { URL.revokeObjectURL(url); resolve(null); };
+      im.src = url;
+    };
+    inp.click();
+  });
 }

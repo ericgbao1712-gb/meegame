@@ -99,10 +99,12 @@ const meta = (row) => (row ? {
 async function playerOf(db, req) {
   const id = sessionPlayerId(req);
   if (!id) return null;
-  const rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden FROM players WHERE id = ?', args: [id] });
+  let rs;
+  try { rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden, admin_pic FROM players WHERE id = ?', args: [id] }); }
+  catch (e) { rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden FROM players WHERE id = ?', args: [id] }); }
   return rs.rows[0] || null;
 }
-const publicPlayer = (p) => ({ id: Number(p.id), name: p.name || '', email: p.email || '', picture: p.picture || '', admin: isAdminPlayerEmail(p.email) });   // admin: khung + thẻ tên hoàng gia
+const publicPlayer = (p) => { const admin = isAdminPlayerEmail(p.email); return { id: Number(p.id), name: p.name || '', email: p.email || '', picture: p.picture || '', admin, adminPic: admin ? (p.admin_pic || '') : undefined }; };   // admin: khung + thẻ tên hoàng gia, ảnh riêng
 
 async function cloudRow(db, pid, GAME, full = false) {
   const rs = await db.execute({
@@ -148,7 +150,9 @@ export default async function handler(req, res) {
               ON CONFLICT(google_sub) DO UPDATE SET email = excluded.email, name = excluded.name, picture = excluded.picture, last_login = excluded.last_login`,
         args: [String(claims.sub), claims.email || null, String(claims.name || '').slice(0, 80) || null, claims.picture || null, now, now],
       });
-      const rs = await db.execute({ sql: 'SELECT id, email, name, picture FROM players WHERE google_sub = ?', args: [String(claims.sub)] });
+      let rs;
+      try { rs = await db.execute({ sql: 'SELECT id, email, name, picture, admin_pic FROM players WHERE google_sub = ?', args: [String(claims.sub)] }); }
+      catch (e) { rs = await db.execute({ sql: 'SELECT id, email, name, picture FROM players WHERE google_sub = ?', args: [String(claims.sub)] }); }
       const p = rs.rows[0];
       let cookie;
       try { cookie = makeSessionCookie(Number(p.id)); } catch (e) { console.error('[lau] session', e.message); return err(res, 503, 'config_error', 'Đăng nhập chưa được cấu hình xong.'); }
@@ -164,7 +168,7 @@ export default async function handler(req, res) {
       const col = BOARD_VALUE[by];
       const where = 'g.game = ? AND g.cheat = 0 AND g.flagged = 0 AND p.hidden = 0';
       const rs = await db.execute({
-        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge, p.email FROM game_saves g
+        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge, p.email, p.admin_pic FROM game_saves g
               JOIN players p ON p.id = g.player_id WHERE ${where} ORDER BY ${BOARDS[by]}, g.updated_at ASC LIMIT 50`,
         args: [GAME],
       });
@@ -187,7 +191,7 @@ export default async function handler(req, res) {
       }
       const rows = rs.rows.map((r, i) => ({
         rank: i + 1, shopName: r.shop_name, avatar: num(r.avatar), level: num(r.level),
-        value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined,   // không trả email ra ngoài
+        value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined, adminPic: isAdminPlayerEmail(r.email) ? (r.admin_pic || undefined) : undefined,   // không trả email ra ngoài
       }));
       return send(res, 200, { by, rows, me });
     }
@@ -356,6 +360,16 @@ export default async function handler(req, res) {
       return err(res, 401, 'unauthorized', 'Chưa đăng nhập.', path.startsWith('/auth') || path === '/save' ? { 'Set-Cookie': clearSessionCookie() } : {});
     }
     const pid = Number(p.id);
+
+    // v1.25b admin đổi ảnh avatar (ảnh vuông nhỏ đã nén ở máy, data:image/...;base64). image = null → bỏ ảnh riêng
+    if (method === 'POST' && path === '/admin-pic') {
+      if (!isAdminPlayerEmail(p.email)) return err(res, 403, 'forbidden', 'Chỉ tài khoản admin mới đổi được ảnh này.');
+      const b = await parseBody(req);
+      const img = b && b.image == null ? null : String((b && b.image) || '');
+      if (img !== null && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 150000)) return err(res, 400, 'bad_image', 'Ảnh không hợp lệ hoặc quá lớn (tối đa ~100KB).');
+      await db.execute({ sql: 'UPDATE players SET admin_pic = ? WHERE id = ?', args: [img, pid] });
+      return send(res, 200, { ok: true, adminPic: img || '' });
+    }
 
     if (method === 'GET' && path === '/auth/me') {
       return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid, GAME)) });
