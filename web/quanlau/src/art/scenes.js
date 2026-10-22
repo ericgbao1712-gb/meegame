@@ -8,6 +8,32 @@ import { PAL, BROTH } from './palette.js';
 import { POT_SKINS, TABLE_SKINS, CHAIR_SKINS, TABLE_SHAPES, CHAIR_SHAPES, DECO } from '../config.js';
 const DECO_CAT = Object.fromEntries(DECO.map((d) => [d.id, d.cat]));
 const DECO_FUN = Object.fromEntries(DECO.filter((d) => d.fun).map((d) => [d.id, d.fun]));
+/** v1.21 cánh cửa vòm trên vách hông cầu thang (sang Karaoke / Photo Studio). open 0…1: 0 = đóng, 1 = mở hẳn.
+ *  Khung + lòng cửa nằm sẵn trong ảnh nền; ở đây vẽ cánh cửa (bản lề phía khu giải trí) và ánh đèn trong phòng khi mở. */
+export function drawFunDoor(ctx, dr, open, locked) {
+  const x0 = dr.x0, x1 = dr.x1, y0 = dr.y0, y1 = dr.y1, w = x1 - x0, r = w / 2;
+  const arch = (x, wd) => { ctx.beginPath(); ctx.moveTo(x, y1); ctx.lineTo(x, y0 + r); ctx.arc(x0 + r, y0 + r, r, Math.PI, 0); ctx.lineTo(x + wd, y1); ctx.closePath(); };
+  ctx.save();
+  if (open > 0.02) {                                         // trong phòng sáng đèn
+    ctx.globalAlpha = 0.85 * open; ctx.fillStyle = dr.glow || '#c58cff'; arch(x0, w); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  const lw = Math.max(1, w * (1 - open * 0.84));            // cánh cửa thu về phía bản lề (bên phải)
+  ctx.beginPath(); ctx.rect(x1 - lw, y0 - 1, lw, y1 - y0 + 1); ctx.clip();
+  arch(x0, w);
+  ctx.fillStyle = open > 0.5 ? '#7a4a30' : (dr.leaf || '#a9683f'); ctx.fill();
+  ctx.strokeStyle = '#3a1e28'; ctx.lineWidth = 0.5; ctx.stroke();
+  if (open < 0.5) {
+    ctx.fillStyle = 'rgba(255,230,190,0.35)'; ctx.fillRect(x0 + 1, y0 + r + 1, w - 2, 0.5);           // nẹp ô cửa
+    ctx.fillStyle = 'rgba(60,30,30,0.35)'; ctx.fillRect(x0 + 1.5, y0 + r + 2, w - 3, (y1 - y0 - r) * 0.42); ctx.fillRect(x0 + 1.5, y0 + r + 3 + (y1 - y0 - r) * 0.46, w - 3, (y1 - y0 - r) * 0.4);
+    ctx.fillStyle = '#ffd25a'; ctx.fillRect(x0 + 1, (y0 + r + y1) / 2 + 1, 1, 1);                         // tay nắm (phía cầu thang)
+    if (dr.win) { ctx.fillStyle = dr.win; ctx.fillRect(x0 + r - 1.5, y0 + 2, 3, 3); }                   // ô kính nhỏ
+  }
+  ctx.restore();
+  if (locked) {                                              // khu chưa mở: dán băng chéo
+    ctx.fillStyle = '#e8504a'; ctx.save(); ctx.translate(x0 + r, (y0 + y1) / 2); ctx.rotate(-0.6); ctx.fillRect(-w * 0.8, -1, w * 1.6, 2); ctx.restore();
+  }
+}
+
 /** v1.19 phòng giải trí: tầng chưa mở kéo cửa cuốn + nơ đỏ "sắp khai trương"; tầng đã mở vẽ đồ treo tường */
 function drawFunBack(ctx, L, env) {
   const FN = L && L.fun;

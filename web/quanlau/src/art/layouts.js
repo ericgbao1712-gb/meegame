@@ -170,9 +170,14 @@ const LAYOUTS = {
       rooms: { 1: { x0: 189, x1: 304, y0: 186, y1: 295 }, 2: { x0: 189, x1: 304, y0: 16, y1: 136 } },
       view: 312,
       // v1.20 khách mua vé: đi vỉa hè → cổng riêng → (cầu thang bên phải lên lầu) → chỗ chơi
-      nav: { spawnR: 344, spawnL: -124, walkY: 326, gateX: 274, inY: 282, upY: 124,
-        up: [[186, 282], [178, 258], [178, 198], [160, 148], [194, 128]],   // cầu thang chung của quán (stairs.bottom → via → top) rồi sang lầu karaoke
+      // v1.21 khách vào khu giải trí qua cổng quán → (cầu thang chung → chiếu nghỉ lầu) → cửa vòm hông cầu thang
+      nav: { spawnR: 344, spawnL: -124, walkY: 326,
+        door: { 1: { out: [182, 286], at: [195, 287], in: [207, 284], walk: 282 }, 2: { out: [184, 132], at: [195, 133], in: [207, 128], walk: 124 } },
         hide: { x0: 165, x1: 192, y0: 149, y1: 199 } },
+      doors: [
+        { floor: 2, x: 195, x0: 190.5, x1: 199.5, y0: 105, y1: 134, glow: '#b06cff', win: '#ff8ad8' },
+        { floor: 1, x: 195, x0: 190.5, x1: 199.5, y0: 258, y1: 288, glow: '#ffc4dc', win: '#8ae6ff' },
+      ],
       spots: {
         1: [{ x: 238, y: 232, pose: 'cheer', need: 'gt_phong' }, { x: 249, y: 232, pose: 'cheer', need: 'gt_phong' },
           { x: 244, y: 258, facing: 'up' }, { x: 288, y: 262, facing: 'up', need: 'gt_mayanh' }, { x: 226, y: 288, pose: 'cheer', need: 'gt_gapthu' },

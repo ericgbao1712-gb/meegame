@@ -4,7 +4,7 @@
 // at integer world coordinates and lands 1:1 on buffer pixels.
 import {
   drawSceneBack, sceneDrawables, drawSceneFront, drawTable, drawStove, drawCoinPile, drawBubble, drawParticle,
-  drawVehicle, drawWeather, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins, setSitLift, sitLiftFor,
+  drawVehicle, drawWeather, drawFunDoor, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins, setSitLift, sitLiftFor,
 } from '../art/index.js';
 import { PAL } from '../art/palette.js';
 import { TIME, RAIN, DECO, TIERS } from '../config.js';
@@ -21,6 +21,7 @@ const TAP_PX = 6;                 // CSS px: below this a press is a tap, above 
 const SLOP = 8;                   // generous world-px hit slop (§7)
 
 // y-sort entry kinds
+const doorOpen = [], doorDraw = [];
 const K_DRAW = 0, K_TABLE = 1, K_STOVE = 2, K_ACTOR = 3, K_COINS = 4, K_PED = 5, K_VEH = 6;
 
 export function createRenderer(canvas, game) {
@@ -509,6 +510,22 @@ export function createRenderer(canvas, game) {
     poolN = 0; list.length = 0;
     const drawables = sceneDrawables(s.tier, env);
     if (drawables) for (let i = 0; i < drawables.length; i++) push(K_DRAW, drawables[i].y, drawables[i]);
+    // v1.21 cửa vòm hông cầu thang: mở khi có khách khu giải trí đi tới gần, tự đóng lại
+    const FD = L && L.fun && L.fun.doors;
+    if (FD && s.tier >= 4) {
+      for (let i = 0; i < FD.length; i++) {
+        const dr = FD[i];
+        let near = false;
+        for (let j = 0; j < w.actors.length; j++) {
+          const a = w.actors[j];
+          if (a.type === 'funguest' && Math.abs(a.x - dr.x) < 13 && Math.abs(a.y - dr.y1) < 7) { near = true; break; }
+        }
+        doorOpen[i] = Math.max(0, Math.min(1, (doorOpen[i] || 0) + (near ? 1 : -1) * Math.min(0.1, (dt || 0.016)) * 5));
+        const o = doorDraw[i] || (doorDraw[i] = { y: 0, i, draw: (ctx) => drawFunDoor(ctx, FD[o.i], doorOpen[o.i] || 0, (L.funLevel | 0) < FD[o.i].floor) });
+        o.i = i; o.y = dr.y1 - 0.6;
+        push(K_DRAW, o.y, o);
+      }
+    }
     for (let i = 0; i < w.tables.length; i++) {
       const t = w.tables[i];
       push(K_TABLE, t.y, t);

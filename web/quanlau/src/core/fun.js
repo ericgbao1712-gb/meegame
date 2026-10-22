@@ -5,6 +5,7 @@ import { clamp, round2 } from './util.js';
 import { isWeekend } from './format.js';
 import { addMoney, builtFun, funPlaced } from './economy.js';
 import { makeActor, removeActor, setPath, stepActor, nid } from './world.js';
+import { route } from './routing.js';
 
 const F = () => C.FUN;
 const fail = (reason, msg) => ({ ok: false, reason, msg });
@@ -70,19 +71,20 @@ export function funRate(G, id) {
   return r;
 }
 
-// v1.20b lên lầu karaoke bằng cầu thang chung của quán (giữa quán ăn và khu giải trí), không còn cầu thang riêng
+// v1.21 khách đi như khách quán: vào cổng quán, (lên cầu thang chung tới chiếu nghỉ lầu), bước qua cửa vòm bên hông
+// cầu thang sang khu giải trí. Về thì đi ngược lại.
+const P = (a) => ({ x: a[0], y: a[1] });
 function pathIn(G, id, spot, startX) {
-  const N = G.world.layout.fun.nav, pts = [{ x: startX, y: N.walkY }, { x: N.gateX, y: N.walkY }, { x: N.gateX, y: N.inY }];
-  if (fl(id) === 2) { for (const p of N.up) pts.push({ x: p[0], y: p[1] }); pts.push({ x: spot.x, y: N.upY }); }
-  else pts.push({ x: spot.x, y: N.inY });
-  pts.push({ x: spot.x, y: spot.y });
+  const L = G.world.layout, D = L.fun.nav.door[fl(id)];
+  const pts = route(L, { x: startX, y: L.fun.nav.walkY }, P(D.out));
+  pts.push(P(D.at), P(D.in), { x: spot.x, y: D.walk }, { x: spot.x, y: spot.y });
   return pts;
 }
 function pathOut(G, id, a, endX) {
-  const N = G.world.layout.fun.nav, pts = [{ x: a.x, y: a.y }];
-  if (fl(id) === 2) { pts.push({ x: a.x, y: N.upY }); for (let i = N.up.length - 1; i >= 0; i--) pts.push({ x: N.up[i][0], y: N.up[i][1] }); }
-  else pts.push({ x: a.x, y: N.inY });
-  pts.push({ x: N.gateX, y: N.inY }, { x: N.gateX, y: N.walkY }, { x: endX, y: N.walkY });
+  const L = G.world.layout, D = L.fun.nav.door[fl(id)];
+  const pts = [{ x: a.x, y: a.y }, { x: a.x, y: D.walk }, P(D.in), P(D.at)];
+  const back = route(L, P(D.out), { x: endX, y: L.fun.nav.walkY });
+  for (const p of back) pts.push(p);
   return pts;
 }
 
@@ -137,7 +139,7 @@ export function funTick(G, dtMin) {
       else if (g.state !== 'out') { a.pose = a.spotPose; a.facing = a.spotFacing; }
     }
     const N = L && L.fun && L.fun.nav;
-    if (!g.paid && N && g.members.some((a) => a.y < N.walkY - 4)) { g.paid = true; pay(G, g); }   // qua cổng là mua vé
+    if (!g.paid && N && g.members.some((a) => a.x > 199 && a.y < 300)) { g.paid = true; pay(G, g); }   // v1.21 bước qua cửa vòm là mua vé
     if (g.state === 'in' && !g.members.some((a) => a.path)) {
       g.state = 'play';
     } else if (g.state === 'play') {

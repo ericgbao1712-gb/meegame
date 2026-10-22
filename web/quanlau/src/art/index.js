@@ -8,4 +8,5 @@ export {
   drawSceneBack, sceneDrawables, drawSceneFront, drawTable, drawStove, drawSteam, drawCoinPile,
   drawBubble, drawParticle, drawVehicle, drawWeather, drawCanopy, drawLighting, decoIconURL, sceneThumbURL,
   setSkins, skinPreviewURL,   // v1.18 Hộp mù
+  drawFunDoor,                // v1.21 cửa hông cầu thang
 } from './scenes.js';
