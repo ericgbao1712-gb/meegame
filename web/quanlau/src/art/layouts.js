@@ -169,11 +169,11 @@ const LAYOUTS = {
     // v1.19: bên trái = dãy bàn 2 tầng (cấp 1 trệt, cấp 2 lầu); bên phải = phòng giải trí (art/scenes.js, fun)
     // v1.23 mỗi tầng dãy bên kê 2 hàng × 2 bàn (trước 1 hàng) cho đỡ trống, cách nhau như bàn trong quán; đèn treo trên từng cặp bàn
     wing: { perLevel: 4,
-      tables: [table(-30, 250, 1), table(-76, 250, 1), table(-30, 280, 1), table(-76, 280, 1), table(-30, 88, 2), table(-76, 88, 2), table(-30, 116, 2), table(-76, 116, 2)],
-      aisles: [-53], y: 234,
-      waiters: [{ x: -53, y: 236 }, { x: -53, y: 74 }], view: [-104, 292], leftOnly: true,
-      lamps: [{ x: -30, y: 200, lvl: 1 }, { x: -76, y: 200, lvl: 1 }, { x: -30, y: 34, lvl: 2 }, { x: -76, y: 34, lvl: 2 }],
-      lights: [{ x: -30, y: 262, r: 34, lvl: 1 }, { x: -76, y: 262, r: 34, lvl: 1 }, { x: -30, y: 98, r: 32, lvl: 2 }, { x: -76, y: 98, r: 32, lvl: 2 }] },
+      tables: [table(-24, 250, 1), table(-68, 250, 1), table(-24, 280, 1), table(-68, 280, 1), table(-24, 88, 2), table(-68, 88, 2), table(-24, 116, 2), table(-68, 116, 2)],
+      aisles: [-46], y: 234,
+      waiters: [{ x: -46, y: 236 }, { x: -46, y: 74 }], view: [-104, 292], leftOnly: true,
+      lamps: [{ x: -24, y: 200, lvl: 1 }, { x: -68, y: 200, lvl: 1 }, { x: -24, y: 34, lvl: 2 }, { x: -68, y: 34, lvl: 2 }],
+      lights: [{ x: -24, y: 262, r: 34, lvl: 1 }, { x: -68, y: 262, r: 34, lvl: 1 }, { x: -24, y: 98, r: 32, lvl: 2 }, { x: -68, y: 98, r: 32, lvl: 2 }] },
     // v1.19 phòng giải trí bên phải: vùng trong phòng (world px) theo tầng, khách tham quan đứng / ngồi khi quán mở
     fun: {
       rooms: { 1: { x0: 202, x1: 304, y0: 186, y1: 295 }, 2: { x0: 202, x1: 304, y0: 16, y1: 136 } },   // v1.23 bắt đầu sau vách hông (đèn không lọt ra cửa)
