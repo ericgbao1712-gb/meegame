@@ -307,7 +307,9 @@ export const SHIP = {
   tripMin: [9, 15],                      // phút game chạy đi giao rồi về (chia cho tốc độ shipper)
   fee: 15,                               // phí ship (k) khách trả thêm
   drinkChance: 0.45, sideChance: 0.3,
-  promiseMin: 55, starsAt: [[40, 5], [55, 4], [75, 3], [Infinity, 2]],   // tổng phút (từ lúc gọi tới lúc nhận) → sao
+  // v1.25k: chấm theo thời gian bếp + giao (bỏ phần chờ trong hàng), mốc rộng hơn; giao tới nơi luôn ≥ 3★, 2★ chỉ khi hủy đơn
+  promiseMin: 70, starsAt: [[55, 5], [80, 4], [Infinity, 3]],
+  minStars: 3, rushGrace: 15,             // giờ cao điểm khách thông cảm thêm 15 phút
   tipChance: 0.35, tip: [5, 15],
   reviewChance: 0.25,
   reviews: {

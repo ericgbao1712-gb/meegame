@@ -1765,3 +1765,6 @@ button.hchip:active { transform: translateY(2px); }
   padding: 2px 5px 2px 6px; color: #ffe58a; -webkit-font-smoothing: antialiased; }
 .cl-row.cl-admin .adm-frame .adm-ribbon { font-size: 6.5px; letter-spacing: .08em; padding: 1px 3px 1px 4px; bottom: -6px; }
 .adm-tag { font-family: var(--f-body) !important; font-weight: 900; text-shadow: none; }
+/* v1.25k đánh giá + combo chuyển xuống góc dưới bên phải (trước che phòng Karaoke ở góc trên) */
+.corner-r { top: auto; bottom: 48px; flex-direction: column-reverse; max-width: 38%; }
+.corner-r .rev-pop { max-width: 140px; opacity: .96; }

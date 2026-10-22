@@ -85,9 +85,12 @@ export function deliver(G, o) {
   const s = G.state, w = G.world, rng = G.rng;
   if (!o || o.status === 'done') return null;
   o.status = 'done';
-  const mins = Math.max(0, w.tMin - o.created);
-  let stars = 2;
+  let mins = Math.max(0, w.tMin - o.created);
+  if (w.rushOn) mins -= S().rushGrace || 0;                        // v1.25k giờ cao điểm khách thông cảm hơn
+  let stars = S().minStars || 2;
   for (const [lim, st] of S().starsAt) if (mins <= lim) { stars = st; break; }
+  stars = Math.max(S().minStars || 2, stars);                      // giao tới nơi thì không bị 2★ (2★ chỉ khi hủy đơn)
+  mins = Math.max(0, w.tMin - o.created);
   let drinksRev = 0;
   for (const d of o.drinks) drinksRev += DRINK[d].price;
   let sidesRev = 0;
