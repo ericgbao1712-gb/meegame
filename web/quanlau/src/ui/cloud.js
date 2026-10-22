@@ -368,7 +368,7 @@ export function accountPanel({ compact = false, gate = false } = {}) {
     let pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
     if (p.admin) {                                                  // v1.25b ảnh riêng của admin (tải lên) thay ảnh Google
       if (p.adminPic) pic = h('img', { class: 'cl-pic', src: p.adminPic, alt: '', width: 40, height: 40 });
-      pic = adminFrame(pic, { size: 56 });
+      pic = adminFrame(pic, { size: 72 });
     }   // v1.25 khung hoàng gia cho admin
     const saveBtn = h('button', { class: 'btn jade sm', onclick: async () => { sfx('click'); saveBtn.disabled = true; const ok = await upload({ force: false }); saveBtn.disabled = false; ctx.toast(ok ? 'Đã lưu lên mạng!' : (st.lastErr || 'Vừa lưu rồi, đợi chút nha.'), ok ? 'good' : 'info', ok ? 'ui_check' : 'ui_info'); } }, 'Lưu ngay');
     add(
@@ -377,7 +377,7 @@ export function accountPanel({ compact = false, gate = false } = {}) {
         h('button', { class: 'btn jade sm', onclick: async (e) => {
           sfx('click');
           const b = e.currentTarget;
-          const data = await pickSquareImage(384);
+          const data = await pickSquareImage(512);
           if (!data) return;
           if (b) b.disabled = true;
           const r = await api('POST', '/admin-pic', { image: data });
@@ -527,7 +527,7 @@ export function leaderboardView(body, api2) {
     const myBadge = S().box?.badge || null;   // v1.25c dòng của mình luôn hiện đúng thẻ đang đeo (kể cả khi máy chủ chưa kịp nhận)
     for (const r of data.rows) {
       if (r.me) r.badge = myBadge;
-      const av = r.admin ? (() => { const im = h('img', { class: r.adminPic ? '' : 'pix', alt: '', width: 36, height: 36 }); try { im.src = r.adminPic || portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 48 }); })() : null;
+      const av = r.admin ? (() => { const im = h('img', { class: r.adminPic ? '' : 'pix', alt: '', width: 52, height: 52 }); try { im.src = r.adminPic || portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 56 }); })() : null;
       list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : badgeRowCls(r.badge)),
         span('cl-rank num', String(r.rank)), av,
         div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, badgePlate(r.badge), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),

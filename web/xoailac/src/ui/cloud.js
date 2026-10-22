@@ -363,7 +363,7 @@ export function accountPanel({ compact = false, gate = false } = {}) {
     let pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
     if (p.admin) {                                                  // v1.25b ảnh riêng của admin (tải lên) thay ảnh Google
       if (p.adminPic) pic = h('img', { class: 'cl-pic', src: p.adminPic, alt: '', width: 40, height: 40 });
-      pic = adminFrame(pic, { size: 56 });
+      pic = adminFrame(pic, { size: 72 });
     }   // v1.25
     const saveBtn = h('button', { class: 'btn jade sm', onclick: async () => { sfx('click'); saveBtn.disabled = true; const ok = await upload({ force: false }); saveBtn.disabled = false; ctx.toast(ok ? 'Đã lưu lên mạng!' : (st.lastErr || 'Vừa lưu rồi, đợi chút nha.'), ok ? 'good' : 'info', ok ? 'ui_check' : 'ui_info'); } }, 'Lưu ngay');
     add(
@@ -372,7 +372,7 @@ export function accountPanel({ compact = false, gate = false } = {}) {
         h('button', { class: 'btn jade sm', onclick: async (e) => {
           sfx('click');
           const b = e.currentTarget;
-          const data = await pickSquareImage(384);
+          const data = await pickSquareImage(512);
           if (!data) return;
           if (b) b.disabled = true;
           const r = await api('POST', '/admin-pic', { image: data });
@@ -521,7 +521,7 @@ export function leaderboardView(body, api2) {
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
       list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : ''),
-        span('cl-rank num', String(r.rank)), r.admin ? adminFrame(r.adminPic ? h('img', { alt: '', width: 36, height: 36, src: r.adminPic }) : ico('ui_heart', 32), { size: 48 }) : null,
+        span('cl-rank num', String(r.rank)), r.admin ? adminFrame(r.adminPic ? h('img', { alt: '', width: 52, height: 52, src: r.adminPic }) : ico('ui_heart', 32), { size: 56 }) : null,
         div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
         span('num cl-val', B.fmt(r.value))));
     }
