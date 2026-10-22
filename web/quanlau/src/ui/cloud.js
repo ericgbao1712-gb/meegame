@@ -219,7 +219,9 @@ function closeGate() {
 // "Có chơi thêm không": chỉ tính tiến trình thật — tiền chi nhánh tự chảy về khi để máy mở không tính là đã chơi.
 const sum = (o) => Object.values(o || {}).reduce((a, v) => a + (Number(v) || 0), 0);
 const sigOf = (s) => [s.day, s.phase, s.level, Math.floor(s.xp || 0), s.tier, s.stats?.potsSold, s.stats?.served, s.shopName,
-  sum(s.upgrades), (s.deco?.owned || []).length, sum(s.branches), s.location, (s.staff || []).length].join('|');
+  sum(s.upgrades), (s.deco?.owned || []).length, sum(s.branches), s.location, (s.staff || []).length,
+  // v1.25c đồ Hộp mù đang dùng (thẻ, nồi, bàn, ghế…): đổi / thôi dùng cũng phải lưu lên mạng để bảng xếp hạng cập nhật
+  s.box?.badge || '', s.box?.pot || '', s.box?.table || '', s.box?.chair || '', s.box?.tform || '', s.box?.cform || ''].join('|');
 function syncRec() { try { const o = JSON.parse(lsGet(SYNC_KEY) || 'null'); return o && st.player && o.pid === st.player.id ? o : null; } catch (e) { return null; } }
 function setSync(base, sig) { if (st.player) lsSet(SYNC_KEY, JSON.stringify({ pid: st.player.id, base, sig })); }
 const localSummary = (s) => ({ level: s.level || 1, day: s.day || 1, money: s.money || 0, savedAt: s.savedAt || 0, shopName: s.shopName });
@@ -317,6 +319,7 @@ export async function reconcile(why) {
 
 // ───────────── boot / timers ─────────────
 export function initCloud(game) {
+  try { hookEquipSync(game); } catch (e) { /* ignore */ }   // v1.25c
   const tick = () => {
     if (!st.player || st.busy || document.hidden) return;
     const s = S();
@@ -521,7 +524,9 @@ export function leaderboardView(body, api2) {
     list.textContent = '';
     if (!data) { list.appendChild(span('muted sm', 'Chưa tải được bảng xếp hạng (cần mạng).')); return; }
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
+    const myBadge = S().box?.badge || null;   // v1.25c dòng của mình luôn hiện đúng thẻ đang đeo (kể cả khi máy chủ chưa kịp nhận)
     for (const r of data.rows) {
+      if (r.me) r.badge = myBadge;
       const av = r.admin ? (() => { const im = h('img', { class: r.adminPic ? '' : 'pix', alt: '', width: 36, height: 36 }); try { im.src = r.adminPic || portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 48 }); })() : null;
       list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : badgeRowCls(r.badge)),
         span('cl-rank num', String(r.rank)), av,
@@ -547,3 +552,13 @@ export function leaderboardView(body, api2) {
 }
 
 export const cloudState = st;
+
+// v1.25c bấm Dùng / Thôi dùng đồ Hộp mù → lưu lên mạng ngay (không đợi chu kỳ 2 phút), xoá bảng xếp hạng đã nhớ
+let equipT = 0;
+export function hookEquipSync(game) {
+  (game || ctx.game)?.on?.('boxEquip', () => {
+    for (const k in boardCache) delete boardCache[k];
+    clearTimeout(equipT);
+    equipT = setTimeout(() => { upload(); }, 800);
+  });
+}

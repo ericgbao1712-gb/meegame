@@ -136,7 +136,7 @@ export function equipBox(G, id, on = true) {
   G.emit('boxEquip', { kind: it.kind, id, on });
   return { ok: true, kind: it.kind, on };
 }
-export const setBadge = (G, id) => (id == null ? (boxState(G.state).badge = null, { ok: true }) : equipBox(G, id, true));
+export const setBadge = (G, id) => (id == null ? (boxState(G.state).badge = null, G.emit('boxEquip', { kind: 'badge', id: null, on: false }), { ok: true }) : equipBox(G, id, true));   // v1.25c báo để lưu lên mạng
 
 export function boxInfo(G, set = 'hop') {
   const s = G.state, all = boxState(s), b = ctr(all, set), P = SET(set);
