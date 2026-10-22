@@ -521,7 +521,7 @@ export function leaderboardView(body, api2) {
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
       list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : ''),
-        span('cl-rank num', String(r.rank)), r.admin ? adminFrame(r.adminPic ? h('img', { alt: '', width: 52, height: 52, src: r.adminPic }) : ico('ui_heart', 32), { size: 56 }) : null,
+        span('cl-rank num', String(r.rank)), r.admin ? adminFrame(r.adminPic ? h('img', { alt: '', width: 52, height: 52, src: r.adminPic }) : ico('ui_heart', 32), { size: 38 }) : null,
         div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
         span('num cl-val', B.fmt(r.value))));
     }

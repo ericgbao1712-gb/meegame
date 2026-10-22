@@ -1751,3 +1751,12 @@ button.hchip:active { transform: translateY(2px); }
 .adm-crop-z { display: flex; align-items: center; gap: 8px; width: 100%; font: 900 18px/1 var(--f-body); color: #7a3b00; }
 .adm-crop-z input { flex: 1; accent-color: #e3a020; }
 .adm-crop-b { display: flex; gap: 10px; width: 100%; } .adm-crop-b .btn { flex: 1; }
+/* v1.25h dòng admin trên bảng xếp hạng gọn lại: cao bằng các dòng khác */
+.cl-row.cl-admin { padding-top: 6px; padding-bottom: 6px; min-height: 0; }
+.cl-row.cl-admin .adm-frame { margin: 0 6px 4px 0; }
+.cl-row.cl-admin .adm-frame .adm-gem { width: 5px; height: 5px; }
+.cl-row.cl-admin .adm-frame .adm-ribbon { bottom: -5px; padding: 0 3px 1px; font-size: 5.5px; letter-spacing: .1em; border-width: 1px; }
+.cl-row.cl-admin .adm-frame .adm-ribbon::before, .cl-row.cl-admin .adm-frame .adm-ribbon::after { display: none; }
+.cl-row.cl-admin .grow { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 6px; row-gap: 2px; }
+.cl-row.cl-admin .adm-tag { margin: 0; padding: 1px 6px 1px 4px; font-size: 9px; gap: 3px; border-width: 1px; }
+.cl-row.cl-admin .adm-tag .adm-crown { width: 12px; height: 9px; }
