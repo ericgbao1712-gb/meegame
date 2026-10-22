@@ -12,7 +12,7 @@ const DECO_FUN = Object.fromEntries(DECO.filter((d) => d.fun).map((d) => [d.id, 
 function drawFunBack(ctx, L, env) {
   const FN = L && L.fun;
   if (!FN || !env.funAvail) return;
-  for (const fl of [1]) {                 // v1.19c lầu chưa xây thì ảnh nền đã là sân thượng, chỉ tầng trệt cần cửa cuốn
+  for (const fl of [1, 2]) {             // v1.19e tầng chưa mở kéo cửa cuốn
     const r = FN.rooms[fl];
     if ((env.funLevel | 0) >= fl) continue;
     const w = r.x1 - r.x0, h = r.y1 - r.y0;
