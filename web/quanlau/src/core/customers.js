@@ -741,7 +741,8 @@ export function beginClosing(G) {
 
 export function resetCustomers(G) {
   const w = G.world;
-  for (const a of w.actors.slice()) if (a.type === 'customer') removeActor(G, a);
+  for (const a of w.actors.slice()) if (a.type === 'customer' || a.type === 'funguest') removeActor(G, a);   // v1.20 + khách khu vui chơi
+  if (w.funGroups) w.funGroups.length = 0;
   w.groups.length = 0; w.tickets.length = 0; w.tray.ticketId = null;
   for (let i = 0; i < w.doors.length; i++) w.doors[i] = 0;
   for (const t of w.tables) { t.status = 'free'; t.groupId = 0; t.coins = null; t.claimedBy = 0; resetTableView(t); }

@@ -8,11 +8,14 @@ import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
-  ver: 119,
+  ver: 120,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Phòng giải trí 2 lầu!',
+  hero: 'Khu Karaoke & Photo mở bán vé!',
   items: [
-    { icon: 'ui_hopmu', title: 'Phòng giải trí + dãy bên 2 lầu', lv: 28, isNew: true,
+    { icon: 'ui_ticket', title: 'Bán vé Karaoke & Photo', lv: 28, isNew: true,
+      text: 'Khu vui chơi bên phải nhà hàng 2 lầu giờ có **khách mua vé ra vào**: chụp ảnh ở Photo Studio tầng trệt, đi **cầu thang mới** lên lầu hát Karaoke. Đặt giá vé ở **Thực đơn ▸ Giá bán ▸ Vé Karaoke & Photo**. Bày thêm đồ trong phòng để có thêm chỗ chơi.',
+      go: ['menu', 'gia'], goLabel: 'Đặt giá vé' },
+    { icon: 'ui_hopmu', title: 'Phòng giải trí + dãy bên 2 lầu', lv: 28,
       text: 'Nhà hàng 2 lầu mở rộng hai bên: **bên trái** thêm bàn ăn ở tầng trệt và **trên lầu**, **bên phải** là **Phòng giải trí**: Photo Studio tầng trệt, Karaoke trên lầu. 12 món đồ mới (phông chụp, đèn vòng, sân khấu, sofa, quả cầu disco…) nhận từ **Nhiệm vụ Level** và **Hộp mù**. Bày ở **Quán ▸ Trang trí ▸ Phòng giải trí**.',
       go: ['shop', 'deco'], goLabel: 'Xem Phòng giải trí' },
     { icon: 'ui_hopmu', title: 'Hộp mù', lv: C.FEATURES.blindbox,

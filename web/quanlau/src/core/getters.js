@@ -1,4 +1,5 @@
 // Pure derived helpers for the UI/renderer (TECH_SPEC §5.3). Cheap enough to call every frame.
+import * as fun from './fun.js';
 import * as C from '../config.js';
 import {
   ING, POT, UP, xpNeed, tierDef, builtTables, allTables, builtStoves, khoInfo, buyPrice as baseBuyPrice, potPrice, masteryStars,
@@ -196,6 +197,7 @@ export function createGetters(G) {
   }
 
   // ───────────── v1.14 giá bán + thuế ─────────────
+  const funInfo = () => fun.funInfo(G);   // v1.20
   function priceInfo(potId) {
     const p = POT[potId];
     if (!p) return null;
@@ -226,7 +228,7 @@ export function createGetters(G) {
   }
 
   return {
-    priceInfo, taxInfo, menuPriceDemand: () => menuPriceDemand(G),
+    priceInfo, taxInfo, funInfo, menuPriceDemand: () => menuPriceDemand(G),
     lotteryInfo: () => lotteryInfo(G),   // v1.15
     boxInfo: (set) => boxInfo(G, set),
     decoMore: () => decoMoreInfo(G),     // v1.18p           // v1.18

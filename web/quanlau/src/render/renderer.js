@@ -21,7 +21,6 @@ const TAP_PX = 6;                 // CSS px: below this a press is a tap, above 
 const SLOP = 8;                   // generous world-px hit slop (§7)
 
 // y-sort entry kinds
-const funLooks = [], funDraws = [], funOpts = {};
 const K_DRAW = 0, K_TABLE = 1, K_STOVE = 2, K_ACTOR = 3, K_COINS = 4, K_PED = 5, K_VEH = 6;
 
 export function createRenderer(canvas, game) {
@@ -510,21 +509,6 @@ export function createRenderer(canvas, game) {
     poolN = 0; list.length = 0;
     const drawables = sceneDrawables(s.tier, env);
     if (drawables) for (let i = 0; i < drawables.length; i++) push(K_DRAW, drawables[i].y, drawables[i]);
-    // v1.19 khách chơi phòng giải trí (chỉ khi quán mở, tầng đó đã mở, có món cần)
-    if (L.fun && env.open && env.funLevel > 0) {
-      const placed = env.fun;
-      for (let i = 0; i < L.fun.npcs.length; i++) {
-        const n = L.fun.npcs[i];
-        if (n.floor > env.funLevel || (n.need && !placed.includes(n.need))) continue;
-        if (!funLooks[i]) funLooks[i] = makeLook(n.kind, n.seed, n.idx);
-        const d = funDraws[i] || (funDraws[i] = { y: 0, draw: (ctx) => {
-          funOpts.pose = n.pose; funOpts.facing = n.facing; funOpts.alpha = 1; funOpts.carry = null; funOpts.t = time + i * 0.61;
-          drawChar(ctx, funLooks[i], n.x, n.y, funOpts);
-        } });
-        d.y = n.sortY != null ? n.sortY : n.y;
-        push(K_DRAW, d.y, d);
-      }
-    }
     for (let i = 0; i < w.tables.length; i++) {
       const t = w.tables[i];
       push(K_TABLE, t.y, t);
@@ -536,7 +520,13 @@ export function createRenderer(canvas, game) {
     for (let i = 0; i < w.actors.length; i++) {
       const a = w.actors[i];
       if (a.hidden || a.x < xl || a.x > xr) continue;
-      if (sh && a.x >= sh.x0 && a.y > sh.y0 && a.y < sh.y1) continue;   // v1.3: inside the stair well, behind the facade
+      if (sh && a.x >= sh.x0 && a.y > sh.y0 && a.y < sh.y1 && a.x < (L.w || 1e9)) continue;   // v1.3: inside the stair well, behind the facade
+      if (a.type === 'funguest') {                                       // v1.20 khách khu vui chơi: khuất sau biển khi đi cầu thang
+        const fh = L.fun && L.fun.nav && L.fun.nav.hide;
+        if (fh && a.x >= fh.x0 && a.x <= fh.x1 && a.y > fh.y0 && a.y < fh.y1) continue;
+        push(K_ACTOR, a.sortY != null && !a.path ? a.sortY : a.y, a);
+        continue;
+      }
       push(K_ACTOR, a.y, a);
     }
     for (let i = 0; i < amb.peds.length; i++) push(K_PED, amb.peds[i].y, amb.peds[i]);

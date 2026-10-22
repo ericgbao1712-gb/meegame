@@ -1,4 +1,5 @@
 // createGame(): the whole simulation behind one object (TECH_SPEC §3–§6). DOM-free.
+import * as fun from './fun.js';   // v1.20 khu vui chơi
 import * as C from '../config.js';
 import { clamp, round2, clone } from './util.js';
 import { createRng } from './rng.js';
@@ -112,6 +113,7 @@ export function createGame(save, opts = {}) {
     customers.spawnTick(G, dtMin);
     day.tickReservations(G, dtMin);
     customers.updateGroups(G, dtMin);
+    fun.funTick(G, dtMin);   // v1.20 khách Karaoke & Photo
     rain.rainTick(G, dtMin, customers.angryLeave);
     workers.updateWorkers(G, dtMin);
     quankhoTick(G, dtMin);
@@ -203,7 +205,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
-      state.flags.ui.seenNews = 119;   // v1.16 người chơi mới không cần bảng "Có gì mới"
+      state.flags.ui.seenNews = 120;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),
@@ -257,6 +259,7 @@ export function createGame(save, opts = {}) {
       return { ok: true, changed, capped };
     }),
     payTax: wrap(() => payTax(G)),   // v1.14
+    setFunPrice: wrap((id, price) => fun.setTicketPrice(G, id, price)),   // v1.20 giá vé khu vui chơi
     placeBet: wrap((num, amount) => lottery.placeBet(G, num, amount)),   // v1.15 Đoán số
     checkTickets: wrap((id) => lottery.checkTickets(G, id)),            // v1.15 dò vé
     claimPrize: wrap((id) => lottery.claimPrize(G, id)),                // v1.15 nhận thưởng

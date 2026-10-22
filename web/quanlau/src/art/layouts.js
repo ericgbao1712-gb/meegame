@@ -169,16 +169,17 @@ const LAYOUTS = {
     fun: {
       rooms: { 1: { x0: 201, x1: 304, y0: 186, y1: 295 }, 2: { x0: 201, x1: 304, y0: 16, y1: 136 } },
       view: 312,
-      npcs: [
-        { floor: 1, x: 238, y: 232, pose: 'cheer', facing: 'down', need: 'gt_phong', kind: 'capdoi', seed: 3, idx: 1 },
-        { floor: 1, x: 249, y: 232, pose: 'cheer', facing: 'down', need: 'gt_phong', kind: 'capdoi', seed: 3, idx: 0 },
-        { floor: 1, x: 244, y: 260, pose: 'idle', facing: 'up', kind: 'hoiban', seed: 7, idx: 1 },
-        { floor: 1, x: 226, y: 290, pose: 'cheer', facing: 'down', need: 'gt_gapthu', kind: 'giadinh', seed: 5, idx: 2 },
-        { floor: 2, x: 246, y: 72, pose: 'cheer', facing: 'down', need: 'gt_sankhau', kind: 'hoiban', seed: 9, idx: 0 },
-        { floor: 2, x: 224, y: 110, sortY: 113, pose: 'sit', facing: 'down', need: 'gt_sofa', kind: 'vanphong', seed: 4, idx: 0 },
-        { floor: 2, x: 240, y: 110, sortY: 113, pose: 'sit', facing: 'down', need: 'gt_sofa', kind: 'sinhvien', seed: 2, idx: 1 },
-        { floor: 2, x: 286, y: 118, pose: 'cheer', facing: 'down', kind: 'capdoi', seed: 6, idx: 1 },
-      ],
+      // v1.20 khách mua vé: đi vỉa hè → cổng riêng → (cầu thang bên phải lên lầu) → chỗ chơi
+      nav: { spawnR: 344, spawnL: -124, walkY: 326, gateX: 274, inY: 282, stairX: 297, stairBot: 280, stairTop: 132, upY: 124,
+        hide: { x0: 288, x1: 306, y0: 136, y1: 198 } },
+      spots: {
+        1: [{ x: 238, y: 232, pose: 'cheer', need: 'gt_phong' }, { x: 249, y: 232, pose: 'cheer', need: 'gt_phong' },
+          { x: 244, y: 258, facing: 'up' }, { x: 274, y: 262, facing: 'up', need: 'gt_mayanh' }, { x: 226, y: 288, pose: 'cheer', need: 'gt_gapthu' },
+          { x: 218, y: 262, facing: 'left' }, { x: 258, y: 276, facing: 'up' }, { x: 230, y: 250, facing: 'right' }],
+        2: [{ x: 246, y: 72, pose: 'cheer', need: 'gt_sankhau' }, { x: 224, y: 110, pose: 'sit', need: 'gt_sofa', sortY: 113 }, { x: 240, y: 110, pose: 'sit', need: 'gt_sofa', sortY: 113 },
+          { x: 262, y: 100, pose: 'cheer' }, { x: 276, y: 112, pose: 'cheer' }, { x: 256, y: 122, facing: 'up' }, { x: 270, y: 124, pose: 'sit', need: 'gt_gheluoi' },
+          { x: 230, y: 90, facing: 'up' }],
+      },
     },
   },
 };

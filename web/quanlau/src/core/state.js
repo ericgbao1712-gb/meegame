@@ -37,7 +37,8 @@ export function defaultState(now = Date.now()) {
   return {
     v: C.VERSION, savedAt: now, createdAt: now,
     started: false,
-    prices: {},                                                   // v1.14 giá bán người chơi tự đặt (k) theo món
+    prices: {},
+    funPrices: {},                                                // v1.20 giá vé khu vui chơi (k)                                                   // v1.14 giá bán người chơi tự đặt (k) theo món
     tax: { since: 0, base: 0, bill: null, nextId: 1, history: [] }, // v1.14 thuế: kỳ đang tính + tờ thông báo chưa đóng
     shopName: C.START.shopName, avatar: 0, uniform: { staff: 'do', owner: 'do', staffStyle: 'tron', ownerStyle: 'tron' },
     money: C.START.money, xp: 0, level: 1, tier: 1,

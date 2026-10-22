@@ -581,8 +581,8 @@ export const DECO = [
   { id: 'gt_phong', cat: 'giaitri', name: 'Phông chụp + vòm hoa giấy', price: 0, amb: 8, source: 'box', box: 'bx_gt_phong', fun: { floor: 1, x: 243, y: 232 }, effect: { demandMult: 1.04 }, desc: 'Góc sống ảo của quán. Khách +4%.' },
   { id: 'gt_denvong', cat: 'giaitri', name: 'Đèn vòng chụp ảnh', price: 0, amb: 3, source: 'box', box: 'bx_gt_denvong', fun: { floor: 1, x: 210, y: 256 }, effect: { tipMult: 1.03 }, desc: 'Ảnh lung linh, khách vui tip thêm. Tip +3%.' },
   { id: 'gt_bongbay', cat: 'giaitri', name: 'Chùm bóng bay', price: 0, amb: 3, source: 'box', box: 'bx_gt_bongbay', fun: { floor: 1, x: 266, y: 288 }, effect: { patienceMult: 1.02 }, desc: 'Kiên nhẫn +2%.' },
-  { id: 'gt_polaroid', cat: 'giaitri', name: 'Tường ảnh polaroid', price: 0, amb: 4, source: 'box', box: 'bx_gt_polaroid', fun: { floor: 1, x: 290, y: 198, wall: true }, effect: { patienceMult: 1.03 }, desc: 'Khách ngắm ảnh trong lúc chờ. Kiên nhẫn +3%.' },
-  { id: 'gt_mayanh', cat: 'giaitri', name: 'Máy chụp ảnh lấy liền (to)', price: 0, amb: 8, source: 'box', box: 'bx_gt_mayanh', fun: { floor: 1, x: 288, y: 246 }, effect: { demandMult: 1.05 }, desc: 'Khách +5%.' },
+  { id: 'gt_polaroid', cat: 'giaitri', name: 'Tường ảnh polaroid', price: 0, amb: 4, source: 'box', box: 'bx_gt_polaroid', fun: { floor: 1, x: 274, y: 198, wall: true }, effect: { patienceMult: 1.03 }, desc: 'Khách ngắm ảnh trong lúc chờ. Kiên nhẫn +3%.' },
+  { id: 'gt_mayanh', cat: 'giaitri', name: 'Máy chụp ảnh lấy liền (to)', price: 0, amb: 8, source: 'box', box: 'bx_gt_mayanh', fun: { floor: 1, x: 274, y: 246 }, effect: { demandMult: 1.05 }, desc: 'Khách +5%.' },
   { id: 'gt_gapthu', cat: 'giaitri', name: 'Máy gắp thú', price: 0, amb: 6, source: 'box', box: 'bx_gt_gapthu', fun: { floor: 1, x: 214, y: 288 }, effect: { patienceMult: 1.05 }, desc: 'Trẻ em mê lắm. Kiên nhẫn +5%.' },
   { id: 'gt_neon', cat: 'giaitri', name: 'Bảng neon KARAOKE', price: 0, amb: 4, source: 'box', box: 'bx_gt_neon', fun: { floor: 2, x: 222, y: 22, wall: true }, effect: { demandMult: 1.02 }, desc: 'Khách +2%.' },
   { id: 'gt_disco', cat: 'giaitri', name: 'Quả cầu disco', price: 0, amb: 4, source: 'box', box: 'bx_gt_disco', fun: { floor: 2, x: 276, y: 17, wall: true }, effect: { tipMult: 1.03 }, desc: 'Tip +3%.' },
@@ -821,6 +821,19 @@ export const MAIN_QUEST_INSERTS = [{ after: 'q26', n: 2 }, { after: 'q32', n: 1 
 export const MAIN_QUESTS_V116 = ['qp1', 'ql1', 'qs1', 'qs2', 'qt1'];
 export const MAIN_QUESTS_V117 = ['qn1', 'qn2'];
 export const MAIN_QUESTS_V118 = ['qb1'];
+// v1.20 Khu vui chơi: bán vé Photo Studio (tầng trệt) và Karaoke (lầu). Giá vé đặt ở Thực đơn ▸ Giá bán ▸ Vé.
+export const FUN = {
+  tickets: {
+    photo: { name: 'Vé Photo Studio', icon: 'ui_hopmu', floor: 1, ref: 35, group: [1, 3], stay: [25, 50], perHour: 3.2, desc: 'Chụp ảnh lấy liền, phông hoa giấy, máy gắp thú.' },
+    kara: { name: 'Vé Karaoke', icon: 'ui_ticket', floor: 2, ref: 80, group: [2, 4], stay: [45, 90], perHour: 2.2, desc: 'Phòng hát trên lầu: sân khấu, sofa, quầy nước.' },
+  },
+  tier5Mult: 1.3,                // nhà hàng lớn (bậc 5) giá gợi ý cao hơn
+  minMult: 0.5, maxMult: 2.5,    // giá đặt được = giá gợi ý × [0,5 … 2,5]
+  priceExp: 1.6,                 // khách ∝ (giá / gợi ý)^-1,6
+  perItem: 0.12,                 // mỗi món đồ giải trí đang bày ở tầng đó: +12% khách
+  weekendMult: 1.3, rainMult: 1.25,
+  hourCurve: { 10: 0.4, 11: 0.6, 12: 0.7, 13: 0.8, 14: 1, 15: 1, 16: 1, 17: 1.1, 18: 1.3, 19: 1.5, 20: 1.6, 21: 1.4, 22: 0.9 },
+};
 export const MAIN_QUESTS_V119 = ['qg1', 'qg2', 'qg3', 'qg4', 'qg5'];
 
 // Daily tasks: 3 picked per game day from the pool (only those whose `minLv` ≤ level).

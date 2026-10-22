@@ -67,8 +67,49 @@ function bulkCard(api, pots) {
     h('button', { class: 'btn paper sm block', type: 'button', disabled: !anyCustom, onclick: () => run(null) }, 'Tất cả về giá gợi ý'));
 }
 
+let priceTab = 'mon';
+function ticketCard(t, api) {
+  const set = (v) => { const r = act('setFunPrice', t.id, v); if (r.ok === false) return; sfx('click'); api.rerender(); };
+  const step = (d) => {
+    const v = t.price + d;
+    return h('button', { class: 'pstep', type: 'button', disabled: !t.open || v < t.min || v > t.max, 'aria-label': (d > 0 ? 'Tăng ' : 'Giảm ') + Math.abs(d) + 'k',
+      onclick: () => set(Math.max(t.min, Math.min(t.max, v))) }, d > 0 ? '+' : '−');
+  };
+  const band = { cheap: ['jade', 'Rẻ'], normal: ['gold', 'Vừa'], pricey: ['red', 'Cao'] }[t.band] || ['gold', 'Vừa'];
+  const pct = Math.round((t.demand - 1) * 100);
+  const def = C.FUN.tickets[t.id];
+  return div('card pc-card band-' + t.band + (t.open ? '' : ' off'),
+    div('pc-top',
+      ico(t.icon, 32, 'pc-ico'),
+      div('pc-name', h('b', null, t.name), span('muted sm', t.open ? `Gợi ý ${fmtShort(t.ref)}/người · ${t.floor === 1 ? 'tầng trệt' : 'trên lầu'}` : (t.floor === 1 ? 'Mở Photo Studio ở Nâng cấp ▸ Phòng giải trí' : 'Mở Karaoke trên lầu ở Nâng cấp ▸ Phòng giải trí'))),
+      div('pc-ctl', step(-1), span('num pc-v', fmtShort(t.price)), step(1))),
+    div('pc-info',
+      span('chip ' + band[0], band[1]),
+      span(pct >= 0 ? 'pe-ok' : 'pe-bad', (pct >= 0 ? 'Khách +' : 'Khách −') + Math.abs(pct) + '%'),
+      span('muted', t.open ? (t.playing ? `Đang chơi: ${t.playing} người` : `${t.spots} chỗ chơi`) : def.desc),
+      t.open ? h('span', { class: 'pc-fast' },
+        h('button', { class: 'plink', type: 'button', onclick: () => set(Math.max(t.min, t.price - 5)) }, '−5'),
+        h('button', { class: 'plink', type: 'button', onclick: () => set(Math.min(t.max, t.price + 5)) }, '+5'),
+        t.custom ? h('button', { class: 'plink', type: 'button', onclick: () => set(null) }, 'Về gợi ý') : null) : null));
+}
+function ticketsView(body, api, fi) {
+  body.appendChild(noteBox('ui_ticket', `Khách mua vé ở cổng riêng bên phải quán rồi vào chơi. Vé rẻ thì đông, vé đắt thì vắng. Bày thêm đồ trong phòng (Quán ▸ Trang trí ▸ Karaoke & Photo) để có thêm chỗ chơi và đông khách hơn. Hôm nay: **${fi.today.tickets} vé · ${fmtShort(fi.today.revenue)}**.`, fi.level ? 'jade' : ''));
+  body.appendChild(secTitle('Giá vé', 'mỗi người'));
+  for (const id of Object.keys(fi.tickets)) body.appendChild(ticketCard(fi.tickets[id], api));
+}
+
 export function pricesView(body, api) {
   if (!D.featureOn('pricing')) { body.appendChild(lockCard('Tự đặt giá bán', `Mở ở Lv ${C.FEATURES.pricing}. Tới lúc đó món bán theo giá gợi ý.`, 'ui_coin')); return; }
+  // v1.20 tab nhỏ: Món lẩu / Vé khu vui chơi (Karaoke & Photo, nhà hàng 2 lầu)
+  const fi = ctx.game.get?.funInfo?.();
+  if (fi && fi.unlocked) {
+    const tabs = div('bx-filter deco-tabs');
+    [['mon', 'Món lẩu'], ['ve', 'Vé Karaoke & Photo']].forEach(([id, label]) => tabs.appendChild(h('button', {
+      class: 'chip' + (priceTab === id ? ' ink' : ''), type: 'button', onclick: () => { if (priceTab === id) return; priceTab = id; sfx('click'); api.rerender(); },
+    }, label)));
+    body.appendChild(tabs);
+    if (priceTab === 've') { ticketsView(body, api, fi); return; }
+  }
   const dm = ctx.game.get?.menuPriceDemand?.() ?? 1;
   const pct = Math.round((dm - 1) * 100);
   body.appendChild(noteBox('ui_coin', `Rẻ thì đông khách nhưng lời ít, đắt thì lời nhiều mỗi nồi nhưng có người chê bỏ về. Mặt bằng giá hiện tại: khách ghé **${pct >= 0 ? '+' : '−'}${Math.abs(pct)}%**.`, pct > 3 ? 'jade' : pct < -3 ? 'red' : ''));
