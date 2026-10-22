@@ -131,27 +131,9 @@ export function serveAct(G) {
   t.maker = { type: 'owner' };
   t.readyAt = G.world.tMin;
   G.world.tray.ticketId = null;
-  if (t.ship) {                                   // v1.22 đơn ship: làm xong chờ chủ quán kiểm & xác nhận rồi Shipper mới lấy
-    t.status = 'confirm';
-    G.emit('shipMade', { ticketId: t.id, ship: t.ship });
-    return { ok: true, ticketId: t.id, ship: true };
-  }
   t.status = 'ready';
   G.emit('ticketReady', { ticketId: t.id, by: 'player' });
   return { ok: true, ticketId: t.id };
-}
-
-/** v1.22 xác nhận đơn ship đã làm xong: đúng món → giao cho Shipper. */
-export function confirmShipAct(G, id) {
-  const t = findTicket(G, id);
-  if (!t || !t.ship) return fail('noTicket', 'Đơn ship này không còn nữa.');
-  if (t.status !== 'confirm') return fail('notReady', 'Làm xong mâm đơn ship trước rồi mới xác nhận nha!');
-  t.status = 'ready';
-  t.confirmedAt = G.world.tMin;
-  G.counter('shipConfirm', 1);
-  G.emit('ticketReady', { ticketId: t.id, by: 'player' });
-  G.emit('shipConfirmed', { ticketId: t.id, ship: t.ship });
-  return { ok: true };
 }
 
 export { DRINK };

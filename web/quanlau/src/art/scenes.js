@@ -381,6 +381,7 @@ export function drawSceneBack(ctx, tier, env, view) {
     if (dc.tuong && F[dc.tuong]) for (const s of (L.deco.tuong || [])) putTop(ctx, dc.tuong, s.x, s.y);
     for (const m of moreSlots(env, 'wall')) putTop(ctx, m.id, m.slot.x, m.slot.y);   // v1.18p đồ treo tường đặt thêm
     drawFunBack(ctx, L, env);   // v1.19 phòng giải trí: cửa cuốn tầng chưa mở + đồ treo tường
+    if (L.wingLamps) for (const l of L.wingLamps) putTop(ctx, 'den_bong', l.x, l.y);   // v1.23 đèn treo dãy bên
     // wall-mounted air conditioner
     if (lvl(up.cooling) >= 3 && sc && sc.cool) for (const a of sc.cool.ac) put(ctx, 'aircon', a.x, a.y);
     // shop sign
@@ -941,6 +942,7 @@ export function drawLighting(ctx, view, env) {
         const nearStove = (x, y) => st && st.some((o) => Math.abs(o.y - y) < 26 && Math.abs(o.x - x) < 30);
         const dim = (x, y) => (nearStove(x, y) ? 0.35 : 1);
         for (const l of sc.lights) pool(ctx, l.x, l.y, l.r, l.c, k * dim(l.x, l.y) * (0.9 + 0.1 * Math.sin(t * 1.7 + l.x)));
+        for (const l of (L.wingLights || [])) pool(ctx, l.x, l.y, l.r, 'warm', k * (0.92 + 0.08 * Math.sin(t * 1.9 + l.x)));   // v1.23
         for (const it of denItems(L, env)) {
           if (it.string) for (const b of stringBulbs(it)) pool(ctx, b.x, b.y, Math.round(13 * (1 + lamp)), 'warm', k * dim(b.x, b.y + 10) * (0.8 + 0.2 * Math.sin(t * 3 + b.x)));
           else pool(ctx, it.x, it.y + 12, Math.round((env.deco.den === 'den_chum' ? 26 : 17) * (1 + lamp * 1.5)), 'warm', k * 0.95 * dim(it.x, it.y + 12));

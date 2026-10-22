@@ -131,7 +131,8 @@ const LAYOUTS = {
     spawn: [{ x: -16, y: 326 }, { x: 208, y: 326 }],
     waitSpots: [{ x: 94, y: 322, facing: 'up' }, { x: 108, y: 322, facing: 'up' }, { x: 122, y: 322, facing: 'up' }, { x: 136, y: 322, facing: 'up' }, { x: 150, y: 322, facing: 'up' }],
     tables: [
-      table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280), table(174, 280),
+      // v1.23 bàn sát chân cầu thang (174,280) bị khuất + chật → dời lên lầu, góc phải trống cạnh chiếu nghỉ
+      table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280), table(174, 92, 2),
       table(36, 88, 2), table(82, 88, 2), table(128, 88, 2), table(36, 116, 2), table(82, 116, 2), table(128, 116, 2),
       table(105, 304),
     ],
@@ -152,7 +153,7 @@ const LAYOUTS = {
       tuong: [{ x: 146, y: 198 }, { x: 70, y: 40 }],
       dacbiet: [{ x: 156, y: 228 }],   // v1.7: góc sau bên phải cạnh tủ, không còn chắn chân cầu thang (trước: 170,236)
     },
-    decoMore: { tuong: [{ x: 24, y: 44 }, { x: 128, y: 44 }], floor: [{ x: 158, y: 104 }, { x: 104, y: 66 }] },
+    decoMore: { tuong: [{ x: 24, y: 44 }, { x: 128, y: 44 }], floor: [{ x: 8, y: 104 }, { x: 104, y: 66 }] },   // v1.23 (158,104) nhường chỗ bàn mới
     equip: { cooler: { x: 152, y: 216 }, cooling: { x: 166, y: 134 }, speaker: { x: 154, y: 124 }, pos: { x: 68, y: 304 }, tarp: null, kho: { x: 14, y: 222 } },
     sign: { x: 28, y: 157, w: 136, h: 13 },
     gate: { x: 105, y: 312, yIn: 266 },  // v1.3: front fence opening spans x 57…135 → cross on the middle aisle
@@ -164,11 +165,16 @@ const LAYOUTS = {
     // v1.21b cầu thang một mạch từ nền trệt lên thẳng chiếu nghỉ lầu (cạnh cửa Karaoke); đoạn giữa chạy sau mặt tiền
     stairs: { bottom: { x: 177, y: 262 }, via: { x: 177, y: 140 }, top: { x: 177, y: 128 }, hide: { x0: 166, y0: 137, y1: 196 } },   // v1.21c khuất sau mặt tiền
     // v1.19: bên trái = dãy bàn 2 tầng (cấp 1 trệt, cấp 2 lầu); bên phải = phòng giải trí (art/scenes.js, fun)
-    wing: { tables: [table(-30, 262, 1), table(-72, 262, 1), table(-30, 100, 2), table(-72, 100, 2)], aisles: [-10], y: 248,
-      waiters: [{ x: -50, y: 247 }, { x: -50, y: 86 }], view: [-100, 292], leftOnly: true },
+    // v1.23 mỗi tầng dãy bên kê 2 hàng × 2 bàn (trước 1 hàng) cho đỡ trống, cách nhau như bàn trong quán; đèn treo trên từng cặp bàn
+    wing: { perLevel: 4,
+      tables: [table(-30, 250, 1), table(-76, 250, 1), table(-30, 280, 1), table(-76, 280, 1), table(-30, 88, 2), table(-76, 88, 2), table(-30, 116, 2), table(-76, 116, 2)],
+      aisles: [-53], y: 234,
+      waiters: [{ x: -53, y: 236 }, { x: -53, y: 74 }], view: [-104, 292], leftOnly: true,
+      lamps: [{ x: -30, y: 200, lvl: 1 }, { x: -76, y: 200, lvl: 1 }, { x: -30, y: 34, lvl: 2 }, { x: -76, y: 34, lvl: 2 }],
+      lights: [{ x: -30, y: 262, r: 34, lvl: 1 }, { x: -76, y: 262, r: 34, lvl: 1 }, { x: -30, y: 98, r: 32, lvl: 2 }, { x: -76, y: 98, r: 32, lvl: 2 }] },
     // v1.19 phòng giải trí bên phải: vùng trong phòng (world px) theo tầng, khách tham quan đứng / ngồi khi quán mở
     fun: {
-      rooms: { 1: { x0: 189, x1: 304, y0: 186, y1: 295 }, 2: { x0: 189, x1: 304, y0: 16, y1: 136 } },
+      rooms: { 1: { x0: 202, x1: 304, y0: 186, y1: 295 }, 2: { x0: 202, x1: 304, y0: 16, y1: 136 } },   // v1.23 bắt đầu sau vách hông (đèn không lọt ra cửa)
       view: 312,
       // v1.20 khách mua vé: đi vỉa hè → cổng riêng → (cầu thang bên phải lên lầu) → chỗ chơi
       // v1.21 khách vào khu giải trí qua cổng quán → (cầu thang chung → chiếu nghỉ lầu) → cửa vòm hông cầu thang
@@ -204,7 +210,9 @@ export function getLayout(tier, { tables = Infinity, stoves = Infinity, wing = 0
   return {
     ...base,
     // v1.1: wing tables come after every in-shop table (the wing is only sold once those are all built)
-    tables: base.tables.slice(0, tables).concat(W ? W.tables.slice(0, wing * 2) : []),
+    tables: base.tables.slice(0, tables).concat(W ? W.tables.slice(0, wing * (W.perLevel || 2)) : []),
+    wingLamps: W && W.lamps ? W.lamps.filter((l) => l.lvl <= wing) : null,      // v1.23
+    wingLights: W && W.lights ? W.lights.filter((l) => l.lvl <= wing) : null,
     aisles: W ? base.aisles.concat(W.aisles) : base.aisles,
     wingY: W ? W.y : null,
     viewX,

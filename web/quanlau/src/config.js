@@ -303,7 +303,7 @@ export const CUSTOMERS = {
 // Sao đánh giá theo tổng thời gian từ lúc gọi tới lúc nhận (hứa giao trong promiseMin phút).
 export const SHIP = {
   share: 0.28, perShipper: 2,            // đơn đang chạy tối đa = số shipper × perShipper
-  patience: 70,                          // phút game chờ bếp nấu + shipper lấy; quá thì khách hủy đơn
+  patience: 95,                          // phút game chờ bếp nấu + shipper lấy; quá thì khách hủy đơn (v1.23: 70 → 95, chủ quán tự làm mâm)
   tripMin: [9, 15],                      // phút game chạy đi giao rồi về (chia cho tốc độ shipper)
   fee: 15,                               // phí ship (k) khách trả thêm
   drinkChance: 0.45, sideChance: 0.3,
@@ -429,7 +429,7 @@ export const UPGRADES = [
   // v1.1 khu mở rộng hai bên: the neighbour shophouses become dining space (from Nhà hàng mặt phố); each level = 2 tables
   { id: 'canh', cat: 'banghe', name: 'Mở rộng hai bên', icon: 'eq_table', costs: [60000, 180000], minTier: [3, 3], minLv: [22, 30],
     levels: ['Chưa mở', 'Thuê hiên hai bên · +2 bàn', 'Mở cả hai dãy · +4 bàn'], amb: 3,
-    levelsHaitang: ['Chưa mở', 'Dãy bên trái tầng trệt · +2 bàn', 'Thêm lầu dãy bên trái · +2 bàn'],   // v1.19 nhà hàng 2 lầu: bên phải là phòng giải trí
+    levelsHaitang: ['Chưa mở', 'Dãy bên trái tầng trệt · +4 bàn', 'Thêm lầu dãy bên trái · +4 bàn'],   // v1.19 nhà hàng 2 lầu: bên phải là phòng giải trí
     desc: 'Thuê hiên của hai căn bên cạnh làm chỗ ngồi: thêm bàn, có tủ chén và chỗ đứng cho phục vụ. Cần kê đủ bàn trong quán trước.' },
   // v1.19 phòng giải trí: khối 2 tầng bên phải nhà hàng 2 lầu (trệt Photo Studio, lầu Karaoke). Khách chờ bàn vào chơi.
   { id: 'giaitri', cat: 'banghe', name: 'Phòng giải trí', icon: 'ui_hopmu', costs: [150000, 350000], minTier: [4, 4], minLv: [28, 32],

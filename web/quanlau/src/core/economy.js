@@ -20,7 +20,7 @@ export const tierDef = (G) => C.TIERS[G.state.tier - 1];
 export const nextTierDef = (G) => C.TIERS[G.state.tier] || null;
 export const builtTables = (G) => { const t = tierDef(G); return Math.min(t.maxTables, t.startTables + G.state.upgrades.table); };
 /** v1.1: every table in use, in-shop + khu mở rộng (2 per wing level from tier 3). */
-export const allTables = (G) => builtTables(G) + 2 * (G.state.tier >= 3 ? Math.min(2, G.state.upgrades.canh || 0) : 0);
+export const allTables = (G) => builtTables(G) + (G.state.tier >= 4 ? 4 : 2) * (G.state.tier >= 3 ? Math.min(2, G.state.upgrades.canh || 0) : 0);   // v1.23 nhà hàng 2 lầu: +4 bàn mỗi cấp
 export const builtWing = (G) => (G.state.tier >= 3 ? Math.min(2, G.state.upgrades.canh || 0) : 0);   // v1.1 khu mở rộng hai bên
 /** v1.19 phòng giải trí (nhà hàng 2 lầu): 0 chưa mở · 1 Photo Studio (trệt) · 2 + Karaoke (lầu) */
 export const builtFun = (G) => (G.state.tier >= 4 ? Math.min(2, G.state.upgrades.giaitri || 0) : 0);

@@ -50,7 +50,9 @@ export default {
     ],
     lights: [{ x: 3, y: 311, r: 34, c: 'warm' }, { x: 189, y: 311, r: 34, c: 'warm' },
       { x: 50, y: 206, r: 40, c: 'warm' }, { x: 96, y: 206, r: 44, c: 'warm' }, { x: 142, y: 206, r: 40, c: 'warm' },
-      { x: 50, y: 62, r: 36, c: 'warm' }, { x: 96, y: 62, r: 36, c: 'warm' }, { x: 142, y: 62, r: 36, c: 'warm' }],
+      { x: 50, y: 62, r: 36, c: 'warm' }, { x: 96, y: 62, r: 36, c: 'warm' }, { x: 142, y: 62, r: 36, c: 'warm' },
+      // v1.23 chỗ bàn còn tối: hàng bàn trước tầng trệt + góc phải lầu
+      { x: 36, y: 288, r: 30, c: 'warm' }, { x: 105, y: 296, r: 32, c: 'warm' }, { x: 128, y: 288, r: 28, c: 'warm' }, { x: 174, y: 100, r: 30, c: 'warm' }],
     cool: { ceil: [{ x: 96, y: 202 }, { x: 96, y: 44 }], ac: [{ x: 150, y: 214 }, { x: 150, y: 60 }] },
   },
 };

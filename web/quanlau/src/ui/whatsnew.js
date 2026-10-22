@@ -12,8 +12,8 @@ export const NEWS = {
   title: 'Có gì mới trong Lẩu Ơi!',
   hero: 'Đèn LED vũ trường + tự làm đơn ship!',
   items: [
-    { icon: 'eq_truck', title: 'Đơn ship: tự làm + xác nhận', lv: C.FEATURES.ship, isNew: true,
-      text: 'Đầu bếp không tự nấu phiếu **Ship** nữa: chủ quán chạm phiếu Ship, **tự soạn mâm** rồi bấm Phục vụ. Phiếu sáng vàng thì chạm lần nữa để **kiểm đơn & Xác nhận giao**, Shipper mới ra lấy hàng.' },
+    { icon: 'eq_truck', title: 'Đơn ship: chủ quán tự làm', lv: C.FEATURES.ship, isNew: true,
+      text: 'Đầu bếp không tự nấu phiếu **Ship** nữa: chủ quán chạm phiếu Ship, **tự soạn mâm** rồi bấm Phục vụ là Shipper ra lấy hàng đi giao. Khách ship chờ lâu hơn trước (95 phút).' },
     { icon: 'ui_hopmu', title: 'Đèn LED vũ trường', lv: 28, isNew: true,
       text: 'Món mới **Cực hiếm** trong **Hộp mù**: lắp vào phòng Karaoke là đèn quét màu chạy theo nhạc khi quán mở. Buổi tối phòng **Karaoke & Photo** giờ sáng đèn rực rỡ.',
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
