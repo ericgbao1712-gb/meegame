@@ -12,8 +12,8 @@ export const NEWS = {
   title: 'Có gì mới trong Lẩu Ơi!',
   hero: 'Quán chứa 15 nhân viên!',
   items: [
-    { icon: 'ui_staff', title: 'Quán chứa tới 15 nhân viên', lv: 36, isNew: true,
-      text: 'Lên **Lv 36, 38, 40** mỗi mốc mở thêm 1 chỗ nhân viên: nhà hàng 2 lầu chứa tối đa **15 người**. Khách đặt ship cũng chờ lâu hơn (**120 phút**).',
+    { icon: 'ui_staff', title: 'Quán chứa tới 15 nhân viên', lv: 20, isNew: true,
+      text: 'Lên **Lv 20, 24, 28, 30, 32, 34** mỗi mốc mở thêm 1 chỗ nhân viên: nhà hàng 2 lầu chứa tối đa **15 người** từ Lv 34. Khách đặt ship cũng chờ lâu hơn (**120 phút**).',
       go: ['staff', null], goLabel: 'Xem Nhân viên' },
     { icon: 'fn_thapbia', title: 'Thực đơn Karaoke & Photo', lv: 28,
       text: `**${C.FUN.menu.length} món mới** trong **Hộp mù**: mồi nhậu (khô mực, bò khô, xúc xích…), trái cây, **bia, tháp bia, soju, rượu vang**, trà sữa, soda, cocktail. Khách vào hát / chụp ảnh tự gọi thêm các món đã mở. Xem ở **Thực đơn ▸ Giá bán ▸ Vé Karaoke & Photo**.`,

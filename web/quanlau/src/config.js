@@ -379,7 +379,7 @@ export const STAFF = {
   },
   slotsByTier: [2, 4, 6, 9, 9],
   // v1.17: lên cấp mở thêm chỗ chứa nhân viên (cộng vào slotsByTier), tối đa 12 người một quán
-  slotBonus: [[20, 1], [28, 1], [34, 1], [36, 1], [38, 1], [40, 1]],   // v1.25 thêm 3 mốc → tối đa 15 người
+  slotBonus: [[20, 1], [24, 1], [28, 1], [30, 1], [32, 1], [34, 1]],   // v1.25l đủ 15 người từ Lv 34 (nhà hàng 2 lầu: 9 + 6)
   maxSlots: 15,
   rarityWeights: [40, 30, 18, 9, 3],          // ★1..★5
   rarityPoints: [6, 9, 12, 16, 21],           // total stat points (spd+skl+chm), ±2
