@@ -694,7 +694,17 @@ body.settings-open { overflow: hidden; }
     for (const kid of kids.flat()) if (kid != null && kid !== false) el.append(kid);
     return el;
   }
-  const outLink = (g, attrs, ...kids) => h('a', { href: g.url, target: '_blank', rel: 'noopener noreferrer', onclick: () => onPlay(g), ...attrs }, ...kids);
+  // 22/10: tên miền .io.vn lỗi DNSSEC phía VNNIC → khi đang mở MeeGame bằng tên miền khác (meegame.vercel.app…),
+  // game của MeeGame mở luôn trên tên miền đang dùng thay vì meegame.io.vn (có thể không vào được).
+  function playUrl(g) {
+    try {
+      const u = new URL(g.url), own = location.hostname;
+      if (MEE_HOSTS.some(d => u.hostname.replace(/^www\./, '') === d) && own && !MEE_HOSTS.some(d => own.replace(/^www\./, '') === d) && !/^(localhost|127\.)/.test(own))
+        return location.origin + u.pathname + u.search + u.hash;
+    } catch (_) {}
+    return g.url;
+  }
+  const outLink = (g, attrs, ...kids) => h('a', { href: playUrl(g), target: '_blank', rel: 'noopener noreferrer', onclick: () => onPlay(g), ...attrs }, ...kids);
   // Ảnh lỗi thì thử lần lượt: ảnh nhỏ -> ảnh lớn -> ảnh tự chụp -> chữ cái đầu.
   function shot(g, eager, small) {
     const srcs = [...new Set([small && smallOf(g.cover), g.cover, g.shot].filter(Boolean))];
@@ -901,7 +911,7 @@ body.settings-open { overflow: hidden; }
     const list = pool.length ? pool : games;
     const g = list[Math.floor(Math.random() * list.length)];
     if (!g) return;
-    window.open(g.url, '_blank', 'noopener');
+    window.open(playUrl(g), '_blank', 'noopener');
     onPlay(g);
     toast(t('opening', titleOf(g)));
   });
