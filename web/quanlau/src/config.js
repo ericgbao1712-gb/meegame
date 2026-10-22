@@ -585,6 +585,15 @@ export const DECO = [
   { id: 'gt_mayanh', cat: 'giaitri', name: 'Máy chụp ảnh lấy liền (to)', price: 0, amb: 8, source: 'box', box: 'bx_gt_mayanh', fun: { floor: 1, x: 288, y: 246 }, effect: { demandMult: 1.05 }, desc: 'Khách +5%.' },
   { id: 'gt_gapthu', cat: 'giaitri', name: 'Máy gắp thú', price: 0, amb: 6, source: 'box', box: 'bx_gt_gapthu', fun: { floor: 1, x: 214, y: 288 }, effect: { patienceMult: 1.05 }, desc: 'Trẻ em mê lắm. Kiên nhẫn +5%.' },
   { id: 'gt_neon', cat: 'giaitri', name: 'Bảng neon KARAOKE', price: 0, amb: 4, source: 'box', box: 'bx_gt_neon', fun: { floor: 2, x: 222, y: 22, wall: true }, effect: { demandMult: 1.02 }, desc: 'Khách +2%.' },
+  { id: 'gt_micro', cat: 'giaitri', name: 'Micro đứng vàng', price: 0, amb: 2, source: 'box', box: 'bx_gt_micro', fun: { floor: 2, x: 256, y: 86 }, effect: { tipMult: 1.02 }, desc: 'Micro cho khách lên sân khấu. Tip +2%.' },   // v1.24
+  { id: 'gt_khoi', cat: 'giaitri', name: 'Máy tạo khói', price: 0, amb: 4, source: 'box', box: 'bx_gt_khoi', fun: { floor: 2, x: 212, y: 98, fx: 'smoke' }, effect: { patienceMult: 1.03 }, desc: 'Khói tím lan trên sân khấu khi quán mở. Kiên nhẫn +3%.' },   // v1.24
+  { id: 'gt_chonbai', cat: 'giaitri', name: 'Màn hình chọn bài', price: 0, amb: 2, source: 'box', box: 'bx_gt_chonbai', fun: { floor: 2, x: 293, y: 34, wall: true }, effect: { patienceMult: 1.02 }, desc: 'Treo tường, khách tự chọn bài. Kiên nhẫn +2%.' },   // v1.24
+  { id: 'gt_bantra', cat: 'giaitri', name: 'Bàn trà kính', price: 0, amb: 2, source: 'box', box: 'bx_gt_bantra', fun: { floor: 2, x: 236, y: 127 }, effect: { tipMult: 1.02 }, desc: 'Bàn trà trước sofa, đĩa trái cây. Tip +2%.' },   // v1.24
+  { id: 'gt_laser', cat: 'giaitri', name: 'Đèn laser', price: 0, amb: 6, source: 'box', box: 'bx_gt_laser', fun: { floor: 2, x: 298, y: 16, wall: true, fx: 'laser' }, effect: { demandMult: 1.03 }, desc: 'Treo trần: tia laser xanh quét quanh phòng. Khách +3%.' },   // v1.24
+  { id: 'gt_trangdiem', cat: 'giaitri', name: 'Bàn trang điểm', price: 0, amb: 3, source: 'box', box: 'bx_gt_trangdiem', fun: { floor: 1, x: 212, y: 232 }, effect: { patienceMult: 1.02 }, desc: 'Gương viền đèn để khách chỉnh tóc trước khi chụp. Kiên nhẫn +2%.' },   // v1.24
+  { id: 'gt_gaubong', cat: 'giaitri', name: 'Gấu bông khổng lồ', price: 0, amb: 5, source: 'box', box: 'bx_gt_gaubong', fun: { floor: 1, x: 294, y: 292 }, effect: { demandMult: 1.02 }, desc: 'Góc ôm gấu chụp ảnh. Khách +2%.' },   // v1.24
+  { id: 'gt_anhdao', cat: 'giaitri', name: 'Cây hoa anh đào', price: 0, amb: 5, source: 'box', box: 'bx_gt_anhdao', fun: { floor: 1, x: 270, y: 232, fx: 'petal' }, effect: { tipMult: 1.02 }, desc: 'Cánh hoa rơi lất phất. Tip +2%.' },   // v1.24
+  { id: 'gt_bongbong', cat: 'giaitri', name: 'Máy bong bóng', price: 0, amb: 6, source: 'box', box: 'bx_gt_bongbong', fun: { floor: 1, x: 250, y: 190, wall: true, fx: 'bubble' }, effect: { demandMult: 1.03, tipMult: 1.02 }, desc: 'Treo trần: bong bóng xà phòng bay khắp Photo Studio. Khách +3%, tip +2%.' },   // v1.24
   { id: 'gt_led', cat: 'giaitri', name: 'Đèn LED vũ trường', price: 0, amb: 7, source: 'box', box: 'bx_gt_led', fun: { floor: 2, x: 250, y: 16, wall: true, fx: 'disco' }, effect: { demandMult: 1.03, tipMult: 1.03 }, desc: 'Lắp vào phòng Karaoke: đèn quét màu chạy theo nhạc. Khách +3%, tip +3%.' },
   { id: 'gt_disco', cat: 'giaitri', name: 'Quả cầu disco', price: 0, amb: 4, source: 'box', box: 'bx_gt_disco', fun: { floor: 2, x: 276, y: 17, wall: true }, effect: { tipMult: 1.03 }, desc: 'Tip +3%.' },
   { id: 'gt_sankhau', cat: 'giaitri', name: 'Sân khấu karaoke', price: 0, amb: 12, source: 'box', box: 'bx_gt_sankhau', fun: { floor: 2, x: 232, y: 79 }, effect: { demandMult: 1.06, patienceMult: 1.04 }, desc: 'Màn hình, loa, micro đủ bộ. Khách +6%, kiên nhẫn +4%.' },
@@ -606,10 +615,10 @@ export const TIERS = [
     startTables: 7, maxTables: 10, startStoves: 3, maxStoves: 4, waitSpots: 4, kho: 400, rent: 300, demand: 2.1, ambCap: 65, covered: true,
     desc: 'Mặt tiền đường lớn, cửa kính, biển hiệu to. Giờ bạn là chủ nhà hàng thật sự.' },
   { id: 4, scene: 'haitang', name: 'Nhà hàng lẩu 2 tầng',  cost: 60000,  require: { level: 26, rating: 4.3 },
-    startTables: 10, maxTables: 13 /* v1.23b bỏ bàn dư cạnh cầu thang */, startStoves: 4, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
+    startTables: 10, maxTables: 12 /* v1.23b/1.24 bỏ bàn dư cạnh cầu thang + bàn sát cổng */, startStoves: 4, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
     desc: 'Hai tầng, ban công nhìn ra phố, tầng trên dành cho khách đi nhóm.' },
   { id: 5, scene: 'haitang', name: 'Chuỗi Lẩu Nhà Mình',   cost: 250000, require: { level: 40, rating: 4.5 }, chain: true,   // v1.3: the chain is the last level
-    startTables: 13, maxTables: 13, startStoves: 5, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
+    startTables: 12, maxTables: 12, startStoves: 5, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
     desc: 'Mở chi nhánh khắp Việt Nam. Nhà hàng gốc vẫn hoạt động như cũ.' },
 ];
 export const TIER_MULT = [1, 3, 8, 20, 50]; // reward/price scaling helper by tier
@@ -1074,6 +1083,15 @@ export const BOX = {
     { id: 'bx_gt_mayanh', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_mayanh', name: 'Máy chụp ảnh lấy liền (to)' },
     { id: 'bx_gt_gapthu', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_gapthu', name: 'Máy gắp thú' },
     { id: 'bx_gt_neon', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_neon', name: 'Bảng neon KARAOKE' },
+    { id: 'bx_gt_micro', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_micro', name: 'Micro đứng vàng' },   // v1.24
+    { id: 'bx_gt_khoi', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_khoi', name: 'Máy tạo khói' },   // v1.24
+    { id: 'bx_gt_chonbai', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_chonbai', name: 'Màn hình chọn bài' },   // v1.24
+    { id: 'bx_gt_bantra', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_bantra', name: 'Bàn trà kính' },   // v1.24
+    { id: 'bx_gt_laser', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_laser', name: 'Đèn laser' },   // v1.24
+    { id: 'bx_gt_trangdiem', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_trangdiem', name: 'Bàn trang điểm' },   // v1.24
+    { id: 'bx_gt_gaubong', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_gaubong', name: 'Gấu bông khổng lồ' },   // v1.24
+    { id: 'bx_gt_anhdao', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_anhdao', name: 'Cây hoa anh đào' },   // v1.24
+    { id: 'bx_gt_bongbong', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_bongbong', name: 'Máy bong bóng' },   // v1.24
     { id: 'bx_gt_led', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_led', name: 'Đèn LED vũ trường' },   // v1.22
     { id: 'bx_gt_disco', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_disco', name: 'Quả cầu disco' },
     { id: 'bx_gt_sankhau', grp: 'giaitri', r: 4, kind: 'deco', ref: 'gt_sankhau', name: 'Sân khấu karaoke' },

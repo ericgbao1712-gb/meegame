@@ -136,8 +136,7 @@ const LAYOUTS = {
       // v1.23b bỏ luôn bàn góc phải lầu cạnh cầu thang (dư, chật lối lên chiếu nghỉ)
       table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280),
       table(36, 88, 2), table(82, 88, 2), table(128, 88, 2), table(36, 116, 2), table(82, 116, 2), table(128, 116, 2),
-      table(105, 304),
-    ],
+    ],   // v1.24 bỏ bàn đơn hàng trước sát cổng (chắn lối vào, chật)
     kitchen: {
       stoves: [{ x: 36, y: 212, sortY: 224.5 }, { x: 58, y: 212, sortY: 224.5 }, { x: 80, y: 212, sortY: 224.5 }, { x: 102, y: 212, sortY: 224.5 }, { x: 124, y: 212, sortY: 224.5 }],
       chefSpots: [{ x: 36, y: 210, facing: 'down' }, { x: 58, y: 210, facing: 'down' }, { x: 80, y: 210, facing: 'down' }, { x: 102, y: 210, facing: 'down' }, { x: 124, y: 210, facing: 'down' }],

@@ -868,10 +868,56 @@ function funLit(env) {
   return out;
 }
 /** v1.22 Đèn LED vũ trường (Hộp mù) đã lắp trong phòng Karaoke: chùm đèn quét màu + đốm sáng chạy trên sàn khi quán mở. */
+/** v1.24 hiệu ứng của đồ giải trí mới (chỉ trong phòng, khi quán mở). */
+function drawFunFx2(ctx, env, FN) {
+  const t = env.t || 0, placed = env.fun || [], night = nightK(env.clock == null ? 600 : env.clock);
+  for (const id of placed) {
+    const d = DECO_FUN[id];
+    if (!d || !d.fx || d.floor > env.funLevel) continue;
+    const r = FN.rooms[d.floor];
+    ctx.save(); ctx.beginPath(); ctx.rect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0); ctx.clip();
+    if (d.fx === 'smoke') {                                             // khói tím lan sang sân khấu
+      for (let i = 0; i < 9; i++) {
+        const u = ((t * 0.12 + i / 9) % 1);
+        const x = d.x + 6 + u * 46 + Math.sin(t * 0.8 + i) * 3, y = d.y - 4 - u * 10 + Math.sin(t + i * 2) * 2, rad = 4 + u * 9;
+        ctx.fillStyle = `rgba(214,190,255,${(0.32 * (1 - u)).toFixed(3)})`;
+        ctx.beginPath(); ctx.ellipse(x, y, rad, rad * 0.55, 0, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (d.fx === 'laser') {                                      // tia laser xanh lá / xanh dương / hồng
+      ctx.globalCompositeOperation = 'lighter';
+      const COL = ['60,255,120', '60,200,255', '255,60,200'];
+      for (let i = 0; i < 6; i++) {
+        const ang = Math.PI / 2 + Math.sin(t * 0.7 + i * 1.1) * 1.1 + (i - 2.5) * 0.12;
+        const len = 120, ex = d.x + Math.cos(ang) * len, ey = d.y + 5 + Math.sin(ang) * len;
+        ctx.strokeStyle = `rgba(${COL[i % 3]},${(0.35 + 0.35 * night).toFixed(3)})`; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.moveTo(d.x - 4 + (i % 3) * 4, d.y + 5); ctx.lineTo(ex, ey); ctx.stroke();
+      }
+    } else if (d.fx === 'bubble') {                                     // bong bóng bay khắp phòng
+      for (let i = 0; i < 14; i++) {
+        const u = ((t * 0.07 + i * 0.137) % 1);
+        const x = d.x + Math.sin(i * 2.3 + t * 0.5) * (12 + u * 40), y = d.y + 8 + u * (r.y1 - d.y - 14);
+        const rad = 1.2 + (i % 3) * 0.6;
+        ctx.strokeStyle = `rgba(210,240,255,${(0.75 * (1 - u * 0.6)).toFixed(3)})`; ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.arc(x, y, rad, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = 'rgba(255,255,255,0.7)'; ctx.fillRect(x - rad * 0.5, y - rad * 0.6, 0.5, 0.5);
+      }
+    } else if (d.fx === 'petal') {                                      // cánh hoa anh đào rơi
+      for (let i = 0; i < 7; i++) {
+        const u = ((t * 0.09 + i * 0.19) % 1);
+        const x = d.x + Math.sin(i * 1.7 + t * 0.9) * 8 + (i - 3) * 2, y = d.y - 22 + u * 26;
+        ctx.fillStyle = i % 2 ? 'rgba(255,190,214,0.9)' : 'rgba(255,230,238,0.9)';
+        ctx.fillRect(Math.round(x * 2) / 2, Math.round(y * 2) / 2, 1, 0.5);
+      }
+    }
+    ctx.restore();
+  }
+}
 export function drawFunFx(ctx, env) {
   try {
     const L = env.layout, FN = L && L.fun;
-    if (!FN || (env.funLevel | 0) < 2 || !env.open || !(env.fun || []).includes('gt_led')) return;
+    if (!FN || !(env.funLevel > 0) || !env.open) return;
+    drawFunFx2(ctx, env, FN);                                             // v1.24 khói / laser / bong bóng / cánh hoa
+    if ((env.funLevel | 0) < 2 || !(env.fun || []).includes('gt_led')) return;
     const d = DECO_FUN.gt_led, r = FN.rooms[2], t = env.t || 0;
     if (!d || !r) return;
     const night = nightK(env.clock == null ? 600 : env.clock);

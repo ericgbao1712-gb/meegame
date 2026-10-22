@@ -8,13 +8,14 @@ import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
-  ver: 122,
+  ver: 124,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Đèn LED vũ trường + tự làm đơn ship!',
+  hero: '9 món mới cho Karaoke & Photo!',
   items: [
-    { icon: 'eq_truck', title: 'Đơn ship: chủ quán tự làm', lv: C.FEATURES.ship, isNew: true,
-      text: 'Đầu bếp không tự nấu phiếu **Ship** nữa: chủ quán chạm phiếu Ship, **tự soạn mâm** rồi bấm Phục vụ là Shipper ra lấy hàng đi giao. Khách ship chờ lâu hơn trước (95 phút).' },
-    { icon: 'ui_hopmu', title: 'Đèn LED vũ trường', lv: 28, isNew: true,
+    { icon: 'ui_hopmu', title: '9 món mới cho Karaoke & Photo', lv: 28, isNew: true,
+      text: 'Hộp mù có thêm: **micro đứng, máy tạo khói, màn hình chọn bài, bàn trà kính, đèn laser** cho phòng Karaoke và **bàn trang điểm, gấu bông khổng lồ, cây hoa anh đào, máy bong bóng** cho Photo Studio. Khói, laser, bong bóng và cánh hoa chạy hiệu ứng khi quán mở.',
+      go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
+    { icon: 'ui_hopmu', title: 'Đèn LED vũ trường', lv: 28,
       text: 'Món mới **Cực hiếm** trong **Hộp mù**: lắp vào phòng Karaoke là đèn quét màu chạy theo nhạc khi quán mở. Buổi tối phòng **Karaoke & Photo** giờ sáng đèn rực rỡ.',
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
     { icon: 'ui_ticket', title: 'Bán vé Karaoke & Photo', lv: 28,

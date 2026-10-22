@@ -363,7 +363,7 @@ function tickChef(G, a, m, dtMin, open) {
   if (!a.task) {
     if (open) {
       for (const t of w.tickets) {
-        if (t.status !== 'new' || t.ship || t.claimedBy || (t.chefBlock || 0) > w.tMin) continue;   // v1.22 phiếu ship chủ quán tự làm
+        if (t.status !== 'new' || t.claimedBy || (t.chefBlock || 0) > w.tMin) continue;
         if (w.tMin - t.createdAt < 1.5) continue;
         const lack = stockBlocked(G, t);
         if (lack) { warnOut(G, lack); t.chefBlock = w.tMin + 6; continue; }
