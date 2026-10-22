@@ -1844,3 +1844,4 @@ body { background: radial-gradient(circle at 20% 15%, rgba(255, 236, 160, .55) 0
 .gc-l { font: 800 12px/1.2 var(--f-body); letter-spacing: .08em; text-transform: uppercase; color: var(--ink-2); }
 .gc-v { font-size: 30px; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
 .gc-take { gap: 8px; }
+.cl-gate-backup { color: #d2433b; }   /* 22/10 link dự phòng khi tên miền .io.vn lỗi */

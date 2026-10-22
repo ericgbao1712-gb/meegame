@@ -85,7 +85,10 @@ export async function signIn(credential) {
   const r = await api('POST', '/auth/google', { credential });
   st.busy = false;
   if (r.status !== 200 || !r.json?.player) {
-    st.lastErr = r.json?.message || ('Đăng nhập chưa được (mã lỗi ' + r.status + '), thử lại nha.');
+    st.lastErr = r.json?.message || (r.status === 0
+      ? 'Mạng của bạn chưa vào được máy chủ MeeGame. Bấm "Mở link dự phòng" bên dưới nha.'
+      : 'Đăng nhập chưa được (mã lỗi ' + r.status + '), thử lại nha.');
+    if (r.status === 0) st.offline = true;
     ctx.toast(st.lastErr, 'bad'); emit(); return;
   }
   st.player = r.json.player; st.cloud = r.json.cloud; st.lastErr = '';
@@ -168,6 +171,12 @@ export function askUnlink() {
   });
 }
 
+// 22/10: tên miền .io.vn lỗi DNSSEC phía nhà quản lý (VNNIC) → máy dùng DNS Google / Cloudflare / iCloud Private Relay
+// không vào được meegame.io.vn ("Không thể kết nối", mã lỗi 0). Link dự phòng meegame.vercel.app cùng máy chủ,
+// đăng nhập Google lại là lấy được quán đã lưu trên mạng.
+const BACKUP_HOST = 'meegame.vercel.app';
+const BACKUP_URL = () => { try { return location.hostname.endsWith('meegame.io.vn') ? 'https://' + BACKUP_HOST + location.pathname : ''; } catch (e) { return ''; } };
+
 // ───────────── màn chắn: phải đăng nhập mới chơi tiếp ─────────────
 let gateEl = null;
 export function openGate({ offline = false } = {}) {
@@ -178,6 +187,7 @@ export function openGate({ offline = false } = {}) {
   const errEl = span('bk-err', '');
   const small = (label, fn) => h('button', { class: 'cl-gate-alt', type: 'button', onclick: () => { sfx('click'); fn(); } }, label);
   const alts = div('cl-gate-alts',
+    BACKUP_URL() ? h('a', { class: 'cl-gate-alt cl-gate-backup', href: BACKUP_URL(), rel: 'noopener' }, 'Không vào được? Mở link dự phòng ▸') : null,
     offline ? small('Mất mạng? Chơi tạm, đăng nhập sau ▸', () => closeGate()) : null,
     h('a', { class: 'cl-gate-alt', href: '/privacy', target: '_blank', rel: 'noopener' }, 'Chính sách bảo mật'));
   const card = div('cl-gate-card',

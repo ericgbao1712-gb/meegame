@@ -1693,3 +1693,4 @@ button.hchip:active { transform: translateY(2px); }
 .deco-slots { display: flex; gap: 4px; }
 .deco-slots .num { font-size: 18px; line-height: .8; margin-left: 2px; }
 .deco-act { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
+.cl-gate-backup { color: #d2433b; }   /* 22/10 link dự phòng khi tên miền .io.vn lỗi */
