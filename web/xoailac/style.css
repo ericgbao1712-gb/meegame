@@ -1904,3 +1904,8 @@ body { background: radial-gradient(circle at 20% 15%, rgba(255, 236, 160, .55) 0
 .cl-row.cl-admin .grow { display: flex; flex-direction: row; flex-wrap: wrap; align-items: center; column-gap: 6px; row-gap: 2px; }
 .cl-row.cl-admin .adm-tag { margin: 0; padding: 1px 6px 1px 4px; font-size: 9px; gap: 3px; border-width: 1px; }
 .cl-row.cl-admin .adm-tag .adm-crown { width: 12px; height: 9px; }
+/* v1.25i chữ ADMIN trên ruy băng: phông thường đậm, không bóng, rõ ở cỡ nhỏ */
+.adm-ribbon { font-family: var(--f-body) !important; font-weight: 900; font-size: 8px; line-height: 1; letter-spacing: .12em; text-shadow: none;
+  padding: 2px 5px 2px 6px; color: #ffe58a; -webkit-font-smoothing: antialiased; }
+.cl-row.cl-admin .adm-frame .adm-ribbon { font-size: 6.5px; letter-spacing: .08em; padding: 1px 3px 1px 4px; bottom: -6px; }
+.adm-tag { font-family: var(--f-body) !important; font-weight: 900; text-shadow: none; }
