@@ -837,6 +837,26 @@ export const FUN = {
     photo: { name: 'Vé Photo Studio', icon: 'ui_hopmu', floor: 1, ref: 35, group: [1, 3], stay: [25, 50], perHour: 3.2, desc: 'Chụp ảnh lấy liền, phông hoa giấy, máy gắp thú.' },
     kara: { name: 'Vé Karaoke', icon: 'ui_ticket', floor: 2, ref: 80, group: [2, 4], stay: [45, 90], perHour: 2.2, desc: 'Phòng hát trên lầu: sân khấu, sofa, quầy nước.' },
   },
+  // v1.24 thực đơn trong phòng Karaoke & Photo (mở trong Hộp mù): khách đang chơi gọi thêm, cộng vào doanh thu
+  menuCats: { moi: 'Mồi nhậu', traicay: 'Trái cây', bia: 'Bia', ruou: 'Rượu', nuoc: 'Nước uống' },
+  orderFood: 0.55, orderDrink: 0.75,   // mỗi khách: xác suất gọi 1 món ăn / 1 đồ uống (trong số món đã mở hợp phòng)
+  menu: [
+    { id: 'khomuc', name: 'Khô mực nướng', icon: 'fn_khomuc', cat: 'moi', price: 45, cost: 15, rooms: [2] },
+    { id: 'dauphong', name: 'Đậu phộng rang', icon: 'fn_dauphong', cat: 'moi', price: 15, cost: 4, rooms: [2] },
+    { id: 'bokho', name: 'Bò khô', icon: 'fn_bokho', cat: 'moi', price: 40, cost: 14, rooms: [2] },
+    { id: 'khoaitay', name: 'Khoai tây chiên', icon: 'fn_khoaitay', cat: 'moi', price: 30, cost: 9, rooms: [1] },
+    { id: 'xucxich', name: 'Xúc xích nướng', icon: 'fn_xucxich', cat: 'moi', price: 35, cost: 11, rooms: [2] },
+    { id: 'traicay', name: 'Đĩa trái cây', icon: 'fn_traicay', cat: 'traicay', price: 60, cost: 22, rooms: [1, 2] },
+    { id: 'duahau', name: 'Dưa hấu', icon: 'fn_duahau', cat: 'traicay', price: 30, cost: 9, rooms: [1] },
+    { id: 'bia', name: 'Bia lon', icon: 'fn_bia', cat: 'bia', price: 25, cost: 12, rooms: [2] },
+    { id: 'thapbia', name: 'Tháp bia 3 lít', icon: 'fn_thapbia', cat: 'bia', price: 180, cost: 80, rooms: [2] },
+    { id: 'soju', name: 'Rượu soju', icon: 'fn_soju', cat: 'ruou', price: 70, cost: 30, rooms: [2] },
+    { id: 'vang', name: 'Rượu vang', icon: 'fn_vang', cat: 'ruou', price: 220, cost: 95, rooms: [2] },
+    { id: 'suoi', name: 'Nước suối', icon: 'fn_suoi', cat: 'nuoc', price: 10, cost: 3, rooms: [1, 2] },
+    { id: 'trasua', name: 'Trà sữa trân châu', icon: 'fn_trasua', cat: 'nuoc', price: 35, cost: 12, rooms: [1] },
+    { id: 'soda', name: 'Soda chanh', icon: 'fn_soda', cat: 'nuoc', price: 30, cost: 9, rooms: [1, 2] },
+    { id: 'cocktail', name: 'Cocktail trái cây', icon: 'fn_cocktail', cat: 'nuoc', price: 90, cost: 35, rooms: [2] },
+  ],
   tier5Mult: 1.3,                // nhà hàng lớn (bậc 5) giá gợi ý cao hơn
   minMult: 0.5, maxMult: 2.5,    // giá đặt được = giá gợi ý × [0,5 … 2,5]
   priceExp: 1.6,                 // khách ∝ (giá / gợi ý)^-1,6
@@ -1092,6 +1112,21 @@ export const BOX = {
     { id: 'bx_gt_gaubong', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_gaubong', name: 'Gấu bông khổng lồ' },   // v1.24
     { id: 'bx_gt_anhdao', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_anhdao', name: 'Cây hoa anh đào' },   // v1.24
     { id: 'bx_gt_bongbong', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_bongbong', name: 'Máy bong bóng' },   // v1.24
+    { id: 'bx_fn_khomuc', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'khomuc', name: 'Khô mực nướng' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_dauphong', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'dauphong', name: 'Đậu phộng rang' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_bokho', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'bokho', name: 'Bò khô' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_khoaitay', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'khoaitay', name: 'Khoai tây chiên' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_xucxich', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'xucxich', name: 'Xúc xích nướng' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_traicay', grp: 'funmenu', r: 2, kind: 'funmenu', ref: 'traicay', name: 'Đĩa trái cây' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_duahau', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'duahau', name: 'Dưa hấu' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_bia', grp: 'funmenu', r: 2, kind: 'funmenu', ref: 'bia', name: 'Bia lon' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_thapbia', grp: 'funmenu', r: 3, kind: 'funmenu', ref: 'thapbia', name: 'Tháp bia 3 lít' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_soju', grp: 'funmenu', r: 2, kind: 'funmenu', ref: 'soju', name: 'Rượu soju' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_vang', grp: 'funmenu', r: 3, kind: 'funmenu', ref: 'vang', name: 'Rượu vang' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_suoi', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'suoi', name: 'Nước suối' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_trasua', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'trasua', name: 'Trà sữa trân châu' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_soda', grp: 'funmenu', r: 1, kind: 'funmenu', ref: 'soda', name: 'Soda chanh' },   // v1.24 thực đơn Karaoke & Photo
+    { id: 'bx_fn_cocktail', grp: 'funmenu', r: 3, kind: 'funmenu', ref: 'cocktail', name: 'Cocktail trái cây' },   // v1.24 thực đơn Karaoke & Photo
     { id: 'bx_gt_led', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_led', name: 'Đèn LED vũ trường' },   // v1.22
     { id: 'bx_gt_disco', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_disco', name: 'Quả cầu disco' },
     { id: 'bx_gt_sankhau', grp: 'giaitri', r: 4, kind: 'deco', ref: 'gt_sankhau', name: 'Sân khấu karaoke' },

@@ -160,7 +160,7 @@ export function buildReport(G) {
     forecast: forecastInfo(G), reservationsTomorrow: s.reservations.map((r) => Object.assign({}, r)),
     goalHint: '', money: s.money,
     priceLost: t.priceLost || 0,                                       // v1.14
-    fun: { tickets: t.funTickets || 0, revenue: t.funRevenue || 0 },   // v1.20 vé khu vui chơi
+    fun: { tickets: t.funTickets || 0, revenue: t.funRevenue || 0, menu: t.funMenu || 0 },   // v1.20 vé khu vui chơi
     ship: { orders: t.shipOrders || 0, delivered: t.shipDelivered || 0, cancelled: t.shipCancelled || 0, revenue: t.shipRevenue || 0 },   // v1.16
     tax: s.tax ? { bill: s.tax.bill ? Object.assign({}, s.tax.bill) : null, base: s.tax.base, since: s.tax.since } : null,
   };

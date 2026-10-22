@@ -96,6 +96,19 @@ function ticketsView(body, api, fi) {
   body.appendChild(noteBox('ui_ticket', `Khách mua vé ở cổng riêng bên phải quán rồi vào chơi. Vé rẻ thì đông, vé đắt thì vắng. Bày thêm đồ trong phòng (Quán ▸ Trang trí ▸ Karaoke & Photo) để có thêm chỗ chơi và đông khách hơn. Hôm nay: **${fi.today.tickets} vé · ${fmtShort(fi.today.revenue)}**.`, fi.level ? 'jade' : ''));
   body.appendChild(secTitle('Giá vé', 'mỗi người'));
   for (const id of Object.keys(fi.tickets)) body.appendChild(ticketCard(fi.tickets[id], api));
+  // v1.24 thực đơn trong phòng: mở trong Hộp mù, khách đang chơi tự gọi thêm (giá cố định)
+  const own = fi.menu.filter((m) => m.owned).length;
+  body.appendChild(secTitle('Thực đơn trong phòng', `${own}/${fi.menu.length} món · hôm nay bán ${fi.today.menu || 0}`));
+  body.appendChild(noteBox('ui_hopmu', 'Mồi nhậu, trái cây, bia, rượu, nước uống **mở trong Hộp mù**. Khách vào hát / chụp ảnh sẽ gọi thêm các món đã mở (Karaoke gọi bia rượu, mồi; Photo gọi nước, trái cây).', ''));
+  const grid = div('fnm-grid');
+  for (const cat of Object.keys(C.FUN.menuCats)) {
+    for (const m of fi.menu.filter((x) => x.cat === cat)) {
+      grid.appendChild(div('card fnm' + (m.owned ? '' : ' locked'), ico(m.icon, 32), div('grow', h('b', null, m.name),
+        span('muted sm', C.FUN.menuCats[cat] + ' · ' + (m.rooms.length > 1 ? 'cả 2 phòng' : m.rooms[0] === 2 ? 'Karaoke' : 'Photo'))),
+        m.owned ? span('chip gold num', fmtShort(m.price)) : span('chip', ico('ui_lock', 16), 'Hộp mù')));
+    }
+  }
+  body.appendChild(grid);
 }
 
 export function pricesView(body, api) {

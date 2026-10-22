@@ -19,7 +19,7 @@ const KIND = {
 };
 const FILTERS = [
   { id: 'all', label: 'Tất cả' }, { id: 'mon', label: 'Món', kinds: ['food', 'drink'] }, { id: 'ao', label: 'Trang phục', kinds: ['uniform', 'look'] },
-  { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'gt', label: 'Giải trí', kinds: ['deco'], grp: 'giaitri' }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
+  { id: 'noi', label: 'Nồi, bàn, ghế', kinds: ['pot', 'table', 'chair', 'tform', 'cform'] }, { id: 'deco', label: 'Trang trí', kinds: ['deco'], grp: '' }, { id: 'bep', label: 'Đồ bếp', kinds: ['deco'], grp: 'bep' }, { id: 'gt', label: 'Giải trí', kinds: ['deco'], grp: 'giaitri' }, { id: 'fnm', label: 'Đồ ăn uống Karaoke', kinds: ['funmenu'] }, { id: 'the', label: 'Thẻ', kinds: ['badge'] },
 ];
 let filter = 'all';
 let gridAnim = true;   // v1.18k: lưới chỉ chạy hiệu ứng nảy khi mới mở tab, không chạy lại sau mỗi lần mở hộp
@@ -52,6 +52,7 @@ export function itemPic(it, size = 40) {
       case 'pot': case 'table': case 'chair': case 'tform': case 'cform': return img(skinPreviewURL(it.kind, it.ref, 3), size);
       case 'deco': return img(decoIconURL(it.ref, Math.max(1, Math.round(size / 24))), size);
       case 'badge': return medal(it, size);
+      case 'funmenu': return ico((C.FUN.menu.find((m) => m.id === it.ref) || {}).icon || 'ui_gift', size);   // v1.24
       default: return ico('ui_gift', size);
     }
   } catch (e) { return ico('ui_gift', size); }

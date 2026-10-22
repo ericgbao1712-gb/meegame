@@ -161,6 +161,12 @@ function openPause() {
     build: (m) => frame('Tạm dừng', { icon: 'ui_pause', onClose: () => m.close('x') },
       div('pause-box',
         span('pz-txt', 'Quán đang tạm nghỉ — khách đứng yên, đồng hồ không chạy. Bấm chơi tiếp khi sẵn sàng nha!'),
-        h('button', { class: 'btn jade block', onclick: () => { sfx('click'); m.close('resume'); } }, ico('ui_play', 16), 'Chơi tiếp'))),
+        h('button', { class: 'btn jade block', onclick: () => { sfx('click'); m.close('resume'); } }, ico('ui_play', 16), 'Chơi tiếp'),
+        S().phase === 'open' ? h('button', { class: 'btn red block pz-close', onclick: () => {   // v1.24 đóng cửa sớm ngay trong bảng tạm dừng
+          sfx('click'); m.close('close');
+          ctx.confirm({ title: 'Đóng cửa sớm?', icon: 'ui_close', yes: 'Đóng cửa', no: 'Thôi, bán tiếp',
+            text: 'Không nhận thêm khách mới. Khách đang ngồi ăn xong rồi về, sau đó chốt sổ cuối ngày.',
+            onYes: () => { const r = act('closeEarly'); if (r && r.ok !== false) sfx('door'); } });
+        } }, ico('ui_close', 16), 'Đóng cửa sớm') : null)),
   });
 }

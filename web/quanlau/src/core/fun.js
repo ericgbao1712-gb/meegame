@@ -3,7 +3,7 @@
 import * as C from '../config.js';
 import { clamp, round2 } from './util.js';
 import { isWeekend } from './format.js';
-import { addMoney, builtFun, funPlaced } from './economy.js';
+import { addMoney, spend, builtFun, funPlaced } from './economy.js';
 import { makeActor, removeActor, setPath, stepActor, nid } from './world.js';
 import { route } from './routing.js';
 
@@ -121,6 +121,30 @@ function pay(G, g) {
   G.emit('funTicket', { ticket: g.ticket, n, amount, x: a && a.x, y: a && a.y });
 }
 
+// ───────────── v1.24 thực đơn trong phòng (mở trong Hộp mù) ─────────────
+export const menuOwned = (s) => (C.FUN.menu || []).filter((m) => s.box && s.box.got && s.box.got['bx_fn_' + m.id] > 0);
+function orderMenu(G, g) {
+  const s = G.state, rng = G.rng, fl = ticketDef(g.ticket).floor;
+  const own = menuOwned(s).filter((m) => m.rooms.includes(fl));
+  if (!own.length) return;
+  const food = own.filter((m) => m.cat === 'moi' || m.cat === 'traicay'), drink = own.filter((m) => m.cat !== 'moi' && m.cat !== 'traicay');
+  let rev = 0, cost = 0, n = 0;
+  const got = [];
+  for (let i = 0; i < g.members.length; i++) {
+    if (food.length && rng.chance(C.FUN.orderFood)) { const m = rng.pick(food); rev += m.price; cost += m.cost; n++; got.push(m.id); }
+    if (drink.length && rng.chance(C.FUN.orderDrink)) { const m = rng.pick(drink); rev += m.price; cost += m.cost; n++; got.push(m.id); }
+  }
+  if (!n) return;
+  const a = g.members[0];
+  addMoney(G, rev, 'fun', a && a.x, a && a.y);
+  spend(G, 'drinks', cost, 'drinks');
+  s.today.funRevenue = round2((s.today.funRevenue || 0) + rev);
+  s.today.revenue = round2((s.today.revenue || 0) + rev);
+  s.today.funMenu = (s.today.funMenu || 0) + n;
+  for (const id of got) { if (!s.stats.funMenu) s.stats.funMenu = {}; s.stats.funMenu[id] = (s.stats.funMenu[id] || 0) + 1; }
+  G.emit('funMenu', { n, amount: rev, items: got, x: a && a.x, y: a && a.y });
+}
+
 export function funTick(G, dtMin) {
   const s = G.state, w = G.world, L = w.layout;
   const groups = fw(G);
@@ -142,6 +166,7 @@ export function funTick(G, dtMin) {
     if (!g.paid && N && g.members.some((a) => a.x > 199 && a.y < 300)) { g.paid = true; pay(G, g); }   // v1.21 bước qua cửa vòm là mua vé
     if (g.state === 'in' && !g.members.some((a) => a.path)) {
       g.state = 'play';
+      orderMenu(G, g);   // v1.24 gọi thêm mồi nhậu / trái cây / bia / rượu / nước
     } else if (g.state === 'play') {
       g.stay -= dtMin;
       if (g.stay <= 0 || s.phase !== 'open') {
@@ -171,5 +196,5 @@ export function funInfo(G) {
       playing: (G.world.funGroups || []).filter((g) => g.ticket === id && g.state !== 'out').reduce((n, g) => n + g.members.length, 0),
       spots: G.world.layout && G.world.layout.fun ? spotsFor(G, id).length : 0 };
   }
-  return { level: lvl, unlocked: s.tier >= 4, tickets: out, today: { tickets: s.today.funTickets || 0, revenue: s.today.funRevenue || 0 } };
+  return { level: lvl, unlocked: s.tier >= 4, tickets: out, today: { tickets: s.today.funTickets || 0, revenue: s.today.funRevenue || 0, menu: s.today.funMenu || 0 }, menu: (C.FUN.menu || []).map((m) => Object.assign({ owned: menuOwned(s).includes(m) }, m)) };
 }

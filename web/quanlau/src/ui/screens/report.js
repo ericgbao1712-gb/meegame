@@ -114,7 +114,7 @@ function build(m, rep) {
   if (shp.orders > 0) sec(noteBox('eq_truck', `**Đơn ship:** giao ${shp.delivered}/${shp.orders} đơn, thu **${fmtMoney(shp.revenue)}**${shp.cancelled ? ` · ${shp.cancelled} đơn bị hủy vì chờ lâu` : ''}.`, shp.cancelled ? 'red' : 'jade'));
   // v1.20 vé khu vui chơi
   const fn = rep.fun || {};
-  if (fn.tickets > 0) sec(noteBox('ui_ticket', `**Khu Karaoke & Photo:** bán ${fn.tickets} vé, thu **${fmtMoney(fn.revenue)}** (đã tính vào doanh thu).`, 'jade'));
+  if (fn.tickets > 0) sec(noteBox('ui_ticket', `**Khu Karaoke & Photo:** bán ${fn.tickets} vé, thu **${fmtMoney(fn.revenue)}**${fn.menu ? ` (gồm ${fn.menu} món ăn uống trong phòng)` : ''} (đã tính vào doanh thu).`, 'jade'));
   // v1.15 vé số: tối nay quay, sáng mai dò
   if ((lot.tickets || 0) + (lot.bets || 0) > 0) sec(noteBox('ui_ticket', `Đã quay xổ số! ${lot.tickets ? `**${lot.tickets} vé số**` : ''}${lot.tickets && lot.bets ? ' và ' : ''}${lot.bets ? `**${lot.bets} phiếu đoán số**` : ''} chờ dò. Sáng mai vào **Quán ▸ Vé số** để dò và nhận thưởng nha.`, 'gold'));
   // v1.14 thuế + khách chê đắt

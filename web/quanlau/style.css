@@ -1694,3 +1694,11 @@ button.hchip:active { transform: translateY(2px); }
 .deco-slots .num { font-size: 18px; line-height: .8; margin-left: 2px; }
 .deco-act { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
 .cl-gate-backup { color: #d2433b; }   /* 22/10 link dự phòng khi tên miền .io.vn lỗi */
+/* v1.24 thực đơn Karaoke & Photo */
+.fnm-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; margin-bottom: 10px; }
+.fnm-grid .card.fnm { display: flex !important; flex-direction: row !important; align-items: center; gap: 6px; padding: 6px 8px; margin: 0; text-align: left; min-height: 0; }
+.fnm-grid .card.fnm > img, .fnm-grid .card.fnm > .ico { width: 32px; height: 32px; flex: none; }
+.fnm-grid .card.fnm .grow { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.fnm-grid .card.fnm b { font-size: 13px; line-height: 1.2; }
+.fnm-grid .card.fnm .chip { flex: none; font-size: 11px; padding: 3px 6px; }
+.fnm-grid .card.fnm.locked img { filter: grayscale(1) brightness(.75); opacity: .7; }
