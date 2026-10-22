@@ -161,7 +161,8 @@ const LAYOUTS = {
     // v1.3: the ground-floor stair climbs to y≈198 and comes out on the upper floor beside the balcony (160,148).
     // Before, the top point was the ROOF stair (178,70): people walked up the balcony rail and the roof steps.
     // While inside `hide` (behind the awning / facade band) the walker is not drawn.
-    stairs: { bottom: { x: 178, y: 258 }, via: { x: 178, y: 198 }, top: { x: 160, y: 148 }, hide: { x0: 165, y0: 149, y1: 199 } },
+    // v1.21b cầu thang một mạch từ nền trệt lên thẳng chiếu nghỉ lầu (cạnh cửa Karaoke); đoạn giữa chạy sau mặt tiền
+    stairs: { bottom: { x: 177, y: 262 }, via: { x: 177, y: 140 }, top: { x: 177, y: 128 }, hide: { x0: 166, y0: 137, y1: 196 } },   // v1.21c khuất sau mặt tiền
     // v1.19: bên trái = dãy bàn 2 tầng (cấp 1 trệt, cấp 2 lầu); bên phải = phòng giải trí (art/scenes.js, fun)
     wing: { tables: [table(-30, 262, 1), table(-72, 262, 1), table(-30, 100, 2), table(-72, 100, 2)], aisles: [-10], y: 248,
       waiters: [{ x: -50, y: 247 }, { x: -50, y: 86 }], view: [-100, 292], leftOnly: true },
@@ -172,11 +173,10 @@ const LAYOUTS = {
       // v1.20 khách mua vé: đi vỉa hè → cổng riêng → (cầu thang bên phải lên lầu) → chỗ chơi
       // v1.21 khách vào khu giải trí qua cổng quán → (cầu thang chung → chiếu nghỉ lầu) → cửa vòm hông cầu thang
       nav: { spawnR: 344, spawnL: -124, walkY: 326,
-        door: { 1: { out: [182, 286], at: [195, 287], in: [207, 284], walk: 282 }, 2: { out: [184, 132], at: [195, 133], in: [207, 128], walk: 124 } },
-        hide: { x0: 165, x1: 192, y0: 149, y1: 199 } },
+        door: { 1: { out: [182, 286], at: [195, 287], in: [207, 284], walk: 282 }, 2: { out: [184, 132], at: [195, 133], in: [207, 128], walk: 124 } }, },
       doors: [
-        { floor: 2, x: 195, x0: 190.5, x1: 199.5, y0: 105, y1: 134, glow: '#b06cff', win: '#ff8ad8' },
-        { floor: 1, x: 195, x0: 190.5, x1: 199.5, y0: 258, y1: 288, glow: '#ffc4dc', win: '#8ae6ff' },
+        { floor: 2, x: 195, x0: 190.5, x1: 199.5, y0: 96, y1: 134, glow: '#b06cff', win: '#ff8ad8' },
+        { floor: 1, x: 195, x0: 190.5, x1: 199.5, y0: 249, y1: 288, glow: '#ffc4dc', win: '#8ae6ff' },
       ],
       spots: {
         1: [{ x: 238, y: 232, pose: 'cheer', need: 'gt_phong' }, { x: 249, y: 232, pose: 'cheer', need: 'gt_phong' },
