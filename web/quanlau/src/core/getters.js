@@ -174,6 +174,8 @@ export function createGetters(G) {
         const miss = tray.need.find((n) => !n.done);
         if (miss) return `Còn thiếu ${ING[miss.ing].name.toLowerCase()} trong mâm.`;
       }
+      const cf = w.tickets.find((t) => t.status === 'confirm');
+      if (cf) return 'Đơn ship làm xong rồi — chạm vào phiếu Ship để xác nhận cho Shipper đi giao.';
       const wait = w.tickets.find((t) => t.status === 'new');
       if (wait) {
         const pot = POT[wait.pot];

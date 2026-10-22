@@ -8,11 +8,16 @@ import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
-  ver: 120,
+  ver: 122,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Khu Karaoke & Photo mở bán vé!',
+  hero: 'Đèn LED vũ trường + tự làm đơn ship!',
   items: [
-    { icon: 'ui_ticket', title: 'Bán vé Karaoke & Photo', lv: 28, isNew: true,
+    { icon: 'eq_truck', title: 'Đơn ship: tự làm + xác nhận', lv: C.FEATURES.ship, isNew: true,
+      text: 'Đầu bếp không tự nấu phiếu **Ship** nữa: chủ quán chạm phiếu Ship, **tự soạn mâm** rồi bấm Phục vụ. Phiếu sáng vàng thì chạm lần nữa để **kiểm đơn & Xác nhận giao**, Shipper mới ra lấy hàng.' },
+    { icon: 'ui_hopmu', title: 'Đèn LED vũ trường', lv: 28, isNew: true,
+      text: 'Món mới **Cực hiếm** trong **Hộp mù**: lắp vào phòng Karaoke là đèn quét màu chạy theo nhạc khi quán mở. Buổi tối phòng **Karaoke & Photo** giờ sáng đèn rực rỡ.',
+      go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
+    { icon: 'ui_ticket', title: 'Bán vé Karaoke & Photo', lv: 28,
       text: 'Khu vui chơi bên phải nhà hàng 2 lầu giờ có **khách mua vé ra vào**: chụp ảnh ở Photo Studio tầng trệt, đi **cầu thang mới** lên lầu hát Karaoke. Đặt giá vé ở **Thực đơn ▸ Giá bán ▸ Vé Karaoke & Photo**. Bày thêm đồ trong phòng để có thêm chỗ chơi.',
       go: ['menu', 'gia'], goLabel: 'Đặt giá vé' },
     { icon: 'ui_hopmu', title: 'Phòng giải trí + dãy bên 2 lầu', lv: 28,

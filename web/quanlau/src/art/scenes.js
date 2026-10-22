@@ -841,7 +841,7 @@ function poolCanvas(r, kind) {
   let c = poolCache.get(key);
   if (c || !hasDOM) return c;
   const R_ = Math.round(r * DETAIL), c2 = canvas(R_ * 2 + 2, R_ * 2 + 2), g = c2.getContext('2d');
-  const col = kind === 'cool' ? '130,176,255' : '255,178,100';
+  const col = kind === 'cool' ? '130,176,255' : kind === 'pink' ? '255,150,210' : kind === 'violet' ? '190,120,255' : kind === 'white' ? '255,240,235' : '255,178,100';
   const steps = 5;
   for (let i = 0; i < steps; i++) {
     const ri = Math.round(R_ * (1 - i / steps));
@@ -858,6 +858,52 @@ function pool(ctx, x, y, r, kind, a) {
   ctx.drawImage(c, Math.round(x - r - U), Math.round(y - r - U), c.width * U, c.height * U);
 }
 
+/** v1.22 các phòng giải trí đang mở (để đêm vẫn sáng). */
+function funLit(env) {
+  const L = env.layout, FN = L && L.fun;
+  if (!FN || !(env.funLevel > 0)) return [];
+  const out = [];
+  for (const fl of [1, 2]) if (env.funLevel >= fl && FN.rooms[fl]) out.push(Object.assign({ floor: fl }, FN.rooms[fl]));
+  return out;
+}
+/** v1.22 Đèn LED vũ trường (Hộp mù) đã lắp trong phòng Karaoke: chùm đèn quét màu + đốm sáng chạy trên sàn khi quán mở. */
+export function drawFunFx(ctx, env) {
+  try {
+    const L = env.layout, FN = L && L.fun;
+    if (!FN || (env.funLevel | 0) < 2 || !env.open || !(env.fun || []).includes('gt_led')) return;
+    const d = DECO_FUN.gt_led, r = FN.rooms[2], t = env.t || 0;
+    if (!d || !r) return;
+    const night = nightK(env.clock == null ? 600 : env.clock);
+    const a0 = 0.16 + 0.22 * night;
+    const COLS = ['255,80,200', '90,210,255', '255,220,70', '170,110,255'];
+    ctx.save();
+    ctx.beginPath(); ctx.rect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0); ctx.clip();
+    ctx.globalCompositeOperation = 'lighter';
+    const beat = 0.75 + 0.25 * Math.abs(Math.sin(t * 4.2));
+    [-11, -4, 3.5, 10.5].forEach((dx, i) => {
+      const hx = d.x + dx, hy = d.y + 8;
+      const ang = Math.sin(t * (0.9 + i * 0.27) + i * 1.7) * 0.75;
+      const len = r.y1 - hy + 6, spread = 7 + 2 * Math.sin(t * 1.3 + i);
+      const fx = hx + Math.sin(ang) * len, fy = hy + Math.cos(ang) * len;
+      const nx = Math.cos(ang) * spread, ny = -Math.sin(ang) * spread;
+      const g = ctx.createLinearGradient(hx, hy, fx, fy);
+      g.addColorStop(0, `rgba(${COLS[i]},${(a0 * 1.6 * beat).toFixed(3)})`); g.addColorStop(1, `rgba(${COLS[i]},0)`);
+      ctx.fillStyle = g;
+      ctx.beginPath(); ctx.moveTo(hx - 0.8, hy); ctx.lineTo(fx - nx, fy - ny); ctx.lineTo(fx + nx, fy + ny); ctx.lineTo(hx + 0.8, hy); ctx.closePath(); ctx.fill();
+      const sx = hx + Math.sin(ang) * (r.y1 - 12 - hy) * 0.95, sy = r.y1 - 12 - 18 * Math.abs(Math.cos(t * 0.7 + i));   // đốm sáng trên sàn
+      ctx.fillStyle = `rgba(${COLS[i]},${(a0 * 1.3 * beat).toFixed(3)})`;
+      ctx.beginPath(); ctx.ellipse(sx, sy, 7, 3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = `rgba(255,255,255,${(0.5 * beat).toFixed(3)})`; ctx.fillRect(Math.round(hx) - 0.5, hy - 0.5, 1, 1);   // mắt đèn chớp
+    });
+    for (let i = 0; i < 18; i++) {                                         // hạt sáng li ti quay quanh phòng
+      const u = (i * 0.618 + t * 0.06 * (1 + (i % 3) * 0.3)) % 1, v = (i * 0.37 + Math.sin(t * 0.5 + i) * 0.1 + 1) % 1;
+      ctx.fillStyle = `rgba(${COLS[i % 4]},${(0.35 + 0.35 * night).toFixed(3)})`;
+      ctx.fillRect(Math.round(r.x0 + u * (r.x1 - r.x0)), Math.round(r.y0 + 8 + v * (r.y1 - r.y0 - 16)), 1, 1);
+    }
+    ctx.restore();
+  } catch (e) { ctx.globalCompositeOperation = 'source-over'; guard(e); }
+}
+
 export function drawLighting(ctx, view, env) {
   try {
     const clock = env.clock == null ? 600 : env.clock;
@@ -869,9 +915,18 @@ export function drawLighting(ctx, view, env) {
     col = lerpC(col, NIGHT, k * (1 - Math.min(0.6, lamp * 2.4)));
     if (wet) col = lerpC(col, [col[0] * RAIN[0] / 255, col[1] * RAIN[1] / 255, col[2] * RAIN[2] / 255], wet * (1 - 0.4 * k));
     const W = view.x1 - view.x0, H = view.y1 - view.y0;
+    // v1.22 phòng Karaoke & Photo đã mở: tối vẫn sáng đèn trong phòng (chỉ tối đi một ít, không phủ màu đêm cả cảnh)
+    const FR = funLit(env);
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = `rgb(${col[0] | 0},${col[1] | 0},${col[2] | 0})`;
-    ctx.fillRect(view.x0, view.y0, W, H);
+    if (FR.length) {
+      ctx.save(); ctx.beginPath(); ctx.rect(view.x0, view.y0, W, H);
+      for (const r of FR) ctx.rect(r.x1, r.y0, r.x0 - r.x1, r.y1 - r.y0);        // ngược chiều → lỗ (nonzero)
+      ctx.clip(); ctx.fillRect(view.x0, view.y0, W, H); ctx.restore();
+      const rc = lerpC(WHITE, col, 0.22);
+      ctx.fillStyle = `rgb(${rc[0] | 0},${rc[1] | 0},${rc[2] | 0})`;
+      for (const r of FR) ctx.fillRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+    } else ctx.fillRect(view.x0, view.y0, W, H);
     ctx.globalCompositeOperation = 'source-over';
     if (k > 0.02) {
       ctx.globalCompositeOperation = 'screen';
@@ -893,6 +948,12 @@ export function drawLighting(ctx, view, env) {
         const sl = env.up ? lvl(env.up.sign) : 0, sg = L.sign;
         if (sl >= 2 && sg) pool(ctx, sg.x + sg.w / 2, sg.y + sg.h / 2 + 2, Math.min(60, sg.w * 0.42 + 6), sl >= 3 ? 'cool' : 'warm', k * (sl >= 3 ? 1 : 0.7));
         if (env.up && lvl(env.up.speaker) && L.equip.speaker) pool(ctx, L.equip.speaker.x, L.equip.speaker.y - 8, 10, 'cool', k * 0.5);
+        for (const r of FR) {                                            // v1.22 đèn trong phòng giải trí hắt ra
+          const cx = (r.x0 + r.x1) / 2, cy = (r.y0 + r.y1) / 2;
+          pool(ctx, cx, cy, 44, r.floor === 2 ? 'violet' : 'pink', k * 0.55 * (0.92 + 0.08 * Math.sin(t * 2.3 + r.floor)));
+          pool(ctx, cx - 26, cy - 8, 22, r.floor === 2 ? 'pink' : 'white', k * 0.45);
+          pool(ctx, cx + 26, cy + 6, 22, r.floor === 2 ? 'cool' : 'white', k * 0.4);
+        }
       }
       ctx.globalCompositeOperation = 'source-over';
       ctx.globalAlpha = 1;

@@ -4,7 +4,7 @@
 // at integer world coordinates and lands 1:1 on buffer pixels.
 import {
   drawSceneBack, sceneDrawables, drawSceneFront, drawTable, drawStove, drawCoinPile, drawBubble, drawParticle,
-  drawVehicle, drawWeather, drawFunDoor, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins, setSitLift, sitLiftFor,
+  drawVehicle, drawWeather, drawFunDoor, drawFunFx, drawCanopy, drawLighting, drawChar, makeLook, makeOwnerLook, makeStaffLook, setSkins, setSitLift, sitLiftFor,
 } from '../art/index.js';
 import { PAL } from '../art/palette.js';
 import { TIME, RAIN, DECO, TIERS } from '../config.js';
@@ -602,6 +602,7 @@ export function createRenderer(canvas, game) {
     const hole = roofed ? { x0: view.x0 - 2, y0: view.y0 - 2, x1: view.x1 + 2, y1: L.lane.y - 12 } : cp && tarpK > 0.6 ? { x0: cp.x0, y0: cp.yTop, x1: cp.x1, y1: cp.ground } : null;
     drawWeather(bctx, view, wxNow, time, hole);
     drawLighting(bctx, view, env);
+    drawFunFx(bctx, env);   // v1.22 đèn LED vũ trường phòng Karaoke
     drawBubbles(w);
     fx.drawParticles(bctx, drawParticle);
 

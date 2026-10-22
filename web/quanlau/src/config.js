@@ -585,6 +585,7 @@ export const DECO = [
   { id: 'gt_mayanh', cat: 'giaitri', name: 'Máy chụp ảnh lấy liền (to)', price: 0, amb: 8, source: 'box', box: 'bx_gt_mayanh', fun: { floor: 1, x: 288, y: 246 }, effect: { demandMult: 1.05 }, desc: 'Khách +5%.' },
   { id: 'gt_gapthu', cat: 'giaitri', name: 'Máy gắp thú', price: 0, amb: 6, source: 'box', box: 'bx_gt_gapthu', fun: { floor: 1, x: 214, y: 288 }, effect: { patienceMult: 1.05 }, desc: 'Trẻ em mê lắm. Kiên nhẫn +5%.' },
   { id: 'gt_neon', cat: 'giaitri', name: 'Bảng neon KARAOKE', price: 0, amb: 4, source: 'box', box: 'bx_gt_neon', fun: { floor: 2, x: 222, y: 22, wall: true }, effect: { demandMult: 1.02 }, desc: 'Khách +2%.' },
+  { id: 'gt_led', cat: 'giaitri', name: 'Đèn LED vũ trường', price: 0, amb: 7, source: 'box', box: 'bx_gt_led', fun: { floor: 2, x: 250, y: 16, wall: true, fx: 'disco' }, effect: { demandMult: 1.03, tipMult: 1.03 }, desc: 'Lắp vào phòng Karaoke: đèn quét màu chạy theo nhạc. Khách +3%, tip +3%.' },
   { id: 'gt_disco', cat: 'giaitri', name: 'Quả cầu disco', price: 0, amb: 4, source: 'box', box: 'bx_gt_disco', fun: { floor: 2, x: 276, y: 17, wall: true }, effect: { tipMult: 1.03 }, desc: 'Tip +3%.' },
   { id: 'gt_sankhau', cat: 'giaitri', name: 'Sân khấu karaoke', price: 0, amb: 12, source: 'box', box: 'bx_gt_sankhau', fun: { floor: 2, x: 232, y: 79 }, effect: { demandMult: 1.06, patienceMult: 1.04 }, desc: 'Màn hình, loa, micro đủ bộ. Khách +6%, kiên nhẫn +4%.' },
   { id: 'gt_quaynuoc', cat: 'giaitri', name: 'Quầy nước karaoke', price: 0, amb: 6, source: 'box', box: 'bx_gt_quaynuoc', fun: { floor: 2, x: 288, y: 86 }, effect: { tipMult: 1.05 }, desc: 'Tip +5%.' },
@@ -1073,6 +1074,7 @@ export const BOX = {
     { id: 'bx_gt_mayanh', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_mayanh', name: 'Máy chụp ảnh lấy liền (to)' },
     { id: 'bx_gt_gapthu', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_gapthu', name: 'Máy gắp thú' },
     { id: 'bx_gt_neon', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_neon', name: 'Bảng neon KARAOKE' },
+    { id: 'bx_gt_led', grp: 'giaitri', r: 3, kind: 'deco', ref: 'gt_led', name: 'Đèn LED vũ trường' },   // v1.22
     { id: 'bx_gt_disco', grp: 'giaitri', r: 1, kind: 'deco', ref: 'gt_disco', name: 'Quả cầu disco' },
     { id: 'bx_gt_sankhau', grp: 'giaitri', r: 4, kind: 'deco', ref: 'gt_sankhau', name: 'Sân khấu karaoke' },
     { id: 'bx_gt_quaynuoc', grp: 'giaitri', r: 2, kind: 'deco', ref: 'gt_quaynuoc', name: 'Quầy nước karaoke' },

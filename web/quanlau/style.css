@@ -1694,3 +1694,8 @@ button.hchip:active { transform: translateY(2px); }
 .deco-slots .num { font-size: 18px; line-height: .8; margin-left: 2px; }
 .deco-act { display: flex; flex-wrap: wrap; gap: 4px; justify-content: center; }
 .cl-gate-backup { color: #d2433b; }   /* 22/10 link dự phòng khi tên miền .io.vn lỗi */
+/* v1.22 mâm ship làm xong chờ xác nhận: nhấp nháy để chủ quán bấm */
+.tk.confirm { background: #fff3c4; --depth: #e8c96a; box-shadow: 0 0 0 2px #e0a52b, 0 3px 0 2px #b9801c; animation: tkConfirm 1s ease-in-out infinite; }
+.tk.confirm .tb { background: #e0a52b; }
+@keyframes tkConfirm { 50% { transform: translateY(-2px); box-shadow: 0 0 0 3px #ffd25a, 0 4px 0 2px #b9801c; } }
+@media (prefers-reduced-motion: reduce) { .tk.confirm { animation: none; } }

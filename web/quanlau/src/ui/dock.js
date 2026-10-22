@@ -55,7 +55,7 @@ export function mountDock(root, sceneUi) {
     const plus = span('tplus', '+'); const drk = div('tdrk'); const sideEl = div('tside');
     const stI = ico('ui_check', 16, 'tst'); const bar = h('i'); const pb = div('pbar', bar);
     const el = h('button', { class: 'tk', dataset: { id: String(t.id) } }, num, potI, exI, plus, drk, sideEl, stI, pb);
-    onPress(el, () => { sfx('click'); const r = quiet('selectTicket', t.id); if (r.ok === false && r.msg) ctx.toast(r.msg, 'bad'); tickNow(); ctx.tutorial?.onAction?.('select'); });
+    onPress(el, () => { sfx('click'); if (t.status === 'confirm') { askShip(t); return; } const r = quiet('selectTicket', t.id); if (r.ok === false && r.msg) ctx.toast(r.msg, 'bad'); tickNow(); ctx.tutorial?.onAction?.('select'); });
     return { el, num, potI, exI, plus, drk, sideEl, stI, bar, drkKey: '', sideKey: '' };
   }
   function updateTicket(r, t, trayId) {
@@ -73,11 +73,23 @@ export function mountDock(root, sceneUi) {
     setClass(r.el, 'chef', t.status === 'chef');
     setClass(r.el, 'ready', t.status === 'ready' || t.status === 'carrying');
     setClass(r.el, 'extra', !!t.extra);
-    const st = t.status === 'chef' ? 'eq_knife' : (t.status === 'ready' ? 'ui_check' : (t.status === 'carrying' ? 'ui_speed' : null));
+    setClass(r.el, 'confirm', t.status === 'confirm');   // v1.22 mâm ship chờ xác nhận
+    const st = t.status === 'confirm' ? 'eq_truck' : t.status === 'chef' ? 'eq_knife' : (t.status === 'ready' ? 'ui_check' : (t.status === 'carrying' ? 'ui_speed' : null));
     if (st) { setIco(r.stI, st, 16); r.stI.style.display = ''; } else r.stI.style.display = 'none';
     setStyleVar(r.bar, '--p', Math.round(ratio * 20) * 5);
     setClass(r.el, 'p-ok', ratio > 0.5); setClass(r.el, 'p-mid', ratio <= 0.5 && ratio > 0.25); setClass(r.el, 'p-low', ratio <= 0.25);
-    r.el.disabled = t.status === 'chef' || t.status === 'ready' || t.status === 'carrying';
+    r.el.disabled = t.status === 'chef' || t.status === 'ready' || t.status === 'carrying';   // 'confirm' vẫn bấm được để xác nhận
+  }
+  // v1.22 đơn ship: chủ quán tự soạn mâm, xong thì kiểm lại đơn rồi bấm xác nhận cho Shipper đi giao
+  function askShip(t) {
+    const o = (ctx.game.world?.shipOrders || []).find((x) => x.ticketId === t.id || x.id === t.ship);
+    const lines = [POT[t.pot]?.name || 'Lẩu'];
+    (t.sides || []).forEach((d) => lines.push(ING[d]?.name || d));
+    (t.drinks || []).forEach((d) => lines.push(DRINK[d]?.name || d));
+    const left = Math.max(0, Math.round((t.patience || 0) - (t.waited || 0)));
+    ctx.confirm({ title: 'Xác nhận đơn ship #' + (t.ship || ''), icon: 'eq_truck', yes: 'Xác nhận giao', no: 'Để sau',
+      text: 'Đơn gồm: ' + lines.join(', ') + '.' + (o ? ' Giá món ' + Math.round(o.price) + 'k + phí ship.' : '') + ` Khách còn chờ khoảng ${left} phút. Kiểm đủ món rồi bấm xác nhận để Shipper ra lấy hàng nha.`,
+      onYes: () => { const r = act('confirmShip', t.id); if (r && r.ok !== false) { sfx('confirm'); vibrate?.(20); } tickNow(); } });
   }
   function updateTickets(trayId) {
     const list = (ctx.game.world?.tickets || []).filter((t) => t.status !== 'done');

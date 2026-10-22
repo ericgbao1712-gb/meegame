@@ -205,7 +205,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
-      state.flags.ui.seenNews = 120;   // v1.16 người chơi mới không cần bảng "Có gì mới"
+      state.flags.ui.seenNews = 122;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),
@@ -215,6 +215,7 @@ export function createGame(save, opts = {}) {
     addIngredient: wrap((ing) => kitchen.addIngredientAct(G, ing)),
     addDrinks: wrap(() => kitchen.addDrinksAct(G)),
     serve: wrap(() => kitchen.serveAct(G)),
+    confirmShip: wrap((id) => kitchen.confirmShipAct(G, id)),   // v1.22
     collect: wrap((tableIdx) => customers.collectCoins(G, tableIdx, 'player')),
     buyIngredient: wrap((ing, qty) => buyIngredient(G, ing, qty)),
     // v1.13 / v2.9: quà từ mã quà tặng (máy chủ đã kiểm tra mã). XP cộng đúng số ghi trên mã (không nhân xpGainMult).
