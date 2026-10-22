@@ -41,7 +41,7 @@ export function adminTag({ big = false } = {}) {
 export function adminFrame(inner, { size = 44 } = {}) {
   const el = span('adm-frame');
   el.style.setProperty('--sz', size + 'px');
-  el.append(span('adm-ring'), span('adm-ring2'), inner || span(''),
+  el.append(span('adm-ring'), inner || span(''), span('adm-ring2'),
     span('adm-gem g1'), span('adm-gem g2'), span('adm-gem g3'), span('adm-gem g4'),
     span('adm-ribbon', span('adm-rb-txt', 'ADMIN')));
   return el;
