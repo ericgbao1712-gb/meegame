@@ -303,7 +303,7 @@ export const CUSTOMERS = {
 // Sao đánh giá theo tổng thời gian từ lúc gọi tới lúc nhận (hứa giao trong promiseMin phút).
 export const SHIP = {
   share: 0.28, perShipper: 2,            // đơn đang chạy tối đa = số shipper × perShipper
-  patience: 95,                          // phút game chờ bếp nấu + shipper lấy; quá thì khách hủy đơn (v1.23: 70 → 95, chủ quán tự làm mâm)
+  patience: 120,                         // phút game chờ bếp nấu + shipper lấy; quá thì khách hủy đơn (v1.23: 70 → 95, v1.25: → 120)
   tripMin: [9, 15],                      // phút game chạy đi giao rồi về (chia cho tốc độ shipper)
   fee: 15,                               // phí ship (k) khách trả thêm
   drinkChance: 0.45, sideChance: 0.3,
@@ -377,8 +377,8 @@ export const STAFF = {
   },
   slotsByTier: [2, 4, 6, 9, 9],
   // v1.17: lên cấp mở thêm chỗ chứa nhân viên (cộng vào slotsByTier), tối đa 12 người một quán
-  slotBonus: [[20, 1], [28, 1], [34, 1]],
-  maxSlots: 12,
+  slotBonus: [[20, 1], [28, 1], [34, 1], [36, 1], [38, 1], [40, 1]],   // v1.25 thêm 3 mốc → tối đa 15 người
+  maxSlots: 15,
   rarityWeights: [40, 30, 18, 9, 3],          // ★1..★5
   rarityPoints: [6, 9, 12, 16, 21],           // total stat points (spd+skl+chm), ±2
   salary: (s, tier) => Math.round((30 + 5 * (s.spd + s.skl + s.chm)) * [1, 1.6, 2.4, 2.8, 2.8][tier - 1]), // k/day

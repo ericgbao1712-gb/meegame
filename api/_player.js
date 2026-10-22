@@ -174,3 +174,15 @@ export function send(res, status, data, headers = {}) {
   res.end(JSON.stringify(data));
 }
 export function err(res, status, code, message, headers) { send(res, status, { error: code, message }, headers); }
+
+// ───────────── khung / thẻ tên ADMIN (chỉ tài khoản admin) ─────────────
+// Email admin không ghi thẳng trong mã: so khớp bằng SHA-256. Thêm / đổi admin qua biến môi trường
+// ADMIN_PLAYER_EMAILS (cách nhau dấu phẩy) trên Vercel, không cần sửa mã.
+const ADMIN_EMAIL_HASHES = new Set(['1b62f29880ec62480dec4264e4c4a639175fec9e57f07fc08522af74a5f29633']);
+export function isAdminPlayerEmail(email) {
+  const e = String(email || '').trim().toLowerCase();
+  if (!e) return false;
+  const env = String(process.env.ADMIN_PLAYER_EMAILS || '').toLowerCase().split(',').map((x) => x.trim()).filter(Boolean);
+  if (env.includes(e)) return true;
+  return ADMIN_EMAIL_HASHES.has(crypto.createHash('sha256').update(e).digest('hex'));
+}

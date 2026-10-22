@@ -8,14 +8,17 @@ import { confettiFor } from './screens/kit.js';
 
 export const NEWS = {
   // owner 22/10: "bản thông báo chỉ hiển thị một lần" — mỗi bản cập nhật hiện ĐÚNG 1 lần (nhớ cả trong save lẫn trên máy).
-  ver: 125,
+  ver: 126,
   title: 'Có gì mới trong Lẩu Ơi!',
-  hero: 'Bia, mồi nhậu, trái cây cho Karaoke & Photo!',
+  hero: 'Quán chứa 15 nhân viên!',
   items: [
-    { icon: 'fn_thapbia', title: 'Thực đơn Karaoke & Photo', lv: 28, isNew: true,
+    { icon: 'ui_staff', title: 'Quán chứa tới 15 nhân viên', lv: 36, isNew: true,
+      text: 'Lên **Lv 36, 38, 40** mỗi mốc mở thêm 1 chỗ nhân viên: nhà hàng 2 lầu chứa tối đa **15 người**. Khách đặt ship cũng chờ lâu hơn (**120 phút**).',
+      go: ['staff', null], goLabel: 'Xem Nhân viên' },
+    { icon: 'fn_thapbia', title: 'Thực đơn Karaoke & Photo', lv: 28,
       text: `**${C.FUN.menu.length} món mới** trong **Hộp mù**: mồi nhậu (khô mực, bò khô, xúc xích…), trái cây, **bia, tháp bia, soju, rượu vang**, trà sữa, soda, cocktail. Khách vào hát / chụp ảnh tự gọi thêm các món đã mở. Xem ở **Thực đơn ▸ Giá bán ▸ Vé Karaoke & Photo**.`,
       go: ['shop', 'hopmu'], goLabel: 'Mở Hộp mù' },
-    { icon: 'ui_pause', title: 'Đóng cửa sớm trong nút Tạm dừng', lv: 1, isNew: true,
+    { icon: 'ui_pause', title: 'Đóng cửa sớm trong nút Tạm dừng', lv: 1,
       text: 'Bấm **Tạm dừng** là có nút **Đóng cửa sớm**: không nhận khách mới, khách đang ngồi ăn xong rồi chốt sổ.' },
     { icon: 'ui_hopmu', title: '9 món mới cho Karaoke & Photo', lv: 28,
       text: 'Hộp mù có thêm: **micro đứng, máy tạo khói, màn hình chọn bài, bàn trà kính, đèn laser** cho phòng Karaoke và **bàn trang điểm, gấu bông khổng lồ, cây hoa anh đào, máy bong bóng** cho Photo Studio. Khói, laser, bong bóng và cánh hoa chạy hiệu ứng khi quán mở.',

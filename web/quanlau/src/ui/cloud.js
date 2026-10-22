@@ -13,7 +13,8 @@ import { h, div, span, ico } from './dom.js';
 import { ctx, S, sfx } from './ctx.js';
 import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
-import { badgePlate, badgeRowCls } from './badge.js';
+import { badgePlate, badgeRowCls, adminTag, adminFrame } from './badge.js';
+import { portraitURL, makeOwnerLook } from '../art/index.js';
 import { fmtShort, fmtMoney } from '../core/format.js';
 import { countUp, confettiFor, vibrate } from './screens/kit.js';
 
@@ -28,7 +29,10 @@ const st = {
   ready: false, offline: false, player: null, cloud: null,
   busy: false, lastUpload: 0, lastSig: '', lastErr: '', listeners: new Set(),
 };
-const emit = () => { for (const f of st.listeners) { try { f(); } catch (e) { /* ignore */ } } };
+const emit = () => {
+  try { if (ctx.game) ctx.game.adminTag = !!(st.player && st.player.admin); } catch (e) { /* ignore */ }   // v1.25 thẻ tên ADMIN trong cảnh
+  for (const f of st.listeners) { try { f(); } catch (e) { /* ignore */ } }
+};
 const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
 const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
 
@@ -358,10 +362,11 @@ export function accountPanel({ compact = false, gate = false } = {}) {
       return;
     }
     const p = st.player, c = st.cloud;
-    const pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
+    let pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
+    if (p.admin) pic = adminFrame(pic, { size: 44 });   // v1.25 khung hoàng gia cho admin
     const saveBtn = h('button', { class: 'btn jade sm', onclick: async () => { sfx('click'); saveBtn.disabled = true; const ok = await upload({ force: false }); saveBtn.disabled = false; ctx.toast(ok ? 'Đã lưu lên mạng!' : (st.lastErr || 'Vừa lưu rồi, đợi chút nha.'), ok ? 'good' : 'info', ok ? 'ui_check' : 'ui_info'); } }, 'Lưu ngay');
     add(
-      div('set-row', pic, div('grow', h('b', null, p.name || p.email), span('muted sm', p.email || ''))),
+      div('set-row', pic, div('grow', h('b', null, p.name || p.email), p.admin ? adminTag() : null, span('muted sm', p.email || ''))),
       span('muted sm cl-stat', st.busy ? 'Đang lưu…' : c ? `Trên mạng: ${c.shopName || 'Quán'} · cấp ${c.level} · lưu ${timeAgo(c.updatedAt)}` : 'Chưa có bản trên mạng.'),
       st.lastErr ? span('bk-err', st.lastErr) : null,
       div('set-bk', saveBtn,
@@ -495,9 +500,10 @@ export function leaderboardView(body, api2) {
     if (!data) { list.appendChild(span('muted sm', 'Chưa tải được bảng xếp hạng (cần mạng).')); return; }
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
-      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + badgeRowCls(r.badge),
-        span('cl-rank num', String(r.rank)),
-        div('grow', h('b', null, r.shopName), badgePlate(r.badge), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
+      const av = r.admin ? (() => { const im = h('img', { class: 'pix', alt: '', width: 36, height: 36 }); try { im.src = portraitURL(makeOwnerLook(r.avatar | 0, 4), 2); } catch (e) { /* art chưa sẵn */ } return adminFrame(im, { size: 40 }); })() : null;
+      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : badgeRowCls(r.badge)),
+        span('cl-rank num', String(r.rank)), av,
+        div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, badgePlate(r.badge), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
         span('num cl-val', B.fmt(r.value))));
     }
     const me = data.me;

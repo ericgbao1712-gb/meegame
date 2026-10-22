@@ -1845,3 +1845,31 @@ body { background: radial-gradient(circle at 20% 15%, rgba(255, 236, 160, .55) 0
 .gc-v { font-size: 30px; line-height: 1.1; color: var(--ink); overflow-wrap: anywhere; }
 .gc-take { gap: 8px; }
 .cl-gate-backup { color: #d2433b; }   /* 22/10 link dự phòng khi tên miền .io.vn lỗi */
+
+/* v1.25 ADMIN: thẻ tên + khung avatar vàng hoàng gia (chỉ tài khoản admin) */
+.adm-tag { position: relative; display: inline-flex; align-self: flex-start; width: max-content; max-width: 100%; align-items: center; gap: 4px; overflow: hidden; vertical-align: middle;
+  margin: 2px 4px 2px 0; padding: 2px 8px 2px 5px; border-radius: 6px; border: 1.5px solid #7a3b00;
+  background: linear-gradient(180deg, #fff2a8 0%, #ffd34d 45%, #d48a0c 100%);
+  box-shadow: 0 0 0 1px #ffe58a inset, 0 2px 0 #9a5a00, 0 0 10px rgba(255, 200, 60, .55);
+  font: 900 11px/1 var(--f-display, var(--f-body)); letter-spacing: .12em; color: #7a1200; text-shadow: 0 1px 0 #fff6c8; }
+.adm-tag.big { font-size: 14px; padding: 3px 10px 3px 6px; }
+.adm-tag .adm-crown { width: 16px; height: 12px; flex: none; filter: drop-shadow(0 1px 0 #7a3b00); }
+.adm-tag .adm-txt { position: relative; z-index: 1; }
+.adm-shine { position: absolute; inset: 0; background: linear-gradient(105deg, transparent 35%, rgba(255,255,255,.85) 48%, transparent 60%);
+  transform: translateX(-120%); animation: admShine 2.6s ease-in-out infinite; pointer-events: none; }
+@keyframes admShine { 0%, 35% { transform: translateX(-120%); } 75%, 100% { transform: translateX(120%); } }
+.adm-frame { position: relative; display: inline-grid; place-items: center; width: var(--sz, 44px); height: var(--sz, 44px); flex: none; margin: 6px 6px 0 0; }
+.adm-frame > img, .adm-frame > .ico { width: calc(var(--sz, 44px) - 8px); height: calc(var(--sz, 44px) - 8px); border-radius: 50%; object-fit: cover; grid-area: 1 / 1; background: #fff4d6; }
+.adm-ring { grid-area: 1 / 1; width: 100%; height: 100%; border-radius: 50%;
+  background: conic-gradient(from 0deg, #fff2a8, #ffd34d, #c97a00, #ffe58a, #ffd34d, #a85f00, #fff2a8);
+  box-shadow: 0 0 0 1.5px #7a3b00, 0 0 12px rgba(255, 196, 40, .7); animation: admSpin 6s linear infinite;
+  -webkit-mask: radial-gradient(circle, transparent calc(50% - 4px), #000 calc(50% - 3.5px)); mask: radial-gradient(circle, transparent calc(50% - 4px), #000 calc(50% - 3.5px)); }
+@keyframes admSpin { to { transform: rotate(360deg); } }
+.adm-gem { position: absolute; width: 6px; height: 6px; border-radius: 50%; border: 1px solid #7a3b00; }
+.adm-gem.g1 { left: -1px; top: 50%; background: #4dd2ff; } .adm-gem.g2 { right: -1px; top: 50%; background: #4dd2ff; } .adm-gem.g3 { bottom: -2px; left: calc(50% - 3px); background: #ff4d6d; }
+.adm-crown.top { position: absolute; top: -11px; left: calc(50% - 10px); width: 20px; height: 15px; filter: drop-shadow(0 1px 0 #7a3b00) drop-shadow(0 0 4px rgba(255, 210, 80, .8)); }
+.cl-row.cl-admin { position: relative; border: 2px solid #c98a12; background: linear-gradient(90deg, #fff6cf, #ffe9a8 40%, #fff6cf);
+  box-shadow: 0 0 0 1px #fff2a8 inset, 0 3px 0 #a86a00, 0 0 14px rgba(255, 200, 60, .45); align-items: center; }
+.cl-row.cl-admin .cl-rank { background: linear-gradient(180deg, #ffe58a, #e3a020); color: #7a1200; }
+.cl-row.cl-admin b { color: #8a2a00; }
+@media (prefers-reduced-motion: reduce) { .adm-shine, .adm-ring { animation: none; } }

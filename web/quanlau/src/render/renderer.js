@@ -22,6 +22,28 @@ const SLOP = 8;                   // generous world-px hit slop (§7)
 
 // y-sort entry kinds
 const doorOpen = [], doorDraw = [];
+// v1.25 thẻ tên ADMIN trên đầu chủ quán (chỉ tài khoản admin): bảng vàng hoàng gia + vương miện, vệt sáng chạy
+const adminTags = [];
+const AFONT = { A: ['010', '101', '111', '101', '101'], D: ['110', '101', '101', '101', '110'], M: ['10001', '11011', '10101', '10001', '10001'], I: ['111', '010', '010', '010', '111'], N: ['1001', '1101', '1011', '1001', '1001'] };
+function drawAdminTag(ctx, cx, y, t) {
+  const W = 27, H = 8, x0 = cx - W / 2;
+  ctx.fillStyle = '#7a3b00'; ctx.fillRect(x0 - 0.5, y - 0.5, W + 1, H + 1);
+  const g = ctx.createLinearGradient(0, y, 0, y + H); g.addColorStop(0, '#fff2a8'); g.addColorStop(0.45, '#ffd34d'); g.addColorStop(1, '#d48a0c');
+  ctx.fillStyle = g; ctx.fillRect(x0, y, W, H);
+  ctx.fillStyle = '#b8001f'; ctx.fillRect(x0 + 0.5, y + 0.5, W - 1, 0.5); ctx.fillRect(x0 + 0.5, y + H - 1, W - 1, 0.5);
+  let x = x0 + 2.5;
+  ctx.fillStyle = '#7a1200';
+  for (const ch of 'ADMIN') { const gl = AFONT[ch]; for (let r = 0; r < 5; r++) for (let c = 0; c < gl[r].length; c++) if (gl[r][c] === '1') ctx.fillRect(x + c, y + 1.5 + r, 1, 1); x += gl[0].length + 1; }
+  const sx = x0 + ((t * 14) % (W + 10)) - 5;                                    // vệt sáng
+  ctx.save(); ctx.beginPath(); ctx.rect(x0, y, W, H); ctx.clip(); ctx.globalAlpha = 0.55; ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.moveTo(sx, y + H); ctx.lineTo(sx + 2, y); ctx.lineTo(sx + 3.5, y); ctx.lineTo(sx + 1.5, y + H); ctx.fill(); ctx.restore();
+  ctx.fillStyle = '#7a3b00'; ctx.fillRect(cx - 4.5, y - 4.5, 9, 4);                 // vương miện
+  ctx.fillStyle = '#ffd34d'; ctx.fillRect(cx - 4, y - 2, 8, 2);
+  ctx.fillRect(cx - 4, y - 4, 1, 2); ctx.fillRect(cx - 0.5, y - 5, 1, 3); ctx.fillRect(cx + 3, y - 4, 1, 2);
+  ctx.fillStyle = '#ff4d6d'; ctx.fillRect(cx - 0.5, y - 5.5, 1, 1); ctx.fillStyle = '#4dd2ff'; ctx.fillRect(cx - 4, y - 4.5, 1, 1); ctx.fillRect(cx + 3, y - 4.5, 1, 1);
+  const tw = 0.5 + 0.5 * Math.sin(t * 5);                                        // lấp lánh
+  ctx.globalAlpha = tw; ctx.fillStyle = '#fff'; ctx.fillRect(cx + 5.5, y - 5, 0.5, 0.5); ctx.fillRect(cx - 7, y + 2, 0.5, 0.5); ctx.globalAlpha = 1;
+}
 const K_DRAW = 0, K_TABLE = 1, K_STOVE = 2, K_ACTOR = 3, K_COINS = 4, K_PED = 5, K_VEH = 6;
 
 export function createRenderer(canvas, game) {
@@ -577,6 +599,7 @@ export function createRenderer(canvas, game) {
           aOpts.pose = o.pose; aOpts.facing = o.facing; aOpts.carry = o.carry; aOpts.alpha = o.alpha == null ? 1 : o.alpha;
           aOpts.t = time + (o.id % 13) * 0.37;
           drawChar(bctx, lookOf(o), Math.round(o.x), Math.round(o.y), aOpts);
+          if (o.type === 'owner' && game.adminTag && !o.hidden) adminTags.push(o);   // v1.25 thẻ tên ADMIN vẽ sau cùng
           break;
         }
         case K_COINS: {
@@ -602,6 +625,8 @@ export function createRenderer(canvas, game) {
     const hole = roofed ? { x0: view.x0 - 2, y0: view.y0 - 2, x1: view.x1 + 2, y1: L.lane.y - 12 } : cp && tarpK > 0.6 ? { x0: cp.x0, y0: cp.yTop, x1: cp.x1, y1: cp.ground } : null;
     drawWeather(bctx, view, wxNow, time, hole);
     drawLighting(bctx, view, env);
+    for (const o of adminTags) drawAdminTag(bctx, Math.round(o.x), Math.round(o.y) - 27, time);
+    adminTags.length = 0;
     drawFunFx(bctx, env);   // v1.22 đèn LED vũ trường phòng Karaoke
     drawBubbles(w);
     fx.drawParticles(bctx, drawParticle);

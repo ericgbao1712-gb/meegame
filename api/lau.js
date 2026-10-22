@@ -25,7 +25,7 @@
 // mà API này không trả header CORS nào → trang lạ không giả mạo được yêu cầu (chống CSRF), thêm cookie SameSite=Lax.
 import { getDb, parseBody, getAdminEmail, nowIso } from './_db.js';
 import {
-  ensureSchema, verifyGoogleIdToken, makeSessionCookie, clearSessionCookie, sessionPlayerId, send, err,
+  ensureSchema, verifyGoogleIdToken, makeSessionCookie, clearSessionCookie, sessionPlayerId, send, err, isAdminPlayerEmail,
 } from './_player.js';
 
 // Các game dùng chung API này (chọn bằng &g=…, mặc định Lẩu Ơi). Cùng tài khoản / cookie MeeGame cho mọi game.
@@ -102,7 +102,7 @@ async function playerOf(db, req) {
   const rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden FROM players WHERE id = ?', args: [id] });
   return rs.rows[0] || null;
 }
-const publicPlayer = (p) => ({ id: Number(p.id), name: p.name || '', email: p.email || '', picture: p.picture || '' });
+const publicPlayer = (p) => ({ id: Number(p.id), name: p.name || '', email: p.email || '', picture: p.picture || '', admin: isAdminPlayerEmail(p.email) });   // admin: khung + thẻ tên hoàng gia
 
 async function cloudRow(db, pid, GAME, full = false) {
   const rs = await db.execute({
@@ -164,7 +164,7 @@ export default async function handler(req, res) {
       const col = BOARD_VALUE[by];
       const where = 'g.game = ? AND g.cheat = 0 AND g.flagged = 0 AND p.hidden = 0';
       const rs = await db.execute({
-        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge FROM game_saves g
+        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge, p.email FROM game_saves g
               JOIN players p ON p.id = g.player_id WHERE ${where} ORDER BY ${BOARDS[by]}, g.updated_at ASC LIMIT 50`,
         args: [GAME],
       });
@@ -187,7 +187,7 @@ export default async function handler(req, res) {
       }
       const rows = rs.rows.map((r, i) => ({
         rank: i + 1, shopName: r.shop_name, avatar: num(r.avatar), level: num(r.level),
-        value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null,
+        value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined,   // không trả email ra ngoài
       }));
       return send(res, 200, { by, rows, me });
     }

@@ -16,6 +16,7 @@ import { frame } from './modals.js';
 import { writeSave, clearSave } from '../storage.js';
 import { fmtShort, fmtMoney } from '../core/format.js';
 import { countUp, confettiFor, vibrate } from './screens/kit.js';
+import { adminTag, adminFrame } from './badge.js';   // v1.25
 
 const CL = C.CLOUD;
 const GIS_SRC = 'https://accounts.google.com/gsi/client';
@@ -359,10 +360,11 @@ export function accountPanel({ compact = false, gate = false } = {}) {
       return;
     }
     const p = st.player, c = st.cloud;
-    const pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
+    let pic = p.picture ? h('img', { class: 'cl-pic', src: p.picture, alt: '', referrerpolicy: 'no-referrer', width: 40, height: 40 }) : ico('ui_heart', 32);
+    if (p.admin) pic = adminFrame(pic, { size: 44 });   // v1.25
     const saveBtn = h('button', { class: 'btn jade sm', onclick: async () => { sfx('click'); saveBtn.disabled = true; const ok = await upload({ force: false }); saveBtn.disabled = false; ctx.toast(ok ? 'Đã lưu lên mạng!' : (st.lastErr || 'Vừa lưu rồi, đợi chút nha.'), ok ? 'good' : 'info', ok ? 'ui_check' : 'ui_info'); } }, 'Lưu ngay');
     add(
-      div('set-row', pic, div('grow', h('b', null, p.name || p.email), span('muted sm', p.email || ''))),
+      div('set-row', pic, div('grow', h('b', null, p.name || p.email), p.admin ? adminTag() : null, span('muted sm', p.email || ''))),
       span('muted sm cl-stat', st.busy ? 'Đang lưu…' : c ? `Trên mạng: ${c.shopName || 'Quán'} · cấp ${c.level} · lưu ${timeAgo(c.updatedAt)}` : 'Chưa có bản trên mạng.'),
       st.lastErr ? span('bk-err', st.lastErr) : null,
       div('set-bk', saveBtn,
@@ -496,9 +498,9 @@ export function leaderboardView(body, api2) {
     if (!data) { list.appendChild(span('muted sm', 'Chưa tải được bảng xếp hạng (cần mạng).')); return; }
     if (!data.rows.length) list.appendChild(span('muted sm', 'Chưa có quán nào trên bảng. Hãy là người đầu tiên!'));
     for (const r of data.rows) {
-      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : ''),
-        span('cl-rank num', String(r.rank)),
-        div('grow', h('b', null, r.shopName), boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
+      list.appendChild(div('cl-row' + (r.me ? ' me' : '') + (r.rank <= 3 ? ' top' + r.rank : '') + (r.admin ? ' cl-admin' : ''),
+        span('cl-rank num', String(r.rank)), r.admin ? adminFrame(ico('ui_heart', 32), { size: 40 }) : null,
+        div('grow', h('b', null, r.shopName), r.admin ? adminTag() : null, boardBy !== 'level' ? span('muted sm', 'Cấp ' + r.level) : null),
         span('num cl-val', B.fmt(r.value))));
     }
     const me = data.me;

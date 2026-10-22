@@ -205,7 +205,7 @@ export function createGame(save, opts = {}) {
       quests.rollDaily(G);
       G.mom('start');
       G.emit('phase', { phase: 'prep' });
-      state.flags.ui.seenNews = 125;   // v1.16 người chơi mới không cần bảng "Có gì mới"
+      state.flags.ui.seenNews = 126;   // v1.16 người chơi mới không cần bảng "Có gì mới"
       return { ok: true };
     }),
     openShop: wrap(() => day.openShop(G)),
