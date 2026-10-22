@@ -606,10 +606,10 @@ export const TIERS = [
     startTables: 7, maxTables: 10, startStoves: 3, maxStoves: 4, waitSpots: 4, kho: 400, rent: 300, demand: 2.1, ambCap: 65, covered: true,
     desc: 'Mặt tiền đường lớn, cửa kính, biển hiệu to. Giờ bạn là chủ nhà hàng thật sự.' },
   { id: 4, scene: 'haitang', name: 'Nhà hàng lẩu 2 tầng',  cost: 60000,  require: { level: 26, rating: 4.3 },
-    startTables: 10, maxTables: 14, startStoves: 4, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
+    startTables: 10, maxTables: 13 /* v1.23b bỏ bàn dư cạnh cầu thang */, startStoves: 4, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
     desc: 'Hai tầng, ban công nhìn ra phố, tầng trên dành cho khách đi nhóm.' },
   { id: 5, scene: 'haitang', name: 'Chuỗi Lẩu Nhà Mình',   cost: 250000, require: { level: 40, rating: 4.5 }, chain: true,   // v1.3: the chain is the last level
-    startTables: 14, maxTables: 14, startStoves: 5, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
+    startTables: 13, maxTables: 13, startStoves: 5, maxStoves: 5, waitSpots: 5, kho: 670, rent: 900, demand: 2.7, ambCap: 90, covered: true,
     desc: 'Mở chi nhánh khắp Việt Nam. Nhà hàng gốc vẫn hoạt động như cũ.' },
 ];
 export const TIER_MULT = [1, 3, 8, 20, 50]; // reward/price scaling helper by tier

@@ -126,13 +126,15 @@ const LAYOUTS = {
   // ── Tier 4 (and 5): nhà hàng lẩu 2 tầng ─────────────────────────────
   haitang: {
     scene: 'haitang', w: 192, h: 360,
+    lit: { y0: 14, y1: 300 },   // v1.23b buổi tối cả nhà hàng (cả dãy bên + phòng giải trí) sáng đèn, chỉ trời và phố tối
     lane: { y: 326 },
     aisles: [59, 105, 151], serviceY: 232, serviceY2: 72,
     spawn: [{ x: -16, y: 326 }, { x: 208, y: 326 }],
     waitSpots: [{ x: 94, y: 322, facing: 'up' }, { x: 108, y: 322, facing: 'up' }, { x: 122, y: 322, facing: 'up' }, { x: 136, y: 322, facing: 'up' }, { x: 150, y: 322, facing: 'up' }],
     tables: [
       // v1.23 bàn sát chân cầu thang (174,280) bị khuất + chật → dời lên lầu, góc phải trống cạnh chiếu nghỉ
-      table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280), table(174, 92, 2),
+      // v1.23b bỏ luôn bàn góc phải lầu cạnh cầu thang (dư, chật lối lên chiếu nghỉ)
+      table(36, 250), table(82, 250), table(128, 250), table(36, 280), table(82, 280), table(128, 280),
       table(36, 88, 2), table(82, 88, 2), table(128, 88, 2), table(36, 116, 2), table(82, 116, 2), table(128, 116, 2),
       table(105, 304),
     ],

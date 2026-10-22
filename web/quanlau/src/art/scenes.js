@@ -918,15 +918,18 @@ export function drawLighting(ctx, view, env) {
     const W = view.x1 - view.x0, H = view.y1 - view.y0;
     // v1.22 phòng Karaoke & Photo đã mở: tối vẫn sáng đèn trong phòng (chỉ tối đi một ít, không phủ màu đêm cả cảnh)
     const FR = funLit(env);
+    // v1.23b cả nhà hàng sáng đèn về đêm (L.lit): trong nhà chỉ tối nhẹ, trời + phố vẫn tối
+    const LL = env.layout && env.layout.lit, vx = env.layout && env.layout.viewX;
+    const HOLES = LL ? [{ x0: vx ? vx[0] : 0, x1: vx ? vx[1] : env.layout.w, y0: LL.y0, y1: LL.y1 }] : FR;
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = `rgb(${col[0] | 0},${col[1] | 0},${col[2] | 0})`;
-    if (FR.length) {
+    if (HOLES.length) {
       ctx.save(); ctx.beginPath(); ctx.rect(view.x0, view.y0, W, H);
-      for (const r of FR) ctx.rect(r.x1, r.y0, r.x0 - r.x1, r.y1 - r.y0);        // ngược chiều → lỗ (nonzero)
+      for (const r of HOLES) ctx.rect(r.x1, r.y0, r.x0 - r.x1, r.y1 - r.y0);        // ngược chiều → lỗ (nonzero)
       ctx.clip(); ctx.fillRect(view.x0, view.y0, W, H); ctx.restore();
-      const rc = lerpC(WHITE, col, 0.22);
+      const rc = lerpC(WHITE, col, LL ? 0.16 : 0.22);
       ctx.fillStyle = `rgb(${rc[0] | 0},${rc[1] | 0},${rc[2] | 0})`;
-      for (const r of FR) ctx.fillRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
+      for (const r of HOLES) ctx.fillRect(r.x0, r.y0, r.x1 - r.x0, r.y1 - r.y0);
     } else ctx.fillRect(view.x0, view.y0, W, H);
     ctx.globalCompositeOperation = 'source-over';
     if (k > 0.02) {
