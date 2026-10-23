@@ -572,14 +572,19 @@ function openCodeNews(list) {
         const copy = h('button', { class: 'btn paper sm cn-copy', type: 'button', onclick: async () => {
           sfx('click'); try { await navigator.clipboard.writeText(c.code); ctx.toast('Đã chép mã ' + c.code, 'good', 'ui_check'); } catch (e) { ctx.toast('Mã: ' + c.code, 'info'); } } }, 'Chép');
         const use = c.redeemed ? span('chip jade', ico('ui_check', 16), 'Đã nhận')
-          : h('button', { class: 'btn jade sm cn-use', type: 'button', onclick: async (e) => {
-            sfx('click');
-            const b = e.currentTarget; b.disabled = true;
-            const res = await redeemCode(c.code);
-            b.disabled = false;
-            if (!res.ok) { ctx.toast(res.msg, 'bad'); return; }
-            m.close('use'); openGiftReward(res.gift);
-          } }, 'Nhận ngay');
+          : h('button', { class: 'btn jade sm cn-use', type: 'button', onclick: () => {   // v1.26b mở Cài đặt, điền sẵn mã vào ô nhập
+            sfx('click'); m.close('use');
+            setTimeout(() => {
+              try { ctx.modals?.settings?.(); } catch (e) { /* ignore */ }
+              setTimeout(() => {
+                const inp = document.querySelector('.cl-gift input');
+                if (!inp) return;
+                inp.value = c.code; inp.dispatchEvent(new Event('input'));
+                inp.scrollIntoView({ block: 'center', behavior: 'smooth' });
+                inp.closest('.cl-gift')?.classList.add('cn-flash'); setTimeout(() => inp.closest('.cl-gift')?.classList.remove('cn-flash'), 1800);
+              }, 350);
+            }, 200);
+          } }, 'Nhập mã');
         return div('card cn-item',
           div('cn-top', span('cn-code num', c.code), copy, use),
           div('cn-info', gifts ? h('b', null, gifts) : null,
@@ -593,7 +598,7 @@ function openCodeNews(list) {
           h('li', null, 'Đăng nhập Gmail trong game (Cài đặt ▸ Tài khoản Google).'),
           h('li', null, 'Bấm nút ⚙ Cài đặt ở góc trên bên phải màn hình Xoài Lắc.'),
           h('li', null, 'Kéo xuống ô "Nhập mã quà tặng", gõ hoặc dán mã, bấm "Nhận quà".'),
-          h('li', null, 'Hoặc bấm "Nhận ngay" ở mã bên trên. Mỗi tài khoản nhận mỗi mã 1 lần.')))),
+          h('li', null, 'Hoặc bấm "Nhập mã" ở mã bên trên: game mở Cài đặt và điền sẵn mã, chỉ cần bấm "Nhận quà". Mỗi tài khoản nhận mỗi mã 1 lần.')))),
       h('button', { class: 'btn red lg block', type: 'button', onclick: () => { sfx('confirm'); m.close('ok'); } }, 'Đã hiểu')),
   });
 }

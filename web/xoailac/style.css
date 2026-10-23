@@ -1922,3 +1922,6 @@ body { background: radial-gradient(circle at 20% 15%, rgba(255, 236, 160, .55) 0
 .cn-how { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; padding: 8px 10px; }
 .cn-how ol { margin: 4px 0 0; padding-left: 18px; font: 600 12px/1.4 var(--f-body); }
 .cl-codes-btn { margin-top: 6px; }
+
+.cl-gift.cn-flash { animation: cnFlash .6s ease-in-out 3; border-radius: 10px; }
+@keyframes cnFlash { 50% { box-shadow: 0 0 0 3px #ffd34d, 0 0 14px rgba(255, 200, 60, .8); } }
