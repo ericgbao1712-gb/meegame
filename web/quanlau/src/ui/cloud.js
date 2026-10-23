@@ -98,6 +98,7 @@ export async function signIn(credential) {
   st.player = r.json.player; st.cloud = r.json.cloud; st.lastErr = '';
   lsSet(SEEN_KEY, '1');
   closeGate();
+  setTimeout(() => checkCodeNews(), 3500);   // v1.26
   sfx('confirm');
   ctx.toast('Đã đăng nhập ' + (st.player.email || st.player.name) + '!', 'good', 'ui_check');
   emit();
@@ -334,7 +335,7 @@ export function initCloud(game) {
   // Phiên đăng nhập nằm trong cookie httpOnly (JS không đọc được) → hỏi server. Chưa đăng nhập → màn chắn.
   api('GET', '/auth/me').then((r) => {
     st.ready = true;
-    if (r.status === 200 && r.json?.player) { st.player = r.json.player; st.cloud = r.json.cloud; lsSet(SEEN_KEY, '1'); emit(); reconcile('boot'); return; }
+    if (r.status === 200 && r.json?.player) { st.player = r.json.player; st.cloud = r.json.cloud; lsSet(SEEN_KEY, '1'); emit(); reconcile('boot'); setTimeout(() => checkCodeNews(), 3500); return; }
     if (r.status === 401) { lsSet(SEEN_KEY, null); emit(); openGate(); return; }
     st.offline = true; emit(); openGate({ offline: true });   // mất mạng / máy chủ lỗi: không khóa người chơi lại
   });
@@ -494,7 +495,8 @@ export function giftCodePanel() {
   input.addEventListener('input', () => { const v = input.value.toUpperCase(); if (v !== input.value) input.value = v; });
   box.append(
     div('set-row', ico('ui_gift', 32), div('grow', span('sl-l', 'Nhập mã quà tặng'), span('muted sm', 'Mã từ MeeGame (TikTok, sự kiện…) tặng tiền và XP. Mỗi tài khoản dùng mỗi mã 1 lần.'))),
-    div('set-name', input, btn), note);
+    div('set-name', input, btn), note,
+    h('button', { class: 'btn paper sm block cl-codes-btn', type: 'button', onclick: () => { sfx('click'); checkCodeNews(true); } }, ico('ui_gift', 16), 'Xem mã quà đang có'));   // v1.26
   return box;
 }
 
@@ -560,5 +562,56 @@ export function hookEquipSync(game) {
     for (const k in boardCache) delete boardCache[k];
     clearTimeout(equipT);
     equipT = setTimeout(() => { upload(); }, 800);
+  });
+}
+
+// ───────────── v1.26 thông báo mã quà tặng mới (hiện 1 lần mỗi khi admin tạo mã mới; xem lại ở Cài đặt) ─────────────
+const CODES_SEEN_KEY = 'quanlau/codesSeenAt';
+const fmtDate = (ms) => { try { const d = new Date(ms); const p2 = (n) => String(n).padStart(2, '0'); return p2(d.getDate()) + '/' + p2(d.getMonth() + 1) + ' ' + p2(d.getHours()) + ':' + p2(d.getMinutes()); } catch (e) { return ''; } };
+export async function checkCodeNews(manual = false) {
+  if (!manual && (!S().started || document.querySelector('.splash, .intro, .sp-play, .tut'))) { setTimeout(() => checkCodeNews(), 4000); return; }   // đợi vào hẳn quán rồi mới báo
+  const r = await api('GET', '/codes/active');
+  if (r.status !== 200 || !r.json) { if (manual) ctx.toast('Chưa tải được danh sách mã (cần mạng).', 'bad'); return; }
+  const all = r.json.codes || [];
+  const fresh = all.filter((c) => !c.redeemed);
+  const newest = all.reduce((m, c) => Math.max(m, c.createdAt || 0), 0);
+  const seen = +(lsGet(CODES_SEEN_KEY) || 0);
+  if (!manual && (!fresh.length || newest <= seen)) return;
+  if (manual && !all.length) { ctx.toast('Hiện chưa có mã quà nào, theo dõi MeeGame để nhận mã nha!', 'info', 'ui_gift'); return; }
+  lsSet(CODES_SEEN_KEY, String(newest));
+  openCodeNews(manual ? all : fresh);
+}
+function openCodeNews(list) {
+  return ctx.modal({
+    id: 'codenews', cls: 'codenews', queue: true, priority: 22, sound: 'whoosh',
+    build: (m) => frame('Mã quà tặng mới!', { icon: 'ui_gift', onClose: () => m.close('x') },
+      div('cn-list', list.map((c) => {
+        const gifts = [c.money > 0 ? '+' + fmtMoney(c.money) : null, c.xp > 0 ? '+' + Math.round(c.xp).toLocaleString('vi-VN') + ' XP' : null].filter(Boolean).join(' · ');
+        const copy = h('button', { class: 'btn paper sm cn-copy', type: 'button', onclick: async () => {
+          sfx('click'); try { await navigator.clipboard.writeText(c.code); ctx.toast('Đã chép mã ' + c.code, 'good', 'ui_check'); } catch (e) { ctx.toast('Mã: ' + c.code, 'info'); } } }, 'Chép');
+        const use = c.redeemed ? span('chip jade', ico('ui_check', 16), 'Đã nhận')
+          : h('button', { class: 'btn jade sm cn-use', type: 'button', onclick: async (e) => {
+            sfx('click');
+            const b = e.currentTarget; b.disabled = true;
+            const res = await redeemCode(c.code);
+            b.disabled = false;
+            if (!res.ok) { ctx.toast(res.msg, 'bad'); return; }
+            m.close('use'); openGiftReward(res.gift);
+          } }, 'Nhận ngay');
+        return div('card cn-item',
+          div('cn-top', span('cn-code num', c.code), copy, use),
+          div('cn-info', gifts ? h('b', null, gifts) : null,
+            span('muted sm', c.expiresAt ? 'Hạn đến ' + fmtDate(c.expiresAt) : 'Không giới hạn thời gian'),
+            c.left != null ? span('muted sm', 'Còn ' + c.left + ' lượt') : null),
+          c.note ? span('muted sm cn-note', c.note) : null);
+      })),
+      div('card cn-how', ico('ui_info', 32), div('grow',
+        h('b', null, 'Cách nhập mã'),
+        h('ol', null,
+          h('li', null, 'Đăng nhập Gmail trong game (Cài đặt ▸ Tài khoản Google).'),
+          h('li', null, 'Bấm nút ⚙ Cài đặt ở góc trên bên phải màn hình Lẩu Ơi.'),
+          h('li', null, 'Kéo xuống ô "Nhập mã quà tặng", gõ hoặc dán mã, bấm "Nhận quà".'),
+          h('li', null, 'Hoặc bấm "Nhận ngay" ở mã bên trên. Mỗi tài khoản nhận mỗi mã 1 lần.')))),
+      h('button', { class: 'btn red lg block', type: 'button', onclick: () => { sfx('confirm'); m.close('ok'); } }, 'Đã hiểu')),
   });
 }

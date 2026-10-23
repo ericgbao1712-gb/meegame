@@ -14,6 +14,7 @@
 //   POST /api/lau/admin/codes              (admin)      { code, game, money, xp, maxUses, expiresAt, note } → tạo mã
 //   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
+//   GET  /api/lau/codes/active                          → mã quà tặng còn hạn (+ redeemed nếu đã đăng nhập)
 //   Thêm &g=xoailac để dùng cho game Xoài Lắc (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/stats              (admin)      → số liệu tổng quan của game (&g=…)
 //   GET  /api/lau/admin/players            (admin)      ?q=&filter=all|flagged|hidden|cheat&sort=recent|money|level|pots|new&limit=&offset=
@@ -194,6 +195,23 @@ export default async function handler(req, res) {
         value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined, adminPic: isAdminPlayerEmail(r.email) ? (r.admin_pic || undefined) : undefined,   // không trả email ra ngoài
       }));
       return send(res, 200, { by, rows, me });
+    }
+
+    // ── v1.26 mã quà tặng đang dùng được (ai cũng xem; đã đăng nhập thì đánh dấu mã mình đã nhận) ──
+    if (method === 'GET' && path === '/codes/active') {
+      const now = Date.now();
+      const rs = await db.execute({ sql: `SELECT * FROM gift_codes WHERE disabled = 0 AND (game = '*' OR game = ?) AND (expires_at IS NULL OR expires_at > ?)
+              AND (max_uses IS NULL OR uses < max_uses) ORDER BY created_at DESC LIMIT 30`, args: [GAME, now] });
+      const pid = sessionPlayerId(req);
+      let mine = new Set();
+      if (pid) {
+        const r2 = await db.execute({ sql: 'SELECT code FROM gift_redemptions WHERE player_id = ? AND game = ?', args: [pid, GAME] });
+        mine = new Set(r2.rows.map((r) => r.code));
+      }
+      const codes = rs.rows.map((r) => ({ code: r.code, money: num(r.money), xp: num(r.xp), note: r.note || '',
+        expiresAt: r.expires_at == null ? null : num(r.expires_at), left: r.max_uses == null ? null : Math.max(0, num(r.max_uses) - num(r.uses)),
+        createdAt: num(r.created_at), redeemed: mine.has(r.code) }));
+      return send(res, 200, { codes });
     }
 
     // ── admin: mã quà tặng ──

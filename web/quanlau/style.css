@@ -1768,3 +1768,16 @@ button.hchip:active { transform: translateY(2px); }
 /* v1.25k đánh giá + combo chuyển xuống góc dưới bên phải (trước che phòng Karaoke ở góc trên) */
 .corner-r { top: auto; bottom: 48px; flex-direction: column-reverse; max-width: 38%; }
 .corner-r .rev-pop { max-width: 140px; opacity: .96; }
+
+/* v1.26 thông báo mã quà tặng */
+.cn-list { display: flex; flex-direction: column; gap: 8px; max-height: 46vh; overflow: auto; padding: 2px; }
+.cn-item { padding: 8px 10px; display: flex; flex-direction: column; gap: 4px; }
+.cn-top { display: flex; align-items: center; gap: 6px; }
+.cn-code { flex: 1; min-width: 0; font: 900 18px/1.1 var(--f-body); letter-spacing: .06em; color: #c0392b; overflow-wrap: anywhere; user-select: all; }
+.cn-top .btn, .cn-top .chip { flex: none; }
+.cn-info { display: flex; flex-wrap: wrap; gap: 4px 10px; align-items: center; }
+.cn-info b { color: #2f7d4f; }
+.cn-note { font-style: italic; }
+.cn-how { display: flex; gap: 8px; align-items: flex-start; margin: 8px 0; padding: 8px 10px; }
+.cn-how ol { margin: 4px 0 0; padding-left: 18px; font: 600 12px/1.4 var(--f-body); }
+.cl-codes-btn { margin-top: 6px; }
