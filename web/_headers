@@ -1,0 +1,3 @@
+/xoailac/sw.js
+  Service-Worker-Allowed: /xoailac
+  Cache-Control: no-cache

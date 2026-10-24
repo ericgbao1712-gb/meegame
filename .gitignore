@@ -34,3 +34,8 @@ venv/
 # Thư mục tạm & cache
 web/covers/
 *.tmp
+
+
+worker/routes.generated.js
+.dev.vars
+.wrangler/
