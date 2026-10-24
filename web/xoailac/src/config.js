@@ -926,7 +926,7 @@ export const MASTERY = { fromLv: 41, chest: 'gold', ticketEvery: 5 };   // each 
 
 // v2.7 liên kết Gmail + lưu lên mạng + bảng xếp hạng (dùng chung API/tài khoản MeeGame với Lẩu Ơi, xem ui/cloud.js)
 export const CLOUD = {
-  clientId: '279939367302-c932eltrgmjda8jdj3vm15t2hh6lg42t.apps.googleusercontent.com',
+  clientId: '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com',
   api: '/api/lau',
   game: 'xoailac',
   requireLogin: true,    // chủ game 21/10: Xoài Lắc cũng bắt đăng nhập Gmail mới chơi (như Lẩu Ơi); mất mạng thì cho chơi tạm
