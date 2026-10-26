@@ -1698,6 +1698,38 @@ body.phone:not(.land) #title-art { aspect-ratio: auto; }
 .title-cloud:empty { display: none; }
 .tc-me { margin: 0; font-size: 12px !important; color: var(--brown-h, #7B4A32) !important; text-align: center; }
 .code-row input { background: #fff !important; color: #2B1A12 !important; }
+/* ---- Màn đầu: bắt buộc đăng nhập Google (trên MeeGame) */
+body.title-gate .title-actions, body.title-gate #btn-tsettings, body.title-gate .title-long { display: none !important; }
+.title-cloud { width: 100%; align-self: stretch; }
+.tc-card { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 16px 16px 12px; border-radius: 18px; background: #FFFDF8; border: 2px solid #EBD3BB; box-shadow: 0 4px 0 #E6CBAE; text-align: center; }
+.tc-card b { font: 800 19px var(--display); color: var(--brown-h, #7B4A32); }
+.tc-card > span { font-size: 13px; line-height: 1.45; color: #6B4A38; max-width: 320px; }
+.tc-card small { font-size: 11px; color: #9A7E6C; }
+.tc-card small a { color: inherit; }
+.tc-note { font-size: 12px; color: #6B4A38; }
+.tc-err { font-size: 12px; color: #C0392B; font-weight: 600; }
+.tc-row { display: flex; gap: 8px; }
+.tc-spin { width: 22px; height: 22px; border-radius: 50%; border: 3px solid #F0D8C2; border-top-color: #E8577A; animation: tcSpin .8s linear infinite; }
+@keyframes tcSpin { to { transform: rotate(360deg); } }
+.tc-me { display: flex; align-items: center; justify-content: center; gap: 6px; flex-wrap: wrap; margin: 0; font-size: 12.5px !important; color: #6B4A38 !important; }
+.tc-dot { width: 8px; height: 8px; border-radius: 50%; background: #4E9A5E; box-shadow: 0 0 0 3px #DDEFD3; }
+.tc-link { border: 0; background: none; padding: 0; font: 600 12.5px var(--body); color: #C2435F; text-decoration: underline; cursor: pointer; }
+/* nút Google: bo tròn, không còn khung trắng vuông quanh nút */
+.gsi-slot { min-height: 44px; margin: 2px 0; }
+.gsi-btn { display: inline-flex; border-radius: 999px; overflow: hidden; line-height: 0; color-scheme: light; }
+.gsi-slot .gsi-btn:not(:has(iframe)) { line-height: 1.4; font-size: 12px; color: #9A7E6C; }
+.gsi-btn { overflow: visible; border-radius: 0; }
+.gsi-btn:has(iframe) { overflow: hidden; border-radius: 999px; }
+/* ---- Màn đầu trên máy tính: phủ kín màn hình (không còn thấy & bấm được giao diện game phía sau) */
+body:not(.phone) .title { position: fixed !important; inset: 0; z-index: 30; padding: 24px; background: radial-gradient(circle at 50% 30%, #FBE6D2, #EFC9A4) !important; display: flex; align-items: center; justify-content: center; }
+body:not(.phone) .title-card { display: flex !important; flex-direction: column; align-items: stretch; gap: 12px; width: min(480px, 100%); max-height: calc(100vh - 48px); overflow-y: auto; padding: 18px 20px 20px; text-align: center; border-radius: 24px; box-shadow: 0 10px 0 rgba(90,52,36,.25), 0 24px 60px rgba(90,52,36,.25); }
+body:not(.phone) .title-card h2 { font-size: 46px; }
+body:not(.phone) .title-card .title-long { font-size: 13px !important; line-height: 1.55; }
+body:not(.phone) .title-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+body:not(.phone) .title-actions .btn { width: 100%; }
+body:not(.phone) .title-actions .btn.primary { grid-column: 1 / -1; min-height: 54px; font-size: 21px; }
+body:not(.phone) .title-row .btn.t-small { flex: 1; min-height: 58px; }
+body:not(.phone) #title-char { display: none; }
 
 </style>
 
@@ -1989,8 +2021,8 @@ const actions = {
   },
   // --- tài khoản Google & mã quà tặng (cloud.js)
   cloudSave() { cloud.upload({ force: true }).then((ok) => toast(toastsEl, ok ? 'Đã lưu lên mạng!' : (cloud.st.lastErr || 'Vừa lưu rồi, đợi chút nha'), ok ? 'level' : 'info')); },
-  cloudSignOut() { cloud.signOut(); },
-  cloudUnlink() { if (confirmTwice('unlink', 'Huỷ liên kết sẽ XOÁ ván trên mạng (ván trên máy vẫn còn). Bấm lần nữa để xác nhận')) cloud.unlink(); },
+  cloudSignOut() { cloud.signOut().then(() => { if (cloud.st.required) { save(true); view.started = false; location.reload(); } }); },
+  cloudUnlink() { if (confirmTwice('unlink', 'Huỷ liên kết sẽ XOÁ ván trên mạng (ván trên máy vẫn còn). Bấm lần nữa để xác nhận')) cloud.unlink().then(() => { if (cloud.st.required && !cloud.st.player) { save(true); view.started = false; location.reload(); } }); },
   cloudAnswer(el) { cloud.answer(el.dataset.v === 'cloud'); },
   codeFill(el) { view.codeText = el.dataset.v; },
   redeemCode() { cloud.redeem(view.codeText).then((ok) => { if (ok) { view.codeText = ''; save(true); } }); },
@@ -2336,13 +2368,36 @@ const cloud = createCloud({
   onChange: () => { if (cloud?.st.ask) view.settingsOpen = true; renderTitleCloud(); },
 });
 view.cloud = cloud.st;
+/** Màn đầu: trên MeeGame phải đăng nhập Google mới hiện nút vào tiệm (như Lẩu Ơi). */
+function loginGate() {
+  const c = cloud.st;
+  if (!c.required || view.offlinePlay) return null;
+  if (!c.ready) return 'wait';
+  if (c.offline) return 'offline';
+  return c.player ? null : 'login';
+}
 function renderTitleCloud() {
   const el = document.getElementById('title-cloud');
   if (!el) return;
-  const c = cloud.st;
-  const html = !c.available ? '' : c.player ? `<p class="tc-me">☁️ Đã liên kết <b>${String(c.player.email || c.player.name).replace(/</g, '&lt;')}</b>${c.cloud ? ` · trên mạng: cấp ${c.cloud.level}` : ''}</p>`
-    : '<p class="tc-me">Liên kết Google để lưu ván lên mạng & nhận mã quà</p><div class="gsi-slot" data-gsi="title"></div>';
-  if (el._h !== html) { el.innerHTML = html; el._h = html; }
+  const c = cloud.st, gate = loginGate();
+  const who = c.player ? String(c.player.email || c.player.name).replace(/</g, '&lt;') : '';
+  let html = '';
+  if (gate === 'wait') html = '<div class="tc-card"><span class="tc-spin" aria-hidden="true"></span><b>Đang kết nối MeeGame…</b></div>';
+  else if (gate === 'login') html = `<div class="tc-card"><b>Đăng nhập để vào tiệm</b>
+      <span>Ván chơi lưu trên mạng — đổi máy vẫn chơi tiếp, nhận được mã quà.</span>
+      <div class="gsi-slot" data-gsi="title"></div>${c.busy ? '<span class="tc-note">Đang đăng nhập…</span>' : ''}${c.lastErr ? `<span class="tc-err">${c.lastErr.replace(/</g, '&lt;')}</span>` : ''}
+      <small>Chỉ lấy tên, email, ảnh đại diện. <a href="/privacy" target="_blank" rel="noopener">Bảo mật</a></small></div>`;
+  else if (gate === 'offline') html = `<div class="tc-card"><b>Chưa kết nối được máy chủ MeeGame</b>
+      <span>Kiểm tra mạng rồi tải lại trang. Hoặc chơi tạm trên máy này, có mạng thì đăng nhập sau.</span>
+      <div class="tc-row"><button type="button" class="btn small" id="tc-reload">Tải lại</button><button type="button" class="btn small ghost" id="tc-offline">Chơi tạm</button></div></div>`;
+  else if (c.player) html = `<p class="tc-me"><span class="tc-dot" aria-hidden="true"></span>${who}${c.cloud ? ` · trên mạng: cấp ${c.cloud.level}` : ''} · <button type="button" class="tc-link" id="tc-out">Đổi tài khoản</button></p>`;
+  if (el._h !== html) {
+    el.innerHTML = html; el._h = html;
+    el.querySelector('#tc-reload')?.addEventListener('click', () => location.reload());
+    el.querySelector('#tc-offline')?.addEventListener('click', () => { view.offlinePlay = true; renderTitleCloud(); });
+    el.querySelector('#tc-out')?.addEventListener('click', () => cloud.signOut().then(() => renderTitleCloud()));
+  }
+  document.body.classList.toggle('title-gate', !!gate);
   cloud.mountButtons(el);
 }
 const coach = createCoach({ root: coachEl, getState: () => state, view, onDone: () => { save(true); toast(toastsEl, 'Xong hướng dẫn! Chúc tiệm đông khách', 'level'); } });
@@ -2364,21 +2419,26 @@ presetBtn.addEventListener('click', () => {
   state = deserialize(PRESET); view.tab = 'serve'; begin(true);
 });
 cloud.init();
+renderTitleCloud();
 loadSprites().then(() => { startTitleAnim($('title-art'), () => !title.hidden); try { $('title-char').src = lookURL(ownerLook(state.owner.look), 4); } catch { /* chưa có hình */ } startBtn.disabled = false; presetBtn.disabled = false; refreshUi(true); requestAnimationFrame(frame); });
 function begin(openLook) {
+  if (loginGate()) { renderTitleCloud(); return; }   // chưa đăng nhập Google → không vào tiệm
   unlockAudio(); view.started = true; title.hidden = true;
   if (openLook) actions.openCreator(); else if (!view.guideSeen) view.guideStep = 0;
   refreshUi(true);
 }
 startBtn.addEventListener('click', () => {
+  if (loginGate()) return;
   const fresh = !hasSave || !!state.migratedFrom;
   if (fresh && !state.flags?.story_1) { unlockAudio(); title.hidden = true; story.play(1, () => begin(true)); return; }   // ván mới: xem cốt truyện chương 1 trước
   begin(fresh);
 });
 $('btn-story').addEventListener('click', () => { unlockAudio(); story.openList(); });
-$('btn-tsettings').addEventListener('click', () => { view.started = true; title.hidden = true; actions.openSettings(); });
+$('btn-tsettings').addEventListener('click', () => {
+  if (loginGate()) return; view.started = true; title.hidden = true; actions.openSettings(); });
 $('btn-look').addEventListener('click', () => begin(true));
 $('btn-fresh').addEventListener('click', () => {
+  if (loginGate()) return;
   if (!confirmTwice('fresh', 'Bấm "Ván mới" lần nữa để xoá ván đang lưu')) return;
   state = newGame(); view.tab = 'stock'; title.hidden = true; story.play(1, () => begin(true));
 });
@@ -2419,7 +2479,10 @@ const SYNC_KEY = 'meegame-tiramee-cloud-sync';   // { pid, base, sig }
  *   giftReward(state, money, xp) → cộng quà · toast(text, kind) · onChange() → vẽ lại giao diện
  */
 function createCloud(o) {
-  const st = { available: null, ready: false, busy: false, player: null, cloud: null, lastErr: '', lastUpload: 0, lastSig: '', codes: [], codeMsg: '', codeBusy: false };
+  // Trên trang MeeGame (meegame.io.vn, bản dự phòng .vercel.app / .workers.dev) → BẮT BUỘC đăng nhập Google mới chơi (như Lẩu Ơi).
+  // Chỗ khác (bản demo xem trước) không có máy chủ → cho chơi, chỉ lưu trên máy.
+  const onMeeGame = typeof location !== 'undefined' && /(^|\.)meegame\.|meegame[-.].*\.(vercel\.app|workers\.dev)$|^localhost$|^127\./.test(location.hostname);
+  const st = { required: onMeeGame, offline: false, available: null, ready: false, busy: false, player: null, cloud: null, lastErr: '', lastUpload: 0, lastSig: '', codes: [], codeMsg: '', codeBusy: false };
   const ls = { get: (k) => { try { return localStorage.getItem(k); } catch { return null; } }, set: (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch { /* chặn bộ nhớ */ } } };
   const changed = () => { try { o.onChange?.(); } catch { /* ignore */ } };
 
@@ -2478,7 +2541,7 @@ function createCloud(o) {
         gisInit = true;
       }
       el.textContent = '';
-      g.accounts.id.renderButton(el, { type: 'standard', theme: 'filled_blue', size: 'large', text: 'continue_with', shape: 'pill', locale: 'vi', logo_alignment: 'left', width });
+      g.accounts.id.renderButton(el, { type: 'standard', theme: 'filled_blue', size: 'large', text: 'signin_with', shape: 'pill', locale: 'vi', logo_alignment: 'center', width });
     }).catch(() => { el.textContent = 'Chưa tải được nút Google. Kiểm tra mạng rồi mở lại nha.'; });
     return el;
   }
@@ -2610,6 +2673,7 @@ function createCloud(o) {
       st.ready = true;
       if (r.status === 200 && r.json?.player) { st.available = true; st.player = r.json.player; st.cloud = r.json.cloud; changed(); reconcile('boot'); loadCodes(); return; }
       st.available = r.status === 401 && !!r.json;      // 401 dạng JSON = có API MeeGame ở đây, chỉ là chưa đăng nhập
+      st.offline = onMeeGame && !st.available;           // trên MeeGame mà máy chủ không trả lời → mất mạng / máy chủ lỗi
       changed();
       if (st.available) loadCodes();
     });
