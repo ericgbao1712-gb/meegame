@@ -15,7 +15,7 @@
 //   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   GET  /api/lau/codes/active                          → mã quà tặng còn hạn (+ redeemed nếu đã đăng nhập)
-//   Thêm &g=xoailac để dùng cho game Xoài Lắc (cùng bảng players, bản lưu tách theo game).
+//   Thêm &g=xoailac để dùng cho game Xoài Lắc, &g=tiramee cho Tiệm TiraMee (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/stats              (admin)      → số liệu tổng quan của game (&g=…)
 //   GET  /api/lau/admin/players            (admin)      ?q=&filter=all|flagged|hidden|cheat&sort=recent|money|level|pots|new&limit=&offset=
 //   GET  /api/lau/admin/players/:id        (admin)      → chi tiết: bản lưu từng game, bản sao lưu, mã đã nhận
@@ -30,8 +30,9 @@ import {
 } from './_player.js';
 
 // Các game dùng chung API này (chọn bằng &g=…, mặc định Lẩu Ơi). Cùng tài khoản / cookie MeeGame cho mọi game.
-const GAMES = new Set(['quanlau', 'xoailac']);
+const GAMES = new Set(['quanlau', 'xoailac', 'tiramee']);
 const DEFAULT_GAME = 'quanlau';
+const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tiramee: 'Tiệm TiraMee' };
 const MAX_SAVE_BYTES = 400 * 1024;
 const MIN_PUT_GAP_MS = 8 * 1000;          // chống spam: tối đa ~1 lần lưu / 8 giây
 const KEEP_BACKUPS = 10;
@@ -55,15 +56,17 @@ const cleanName = (s, def = 'Quán Lẩu') => String(s || '').replace(/[\u0000-\
 export function saveSummary(save, game = DEFAULT_GAME) {
   if (!save || typeof save !== 'object' || Array.isArray(save) || !save.started) return null;
   const level = Math.floor(num(save.level));
-  const money = num(save.money, -1);
+  // Tiệm TiraMee lưu tiền theo ĐỒNG; Lẩu Ơi / Xoài Lắc theo NGHÌN đồng → đổi về nghìn để xếp hạng & chống gian lận dùng chung một thang
+  const K = game === 'tiramee' ? 1000 : 1;
+  const money = num(save.money, -1) / K;
   if (!(level >= 1 && level <= 100000) || !(money >= 0) || !Number.isFinite(money)) return null;   // Xoài Lắc không có cấp tối đa (mã quà có thể tặng rất nhiều XP)
   const stats = save.stats && typeof save.stats === 'object' ? save.stats : {};
   return {
-    shop_name: cleanName(save.shopName, game === 'xoailac' ? 'Xe Xoài Lắc' : 'Quán Lẩu'),
-    avatar: Math.max(0, Math.min(99, Math.floor(num(save.avatar)))),
+    shop_name: cleanName(save.shopName, DEFAULT_SHOP[game] || 'Quán Lẩu'),
+    avatar: Math.max(0, Math.min(99, Math.floor(num(save.avatar ?? save.owner?.look?.avatar)))),
     level,
     xp: Math.max(0, num(save.xp)),
-    money_earned: Math.max(money, num(stats.moneyEarned)),
+    money_earned: Math.max(money, num(stats.moneyEarned) / K),
     pots_sold: Math.max(0, Math.floor(num(stats.potsSold))),
     day: Math.max(1, Math.floor(num(save.day, 1))),
     days_played: Math.max(0, Math.floor(num(stats.daysPlayed))),
@@ -226,7 +229,7 @@ export default async function handler(req, res) {
         const b = await parseBody(req);
         const code = cleanCode(b.code);
         if (code.length < 3) return err(res, 400, 'invalid', 'Mã cần ít nhất 3 ký tự (chữ không dấu, số, - hoặc _).', {}, 'code');
-        const game = ['quanlau', 'xoailac', '*'].includes(b.game) ? b.game : '*';
+        const game = GAMES.has(b.game) || b.game === '*' ? b.game : '*';
         const money = Math.max(0, num(b.money)), xp = Math.max(0, Math.round(num(b.xp)));
         if (!(money > 0 || xp > 0)) return err(res, 400, 'invalid', 'Mã phải tặng tiền hoặc XP.', {}, 'money');
         if (!Number.isFinite(money) || !Number.isFinite(xp) || money > CODE_MAX || xp > CODE_MAX) return err(res, 400, 'invalid', 'Số tiền / XP không hợp lệ.', {}, 'money');

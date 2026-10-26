@@ -24,13 +24,13 @@
     })();
   </script>
   <style>
-    /* Trang quản lý Lẩu Ơi! + Xoài Lắc Ơi! — cùng bảng màu với trang Đăng game (/admin).
+    /* Trang quản lý Lẩu Ơi! + Xoài Lắc Ơi! + Tiệm TiraMee — cùng bảng màu với trang Đăng game (/admin).
        Bố cục: thanh trên (logo · tên · liên kết) → chọn game → 4 tab: Tổng quan / Người chơi / Xếp hạng / Mã quà tặng. */
     :root {
       --bg: #FFF6F8; --raised: #FFFFFF; --fill: #FCEAF0; --fill-2: #F8DCE6; --line: #F4DEE5;
       --ink: #2B1820; --ink-2: #7A5864; --accent: #C21E5C; --on-accent: #FFFFFF; --tint: #FDE1EB; --on-tint: #9A1747;
       --danger: #C42318; --danger-tint: #FCE9E7; --good: #1F7A4D; --good-tint: #E3F5EA; --warn: #9A5B00; --warn-tint: #FFF1D6;
-      --lau: #D93A2B; --xoai: #5F9A1A;
+      --lau: #D93A2B; --xoai: #5F9A1A; --tira: #8A5A3C;
       --lift: 0 10px 30px rgba(120, 30, 64, .14), 0 1px 3px rgba(120, 30, 64, .08);
       --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
       --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -41,7 +41,7 @@
       --bg: #170F13; --raised: #22181D; --fill: #2B1F25; --fill-2: #382930; --line: #34262D;
       --ink: #FBF0F4; --ink-2: #C9A9B5; --accent: #FF8DB4; --on-accent: #3B0A1D; --tint: #3F1F2C; --on-tint: #FFB6CF;
       --danger: #FF7A6E; --danger-tint: #3A1C19; --good: #6FD69C; --good-tint: #183326; --warn: #FFC56B; --warn-tint: #3A2A10;
-      --lau: #FF7D6B; --xoai: #A9D36A;
+      --lau: #FF7D6B; --xoai: #A9D36A; --tira: #E0B48C;
       --lift: 0 12px 34px rgba(0, 0, 0, .55);
       color-scheme: dark;
     }
@@ -91,7 +91,7 @@
     .seg button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 9px; font-weight: 700; font-size: 14px; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
     .seg button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot.lau { background: var(--lau); } .dot.xoai { background: var(--xoai); }
+    .dot.lau { background: var(--lau); } .dot.xoai { background: var(--xoai); } .dot.tira { background: var(--tira); }
     .tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; }
     .tabs button { border: 0; background: none; padding: 10px 14px 12px; font-weight: 600; font-size: 14px; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
     .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
@@ -202,7 +202,7 @@
       <img src="/assets/game-admin-icon-180.png" alt="" width="40" height="40">
       <div class="top-title">
         <h1>Quản lý game</h1>
-        <p id="who">Lẩu Ơi! · Xoài Lắc Ơi!</p>
+        <p id="who">Lẩu Ơi! · Xoài Lắc Ơi! · Tiệm TiraMee</p>
       </div>
       <a class="pill" href="/admin"><svg class="icon"><use href="#i-edit" /></svg><span>Đăng game</span></a>
       <button class="pill" type="button" id="logout" hidden><svg class="icon"><use href="#i-out" /></svg><span>Thoát</span></button>
@@ -227,6 +227,7 @@
           <div class="seg" role="group" aria-label="Chọn game">
             <button type="button" data-game="quanlau" aria-pressed="true"><i class="dot lau"></i>Lẩu Ơi!</button>
             <button type="button" data-game="xoailac" aria-pressed="false"><i class="dot xoai"></i>Xoài Lắc Ơi!</button>
+            <button type="button" data-game="tiramee" aria-pressed="false"><i class="dot tira"></i>Tiệm TiraMee</button>
           </div>
           <button class="btn sm" type="button" id="reload"><svg class="icon"><use href="#i-reload" /></svg>Tải lại</button>
         </div>
@@ -290,7 +291,7 @@
               <form id="gc-form" novalidate>
                 <div class="two">
                   <label class="field">Mã *<input id="gc-code" maxlength="32" placeholder="TIKTOK1000" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><small>Chữ không dấu, số, - hoặc _.</small></label>
-                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Cả hai game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option></select></label>
+                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Mọi game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option><option value="tiramee">Tiệm TiraMee</option></select></label>
                 </div>
                 <div class="two">
                   <label class="field">Tiền tặng (nghìn đồng)<input id="gc-money" type="number" min="0" step="1" inputmode="numeric" placeholder="0"><small id="gc-money-hint">500 = 500.000đ trong game.</small></label>
@@ -338,7 +339,9 @@
     (() => {
       const TOKEN_KEY = 'meegame_admin_token_v1';
       const $ = (id) => document.getElementById(id);
-      const GAMES = { quanlau: { name: 'Lẩu Ơi!', unit: 'nồi', units: 'Nồi lẩu bán', color: 'var(--lau)' }, xoailac: { name: 'Xoài Lắc Ơi!', unit: 'phần', units: 'Phần xoài bán', color: 'var(--xoai)' } };
+      const GAMES = { quanlau: { name: 'Lẩu Ơi!', unit: 'nồi', units: 'Nồi lẩu bán', color: 'var(--lau)' }, xoailac: { name: 'Xoài Lắc Ơi!', unit: 'phần', units: 'Phần xoài bán', color: 'var(--xoai)' },
+        tiramee: { name: 'Tiệm TiraMee', unit: 'phần', units: 'Phần bánh bán', color: 'var(--tira)' } };
+      const DOT = { quanlau: 'lau', xoailac: 'xoai', tiramee: 'tira' };
       const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (_) { return d; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) { } } };
       let game = GAMES[store.get('meegame_admin_game')] ? store.get('meegame_admin_game') : 'quanlau';
       let tab = 'overview';
@@ -393,7 +396,7 @@
       // ---------- đăng nhập ----------
       function signedOut(message) {
         $('app-view').hidden = true; $('login-view').hidden = false; $('logout').hidden = true;
-        $('who').textContent = 'Lẩu Ơi! · Xoài Lắc Ơi!';
+        $('who').textContent = 'Lẩu Ơi! · Xoài Lắc Ơi! · Tiệm TiraMee';
         $('login-error').textContent = message || ''; $('login-error').hidden = !message;
       }
       $('login-form').addEventListener('submit', async (e) => {
@@ -422,7 +425,7 @@
       function syncGame() {
         document.querySelectorAll('[data-game]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.game === game)));
         document.documentElement.style.setProperty('--game', GAMES[game].color);
-        $('by-pots').textContent = game === 'xoailac' ? 'Phần xoài' : 'Nồi lẩu';
+        $('by-pots').textContent = { xoailac: 'Phần xoài', tiramee: 'Phần bánh' }[game] || 'Nồi lẩu';
       }
       document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
       function showTab(t, reload = true) {
@@ -448,7 +451,7 @@
           tile(data.avgLevel.toLocaleString('vi-VN') + ' / ' + data.maxLevel, 'Cấp trung bình / cao nhất'),
           tile(money(data.moneyEarned), 'Tổng tiền đã kiếm'), tile(data.potsSold, GAMES[game].units),
           tile(data.flagged, 'Bị đánh dấu', true), tile(data.hidden, 'Đang ẩn khỏi bảng'), tile(data.cheat, 'Từng dùng bảng thử'),
-          tile(data.codesLive, 'Mã quà đang dùng được'), tile(data.redemptions7d, 'Lượt nhận mã (7 ngày)'), tile(data.accounts, 'Tài khoản MeeGame (cả 2 game)'));
+          tile(data.codesLive, 'Mã quà đang dùng được'), tile(data.redemptions7d, 'Lượt nhận mã (7 ngày)'), tile(data.accounts, 'Tài khoản MeeGame (mọi game)'));
         const max = Math.max(1, ...data.levels.map((l) => l.n));
         $('levels').textContent = '';
         data.levels.forEach((l) => $('levels').append(h('div', { class: 'bar-row' }, h('span', { text: 'Cấp ' + l.band }), h('i', { style: '--w:' + (l.n / max * 100) + '%' }), h('b', { class: 'num', text: fmt(l.n) }))));
@@ -517,13 +520,13 @@
         $('d-body').append(h('section', { class: 'd-sec' }, h('h3', { text: 'Tài khoản' }),
           h('div', { class: 'acts' },
             p.hidden ? h('button', { class: 'btn sm', type: 'button', text: 'Hiện lại trên bảng xếp hạng', onclick: () => act(game, { hidden: false }, 'Đã hiện lại trên bảng xếp hạng.') })
-              : h('button', { class: 'btn sm', type: 'button', text: 'Ẩn khỏi bảng xếp hạng', onclick: () => act(game, { hidden: true }, 'Đã ẩn khỏi bảng xếp hạng (cả hai game).') }),
-            h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá tài khoản', onclick: () => act(game, { deleteAccount: true }, 'Đã xoá tài khoản.', { title: 'Xoá hẳn tài khoản?', text: 'Xoá quán trên mạng của cả hai game, các bản sao lưu và lịch sử nhận mã của ' + p.email + '. Không lấy lại được. Quán còn lưu trên máy người chơi sẽ tải lên lại nếu họ đăng nhập.', ok: 'Xoá hẳn', word: 'XOA' }) }))));
+              : h('button', { class: 'btn sm', type: 'button', text: 'Ẩn khỏi bảng xếp hạng', onclick: () => act(game, { hidden: true }, 'Đã ẩn khỏi bảng xếp hạng (mọi game).') }),
+            h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá tài khoản', onclick: () => act(game, { deleteAccount: true }, 'Đã xoá tài khoản.', { title: 'Xoá hẳn tài khoản?', text: 'Xoá quán trên mạng của mọi game, các bản sao lưu và lịch sử nhận mã của ' + p.email + '. Không lấy lại được. Quán còn lưu trên máy người chơi sẽ tải lên lại nếu họ đăng nhập.', ok: 'Xoá hẳn', word: 'XOA' }) }))));
         // từng game
         const saves = h('section', { class: 'd-sec' }, h('h3', { text: 'Quán trong từng game' }));
-        for (const g of ['quanlau', 'xoailac']) {
+        for (const g of Object.keys(GAMES)) {
           const s = data.saves.find((x) => x.game === g);
-          const head = h('header', {}, h('i', { class: 'dot ' + (g === 'quanlau' ? 'lau' : 'xoai') }), GAMES[g].name);
+          const head = h('header', {}, h('i', { class: 'dot ' + DOT[g] }), GAMES[g].name);
           if (!s) { saves.append(h('div', { class: 'save-card' }, head, h('span', { class: 'meta', text: 'Chưa có quán trên mạng.' }))); continue; }
           const tags = h('div', { class: 'acts' }, s.flagged ? h('span', { class: 'tag red', text: 'Bị đánh dấu: ' + (s.flagReason || '') }) : h('span', { class: 'tag green', text: 'Bình thường' }), s.cheat ? h('span', { class: 'tag amber', text: 'Từng dùng bảng thử' }) : null);
           saves.append(h('div', { class: 'save-card' }, head,
@@ -544,7 +547,7 @@
         else {
           const ul = h('ul', { class: 'mini' });
           data.backups.forEach((b) => ul.append(h('li', {},
-            h('span', { class: 'num' }, h('i', { class: 'dot ' + (b.game === 'quanlau' ? 'lau' : 'xoai'), style: 'display:inline-block;margin-right:6px' }), 'Cấp ' + b.level + ' · ' + money(b.moneyEarned) + ' · ' + new Date(b.createdAt).toLocaleString('vi-VN')),
+            h('span', { class: 'num' }, h('i', { class: 'dot ' + (DOT[b.game] || 'lau'), style: 'display:inline-block;margin-right:6px' }), 'Cấp ' + b.level + ' · ' + money(b.moneyEarned) + ' · ' + new Date(b.createdAt).toLocaleString('vi-VN')),
             h('button', { class: 'btn sm', type: 'button', text: 'Khôi phục', onclick: () => act(b.game, { restoreBackup: b.id }, 'Đã khôi phục. Người chơi tải lại game là thấy.', { title: 'Khôi phục bản sao lưu này?', text: 'Quán ' + GAMES[b.game].name + ' trên mạng sẽ quay về cấp ' + b.level + '. Bản hiện tại được cất vào sao lưu nên làm lại được. Người chơi cần tải lại game.', ok: 'Khôi phục' }) }))));
           bk.append(ul);
         }
@@ -570,7 +573,7 @@
       }
 
       // ---------- Mã quà tặng ----------
-      const GC_GAME = { '*': 'Cả hai game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!' };
+      const GC_GAME = { '*': 'Mọi game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!', tiramee: 'Tiệm TiraMee' };
       const cleanCode = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
       async function loadCodes() {
         const box = $('codes'); box.textContent = '';
