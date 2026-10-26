@@ -15,7 +15,7 @@
 <meta property="og:title" content="Tiệm TiraMee · MeeGame">
 <meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
 <meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png?v=2">
-<script>window.__BUILD__ = '36dbb6572e10';</script>
+<script>window.__BUILD__ = '967aa9d0528c';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -1758,6 +1758,12 @@ body:not(.phone) #title-char { display: none; }
 .rp-login .gsi-slot { min-height: 44px; display: flex; justify-content: center; width: 100%; }
 .rp-login small.err { color: #B3261E; }
 
+/* thanh báo có bản mới */
+#update-bar { position: fixed; left: 50%; transform: translateX(-50%); top: calc(env(safe-area-inset-top, 0px) + 62px); white-space: nowrap; z-index: 90; display: flex; align-items: center; gap: 10px; padding: 8px 8px 8px 16px; border-radius: 999px; background: #4A2A1E; color: #FFF4E6; font: 700 14px var(--body); box-shadow: 0 6px 18px rgba(0,0,0,.3); max-width: calc(100vw - 24px); animation: ubIn .35s ease-out; }
+#update-bar .ub-go { border: 0; border-radius: 999px; padding: 8px 14px; background: var(--pink, #E8577A); color: #fff; font: 800 14px var(--body); cursor: pointer; white-space: nowrap; }
+#update-bar .ub-x { border: 0; background: transparent; color: #E9C9A8; font: 700 20px/1 var(--body); cursor: pointer; padding: 0 6px; }
+@keyframes ubIn { from { opacity: 0; transform: translate(-50%, -16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
 </style>
 
   <header class="topbar">
@@ -2487,7 +2493,7 @@ renderTitleCloud();
 const updates = setupUpdates({
   isSafe: () => !view.started || (titleEl && !titleEl.hidden) || (state.phase === 'PREP' && !state.kitchen.session && !state.decor && !mini.isOpen()),
   beforeReload: () => { if (view.started) save(true); },
-  notify: () => toast(toastsEl, 'Có bản TiraMee mới — sẽ tự cập nhật khi sang ngày mới', 'info'),
+  notify: () => {},
 });
 if (justUpdated()) setTimeout(() => toast(toastsEl, 'Đã cập nhật TiraMee bản mới nhất ✨', 'level'), 1200);
 loadSprites().then(() => { view.titleAnim = startTitleAnim($('title-art'), () => !title.hidden); try { $('title-char').src = lookURL(ownerLook(state.owner.look), 4); } catch { /* chưa có hình */ } startBtn.disabled = false; presetBtn.disabled = false; refreshUi(true); requestAnimationFrame(frame); });
@@ -9192,7 +9198,7 @@ return Object.assign({}, { rollDailyQuests, dailyValue, dailyQuests, claimDaily,
 //    luôn lấy file MỚI NHẤT khi có mạng, mất mạng thì mở bản đã lưu.
 // 2) Người chơi để tab / app mở lâu: cứ 5 phút (và mỗi lần quay lại app) hỏi /tiramee/version.json.
 //    Có bản mới → nếu đang ở màn đầu hoặc buổi sáng chưa làm gì thì LƯU rồi tải lại ngay;
-//    đang bán hàng thì đợi tới lúc an toàn (sang ngày mới / quay lại app ở buổi sáng) mới tải lại.
+//    đang bán hàng thì hiện thanh "Có bản mới · Cập nhật ngay" để người chơi tự bấm; không bấm thì tự cập nhật khi sang ngày mới.
 // =============================================================
 const BUILD = typeof window !== 'undefined' ? window.__BUILD__ : null;
 const BASE = '/tiramee';
@@ -9225,8 +9231,23 @@ function setupUpdates({ isSafe, beforeReload, notify }) {
       location.reload();
       return true;
     }
-    if (!told) { told = true; notify(); }
+    if (!told) { told = true; notify(); showBar(); }
     return false;
+  }
+  /** Thanh báo "Có bản mới" + nút Cập nhật ngay (người chơi tự chọn lúc nào tải lại). */
+  function showBar() {
+    if (document.getElementById('update-bar')) return;
+    const bar = document.createElement('div');
+    bar.id = 'update-bar'; bar.setAttribute('role', 'status');
+    bar.innerHTML = '<span>✨ Có bản mới</span><button type="button" class="ub-go">Cập nhật ngay</button><button type="button" class="ub-x" aria-label="Để sau">×</button>';
+    bar.querySelector('.ub-go').addEventListener('click', () => {
+      bar.querySelector('.ub-go').textContent = 'Đang lưu…';
+      try { beforeReload(); } catch { /* vẫn tải lại */ }
+      try { sessionStorage.setItem('tm-update-try', newer); sessionStorage.setItem('tm-updated', newer); } catch { /* bỏ qua */ }
+      setTimeout(() => location.reload(), 150);
+    });
+    bar.querySelector('.ub-x').addEventListener('click', () => bar.remove());   // để sau: vẫn tự cập nhật khi sang ngày mới
+    document.body.appendChild(bar);
   }
   setTimeout(check, 4000);
   setInterval(check, 5 * 60 * 1000);
