@@ -23,6 +23,14 @@
       "destination": "/web/xoailac/$1"
     },
     {
+      "source": "/tiramee",
+      "destination": "/web/tiramee/index.html"
+    },
+    {
+      "source": "/tiramee/(.*)",
+      "destination": "/web/tiramee/$1"
+    },
+    {
       "source": "/quanlau",
       "destination": "/web/quanlau/index.html"
     },
