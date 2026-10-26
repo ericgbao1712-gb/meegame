@@ -15,7 +15,7 @@
 <meta property="og:title" content="Tiệm TiraMee · MeeGame">
 <meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
 <meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png?v=2">
-<script>window.__BUILD__ = '4265939c489d';</script>
+<script>window.__BUILD__ = '893be09e085c';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -1766,10 +1766,13 @@ body:not(.phone) #title-char { display: none; }
 
 /* Điện thoại: khoá cả trang đúng bằng màn hình (không bao giờ bị cuộn lệch làm mất thanh trên / cắt thanh dưới) */
 body.phone { position: fixed; inset: 0; height: auto !important; width: 100%; }
-/* App iPhone (thêm vào màn hình chính): thanh trạng thái đè lên trang → chừa chỗ chắc chắn cho tai thỏ / Dynamic Island */
-body.phone.ios-app .topbar, body.phone.ios-app .sheet-head { padding-top: calc(max(env(safe-area-inset-top, 0px), 44px) - 6px) !important; }
-body.phone.ios-app .tabs { padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 20px) + 12px) !important; }
-body.phone.ios-app.sheet-open .side { bottom: calc(max(env(safe-area-inset-bottom, 0px), 20px) + 82px) !important; }
+/* App iPhone (thêm vào màn hình chính): kích thước & khoảng chừa đo bằng JS (fitIosApp) */
+body.phone.ios-app { height: var(--app-h, 100%) !important; bottom: auto !important; }
+body.phone.ios-app .topbar, body.phone.ios-app .sheet-head { padding-top: calc(var(--app-top, 47px) + 4px) !important; }
+body.phone.ios-app .tabs { padding-bottom: calc(var(--app-bot, 21px) + 6px) !important; }
+body.phone.ios-app.sheet-open .side { bottom: calc(var(--app-bot, 21px) + 76px) !important; }
+body.ios-app .title, body.ios-app .story { bottom: auto !important; height: var(--app-h, 100%) !important; }
+body.ios-app .story .st-wrap { padding-top: calc(var(--app-top, 47px) + 8px); }
 
 </style>
 
@@ -2404,8 +2407,30 @@ compactMq.addEventListener?.('change', () => { view.compact = compactMq.matches;
 // Điện thoại cầm dọc: giao diện riêng (thanh trên gọn, dock hành động, trang con toàn màn hình)
 const phoneMq = window.matchMedia('(orientation: portrait) and (max-width: 700px), (orientation: landscape) and (max-height: 540px)');
 const landMq = window.matchMedia('(orientation: landscape)');
-// app iPhone (mở từ màn hình chính): đánh dấu để CSS chừa chỗ thanh trạng thái / thanh home
-try { if (window.navigator.standalone === true || (window.matchMedia?.('(display-mode: standalone)').matches && /iPhone|iPad|iPod/.test(navigator.userAgent))) document.body.classList.add('ios-app'); } catch { /* bỏ qua */ }
+// App iPhone (mở từ màn hình chính): iOS hay báo SAI chiều cao trang (thiếu đúng phần thanh trạng thái → hở 1 dải
+// ở đáy) và có máy báo vùng an toàn trên = 0 (thanh trạng thái đè lên thanh Ngày/tiền). Đo thật rồi tự căn:
+//   chiều cao khung = cả màn hình · khoảng chừa trên = max(vùng an toàn, phần màn hình bị thiếu, mức tối thiểu theo đời máy).
+const IOS_APP = (() => { try { return window.navigator.standalone === true || (window.matchMedia?.('(display-mode: standalone)').matches && /iPhone|iPad|iPod/.test(navigator.userAgent)); } catch { return false; } })();
+function fitIosApp() {
+  if (!IOS_APP) return;
+  document.body.classList.add('ios-app');
+  const probe = document.createElement('div');
+  probe.style.cssText = 'position:fixed;top:0;left:0;visibility:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)';
+  document.body.appendChild(probe);
+  const cs = getComputedStyle(probe), envTop = parseFloat(cs.paddingTop) || 0, envBot = parseFloat(cs.paddingBottom) || 0;
+  probe.remove();
+  const portrait = window.innerHeight >= window.innerWidth;
+  const screenH = portrait ? Math.max(screen.height, screen.width) : Math.min(screen.height, screen.width);
+  const missing = Math.max(0, screenH - window.innerHeight);
+  const H = missing > 8 && missing < 90 ? screenH : window.innerHeight;
+  const guess = !portrait ? 0 : screenH >= 852 ? 54 : screenH >= 812 ? 47 : 20;      // Dynamic Island · tai thỏ · máy cũ
+  const top = Math.max(envTop, missing > 8 && missing < 90 ? missing : 0, envTop ? 0 : guess);
+  const root = document.documentElement.style;
+  root.setProperty('--app-h', `${H}px`); root.setProperty('--app-top', `${top}px`); root.setProperty('--app-bot', `${Math.max(envBot, portrait && screenH >= 812 ? 21 : 0)}px`);
+}
+fitIosApp();
+window.addEventListener('resize', () => setTimeout(fitIosApp, 60));
+window.addEventListener('orientationchange', () => setTimeout(fitIosApp, 300));
 // lỡ trang bị cuộn (bàn phím, cuộn tới phần tử…) → kéo về đầu, tránh mất thanh trên
 window.addEventListener('resize', () => { if (window.scrollY) window.scrollTo(0, 0); });
 document.addEventListener('focusout', () => setTimeout(() => { if (window.scrollY) window.scrollTo(0, 0); }, 50));
