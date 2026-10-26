@@ -2,6 +2,20 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tiệm TiraMee · MeeGame</title>
+<meta name="description" content="Tiệm TiraMee – game quản lý tiệm bánh tiramisu pixel dễ thương trên MeeGame.">
+<meta name="theme-color" content="#E8577A">
+<link rel="icon" type="image/png" sizes="32x32" href="/tiramee/app/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/tiramee/app/icon-192.png">
+<link rel="apple-touch-icon" href="/tiramee/app/apple-touch-icon.png">
+<link rel="manifest" href="/tiramee/manifest.json">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TiraMee">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta property="og:title" content="Tiệm TiraMee · MeeGame">
+<meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
+<meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png">
+<script>window.__BUILD__ = '14479cc999a8';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -1815,6 +1829,7 @@ let { acceptCounterCustomer, cancelOrder, formatNo, suggestAlternative, announce
 let { buy, canBuy, buyMissing, buyBest } = __req("src/game/stock.js"); __link.push(() => { ({ buy, canBuy, buyMissing, buyBest } = __req("src/game/stock.js")); });
 let { cleanSeat } = __req("src/game/seats.js"); __link.push(() => { ({ cleanSeat } = __req("src/game/seats.js")); });
 let { beginBatch, submitGather, submitStep, submitFridge, abandonBatch, queueStaffBatch, discardBase, needFor, canStartBatch, crewTarget } = __req("src/game/kitchen.js"); __link.push(() => { ({ beginBatch, submitGather, submitStep, submitFridge, abandonBatch, queueStaffBatch, discardBase, needFor, canStartBatch, crewTarget } = __req("src/game/kitchen.js")); });
+let { setupUpdates, justUpdated } = __req("src/update.js"); __link.push(() => { ({ setupUpdates, justUpdated } = __req("src/update.js")); });
 let { newGame: newGameRaw, starterGift, openShop, closeShop, endDay, startNextDay, submitClean, openChecklist } = __req("src/game/day.js"); __link.push(() => { ({ newGame: newGameRaw, starterGift, openShop, closeShop, endDay, startNextDay, submitClean, openChecklist } = __req("src/game/day.js")); });
 let { hire, fire, train, giveBonus, setShift, setWage } = __req("src/game/staff.js"); __link.push(() => { ({ hire, fire, train, giveBonus, setShift, setWage } = __req("src/game/staff.js")); });
 let { claimDaily, claimQuest, buyUpgrade, buyInterior, toggleInterior, buyLocation, switchLocation, assignManager, toggleMenu, setPriceStep, renameSignature, buyAd, setPromo, setTarget, setRestock, recipeName } = __req("src/game/progression.js"); __link.push(() => { ({ claimDaily, claimQuest, buyUpgrade, buyInterior, toggleInterior, buyLocation, switchLocation, assignManager, toggleMenu, setPriceStep, renameSignature, buyAd, setPromo, setTarget, setRestock, recipeName } = __req("src/game/progression.js")); });
@@ -1949,6 +1964,7 @@ const actions = {
       return;
     }
     cloud.dayEnded(); report(startNextDay(state)); view.tab = 'stock'; view.openingHidden = false; save(true);
+    updates.applyIfReady();                                  // có bản mới → cập nhật lúc sang ngày (đã lưu xong)
   },
   clean() { mini.open('clean'); },
   // --- bán hàng
@@ -2083,6 +2099,7 @@ const actions = {
   },
   creatorDone() {
     state.owner.look = { ...view.draftLook, set: 2 };
+    (state.flags ??= {}).lookChosen = true;
     if (view.draftStaffUniform) state.owner.staffUniform = { ...view.draftStaffUniform };
     commitNames();
     view.creatorOpen = false;
@@ -2466,6 +2483,13 @@ presetBtn.addEventListener('click', () => {
 });
 cloud.init();
 renderTitleCloud();
+// tự cập nhật bản mới (chỉ bản thật trên MeeGame)
+const updates = setupUpdates({
+  isSafe: () => !view.started || (titleEl && !titleEl.hidden) || (state.phase === 'PREP' && !state.kitchen.session && !state.decor && !mini.isOpen()),
+  beforeReload: () => { if (view.started) save(true); },
+  notify: () => toast(toastsEl, 'Có bản TiraMee mới — sẽ tự cập nhật khi sang ngày mới', 'info'),
+});
+if (justUpdated()) setTimeout(() => toast(toastsEl, 'Đã cập nhật TiraMee bản mới nhất ✨', 'level'), 1200);
 loadSprites().then(() => { view.titleAnim = startTitleAnim($('title-art'), () => !title.hidden); try { $('title-char').src = lookURL(ownerLook(state.owner.look), 4); } catch { /* chưa có hình */ } startBtn.disabled = false; presetBtn.disabled = false; refreshUi(true); requestAnimationFrame(frame); });
 function begin(openLook) {
   if (loginGate()) { renderTitleCloud(); return; }   // chưa đăng nhập Google → không vào tiệm
@@ -2473,11 +2497,18 @@ function begin(openLook) {
   if (openLook) actions.openCreator(); else if (!view.guideSeen) view.guideStep = 0;
   refreshUi(true);
 }
+/** Ván CHƯA chơi gì (ngày 1, buổi sáng, chưa bán phần nào). Xét theo CHÍNH VÁN, không theo "máy này có bản lưu chưa":
+ *  đăng nhập Google → tải ván mới tinh trên mạng về → trang mở lại (đã có bản lưu) mà vẫn phải xem cốt truyện + hướng dẫn. */
+const untouched = (s) => (s.day | 0) <= 1 && s.phase === 'PREP' && !(s.stats?.counters?.served) && !(s.stats?.counters?.batchesOwner);
 startBtn.addEventListener('click', () => {
   if (loginGate()) return;
-  const fresh = !hasSave || !!state.migratedFrom;
-  if (fresh && !state.flags?.story_1) { unlockAudio(); title.hidden = true; story.play(1, () => begin(true)); return; }   // ván mới: xem cốt truyện chương 1 trước
-  begin(fresh);
+  if (untouched(state)) {
+    state.flags ??= {};
+    if (!state.flags.story_1 && state.coach?.done && !state.flags.coachSkipped) state.coach = { step: 1, done: false };   // hướng dẫn tay ngày đầu
+    if (!state.flags.story_1) { unlockAudio(); title.hidden = true; story.play(1, () => begin(true)); return; }   // cốt truyện chương 1 trước
+    begin(!state.flags.lookChosen); return;                                                                    // xem truyện rồi mà chưa chọn nhân vật
+  }
+  begin(!!state.migratedFrom);
 });
 $('btn-story').addEventListener('click', () => { unlockAudio(); story.openList(); });
 $('btn-tsettings').addEventListener('click', () => {
@@ -9132,6 +9163,64 @@ function setRestock(state, key, packs) {
 
 return Object.assign({}, { rollDailyQuests, dailyValue, dailyQuests, claimDaily, storyQuests, staffQuests, claimQuest, upgradeInfo, canUpgrade, buyUpgrade, canBuyInterior, buyInterior, toggleInterior, themeOf, canBuyLocation, buyLocation, switchLocation, assignManager, remoteLocations, toggleMenu, setPriceStep, renameSignature, recipeName, buyAd, setPromo, setTarget, setRestock });
 },
+"src/update.js": function (__req, __link) {
+// =============================================================
+// update.js — TỰ CẬP NHẬT trên máy người chơi (chỉ bản thật trên MeeGame, có window.__BUILD__).
+//
+// 1) Đăng ký service worker /tiramee/sw.js: cài được như app (Android "Cài đặt", iPhone "Thêm vào MH chính"),
+//    luôn lấy file MỚI NHẤT khi có mạng, mất mạng thì mở bản đã lưu.
+// 2) Người chơi để tab / app mở lâu: cứ 5 phút (và mỗi lần quay lại app) hỏi /tiramee/version.json.
+//    Có bản mới → nếu đang ở màn đầu hoặc buổi sáng chưa làm gì thì LƯU rồi tải lại ngay;
+//    đang bán hàng thì đợi tới lúc an toàn (sang ngày mới / quay lại app ở buổi sáng) mới tải lại.
+// =============================================================
+const BUILD = typeof window !== 'undefined' ? window.__BUILD__ : null;
+const BASE = '/tiramee';
+
+function setupUpdates({ isSafe, beforeReload, notify }) {
+  if (!BUILD || !/^https?:$/.test(location.protocol)) return { ready: () => false, applyIfReady: () => false };
+  try {
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register(`${BASE}/sw.js`, { scope: BASE }).catch(() => {});
+  } catch { /* trình duyệt không hỗ trợ: game vẫn chạy */ }
+  let newer = null, told = false, lastCheck = 0;
+  async function check() {
+    if (Date.now() - lastCheck < 60000) return;
+    lastCheck = Date.now();
+    try {
+      const r = await fetch(`${BASE}/version.json?t=${Date.now()}`, { cache: 'no-store' });
+      if (!r.ok) return;
+      const v = await r.json();
+      if (v?.build && v.build !== BUILD) { newer = v.build; applyIfReady(); }
+    } catch { /* mất mạng: thử lại lần sau */ }
+  }
+  function applyIfReady() {
+    if (!newer) return false;
+    // đã tải lại để lấy đúng bản này rồi mà trang vẫn là bản cũ (bộ nhớ đệm mạng chưa kịp đổi) → KHÔNG tải lại nữa
+    let tried = null; try { tried = sessionStorage.getItem('tm-update-try'); } catch { /* bỏ qua */ }
+    if (tried === newer) return false;
+    if (isSafe()) {
+      try { sessionStorage.setItem('tm-update-try', newer); } catch { /* bỏ qua */ }
+      try { beforeReload(); } catch { /* vẫn tải lại */ }
+      try { sessionStorage.setItem('tm-updated', newer); } catch { /* bỏ qua */ }
+      location.reload();
+      return true;
+    }
+    if (!told) { told = true; notify(); }
+    return false;
+  }
+  setTimeout(check, 4000);
+  setInterval(check, 5 * 60 * 1000);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) { lastCheck = 0; check(); } });
+  return { ready: () => !!newer, applyIfReady };
+}
+
+/** Vừa tự cập nhật xong? (để báo người chơi 1 lần) */
+function justUpdated() {
+  try { const v = sessionStorage.getItem('tm-updated'); if (v) { sessionStorage.removeItem('tm-updated'); return true; } } catch { /* bỏ qua */ }
+  return false;
+}
+
+return Object.assign({}, { setupUpdates, justUpdated });
+},
 "src/game/save.js": function (__req, __link) {
 // =============================================================
 // save.js — Lưu & tải game (localStorage trên trình duyệt, hoặc mã sao lưu).
@@ -13396,7 +13485,7 @@ function createCoach({ root, getState, view, onDone }) {
   const flags = () => (S().flags ??= {});
   const setStep = (n) => { coach().step = n; mem.stepAt = performance.now(); mem.ack = false; };
   function finish() { coach().done = true; hideCoach(); onDone?.(); }
-  panel.querySelector('.coach-off').addEventListener('click', finish);
+  panel.querySelector('.coach-off').addEventListener('click', () => { flags().coachSkipped = true; finish(); });
   nextBtn.addEventListener('click', () => { mem.ack = true; poll(); });
   tipEl.querySelector('.tip-x').addEventListener('click', hideTip);
   tipEl.querySelector('.tip-go').addEventListener('click', () => { if (mem.tip?.tab) { view.tab = mem.tip.tab; view.onTab?.(); } hideTip(); });

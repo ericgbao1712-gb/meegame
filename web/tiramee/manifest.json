@@ -1,0 +1,20 @@
+{
+  "id": "/tiramee",
+  "name": "Tiệm TiraMee",
+  "short_name": "TiraMee",
+  "description": "Game quản lý tiệm bánh tiramisu pixel dễ thương trên MeeGame.",
+  "lang": "vi",
+  "start_url": "/tiramee",
+  "scope": "/tiramee",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#FFF4E6",
+  "theme_color": "#E8577A",
+  "categories": ["games"],
+  "icons": [
+    { "src": "/tiramee/app/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/tiramee/app/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/tiramee/app/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/tiramee/app/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

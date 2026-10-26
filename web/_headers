@@ -1,3 +1,15 @@
 /xoailac/sw.js
   Service-Worker-Allowed: /xoailac
   Cache-Control: no-cache
+
+/tiramee
+  Cache-Control: no-cache
+/tiramee/index.html
+  Cache-Control: no-cache
+/tiramee/version.json
+  Cache-Control: no-store
+/tiramee/sw.js
+  Service-Worker-Allowed: /tiramee
+  Cache-Control: no-cache
+/tiramee/manifest.json
+  Cache-Control: no-cache
