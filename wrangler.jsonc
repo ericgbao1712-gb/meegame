@@ -4,6 +4,9 @@
   "main": "worker/index.js",
   "compatibility_date": "2026-09-01",
   "compatibility_flags": ["nodejs_compat"],
+  // Giữ nguyên biến môi trường đặt trên bảng điều khiển Cloudflare (TURSO_DATABASE_URL, SESSION_SECRET…).
+  // Thiếu dòng này, mỗi lần deploy từ GitHub sẽ XOÁ các biến dạng "Text" → API báo "Máy chủ chưa sẵn sàng".
+  "keep_vars": true,
   "build": { "command": "node scripts/gen-routes.mjs" },
   "assets": {
     "directory": "./web",
