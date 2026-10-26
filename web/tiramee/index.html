@@ -1407,7 +1407,13 @@ body.phone .title-long { display: none; }
 .st-wrap { justify-content: center; }
 .st-box { flex: none; }
 .st-text { min-height: 4.8em; flex: none; }
-@media (orientation: portrait) and (max-width: 700px) { .st-frame canvas { aspect-ratio: 16 / 10; } .st-wrap { gap: 14px; } }
+@media (orientation: portrait) and (max-width: 700px) {
+  /* điện thoại dọc: tranh vuông to, cắt bớt 2 mép (nhân vật & biển hiệu luôn ở giữa) */
+  .st-frame canvas { aspect-ratio: 1 / 1; object-fit: cover; }
+  .st-wrap { gap: 14px; padding-left: 10px; padding-right: 10px; }
+}
+/* màn to: tranh lớn nhất có thể, chừa chỗ cho hộp thoại */
+@media (min-width: 701px) { .st-wrap { width: min(1100px, 100%, calc((100dvh - 250px) * 1.6 + 28px)); } .st-text { font-size: 18px; } }
 body.phone .title { background: linear-gradient(#FBE6D2, #F3D2B4) !important; }
 body.phone.sheet-open .side { z-index: 13 !important; }
 body.phone .mini-howto, .mini-howto { z-index: 6; }
@@ -1731,6 +1737,13 @@ body:not(.phone) .title-actions .btn.primary { grid-column: 1 / -1; min-height: 
 body:not(.phone) .title-row .btn.t-small { flex: 1; min-height: 58px; }
 body:not(.phone) #title-char { display: none; }
 
+/* tổng kết ngày chơi thử: mời đăng nhập Google */
+.rp-login { margin: 10px 0 4px; padding: 14px; border-radius: 16px; background: linear-gradient(#FFF7EC, #FFE9D6); border: 2px solid #F2C9A8; display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.rp-login > b { font: 800 18px var(--display); color: var(--brown-h); }
+.rp-login > span { font: 500 14px/1.45 var(--body); color: #5A3A28; }
+.rp-login .gsi-slot { min-height: 44px; display: flex; justify-content: center; width: 100%; }
+.rp-login small.err { color: #B3261E; }
+
 </style>
 
   <header class="topbar">
@@ -1842,7 +1855,7 @@ Object.assign(view, { sec: {}, touchedAt: 0, openingHidden: false, paused: false
 if (!TABS.some((t) => t.id === view.tab)) view.tab = 'stock';
 if (!MORE.some((m) => m.id === view.more)) view.more = 'quests';
 function savePrefs() {
-  try { localStorage.setItem(PREF_KEY, JSON.stringify({ speed: view.speed, muted: view.muted, music: view.music, sfxVol: view.sfxVol, reduceMotion: view.reduceMotion, tab: view.tab, more: view.more, guideSeen: view.guideSeen, autoTab: view.autoTab, nextBar: view.nextBar, sup2: view.sup, tabHelp: view.tabHelp })); } catch { /* bỏ qua */ }
+  try { localStorage.setItem(PREF_KEY, JSON.stringify({ speed: view.speed, muted: view.muted, music: view.music, sfxVol: view.sfxVol, reduceMotion: view.reduceMotion, lowPower: view.lowPower, tab: view.tab, more: view.more, guideSeen: view.guideSeen, autoTab: view.autoTab, nextBar: view.nextBar, sup2: view.sup, tabHelp: view.tabHelp })); } catch { /* bỏ qua */ }
 }
 setMotion(!view.reduceMotion);
 setVolumes({ music: view.music, sfx: view.sfxVol, muted: view.muted });
@@ -1850,7 +1863,10 @@ setVolumes({ music: view.music, sfx: view.sfxVol, muted: view.muted });
 let state = loadOrNew();
 
 function setupCanvas() {
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  // điện thoại: tối đa 1,25× (vẫn nét, số điểm ảnh phải vẽ chỉ còn ~40% so với 2×); Tiết kiệm pin: 1×
+  const phone = window.matchMedia?.('(max-width: 700px), (max-height: 540px)').matches;
+  const low = typeof view !== 'undefined' && view.lowPower;
+  const dpr = Math.min(low ? 1 : phone ? 1.25 : 2, window.devicePixelRatio || 1);
   canvas.width = WIDTH * dpr; canvas.height = HEIGHT * dpr;
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
@@ -1928,7 +1944,7 @@ const actions = {
     const c = cloud.st;
     if (c.required && !c.player && !view.offlinePlay) {          // hết ngày chơi thử → mời đăng nhập để giữ tiệm
       state.flags = { ...state.flags, trialDone: true }; save(true);
-      title.hidden = false; renderTitleCloud();
+      title.hidden = false; renderTitleCloud(); view.titleAnim?.();
       toast(toastsEl, 'Hết ngày chơi thử! Đăng nhập Google để giữ tiệm và chơi tiếp', 'level');
       return;
     }
@@ -2024,6 +2040,7 @@ const actions = {
   speed(el) { view.speed = Number(el.dataset.n); savePrefs(); },
   mute() { view.muted = !view.muted; setVolumes({ muted: view.muted }); savePrefs(); },
   motion() { view.reduceMotion = !view.reduceMotion; setMotion(!view.reduceMotion); savePrefs(); },
+  lowPower() { view.lowPower = !view.lowPower; setupCanvas(); savePrefs(); },
   save() { save(); },
   load() {
     const raw = safeGet(SAVE_KEY);
@@ -2233,7 +2250,7 @@ function refreshUi(force = false) {
     const stg = canvas.parentElement; if (!view._centered && stg.scrollWidth > stg.clientWidth + 20) { stg.scrollLeft = (stg.scrollWidth - stg.clientWidth) * 0.42; view._centered = true; }
   } else { renderHud(hud, state, view); renderTabs(tabs, state, view); }
   if (!(typing && panel.contains(active)) && (!view.phone || view.sheetOpen)) renderPanel(panel, state, view);
-  renderSummary(summary, state, view);
+  renderSummary(summary, state, view); cloud.mountButtons(summary);
   const caret = typing && active.id && (creatorEl.contains(active) || settingsEl.contains(active)) ? { id: active.id, a: active.selectionStart, b: active.selectionEnd } : null;
   renderCreator(creatorEl, view, state);
   if (!sliding) { renderSettings(settingsEl, state, view); cloud.mountButtons(settingsEl); }
@@ -2271,6 +2288,8 @@ function musicFor() {
 
 // ---------- Vòng lặp: bước thời gian cố định 1/30 giây
 let last = performance.now(), acc = 0;
+let lastDraw = 0;
+const titleEl = document.getElementById('title');
 function frame(now) {
   const dt = Math.min(0.25, (now - last) / 1000);
   last = now;
@@ -2279,7 +2298,11 @@ function frame(now) {
   const running = view.started && !view.paused && !story.open && state.phase !== 'SUMMARY' && !view.creatorOpen && view.guideStep === null && !view.settingsOpen;
   if (running) { acc += dt * view.speed; while (acc >= FIXED_DT) { tick(state, FIXED_DT); acc -= FIXED_DT; } }
   handleEvents();
-  draw(ctx, state, { now: now / 1000, hover: view.hover });
+  // Tiết kiệm pin / đỡ nóng máy: chỉ vẽ lại bản đồ khi cần — điện thoại 30 hình/giây, đang dừng 10 hình/giây,
+  // màn tiêu đề / cốt truyện / tab ẩn che kín bản đồ thì KHÔNG vẽ (trước đây vẽ 60–120 hình/giây mọi lúc).
+  const covered = document.hidden || story.open || (titleEl && !titleEl.hidden);
+  const fps = running && !mini.isOpen() ? (view.lowPower ? 20 : view.phone ? 30 : 60) : (view.lowPower ? 6 : 10);
+  if (!covered && now - lastDraw >= 1000 / fps - 4) { lastDraw = now; draw(ctx, state, { now: now / 1000, hover: view.hover }); }
   refreshUi();
   renderToasts(toastsEl, now);
   playMusic(musicFor());
@@ -2364,6 +2387,12 @@ const cloud = createCloud({
   getState: () => state,
   serialize,
   applySave: (obj) => {
+    // chốt an toàn: không bao giờ tự tải lại trang quá 2 lần trong 1 phút (tránh vòng lặp mở lại trang)
+    try {
+      const now = Date.now(), hist = JSON.parse(sessionStorage.getItem('tm-reload') || '[]').filter((t) => now - t < 60000);
+      if (hist.length >= 2) { toast(toastsEl, 'Đã đồng bộ với ván trên mạng.', 'info'); return; }
+      sessionStorage.setItem('tm-reload', JSON.stringify([...hist, now]));
+    } catch { /* trình duyệt chặn bộ nhớ phiên */ }
     try {
       const { started, savedAt, ...data } = obj;   // eslint-disable-line no-unused-vars
       const json = JSON.stringify(data);
@@ -2437,7 +2466,7 @@ presetBtn.addEventListener('click', () => {
 });
 cloud.init();
 renderTitleCloud();
-loadSprites().then(() => { startTitleAnim($('title-art'), () => !title.hidden); try { $('title-char').src = lookURL(ownerLook(state.owner.look), 4); } catch { /* chưa có hình */ } startBtn.disabled = false; presetBtn.disabled = false; refreshUi(true); requestAnimationFrame(frame); });
+loadSprites().then(() => { view.titleAnim = startTitleAnim($('title-art'), () => !title.hidden); try { $('title-char').src = lookURL(ownerLook(state.owner.look), 4); } catch { /* chưa có hình */ } startBtn.disabled = false; presetBtn.disabled = false; refreshUi(true); requestAnimationFrame(frame); });
 function begin(openLook) {
   if (loginGate()) { renderTitleCloud(); return; }   // chưa đăng nhập Google → không vào tiệm
   unlockAudio(); view.started = true; title.hidden = true;
@@ -2463,7 +2492,7 @@ $('btn-fresh').addEventListener('click', () => {
 window.claude?.hot?.snapshot?.(() => ({ save: serialize(state) }));
 const hotSave = window.claude?.hot?.data?.save;
 if (hotSave) { try { state = deserialize(hotSave); } catch { /* bỏ qua */ } }
-window.game = { get state() { return state; }, view, mini, actions, findOrder, RECIPES };
+window.game = { get state() { return state; }, view, mini, actions, findOrder, RECIPES, story };
 
 return Object.assign({}, {  });
 },
@@ -2642,8 +2671,13 @@ function createCloud(o) {
     const local = { level: s.level, day: s.day, shopName: s.shopName };
     const fresh = s.day <= 1 && s.phase === 'PREP' && (s.stats.counters?.served ?? 0) === 0;   // máy này chưa chơi gì
     if (!cloud) { if (await upload({ force: true })) o.toast('Đã sao lưu ván lên mạng — đổi máy vẫn chơi tiếp.', 'info'); return; }
-    if (fresh) { download(`Đã lấy ${cloud.shopName || 'tiệm'} (cấp ${cloud.level}) từ mạng! Đang mở…`); return; }
-    const rec = syncRec();
+    let rec = syncRec();
+    // vừa tải bản trên mạng về (trang mở lại) → ghi nhận máy này đã khớp, KHÔNG tải lại nữa
+    // (lỗi cũ: bản trên mạng cũng là "ván mới" → mỗi lần mở trang lại tải về → tải lại trang mãi không dừng)
+    if (rec && !rec.sig && (cloud.updatedAt || 0) <= (rec.base || 0)) { setSync(rec.base, sigOf(s)); rec = syncRec(); }
+    const cloudNewer = !rec || (cloud.updatedAt || 0) > (rec.base || 0);
+    if (fresh && cloudNewer) { download(`Đã lấy ${cloud.shopName || 'tiệm'} (cấp ${cloud.level}) từ mạng! Đang mở…`); return; }
+    if (fresh && !cloudNewer) return;                     // đã là bản trên mạng, chưa chơi gì thêm
     if (why === 'login' || !rec) {
       if (cloud.level > local.level + CLOUD.levelSlack) { st.ask = { local, cloud }; changed(); return; }
       if (await upload({ force: true })) o.toast('Đã sao lưu ván lên mạng.', 'info');
@@ -2738,9 +2772,12 @@ function startTitleAnim(canvas, isVisible) {
   const walkers = WALKERS.map((sheet, i) => ({ sheet, dir: i % 2 ? -1 : 1, speed: 14 + (i % 3) * 4, off: i * 97 }));
   let raf = 0, t0 = performance.now();
 
+  let lastPaint = 0;
   function frame(now) {
     raf = 0;
     if (!isVisible()) return;              // màn tiêu đề đã ẩn → dừng
+    if (document.hidden || now - lastPaint < 33) { raf = requestAnimationFrame(frame); return; }   // 30 hình/giây là đủ mượt, đỡ nóng máy
+    lastPaint = now;
     const t = (now - t0) / 1000;
     g.setTransform(K, 0, 0, K, 0, 0);
     // trời
@@ -10911,6 +10948,7 @@ function renderSettings(el, state, view) {
       <label class="range"><span>Hiệu ứng</span><input type="range" min="0" max="100" value="${Math.round(view.sfxVol * 100)}" data-vol="sfx" ${view.muted ? 'disabled' : ''}><b>${Math.round(view.sfxVol * 100)}</b></label>`)}
     ${sec('Trò chơi', `<div class="setting"><span>Tốc độ</span><div class="seg">${speed}</div></div>
       <label class="switch"><input type="checkbox" id="opt-motion" data-action="motion" ${view.reduceMotion ? 'checked' : ''}><span>Giảm hiệu ứng rung lắc</span></label>
+      <label class="switch"><input type="checkbox" id="opt-lowpower" data-action="lowPower" ${view.lowPower ? 'checked' : ''}><span>Tiết kiệm pin (đỡ nóng máy, hình bớt mịn)</span></label>
       <label class="switch"><input type="checkbox" id="opt-autotab" data-action="autoTab" ${view.autoTab ? 'checked' : ''}><span>Tự chuyển tab khi có khách ở quầy</span></label>
       <label class="switch"><input type="checkbox" id="opt-nextbar" data-action="nextBar" ${view.nextBar !== false ? 'checked' : ''}><span>Hiện thanh “Việc tiếp theo” (chỉ việc cần làm)</span></label>
       <label class="switch"><input type="checkbox" id="opt-tiphelp" data-action="tabHelpToggle" ${view.tabHelp === true || (view.tabHelp === undefined && state.day <= 3) ? 'checked' : ''}><span>Hiện dòng giải thích ở mỗi tab</span></label>
@@ -11065,6 +11103,8 @@ function renderSummary(el, state, view) {
     : s.net < 0 ? 'Hôm nay lỗ: xem lại giá bán trong Thực đơn, bớt nhập hàng thừa, hoặc đổi ca nhân viên.'
     : unlocksAt(state.level + 1).length ? `Cấp ${state.level + 1} sẽ mở: ${unlocksAt(state.level + 1).slice(0, 3).join(', ')}.` : 'Tiệm đang chạy tốt, cứ thế phát huy!';
   const reviews = s.reviews.map((r) => `<li><span class="stars">${'★'.repeat(r.stars)}</span> “${esc(r.text)}” <span class="muted small">— ${esc(r.who)}</span></li>`).join('');
+  // chơi thử trên MeeGame: hết ngày 1 → mời đăng nhập Google ngay trong bảng tổng kết (thay nút "Ngày tiếp theo")
+  const needLogin = !!(view.cloud?.required && !view.cloud.player && !view.cloud.offline && !view.offlinePlay);
   setHTML(el, `<div class="modal report" role="dialog" aria-modal="true" aria-labelledby="sum-title" data-day="${s.day}">
     <div class="rp-body">
     <h2 id="sum-title" class="rp-title">Kết thúc ngày ${s.day}</h2>
@@ -11089,7 +11129,9 @@ function renderSummary(el, state, view) {
     <p class="rp-sec rp-tip" style="--d:${dProfit + 1.4}s">${icon('clock', 20)}<span><b>Ngày mai:</b> ${esc(tip)}</span></p>
     ${state.money < 0 ? `<p class="rp-sec why" style="--d:${dProfit + 1.5}s">Tiệm đang âm tiền! Không thuê thêm người; bán thêm và bớt chi trước đã.</p>` : ''}
   </div></div></details></div>
-    <div class="rp-foot">${btn('nextDay', `Ngày tiếp theo ▶`, { cls: 'pink wide big' })}</div>
+    ${needLogin ? `<div class="rp-login"><b>🎉 Xong ngày chơi thử!</b><span>Đăng nhập Google để <b>giữ tiệm</b> (${vnd(s.moneyEnd)} trong két) và chơi tiếp ngày ${s.day + 1}. Đổi máy vẫn chơi được, nhận mã quà.</span>
+      <div class="gsi-slot" data-gsi="summary"></div>${view.cloud?.busy ? '<small>Đang đăng nhập…</small>' : ''}${view.cloud?.lastErr ? `<small class="err">${esc(view.cloud.lastErr)}</small>` : ''}</div>` : ''}
+    <div class="rp-foot">${needLogin ? '' : btn('nextDay', `Ngày tiếp theo ▶`, { cls: 'pink wide big' })}</div>
   </div>`);
 }
 
@@ -11104,7 +11146,7 @@ function toast(el, text, kind = 'info', now = performance.now()) {
 function renderToasts(el, now = performance.now()) {
   for (let i = toasts.length - 1; i >= 0; i--) if (toasts[i].until < now) toasts.splice(i, 1);
   const html = toasts.map((t) => `<div class="toast ${t.kind}">${t.text}</div>`).join('');
-  if (el.innerHTML !== html) el.innerHTML = html;
+  if (el._h !== html) { el._h = html; el.innerHTML = html; }   // so với bản đã ghi (đọc innerHTML mỗi khung hình rất tốn)
 }
 
 // =====================================================================
@@ -13725,6 +13767,42 @@ function oldShop(g, x, y, t, renewed = 0) {
   if (renewed) for (let i = 0; i < 6; i++) { const on = (Math.sin(t * 3 + i) + 1) / 2; E(g, x + 6 + i * 21, y + 16, 2, 2, `rgba(255,${200 + 40 * on},120,${0.6 + 0.4 * on})`); }
 }
 
+/** Mặt tiền TiraMee phủ KÍN chiều ngang khung (ảnh 420×206), chân tường ở y = bot. Trả về vị trí biển hiệu. */
+const SF_W = W + 24;
+function storefrontFull(g, bot, { dim = 0 } = {}) {
+  const sf = SPRITES.storefront2;
+  const h = Math.round(SF_W * 206 / 420), x = -12, y = bot - h;
+  if (sf) { g.imageSmoothingEnabled = false; g.drawImage(sf, x, y, SF_W, h); g.imageSmoothingEnabled = true; }
+  else oldShop(g, 100, bot - 86, 0, 1);
+  if (dim) { g.fillStyle = `rgba(30,26,58,${dim})`; g.fillRect(x, y, SF_W, h); }
+  return { signX: x + SF_W * 213 / 420, signY: y + h * 66 / 206, doorY: y + h * 0.78, top: y, h };
+}
+/** Vỉa hè lát gạch dưới mặt tiền. */
+function sidewalk(g, top, c1 = '#D9C2A0', c2 = '#C9AE88') {
+  R(g, 0, top, W, H - top, c1); R(g, 0, top, W, 2, c2);
+  for (let y = top + 10; y < H; y += 12) R(g, 0, y, W, 1, c2);
+  for (let y = top; y < H; y += 12) for (let x = ((y - top) / 12) % 2 ? 0 : 12; x < W; x += 24) R(g, x, y + 2, 1, 10, c2);
+}
+function balloon(g, x, y, c, t, k) {
+  const b = Math.sin(t * 2 + k) * 2, sw = Math.sin(t * 1.6 + k) * 3;
+  g.strokeStyle = 'rgba(90,60,40,.6)'; g.lineWidth = 0.6; g.beginPath(); g.moveTo(x + sw, y + 8 + b); g.quadraticCurveTo(x + sw * 0.4, y + 22, x, y + 34); g.stroke();
+  E(g, x + sw, y + b, 6, 7.5, c); E(g, x + sw - 2, y - 3 + b, 1.6, 2.4, 'rgba(255,255,255,.6)');
+  g.fillStyle = c; g.beginPath(); g.moveTo(x + sw - 1.5, y + 7.5 + b); g.lineTo(x + sw + 1.5, y + 7.5 + b); g.lineTo(x + sw, y + 9.5 + b); g.fill();
+}
+const CONF = ['#F06A86', '#F2B632', '#7FC3E2', '#8DCB6A', '#B58AE0', '#FF9F6A'];
+/** Pháo giấy bắn ra từ (ox, oy) lúc t0, rơi theo trọng lực. */
+function burst(g, ox, oy, t, t0, dir, seed) {
+  const dt = t - t0; if (dt < 0 || dt > 4) return;
+  const r = rnd(seed);
+  for (let i = 0; i < 46; i++) {
+    const an = -Math.PI / 2 + dir * (0.15 + r() * 0.75), sp = 110 + r() * 120;
+    const x = ox + Math.cos(an) * sp * dt * (1 - dt * 0.12), y = oy + Math.sin(an) * sp * dt + 70 * dt * dt;
+    if (y > H + 4) continue;
+    g.save(); g.translate(x, y); g.rotate(dt * (6 + r() * 6) + i); g.globalAlpha = Math.min(1, 4 - dt);
+    R(g, -2.2, -1.1, 4.4, 2.2, CONF[i % CONF.length]); g.restore();
+  }
+}
+
 // ---------------------------------------------------------------- các cảnh
 const SCENES = {
   city: (g, t, ctx) => {
@@ -13842,35 +13920,55 @@ const SCENES = {
     const v = g.createRadialGradient(W / 2, H / 2, 60, W / 2, H / 2, 190); v.addColorStop(0, 'rgba(255,240,220,0)'); v.addColorStop(1, 'rgba(255,240,220,.85)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
   },
   opening: (g, t, ctx) => {
-    sky(g, '#FFC9A8', '#FFF1DD', 150);
-    E(g, 60, 40, 20, 20, 'rgba(255,240,180,.9)');
-    R(g, 0, 150, W, 50, '#D9C2A0');
-    const sf = SPRITES.storefront2;
-    if (sf) { g.imageSmoothingEnabled = false; const w = 200, h = w * sf.height / sf.width; g.drawImage(sf, 160 - w / 2, 150 - h, w, h); g.imageSmoothingEnabled = true; }
-    else oldShop(g, 100, 64, t, 1);
-    // đèn biển hiệu bật dần
-    const on = ease((t - 0.6) / 0.8);
-    g.globalAlpha = on * (0.7 + 0.3 * Math.sin(t * 6)); E(g, 160, 50, 70, 16, 'rgba(255,220,140,.35)'); g.globalAlpha = 1;
-    // pháo giấy
-    const r = rnd(5);
-    for (let i = 0; i < 60; i++) {
-      const sx = r() * W, sp = 20 + r() * 30, ph = r() * 10, c = ['#F06A86', '#F2B632', '#7FC3E2', '#8DCB6A', '#B58AE0'][i % 5];
-      const y = ((t * sp + ph * 20) % 220) - 20; if (t < 0.8) continue;
-      g.save(); g.translate(sx + Math.sin(t * 3 + i) * 6, y); g.rotate(t * 4 + i); R(g, -2, -1, 4, 2, c); g.restore();
+    // Khai trương: mặt tiền phủ kín khung · cắt băng đỏ · pháo giấy bắn từ 2 bên · biển hiệu sáng đèn
+    sky(g, '#FFC4A0', '#FFEBD2', 120);
+    const GROUND = 168, cut = 1.3;
+    const S = storefrontFull(g, GROUND);
+    sidewalk(g, GROUND);
+    // tia nắng chéo nhẹ
+    g.save(); g.globalCompositeOperation = 'lighter';
+    for (let i = 0; i < 3; i++) { const a = 0.05 + 0.03 * Math.sin(t * 1.3 + i); g.fillStyle = `rgba(255,230,180,${a})`; g.beginPath(); g.moveTo(40 + i * 70, 0); g.lineTo(70 + i * 70, 0); g.lineTo(150 + i * 70, GROUND); g.lineTo(110 + i * 70, GROUND); g.fill(); }
+    g.restore();
+    // biển hiệu bật đèn sau khi cắt băng
+    const on = ease((t - cut - 0.1) / 0.6);
+    if (on > 0) { g.save(); g.globalCompositeOperation = 'lighter'; const gl = g.createRadialGradient(S.signX, S.signY, 4, S.signX, S.signY, 80); gl.addColorStop(0, `rgba(255,214,140,${0.45 * on * (0.85 + 0.15 * Math.sin(t * 5))})`); gl.addColorStop(1, 'rgba(255,214,140,0)'); g.fillStyle = gl; g.fillRect(S.signX - 90, S.signY - 60, 180, 120); g.restore(); }
+    for (let i = 0; i < 6; i++) if (on > 0) sparkle(g, S.signX - 62 + i * 25, S.signY - 18 + (i % 2) * 34, 2.5 + 1.5 * Math.sin(t * 5 + i), on);
+    // chùm bóng bay 2 bên cửa
+    [[22, 112], [34, 104], [14, 98], [298, 112], [286, 104], [306, 98]].forEach(([x, y], k) => balloon(g, x, y, CONF[k % CONF.length], t, k));
+    // băng đỏ: căng ngang trước cửa → bị cắt → 2 nửa rủ xuống
+    const ry = GROUND - 16, cx = 160;
+    g.strokeStyle = '#D93A4A'; g.lineWidth = 3; g.lineCap = 'round';
+    if (t < cut) {
+      g.beginPath(); g.moveTo(8, ry); g.quadraticCurveTo(cx, ry + 6, W - 8, ry); g.stroke();
+      E(g, cx - 7, ry + 3, 7, 4, '#E8505E'); E(g, cx + 7, ry + 3, 7, 4, '#E8505E'); E(g, cx, ry + 3, 3, 3, '#B52A3A');
+    } else {
+      const d = ease((t - cut) / 0.7);
+      g.beginPath(); g.moveTo(8, ry); g.quadraticCurveTo(60, ry + 4 + d * 20, cx - 40 + d * -40, ry + 6 + d * 30); g.stroke();
+      g.beginPath(); g.moveTo(W - 8, ry); g.quadraticCurveTo(260, ry + 4 + d * 20, cx + 40 + d * 40, ry + 6 + d * 30); g.stroke();
     }
-    char(g, ctx.look, 160, 176, { pose: 'cheer', t });
-    cat(g, 196, 178, t);
-    if (t > 1) for (let i = 0; i < 4; i++) sparkle(g, 60 + i * 66, 70 + (i % 2) * 20, 4 + Math.sin(t * 6 + i) * 2, 1);
+    // chủ quán (to hơn) + mèo cam
+    g.save(); g.translate(150, 196); g.scale(1.3, 1.3);
+    drawChar(g, ctx.look, 0, 0, { pose: t < cut ? 'work' : 'cheer', facing: t < cut ? 'right' : 'down', t }); g.restore();
+    if (t < cut + 0.15) { // kéo cắt băng
+      const sx = 168, sy = ry + 2, o = Math.abs(Math.sin(t * 9)) * 0.5;
+      g.strokeStyle = '#8E9AA8'; g.lineWidth = 1.4; g.beginPath(); g.moveTo(sx, sy); g.lineTo(sx + 10, sy - 3 - o * 4); g.moveTo(sx, sy); g.lineTo(sx + 10, sy + 3 + o * 4); g.stroke();
+      E(g, sx - 2, sy - 2, 2, 2, '#F06A86'); E(g, sx - 2, sy + 2, 2, 2, '#F06A86');
+    }
+    g.save(); g.translate(206, 196); g.scale(1.15, 1.15); cat(g, 0, 0, t); g.restore();
+    if (t > cut) { const k = (t - cut) % 1.4; heart(g, 216, 168 - k * 22, 0.9, `rgba(240,106,134,${1 - k / 1.4})`); }
+    // pháo giấy bắn từ 2 góc dưới lúc cắt băng, rồi mưa nhẹ
+    burst(g, 6, H, t, cut, 1, 5); burst(g, W - 6, H, t, cut, -1, 11); burst(g, 6, H, t, cut + 2.2, 1, 17); burst(g, W - 6, H, t, cut + 2.2, -1, 23);
+    // viền ấm 4 góc cho cảm giác ảnh kỷ niệm
+    const v = g.createRadialGradient(W / 2, H / 2, 110, W / 2, H / 2, 210); v.addColorStop(0, 'rgba(255,236,210,0)'); v.addColorStop(1, 'rgba(120,70,40,.28)'); g.fillStyle = v; g.fillRect(0, 0, W, H);
   },
   queue: (g, t, ctx) => {
-    sky(g, '#A8DCF4', '#FFF1DD', 150);
-    R(g, 0, 150, W, 50, '#D9C2A0');
-    const sf = SPRITES.storefront2;
-    if (sf) { g.imageSmoothingEnabled = false; const w = 170, h = w * sf.height / sf.width; g.drawImage(sf, 70 - w / 2 + 40, 150 - h, w, h); g.imageSmoothingEnabled = true; }
-    const sheets = ['cust_sinhvien_f', 'cust_vanphong_m', 'cust_capdoi_f', 'cust_hoiban_a', 'cust_giadinh_mom', 'cust_tiktoker', 'cust_ong'];
-    sheets.forEach((s, i) => { const x = Math.max(200 + i * 18, 340 + i * 30 - t * 40); char(g, { sheet: s }, x, 176, { pose: x > 200 + i * 18 + 0.5 ? 'walk' : 'idle', facing: 'left', t: t + i }); });
-    char(g, ctx.look, 150, 178, { pose: 'cheer', t });
-    for (let i = 0; i < 3; i++) { const k = (t * 0.8 + i / 3) % 1; g.globalAlpha = 1 - k; g.fillStyle = '#F2B632'; g.font = '800 10px sans-serif'; g.fillText('+★', 230 + i * 26, 120 - k * 30); g.globalAlpha = 1; }
+    sky(g, '#A8DCF4', '#FFF1DD', 120);
+    const GROUND = 168;
+    storefrontFull(g, GROUND); sidewalk(g, GROUND);
+    const sheets = ['tv19', 'tv20', 'tv21', 'tv22', 'tv23', 'tv04', 'tv13'];
+    sheets.forEach((s2, i) => { const x = Math.max(196 + i * 19, 340 + i * 30 - t * 40); char(g, { sheet: s2 }, x, 192, { pose: x > 196 + i * 19 + 0.5 ? 'walk' : 'idle', facing: 'left', t: t + i }); });
+    g.save(); g.translate(140, 194); g.scale(1.2, 1.2); drawChar(g, ctx.look, 0, 0, { pose: 'cheer', t }); g.restore();
+    for (let i = 0; i < 3; i++) { const k = (t * 0.8 + i / 3) % 1; g.globalAlpha = 1 - k; g.fillStyle = '#F2B632'; g.font = '800 11px sans-serif'; g.fillText('+★', 220 + i * 28, 132 - k * 30); g.globalAlpha = 1; }
   },
   build: (g, t, ctx) => {
     sky(g, '#F6E2C6', '#E9CFA8');
@@ -13879,27 +13977,28 @@ const SCENES = {
     // bức tường cũ bị đập ra, chỗ mới hiện bàn ghế
     R(g, 170, 30, 140, 110, '#B9A58C'); g.globalAlpha = 1 - done; R(g, 170, 30, 140, 110, '#A08A70'); for (let y = 34; y < 140; y += 10) for (let x = 172 + ((y / 10) % 2) * 10; x < 308; x += 20) R(g, x, y, 18, 8, '#8E7860'); g.globalAlpha = 1;
     if (done > 0) { g.globalAlpha = done; for (let i = 0; i < 3; i++) { R(g, 186 + i * 40, 112, 26, 4, '#8A5A3C'); R(g, 197 + i * 40, 116, 4, 22, '#6B4430'); R(g, 182 + i * 40, 122, 6, 16, '#B5743A'); R(g, 210 + i * 40, 122, 6, 16, '#B5743A'); } g.globalAlpha = 1; }
-    char(g, { sheet: 'staff_quankho' }, 160 + Math.sin(t * 2) * 10, 168, { pose: 'work', facing: 'right', t });
+    char(g, { sheet: 'tv14' }, 160 + Math.sin(t * 2) * 10, 168, { pose: 'work', facing: 'right', t });
     if (done < 1) for (let i = 0; i < 10; i++) { const k = (t * 1.5 + i / 10) % 1; E(g, 180 + Math.sin(i * 3) * 40 * k, 120 - k * 50, 4 + k * 6, 3 + k * 4, `rgba(230,210,180,${0.7 * (1 - k)})`); }
     char(g, ctx.look, 80, 168, { pose: done > 0.5 ? 'cheer' : 'idle', t });
     if (done > 0.5) for (let i = 0; i < 5; i++) sparkle(g, 190 + i * 24, 70 + (i % 2) * 16, 3 + Math.sin(t * 6 + i), done);
   },
   night: (g, t, ctx) => {
-    sky(g, '#1E1A3A', '#4A3A6A', 150);
+    // tiệm về đêm (phủ kín khung, tối lại) · pháo hoa nổ trên mái · biển hiệu sáng
+    const S = storefrontFull(g, 168, { dim: 0.45 }); sidewalk(g, 168, '#3A3048', '#2E2640');
+    g.fillStyle = 'rgba(20,16,44,.35)'; g.fillRect(0, 0, W, S.top + S.h * 0.32);
     const r = rnd(9);
-    for (let i = 0; i < 40; i++) { const tw = 0.5 + 0.5 * Math.sin(t * 3 + i); E(g, r() * W, r() * 100, 0.8, 0.8, `rgba(255,255,255,${tw})`); }
-    // pháo hoa
+    for (let i = 0; i < 26; i++) { const tw = 0.4 + 0.6 * Math.abs(Math.sin(t * 2 + i)); E(g, r() * W, r() * 40, 0.8, 0.8, `rgba(255,255,255,${tw})`); }
+    g.save(); g.globalCompositeOperation = 'lighter';
     for (let f = 0; f < 3; f++) {
-      const ph = (t * 0.6 + f / 3) % 1, cx = 70 + f * 90, cy = 50 + (f % 2) * 20, c = ['#F06A86', '#F2B632', '#7FC3E2'][f];
-      if (ph < 0.25) E(g, cx, 150 - (150 - cy) * (ph / 0.25), 1.5, 3, c);
-      else { const k = (ph - 0.25) / 0.75; g.globalAlpha = 1 - k; for (let i = 0; i < 14; i++) { const an = i * Math.PI / 7; E(g, cx + Math.cos(an) * 30 * k, cy + Math.sin(an) * 30 * k + k * k * 10, 1.6, 1.6, c); } g.globalAlpha = 1; }
+      const ph = (t * 0.55 + f / 3) % 1, cx = 60 + f * 100, cy = 26 + (f % 2) * 14, c = ['#F06A86', '#F2B632', '#7FC3E2'][f];
+      if (ph < 0.22) E(g, cx, 110 - (110 - cy) * (ph / 0.22), 1.5, 3, c);
+      else { const k = (ph - 0.22) / 0.78; g.globalAlpha = 1 - k; for (let i = 0; i < 16; i++) { const an = i * Math.PI / 8; E(g, cx + Math.cos(an) * 32 * k, cy + Math.sin(an) * 32 * k + k * k * 12, 1.7, 1.7, c); } g.globalAlpha = 1; }
     }
-    R(g, 0, 150, W, 50, '#3A3048');
-    const sf = SPRITES.storefront2;
-    if (sf) { g.imageSmoothingEnabled = false; const w = 180, h = w * sf.height / sf.width; g.globalAlpha = 0.95; g.drawImage(sf, 160 - w / 2, 150 - h, w, h); g.globalAlpha = 1; g.imageSmoothingEnabled = true; g.fillStyle = 'rgba(30,26,58,.35)'; g.fillRect(160 - w / 2, 150 - h, w, h); }
-    E(g, 160, 120, 60, 20, `rgba(255,210,140,${0.25 + 0.1 * Math.sin(t * 4)})`);
-    char(g, ctx.look, 150, 180, { pose: 'idle', facing: 'up', t });
-    cat(g, 176, 182, t);
+    const gl = g.createRadialGradient(S.signX, S.signY, 4, S.signX, S.signY, 70); gl.addColorStop(0, `rgba(255,210,140,${0.5 + 0.1 * Math.sin(t * 4)})`); gl.addColorStop(1, 'rgba(255,210,140,0)'); g.fillStyle = gl; g.fillRect(S.signX - 80, S.signY - 60, 160, 120);
+    const win = g.createRadialGradient(160, S.doorY, 6, 160, S.doorY, 90); win.addColorStop(0, 'rgba(255,190,110,.35)'); win.addColorStop(1, 'rgba(255,190,110,0)'); g.fillStyle = win; g.fillRect(60, S.doorY - 60, 200, 110);
+    g.restore();
+    g.save(); g.translate(150, 194); g.scale(1.2, 1.2); drawChar(g, ctx.look, 0, 0, { pose: 'idle', facing: 'up', t }); g.restore();
+    cat(g, 182, 194, t);
   },
   trophy: (g, t, ctx) => {
     sky(g, '#FFE3B0', '#FFF6E6');
@@ -13913,7 +14012,7 @@ const SCENES = {
     g.restore();
     R(g, 0, 160, W, 40, '#D9C2A0');
     char(g, ctx.look, 110, 178, { pose: 'cheer', t });
-    char(g, { sheet: 'cust_ba' }, 210, 178, { pose: 'cheer', t: t + 0.3 });
+    char(g, { sheet: 'tv18' }, 210, 178, { pose: 'cheer', t: t + 0.3 });
     for (let i = 0; i < 8; i++) sparkle(g, 160 + Math.cos(t + i) * 70, 90 + Math.sin(t + i) * 46, 3 + (i % 3), 1);
   },
 };
@@ -13954,7 +14053,10 @@ function createStory({ root, getState, sfx = () => {}, onClose }) {
   const flags = () => (getState().flags ??= {});
   const look = () => ownerLook(getState().owner?.look ?? {});
 
+  let lastPaint = 0;
   function paintScene(now) {
+    if (now - lastPaint < 33) { raf = requestAnimationFrame(paintScene); return; }   // 30 hình/giây
+    lastPaint = now;
     const sc = ch.scenes[i];
     const t = (now - start) / 1000;
     g.setTransform(K, 0, 0, K, 0, 0);
