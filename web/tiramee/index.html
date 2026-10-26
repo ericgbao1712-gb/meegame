@@ -11,11 +11,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TiraMee">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta property="og:title" content="Tiệm TiraMee · MeeGame">
 <meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
 <meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png?v=2">
-<script>window.__BUILD__ = '967aa9d0528c';</script>
+<script>window.__BUILD__ = '1b872d02dd22';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -1388,8 +1388,8 @@ body.phone .dock { display: flex; flex-direction: column; gap: 6px; flex: none; 
 .dk-idle p { margin: 4px 0; text-align: center; font: 700 13px var(--body); color: var(--muted); }
 
 body.phone .tabs { position: static !important; order: 3; flex: none; display: flex !important; flex-direction: row !important; height: auto !important; gap: 0; margin: 0 !important; padding: 2px 2px calc(env(safe-area-inset-bottom, 0px) + 2px) !important; background: var(--brown-h) !important; border: 0 !important; border-radius: 0 !important; box-shadow: 0 -3px 0 var(--brown-hd) !important; z-index: 12; }
-body.phone .tab { flex: 1; min-height: 56px !important; padding: 4px 0 !important; border-radius: 12px !important; color: #FFE9C8 !important; font: 700 10px var(--body) !important; gap: 1px !important; background: none; }
-body.phone .tab .pico { height: 28px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)); }
+body.phone .tab { flex: 1; min-height: 66px !important; padding: 6px 0 4px !important; border-radius: 12px !important; color: #FFE9C8 !important; font: 700 12px var(--body) !important; gap: 2px !important; background: none; }
+body.phone .tab .pico { height: 34px; filter: drop-shadow(0 2px 0 rgba(0,0,0,.25)); }
 body.phone .tab.on { background: rgba(255,255,255,.14) !important; }
 body.phone .tab.on::before { display: none; }
 body.phone .tab .badge { top: 2px; left: 58%; }
@@ -1397,7 +1397,7 @@ body.phone .tab span { white-space: nowrap !important; }
 
 /* trang con toàn màn hình */
 body.phone .side { display: none !important; }
-body.phone.sheet-open .side { display: flex !important; flex-direction: column; position: fixed !important; inset: 0 0 calc(env(safe-area-inset-bottom, 0px) + 60px) 0; height: auto !important; z-index: 11; margin: 0; border: 0 !important; border-radius: 0 !important; background: #FBEFE3 !important; animation: sheetIn .2s ease-out; }
+body.phone.sheet-open .side { display: flex !important; flex-direction: column; position: fixed !important; inset: 0 0 calc(env(safe-area-inset-bottom, 0px) + 72px) 0; height: auto !important; z-index: 11; margin: 0; border: 0 !important; border-radius: 0 !important; background: #FBEFE3 !important; animation: sheetIn .2s ease-out; }
 @keyframes sheetIn { from { transform: translateY(16px); opacity: .4; } }
 body.phone .sheet-head { display: flex; align-items: center; gap: 8px; flex: none; padding: calc(env(safe-area-inset-top, 0px) + 6px) 10px 8px; background: var(--brown-h); color: #FFE9C8; box-shadow: 0 3px 0 var(--brown-hd); }
 .sheet-head h2 { margin: 0; flex: 1; text-align: center; font: 800 18px var(--display); }
@@ -1763,6 +1763,13 @@ body:not(.phone) #title-char { display: none; }
 #update-bar .ub-go { border: 0; border-radius: 999px; padding: 8px 14px; background: var(--pink, #E8577A); color: #fff; font: 800 14px var(--body); cursor: pointer; white-space: nowrap; }
 #update-bar .ub-x { border: 0; background: transparent; color: #E9C9A8; font: 700 20px/1 var(--body); cursor: pointer; padding: 0 6px; }
 @keyframes ubIn { from { opacity: 0; transform: translate(-50%, -16px); } to { opacity: 1; transform: translate(-50%, 0); } }
+
+/* Điện thoại: khoá cả trang đúng bằng màn hình (không bao giờ bị cuộn lệch làm mất thanh trên / cắt thanh dưới) */
+body.phone { position: fixed; inset: 0; height: auto !important; width: 100%; }
+/* App iPhone (thêm vào màn hình chính): thanh trạng thái đè lên trang → chừa chỗ chắc chắn cho tai thỏ / Dynamic Island */
+body.phone.ios-app .topbar, body.phone.ios-app .sheet-head { padding-top: calc(max(env(safe-area-inset-top, 0px), 47px) + 6px) !important; }
+body.phone.ios-app .tabs { padding-bottom: calc(max(env(safe-area-inset-bottom, 0px), 20px) + 2px) !important; }
+body.phone.ios-app.sheet-open .side { bottom: calc(max(env(safe-area-inset-bottom, 0px), 20px) + 72px) !important; }
 
 </style>
 
@@ -2397,6 +2404,11 @@ compactMq.addEventListener?.('change', () => { view.compact = compactMq.matches;
 // Điện thoại cầm dọc: giao diện riêng (thanh trên gọn, dock hành động, trang con toàn màn hình)
 const phoneMq = window.matchMedia('(orientation: portrait) and (max-width: 700px), (orientation: landscape) and (max-height: 540px)');
 const landMq = window.matchMedia('(orientation: landscape)');
+// app iPhone (mở từ màn hình chính): đánh dấu để CSS chừa chỗ thanh trạng thái / thanh home
+try { if (window.navigator.standalone === true || (window.matchMedia?.('(display-mode: standalone)').matches && /iPhone|iPad|iPod/.test(navigator.userAgent))) document.body.classList.add('ios-app'); } catch { /* bỏ qua */ }
+// lỡ trang bị cuộn (bàn phím, cuộn tới phần tử…) → kéo về đầu, tránh mất thanh trên
+window.addEventListener('resize', () => { if (window.scrollY) window.scrollTo(0, 0); });
+document.addEventListener('focusout', () => setTimeout(() => { if (window.scrollY) window.scrollTo(0, 0); }, 50));
 const applyPhone = () => { view.phone = phoneMq.matches; document.body.classList.toggle('phone', view.phone); document.body.classList.toggle('land', view.phone && landMq.matches); if (!view.phone) view.sheetOpen = false; view._centered = false; };
 const setPhone = () => { applyPhone(); refreshUi(true); };
 phoneMq.addEventListener?.('change', setPhone); landMq.addEventListener?.('change', setPhone);
