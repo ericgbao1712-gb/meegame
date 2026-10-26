@@ -2703,8 +2703,10 @@ let { drawChar } = __req("src/meeChars.js"); __link.push(() => { ({ drawChar } =
 const SW = 420, SH = 206;          // kích thước ảnh mặt tiền (đơn vị px gốc)
 const PAD_TOP = 34;                // thêm khoảng trời phía trên
 const W = SW, H = SH + PAD_TOP + 22;   // + vỉa hè phía dưới
-const K = 2;                       // độ nét canvas
-const WALKERS = ['cust_sinhvien_f', 'cust_vanphong_m', 'cust_capdoi_f', 'cust_hoiban_a', 'cust_giadinh_mom', 'cust_tiktoker', 'cust_ong'];
+const K = 3;                       // độ nét canvas (3 → nhân vật vẽ đúng 2 điểm ảnh canvas / 1 điểm sprite, không vỡ hình)
+// người đi bộ: chỉ dùng bộ nhân vật TiraMee mới (5 khách + 2 nhân viên đi làm)
+const WALKERS = ['tv19', 'tv20', 'tv21', 'tv02', 'tv22', 'tv23', 'tv01'];
+const WALK_SCALE = 2 / (K * 48 / 56);   // × TM_K × K = đúng 2 → điểm ảnh đều nhau
 
 function rnd(seed) { let s = seed; return () => { s = (s * 16807) % 2147483647; return s / 2147483647; }; }
 const E = (g, x, y, rx, ry, c) => { g.fillStyle = c; g.beginPath(); g.ellipse(x, y, rx, ry, 0, 0, Math.PI * 2); g.fill(); };
@@ -2775,7 +2777,7 @@ function startTitleAnim(canvas, isVisible) {
       const x = w.dir > 0 ? p - 40 : W + 40 - p;
       if (i % 3 === 2) return;           // để vỉa hè thoáng: chỉ 2/3 số người cùng lúc
       g.save(); g.translate(0, (i % 2) * 4);
-      drawChar(g, { sheet: w.sheet }, Math.round(x), walkY, { pose: 'walk', facing: w.dir > 0 ? 'right' : 'left', t: t + i, scale: 0.8 });
+      drawChar(g, { sheet: w.sheet }, Math.round(x), walkY, { pose: 'walk', facing: w.dir > 0 ? 'right' : 'left', t: t + i, scale: WALK_SCALE });
       g.restore();
     });
     // lá rơi
@@ -4158,7 +4160,7 @@ const CUSTOMER_SHEETS = {
   reviewer: ['tv22', 'cust_reviewer', 'cust_tiktoker'], vip: ['tv22', 'cust_vip_f', 'cust_khachtay_m'], doanhNghiep: ['tv22', 'cust_vanphong_m', 'cust_vanphong_f'],
   pedestrian: ['tv19', 'tv20', 'tv21', 'tv22', 'tv23'],
 };
-const REGULAR_SHEETS = { coLan: 'cust_ba', anhKhoa: 'cust_vanphong_m', beNa: 'cust_giadinh_kid', chiMai: 'cust_tiktoker', ongTu: 'cust_ong', hanaSan: 'cust_nhat' };
+const REGULAR_SHEETS = { coLan: 'cust_ba', anhKhoa: 'cust_vanphong_m', beNa: 'cust_giadinh_kid', chiMai: 'cust_tiktoker', ongTu: 'tv14', hanaSan: 'cust_nhat' };
 
 return Object.assign({}, { OWNER_AVATARS, OLD_SHEET_MAP, oldAvatarIndex, UNIFORMS, UNIFORM_STYLES, STAFF_SHEETS, CUSTOMER_SHEETS, REGULAR_SHEETS });
 },
