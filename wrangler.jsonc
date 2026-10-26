@@ -7,6 +7,9 @@
   // Giữ nguyên biến môi trường đặt trên bảng điều khiển Cloudflare (TURSO_DATABASE_URL, SESSION_SECRET…).
   // Thiếu dòng này, mỗi lần deploy từ GitHub sẽ XOÁ các biến dạng "Text" → API báo "Máy chủ chưa sẵn sàng".
   "keep_vars": true,
+  // Mã Google công khai (đã có sẵn trong code các game) → khai báo luôn ở đây để không bao giờ bị mất khi deploy.
+  // Mật khẩu (SESSION_SECRET, TURSO_*) là loại Secret trên Cloudflare — deploy không đụng tới.
+  "vars": { "GOOGLE_CLIENT_ID": "279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com" },
   "build": { "command": "node scripts/gen-routes.mjs" },
   "assets": {
     "directory": "./web",
