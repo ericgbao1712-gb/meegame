@@ -3,19 +3,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Tiệm TiraMee · MeeGame</title>
 <meta name="description" content="Tiệm TiraMee – game quản lý tiệm bánh tiramisu pixel dễ thương trên MeeGame.">
-<meta name="theme-color" content="#E8577A">
-<link rel="icon" type="image/png" sizes="32x32" href="/tiramee/app/icon-32.png">
-<link rel="icon" type="image/png" sizes="192x192" href="/tiramee/app/icon-192.png">
-<link rel="apple-touch-icon" href="/tiramee/app/apple-touch-icon.png">
-<link rel="manifest" href="/tiramee/manifest.json">
+<meta name="theme-color" content="#6B4027">
+<link rel="icon" type="image/png" sizes="32x32" href="/tiramee/app/icon-32.png?v=2">
+<link rel="icon" type="image/png" sizes="192x192" href="/tiramee/app/icon-192.png?v=2">
+<link rel="apple-touch-icon" href="/tiramee/app/apple-touch-icon.png?v=2">
+<link rel="manifest" href="/tiramee/manifest.json?v=2">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="TiraMee">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta property="og:title" content="Tiệm TiraMee · MeeGame">
 <meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
-<meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png">
-<script>window.__BUILD__ = '14479cc999a8';</script>
+<meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png?v=2">
+<script>window.__BUILD__ = '36dbb6572e10';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -2811,21 +2811,42 @@ function startTitleAnim(canvas, isVisible) {
     lastPaint = now;
     const t = (now - t0) / 1000;
     g.setTransform(K, 0, 0, K, 0, 0);
-    // trời
-    const sky = g.createLinearGradient(0, 0, 0, PAD_TOP + 60);
-    sky.addColorStop(0, '#FFD7B0'); sky.addColorStop(1, '#FFF1DD');
-    g.fillStyle = sky; g.fillRect(0, 0, W, H);
-    E(g, 60, 22, 16, 16, 'rgba(255,240,190,.9)');
+    // trời: hoàng hôn đào → xanh tím nhạt sát mái nhà (cùng tông góc trời trong tranh) để hai phần liền nhau
+    const sky = g.createLinearGradient(0, 0, 0, PAD_TOP + 26);
+    sky.addColorStop(0, '#FFC9A2'); sky.addColorStop(0.55, '#F6D6C4'); sky.addColorStop(1, '#C8D1DF');
+    g.fillStyle = sky; g.fillRect(0, 0, W, PAD_TOP + 30);
+    const sun = g.createRadialGradient(64, 20, 2, 64, 20, 34); sun.addColorStop(0, 'rgba(255,246,206,1)'); sun.addColorStop(0.45, 'rgba(255,232,170,.75)'); sun.addColorStop(1, 'rgba(255,220,160,0)');
+    g.fillStyle = sun; g.fillRect(20, 0, 90, 60);
     for (const c of clouds) {
       const x = ((c.x + t * 6 * c.s) % (W + 80)) - 40;
-      g.globalAlpha = 0.85; E(g, x, c.y + 8, 18 * c.s, 6 * c.s, '#fff'); E(g, x + 12 * c.s, c.y + 4, 12 * c.s, 7 * c.s, '#fff'); E(g, x - 12 * c.s, c.y + 6, 10 * c.s, 5 * c.s, '#fff'); g.globalAlpha = 1;
+      g.globalAlpha = 0.8; E(g, x, c.y + 8, 18 * c.s, 6 * c.s, '#FFF8F0'); E(g, x + 12 * c.s, c.y + 4, 12 * c.s, 7 * c.s, '#FFF8F0'); E(g, x - 12 * c.s, c.y + 6, 10 * c.s, 5 * c.s, '#FFF8F0');
+      g.globalAlpha = 0.35; E(g, x + 2, c.y + 11, 20 * c.s, 3 * c.s, '#E9B9A8'); g.globalAlpha = 1;
     }
-    // vỉa hè
-    g.fillStyle = '#D9C2A0'; g.fillRect(0, PAD_TOP + SH - 12, W, H);
-    g.fillStyle = '#CBB08A'; for (let x = -((t * 0) % 24); x < W; x += 24) g.fillRect(x, PAD_TOP + SH + 6, 22, 1);
+    // hàng cây xa mờ (nối với tán cây trên nóc tiệm trong tranh)
+    for (const [col, dy, step, rr] of [['rgba(176,170,190,.55)', 2, 23, 13], ['rgba(140,150,138,.55)', 8, 17, 10]]) {
+      g.fillStyle = col;
+      for (let x = -10, i = 0; x < W + 20; x += step, i++) { const r = rr + ((i * 7) % 5); g.beginPath(); g.ellipse(x, PAD_TOP + dy - r * 0.35, r, r * 0.8, 0, 0, Math.PI * 2); g.fill(); }
+      g.fillRect(0, PAD_TOP + dy - 2, W, 30);
+    }
+    // vỉa hè: lát gạch xám hồng cùng màu đường trong tranh, ô chéo như tranh
+    const GY = PAD_TOP + SH - 8;
+    const pave = g.createLinearGradient(0, GY, 0, H); pave.addColorStop(0, '#978581'); pave.addColorStop(1, '#B4A29C');
+    g.fillStyle = pave; g.fillRect(0, GY, W, H - GY);
+    g.strokeStyle = 'rgba(110,94,92,.55)'; g.lineWidth = 0.7; g.beginPath();
+    for (let x = -60; x < W + 60; x += 16) { g.moveTo(x, GY); g.lineTo(x + 22, H); }
+    for (let y = GY + 7; y < H; y += 8) { g.moveTo(0, y); g.lineTo(W, y); }
+    g.stroke();
+    g.fillStyle = 'rgba(255,240,225,.18)'; g.fillRect(0, H - 9, W, 1);              // mép vỉa hè
     // mặt tiền
     const sf = SPRITES.storefront2;
     if (sf) { g.imageSmoothingEnabled = false; g.drawImage(sf, 0, PAD_TOP, SW, SH); }
+    // hoà mép: trời phủ mờ dần lên ~22px trên cùng của tranh, gạch phủ mờ dần lên ~16px dưới cùng
+    const fadeTop = g.createLinearGradient(0, PAD_TOP, 0, PAD_TOP + 18); fadeTop.addColorStop(0, 'rgba(160,162,160,.75)'); fadeTop.addColorStop(0.5, 'rgba(160,162,160,.25)'); fadeTop.addColorStop(1, 'rgba(160,162,160,0)');
+    g.fillStyle = fadeTop; g.fillRect(0, PAD_TOP, W, 18);
+    const fadeBot = g.createLinearGradient(0, PAD_TOP + SH - 16, 0, PAD_TOP + SH); fadeBot.addColorStop(0, 'rgba(151,133,129,0)'); fadeBot.addColorStop(1, 'rgba(151,133,129,1)');
+    g.fillStyle = fadeBot; g.fillRect(0, PAD_TOP + SH - 16, W, 16);
+    // ánh nắng chiều phủ nhẹ toàn cảnh cho cùng tông
+    g.fillStyle = 'rgba(255,190,140,.07)'; g.fillRect(0, 0, W, H);
     const Y = (y) => PAD_TOP + y;
     // đèn cửa sổ ấm, nhấp nháy rất nhẹ
     g.globalCompositeOperation = 'lighter';
