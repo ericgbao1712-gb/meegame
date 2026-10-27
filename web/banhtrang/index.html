@@ -1635,7 +1635,7 @@ const STAFF=[
 STAFF.push({id:'vy',name:'Chị Vy',role:'Phụ bỏ sốt',desc:'Bạn chọn bánh xong là chị tự rưới đúng sốt khách gọi. Sa tế, mỡ hành vẫn do bạn bỏ',wage:40000,lv:4,look:{skin:'#f2c79b',hair:'#3a2216',style:'bun',shirt:'#f2b84b',shirtD:'#c98a2a',apron:true}},
   {id:'tho',name:'Bé Thơ',role:'Phụ bỏ topping',desc:'Bạn chọn bánh xong là bé tự bỏ đủ topping khách gọi. Sốt, sa tế, mỡ hành vẫn do bạn bỏ',wage:60000,lv:6,look:{skin:'#f6d0aa',hair:'#2b1a14',style:'long',shirt:'#8fd1a0',shirtD:'#4f9d6c',apron:true}});
 STAFF.push({id:'khoa',name:'Anh Khoa',role:'Làm đơn ship',desc:'Chuyên đóng gói đơn app: đơn online mỗi tối nhiều hơn 50%. Cần đăng ký app Ăn Vặt Ship (Mở rộng ▸ Giao hàng)',wage:60000,lv:8,look:{skin:'#d89a6a',hair:'#2b1a14',style:'cap',cap:'#3aa59a',shirt:'#3aa59a',shirtD:'#2a7a72'}});
-STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) trong 6–9 giây cho khách đang chờ, không phải khách bạn đang chọn. Đôi khi lệch vị: món 3–5 sao, nửa XP.',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
+STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) trong 5–8 giây cho khách đang chờ, không phải khách bạn đang chọn. Đôi khi lệch vị: món 3–5 sao, nửa XP.',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
 STAFF.push({id:'hau',name:'Bé Hậu',role:'Pha trà',desc:'Khách gọi nước gì bé pha nước đó (cả trà sữa, dừa, sữa nóng/đá), bạn chỉ lo phần bánh',wage:50000,lv:18,look:{skin:'#f2c79b',hair:'#3a2216',style:'ponytail',shirt:'#c8e07a',shirtD:'#8ab83a',apron:true}},
   {id:'quan',name:'Anh Quân',role:'Quản lý',desc:'Thương lượng mối hàng: nguyên liệu rẻ thêm 8%, nhân viên làm việc hăng hơn',wage:150000,lv:27,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8b8',tie:'#5a1a14',glasses:true}});
 STAFF.push({id:'thu',name:'Chú Thứ',role:'Quản kho',desc:'Giữa ca hết nguyên liệu nào là chú tự chạy đi mua 1 gói, rẻ hơn nhập nhanh 2%. Bạn không cần bấm Nhập nhanh nữa',wage:55000,lv:5,look:{skin:'#c98a5a',hair:'#6a6a70',style:'cap',cap:'#8a5a2a',shirt:'#6a8a5a',shirtD:'#4a6a3e',glasses:true}});
@@ -3075,7 +3075,7 @@ function sorry(){
 }
 /* ---- Anh Bảo · đầu bếp (cấp 12): tự nhận một khách đang chờ, lấy nguyên liệu trong kho, làm trọn món ----
    Không đụng khách người chơi đang chọn; chậm hơn người chơi, món 3–5 sao, nửa XP. Khách bỏ về giữa chừng → trả lại nguyên liệu. */
-const CHEF_T={tron:6,cuon:8,nuong:9};   // giây cho 1 món (cũ 11/14/15)
+const CHEF_T={tron:5.4,cuon:7.2,nuong:8};   // giây cho 1 món (cũ 11/14/15)
 const CHEF_MAX=3;   // thuê tối đa 3 đầu bếp cao cấp, mỗi người làm một khách riêng
 const chefN=()=>G.staff.bao===true?1:Math.max(0,Math.min(CHEF_MAX,Math.floor(nz(G.staff.bao))));
 /* Chị Vy (phụ sốt) / Bé Thơ (phụ topping): người chơi chọn bánh xong, tự bỏ sốt / topping đúng order của khách đang chọn.
@@ -3409,10 +3409,10 @@ function tickService(dt,t){
     if(S.holding){if(S.mode==='tron')doMix(dt*34,dt*3.2);else if(S.mode==='cuon')doRoll(dt*30)}
     if(G.staff.tai&&B.base&&!S.holding){const c0=S.slots[S.active],o0=c0&&!c0.leave?c0.order:null;
       const ready=o0&&B.dish===o0.dish&&o0.tops.every(t=>B.tops.includes(t))&&B.sauce&&B.sate>=o0.cay&&B.mo>=nz(o0.mo);
-      if(ready&&B.dish==='tron'&&mixPct()<100)doMix(dt*22*(1+.25*sL('tai')),dt*2);if(ready&&B.dish==='cuon'&&B.roll<100)doRoll(dt*20*(1+.25*sL('tai')))}
+      if(ready&&B.dish==='tron'&&mixPct()<100)doMix(dt*30*(1+.25*sL('tai')),dt*2.6);if(ready&&B.dish==='cuon'&&B.roll<100)doRoll(dt*27*(1+.25*sL('tai')))}
     if(G.staff.lan&&B.base&&B.dish==='nuong'&&!B.folded&&B.cook>=(ZL()+ZH())/2){fold();toast('Bé Lan gấp bánh giùm, vàng giòn!')}
     if(chefN()||(S.chefs&&S.chefs.length))chefTick(dt);
-    if(B.base&&!S.holding&&(G.staff.vy||G.staff.tho||G.staff.hau)){S.helpT=(S.helpT||0)-dt;if(S.helpT<=0){S.helpT=Math.max(.2,.55*(1-.15*Math.max(G.staff.vy?sL('vy'):0,G.staff.tho?sL('tho'):0,G.staff.hau?sL('hau'):0)));helperStep()}}
+    if(B.base&&!S.holding&&(G.staff.vy||G.staff.tho||G.staff.hau)){S.helpT=(S.helpT||0)-dt;if(S.helpT<=0){S.helpT=Math.max(.14,.38*(1-.15*Math.max(G.staff.vy?sL('vy'):0,G.staff.tho?sL('tho'):0,G.staff.hau?sL('hau'):0)));helperStep()}}
     if(B.base&&B.dish==='nuong'&&!B.folded){const before=B.cook;B.cook+=dt*9*(G.staff.lan?1+.1*sL('lan'):1)*(G.owned.bep2?1.4:1);if(before<=115&&B.cook>115){toast('Bánh bắt đầu <b>cháy</b>!');sfx('bad')}}
     S.slots.forEach((c,i)=>{
       if(!c)return;
