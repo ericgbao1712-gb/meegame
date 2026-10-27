@@ -457,6 +457,9 @@ html[data-skin="dem"] .ttl .btn:not(.hot):not(.go){color:var(--ink)}
 .lk16{width:24px;height:24px}
 html[data-skin="dem"] :is(.rk,.podium,.rkempty,.rkhead){color:var(--ink)}
 
+.hgbox{display:grid;grid-template-columns:28px 1fr auto;gap:8px;align-items:center;background:linear-gradient(90deg,var(--gold),var(--paper));color:var(--ink);padding:6px 8px;flex:none}
+.hgbox img{width:28px;height:auto}.hgbox b{font-weight:400;font-size:18px;display:block;line-height:1}.hgbox small{font-size:14px;line-height:1.05;display:block;color:var(--txt2)}
+.hgbox .btn{font-size:16px;padding:4px 10px 3px}
 /* name tags */
 .nt{display:inline-block;padding:1px 6px 0;line-height:1.1;box-shadow:0 0 0 2px var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .nt-go{background:repeating-linear-gradient(90deg,#e2b98a 0 6px,#d6a978 6px 8px);color:#4a2a14}
@@ -1705,13 +1708,19 @@ const SELLERS={
   rau:makeChar({name:'Chị Bảy',look:{skin:'#d89a6a',hair:'#3a2216',style:'nonla',shirt:'#5aa23a',shirtD:'#3b7a26'}}),
 };
 function sellerOf(id){const k=ITEMS[id].kind;if(k!=='top')return 'banh';return ['kho_bo','kho_muc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','ga_xe','muc_rim','ruoc','kho_ga','rong_bien'].includes(id)?'kho':'rau'}
-function haggle(id){
-  const sk=sellerOf(id),sl=SELLERS[sk],p=PRICE[id],fav=Math.min(.15,nz(G.favor[sk])*.03);
-  const opt=(d,base)=>({t:`Bớt ${Math.round(d*100)}% · ${fmtK(Math.round(p*(1-d)/500)*500)}`,s:`khả năng ${base+fav>=.7?'cao':base+fav>=.4?'vừa':'thấp'}`,fx:()=>{
-    const ok=R()<base+fav;G.haggle[id]={ok,d};if(ok)G.favor[sk]=nz(G.favor[sk])+1;dayPrices();save();renderMarket();sfx(ok?'coin':'bad');
-    return ok?`${sl.name}: “${pick(['Thôi được, bán mở hàng cho con!','Mối quen mà, lấy đi con.','Lấy nhiều thì bớt.'])}”`:`${sl.name}: “${pick(['Trả vậy ai mà bán!','Bớt dữ vậy, bán mắc luôn!','Thôi đi chỗ khác mua đi!'])}” Giá +5% hôm nay.`}});
-  openCard({img:sl.url.neutral,tag:'TRẢ GIÁ',title:`${sl.name} bán ${ITEMS[id].name.toLowerCase()}`,text:`Gói ${ITEMS[id].pack} ${ITEMS[id].unit||'phần'} giá ${fmtK(p)}. Mỗi món chỉ trả giá một lần mỗi sáng, trả mạnh quá dễ bị bán mắc hơn. Mua nhiều lần ở một sạp thì dễ bớt hơn.`,
-    choices:[opt(.1,.8),opt(.2,.5),opt(.3,.22),{t:'Thôi, mua giá này',s:'',fx:()=>''}]});
+function paidToday(){return Object.values(G.paid||{}).flat().reduce((a,b)=>a+b,0)}
+function haggleAll(){
+  const h=G.haggleAll;if(h&&h.day===G.day){toast('Hôm nay trả giá rồi, mai quay lại nha');return}
+  const sl=SELLERS.banh,spent=paidToday(),fav=Math.min(.15,nz(G.favor.cho)*.03),bulk=Math.min(.15,spent/1000000*.15);
+  const opt=(d,base)=>{const pr=base+fav+bulk;return {t:`Bớt ${Math.round(d*100)}% cả giỏ${spent?` · lại ${fmtK(Math.round(spent*d/500)*500)}`:''}`,s:`khả năng ${pr>=.7?'cao':pr>=.4?'vừa':'thấp'}`,fx:()=>{
+    const ok=R()<pr;G.haggleAll={day:G.day,ok,d};
+    if(ok){G.favor.cho=nz(G.favor.cho)+1;const back=Math.round(spent*d/500)*500;G.money+=back;G.spentToday-=back;
+      for(const id in G.paid)G.paid[id]=G.paid[id].map(v=>Math.round(v*(1-d)/500)*500)}
+    dayPrices();save();renderMarket();sfx(ok?'coin':'bad');
+    return ok?`${sl.name}: “${pick(['Thôi được, mối quen bớt cho con!','Lấy nhiều vậy thì bớt!','Mở hàng cho con đó!'])}”${spent?` Được thối lại ${fmtK(Math.round(spent*d/500)*500)}.`:''} Mua thêm hôm nay cũng được bớt ${Math.round(d*100)}%.`
+      :`${sl.name}: “${pick(['Trả vậy ai mà bán!','Bớt dữ vậy, bán mắc luôn!','Thôi đi chợ khác mua đi!'])}” Hàng mua thêm hôm nay đắt hơn 5%.`}}};
+  openCard({img:sl.url.happy,tag:'TRẢ GIÁ',title:'Trả giá cả giỏ hàng',text:`${spent?`Sáng nay đã mua ${fmtK(spent)}.`:'Chưa mua gì.'} Trả giá một lần cho tất cả nguyên liệu trong ngày: mua càng nhiều càng dễ được bớt, mối càng quen càng dễ. Trả mạnh quá thì cả chợ bán đắt hơn 5%.`,
+    choices:[opt(.08,.8),opt(.15,.5),opt(.25,.22),{t:'Thôi, mua giá này',s:'',fx:()=>''}]});
 }
 /* ---- bảng xếp hạng online: artifact db (trên Claude) hoặc máy chủ MeeGame (/api/lau?g=banhtrang) ---- */
 const NET={db:null,uid:null,rows:[],serverRows:null,status:'Đang kết nối bảng xếp hạng…',server:null,player:null,busy:false,lastSync:0};
@@ -1972,18 +1981,17 @@ const marketG=$('marketCv').getContext('2d');marketG.imageSmoothingEnabled=false
 let mTab='food',PRICE={};
 function dayPrices(){
   const r=seeded(G.day*97+G.seed);PRICE={};const tags={};const cm=M().costMul;
-  if(G.haggleDay!==G.day){G.haggleDay=G.day;G.haggle={}}
   const pp=id=>cm*partnerMul(id)*(ITEMS[id].kind==='pack'&&G.pkg.printed?1.2:1);
   for(const id in ITEMS)PRICE[id]=Math.round(ITEMS[id].price*(1+(r()-.5)*.16)*pp(id)/500)*500;
   const ids=Object.keys(ITEMS).filter(id=>unlocked(id)&&ITEMS[id].kind!=='pack');
   const up=ids[Math.floor(r()*ids.length)],dn=ids[Math.floor(r()*ids.length)];
   if(up!==dn){PRICE[up]=Math.round(ITEMS[up].price*1.3*pp(up)/500)*500;tags[up]='up';PRICE[dn]=Math.round(ITEMS[dn].price*.75*pp(dn)/500)*500;tags[dn]='dn'}
-  for(const [id,h] of Object.entries(G.haggle||{}))if(PRICE[id])PRICE[id]=Math.max(500,Math.round(PRICE[id]*(h.ok?1-h.d:1.05)/500)*500);
+  const hg=G.haggleAll;if(hg&&hg.day===G.day)for(const id in ITEMS)PRICE[id]=Math.max(500,Math.round(PRICE[id]*(hg.ok?1-hg.d:1.05)/500)*500);
   for(const id in PRICE)if(PRICE[id]<500&&id!=='tags')PRICE[id]=500;
   PRICE.tags=tags;
 }
 function enterMarket(firstTime){
-  if(G.marketDay!==G.day){G.marketDay=G.day;G.bought={};G.spentToday=0}
+  if(G.marketDay!==G.day){G.marketDay=G.day;G.bought={};G.paid={};G.spentToday=0}
   if(G.questDay!==G.day||!G.quests)genQuests();
   dayPrices();mTab='food';
   if(G.staff.mo&&G.moDay!==G.day){G.moDay=G.day;const before=G.money;$('btnAuto').onclick();const sp=before-G.money;setTimeout(()=>toast(`Chị Mơ đi chợ về, đã mua <b>${fmtK(sp)}</b>`,2400),400)}
@@ -2006,9 +2014,11 @@ function renderMarket(){
     const cm=M().costMul;
     const row=id=>{const it=ITEMS[id],st=G.stock[id],b=G.bought[id]||0,tag=PRICE.tags[id];
       return `<div class="mrow px2"><img src="${IMG[id]}" alt=""><div class="nm"><b>${it.name}${tag?`<span class="tagp ${tag}">${tag==='up'?'lên giá':'rẻ'}</span>`:''}</b>
-        <small class="${st<4?'low':''}">còn ${st} ${it.unit||'phần'}${it.perish?' · dễ héo':''}${G.menuOff[id]?' · ngưng bán':''}${G.haggle[id]?`<span class="hgres">${G.haggle[id].ok?'✓ đã bớt '+Math.round(G.haggle[id].d*100)+'%':'✗ +5%'}</span>`:`<button class="hg" data-haggle="${id}">Trả giá</button>`}</small></div>
+        <small class="${st<4?'low':''}">còn ${st} ${it.unit||'phần'}${it.perish?' · dễ héo':''}${G.menuOff[id]?' · ngưng bán':''}</small></div>
         <div class="qty"><button class="qb" data-minus="${id}" ${b?'':'disabled'} aria-label="Trả lại 1 gói ${it.name}">−</button><span class="q">${b?'×'+b:''}</span>
         <button class="qb plus" data-plus="${id}" ${G.money<PRICE[id]?'disabled':''}>+${it.pack} · ${fmtK(PRICE[id])}</button></div></div>`};
+    const hgA=G.haggleAll&&G.haggleAll.day===G.day?G.haggleAll:null,spent=paidToday();
+    h+=`<div class="hgbox pxb"><img src="${SELLERS.banh.url.happy}" alt=""><div><b>Trả giá cả giỏ</b><small>${hgA?(hgA.ok?`✓ Đã bớt ${Math.round(hgA.d*100)}% cho mọi món hôm nay`:'✗ Trả hụt, hôm nay giá +5%'):`Đã mua ${fmtK(spent)} sáng nay. Mua xong rồi trả giá một lần cho cả giỏ.`}</small></div>${hgA?'':'<button class="btn gold pxb" data-haggleall="1">Trả giá</button>'}</div>`;
     h+=`<p class="mnote">Mỗi lần mua là 1 gói. Rau răm, xoài, tắc để qua đêm sẽ héo.${cm<1?` Đang được giảm ${Math.round((1-cm)*100)}% giá nhập.`:''}</p>`;
     const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate']],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','kho_muc','kho_ga','ruoc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim']],
       ['Sạp trứng, rau trái · Chị Bảy',['trung_cut','trung_muoi','xuc_xich','pho_mai','xoai','rau_ram','hanh_la','tac']]];
@@ -2026,12 +2036,12 @@ function renderMarket(){
 }
 function estCustomers(){return Math.round(200/spawnBase()*.75)}
 function buy(id){const p=PRICE[id];if(G.money<p){toast('Không đủ tiền');sfx('bad');return false}
-  G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;G.bought[id]=(G.bought[id]||0)+1;return true}
+  G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;G.bought[id]=(G.bought[id]||0)+1;G.paid=G.paid||{};(G.paid[id]=G.paid[id]||[]).push(p);return true}
 $('mlist').addEventListener('click',e=>{
   const pl=e.target.closest('[data-plus]'),mi=e.target.closest('[data-minus]'),up=e.target.closest('[data-upg]');
   if(pl){if(buy(pl.dataset.plus))sfx('buy')}
-  if(mi){const id=mi.dataset.minus,it=ITEMS[id];if(G.bought[id]&&G.stock[id]>=it.pack){G.bought[id]--;G.stock[id]-=it.pack;G.money+=PRICE[id];G.spentToday-=PRICE[id];sfx('tap')}else toast('Gói này đã dùng một phần, không trả được')}
-  const hg=e.target.closest('[data-haggle]');if(hg){sfx('tap');haggle(hg.dataset.haggle);return}
+  if(mi){const id=mi.dataset.minus,it=ITEMS[id];if(G.bought[id]&&G.stock[id]>=it.pack){const back=(G.paid&&G.paid[id]&&G.paid[id].pop())??PRICE[id];G.bought[id]--;G.stock[id]-=it.pack;G.money+=back;G.spentToday-=back;sfx('tap')}else toast('Gói này đã dùng một phần, không trả được')}
+  const hg=e.target.closest('[data-haggleall]');if(hg){sfx('tap');haggleAll();return}
   const ac=e.target.closest('[data-act]');if(ac&&!ac.disabled){bizAct(ac.dataset.act);return}
   if(pl||mi){save();renderMarket()}
 });
