@@ -423,6 +423,7 @@ html,body,*{touch-action:manipulation}
   .game:has(#scr-service:not([hidden])),.game:has(#scr-market:not([hidden])){width:min(1240px,96vw)}
   .stage:has(#scr-service:not([hidden])),.stage:has(#scr-market:not([hidden])){flex-direction:column;align-items:center}
   .stage:has(#scr-service:not([hidden])) .notes,.stage:has(#scr-market:not([hidden])) .notes{display:none}
+  .stage:has(#scr-service:not([hidden])),.stage:has(#scr-market:not([hidden])){min-height:100svh;justify-content:center;padding:1vh 1vw;box-sizing:border-box}
   /* --- bán hàng: 3 cột --- */
   #scr-service{display:grid;height:auto;min-height:0;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);align-content:start;
     grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"hud hud hud" "scene ctr ctr" "ticket ctr ctr";column-gap:12px}
@@ -450,7 +451,7 @@ html,body,*{touch-action:manipulation}
   #scr-market>.tabs{grid-area:tabs;display:flex;flex-direction:column;gap:6px!important;padding:10px!important}
   #scr-market>.tabs .tab{flex-direction:row;justify-content:flex-start;gap:8px;padding:6px 10px!important;font-size:17px!important}
   #scr-market>.tabs .tab span{text-align:left}
-  #scr-market>.mlist{grid-area:list;display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));align-content:start;gap:8px 10px;border-left:3px solid var(--ink);padding:10px 14px 14px}
+  #scr-market>.mlist{grid-area:list;display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));align-content:start;gap:8px 10px;border-left:3px solid var(--ink);padding:10px 14px 14px}
   #scr-market>.mlist>*{grid-column:1/-1}
   #scr-market>.mlist>:is(.mrow,.card2,.rdmenu,.pricebox,.tagrow,.quest,.rank){grid-column:auto}
   #scr-market>.mfoot{grid-area:foot;grid-template-columns:1fr;border-top:0;background:none;padding:0 10px}
@@ -2108,8 +2109,20 @@ let current='title';
 function show(name){
   document.querySelectorAll('.screen').forEach(s=>s.hidden=s.id!=='scr-'+name);
   current=name;$('toast').classList.remove('show');
+  fitWide();
   $('game').scrollIntoView({block:'nearest'});
 }
+/* Màn hình rộng: thử vài độ rộng bố cục, chọn cái phóng to được nhiều nhất mà vẫn vừa khít màn hình, rồi zoom cả khung game. */
+const WIDE_MQ=matchMedia('(min-width:980px) and (min-height:600px)');let fitWideT=0;
+function fitWide(){
+  const g=$('game');if(!g)return;
+  const on=WIDE_MQ.matches&&(current==='service'||current==='market');
+  if(!on){if(g.style.zoom||g.style.width){g.style.zoom='';g.style.width=''}return}
+  const vw=innerWidth*.98,vh=innerHeight*.97,Ws=current==='service'?[860,940,1020,1100,1200]:[1040,1200];let best=null;
+  for(const W of Ws){g.style.zoom='1';g.style.width=W+'px';const H=g.offsetHeight||1,z=Math.min(vw/W,vh/H);if(!best||z>best.z+.005)best={W,z}}
+  g.style.width=best.W+'px';g.style.zoom=String(Math.max(.6,Math.min(2.4,best.z)).toFixed(3));
+}
+function fitWideSoon(){clearTimeout(fitWideT);fitWideT=setTimeout(fitWide,60)}
 let toastT;
 function toast(html,ms=1700){const t=$('toast');t.innerHTML=html;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),ms)}
 function updateHudCommon(){document.querySelectorAll('.rLbl').forEach(e=>e.textContent=fmtStar(rating()))}
@@ -2491,7 +2504,7 @@ const TRAY_GROUPS=[['ĐỒ KHÔ · MẶN',['kho_bo','kho_muc','kho_ga','ruoc','t
   ['TRỨNG · THỊT · PHÔ MAI',['trung_cut','trung_muoi','xuc_xich','xx_phomai','pho_mai','bo_dau','thit_bam']],['RAU · TRÁI',['xoai','bo_bia','rau_ram','hanh_la','tac']]];
 function buildTray(){
   const m=B.dish||(S?S.mode:'tron'),fit=id=>unlocked(id)&&(!ITEMS[id].only||ITEMS[id].only.includes(m)||B.tops.includes(id));
-  const key=m+'|'+TOP_IDS.filter(fit).join();if(tray.dataset.k===key)return;tray.dataset.k=key;tray.innerHTML='';
+  const key=m+'|'+TOP_IDS.filter(fit).join();if(tray.dataset.k===key)return;tray.dataset.k=key;tray.innerHTML='';fitWideSoon();
   const seen=new Set(),group=(t,ids)=>{if(!ids.length)return;const lb=document.createElement('div');lb.className='tgl';lb.textContent=t;tray.appendChild(lb);ids.forEach(id=>tray.appendChild(tile(id)))};
   for(const [t,ids] of TRAY_GROUPS){ids.forEach(i=>seen.add(i));group(t,ids.filter(fit))}
   group('KHÁC',TOP_IDS.filter(id=>!seen.has(id)&&fit(id)));
@@ -2521,7 +2534,7 @@ function startService(){
   $('dayLbl').textContent='Ngày '+G.day;
   newCustomer(0,true);autoMode();renderModes();
   refresh();renderHud();updateSlotsDOM();renderTicket(true);updateHints();
-  show('service');requestAnimationFrame(fitScene);
+  show('service');requestAnimationFrame(()=>{fitScene();fitWide()});
   toast(`<b>16:00</b> · Mở quầy ở ${(LOCS[G.loc]||LOCS.hem).name}!`,1800);
 }
 function pickKind(){
@@ -2955,7 +2968,7 @@ function fitScene(){
   if(ex){cv.height=48+ex;sc.imageSmoothingEnabled=false}
   $('bubbles').style.height=(48/(48+ex)*100)+'%';
 }
-addEventListener('resize',()=>{if(S)fitScene();if(current==='market')renderMarket()});
+addEventListener('resize',()=>{if(S)fitScene();fitWideSoon()});
 function drawScene(t){
   const {P}=st;const k=clamp((S.min-16*60)/170,0,1),night=S.min>=17*60+20;
   const EX=SCN.ex;
