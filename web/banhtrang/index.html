@@ -38,6 +38,8 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #scr-service .counter{flex:1;display:flex;flex-direction:column}
 #scr-service .station{flex:1}
 #scr-service .bowlbox{flex:1;min-height:102px}
+#bubbles{position:absolute;left:0;right:0;bottom:0;height:100%;pointer-events:none}
+#bubbles .bubble{pointer-events:auto}
 #scr-service .bowlbox canvas{position:absolute;left:3px;top:3px;width:calc(100% - 6px);height:calc(100% - 6px);max-width:none;object-fit:contain}
 
 /* shared buttons */
@@ -2173,6 +2175,7 @@ const shelf=$('shelf'),tray=$('tray'),slotsEl=$('slots'),pipsEl=$('pips');
 function tile(id){const it=ITEMS[id],b=document.createElement('button');b.className='tile';b.dataset.id=id;
   b.innerHTML=`<img src="${IMG[id]}" alt=""><span class="lbl">${it.short}</span><span class="cnt"></span>`;b.onclick=()=>addItem(id,b);return b}
 function buildCounter(){
+  if(typeof fitScene==='function')requestAnimationFrame(fitScene);
   shelf.innerHTML='';tray.innerHTML='';
   const sh=[...BASE_IDS.filter(unlocked),...SAUCE_IDS.filter(unlocked)];sh.forEach(id=>shelf.appendChild(tile(id)));
   shelf.classList.toggle('many',sh.length>6);shelf.style.gridTemplateColumns=sh.length>6?'':`repeat(${sh.length},1fr)`;
@@ -2197,7 +2200,7 @@ function startService(){
   $('dayLbl').textContent='Ngày '+G.day;
   newCustomer(0,true);autoMode();renderModes();
   refresh();renderHud();updateSlotsDOM();renderTicket(true);updateHints();
-  show('service');
+  show('service');requestAnimationFrame(fitScene);
   toast(`<b>16:00</b> · Mở quầy ở ${(LOCS[G.loc]||LOCS.hem).name}!`,1800);
 }
 function pickKind(){
@@ -2538,8 +2541,25 @@ const SW=128,SH=48,SLOTX=[22,64,106];
 const blds=[];{let x=-4;const r=seeded(7);while(x<SW+6){const w=12+Math.floor(r()*14),h=8+Math.floor(r()*10);const win=[];for(let y=28-h+3;y<26;y+=4)for(let xx=x+2;xx<x+w-2;xx+=4)win.push([xx,y,r()]);blds.push({x,w,h,win});x+=w+2}}
 const lerpC=(a,b,t)=>{const A=hex(a),Bc=hex(b);return '#'+A.map((v,i)=>Math.round(v+(Bc[i]-v)*t).toString(16).padStart(2,'0')).join('')};
 const hex=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
+/* Khung cảnh ngoài phố cao thêm khi màn hình còn dư chỗ: thêm EX hàng trời phía trên, thau trộn giữ cỡ vừa phải */
+const SCN={ex:0};const BOWL_H=128;
+function fitScene(){
+  const cv=$('sceneCv'),bb=$('bowlBox');if(!cv||!bb||current!=='service')return;
+  if(cv.height!==48){cv.height=48;sc.imageSmoothingEnabled=false}
+  const ppr=cv.clientWidth/128||3,extra=bb.clientHeight-BOWL_H;
+  const ex=clamp(Math.floor(extra/ppr),0,34);SCN.ex=ex;
+  if(ex){cv.height=48+ex;sc.imageSmoothingEnabled=false}
+  $('bubbles').style.height=(48/(48+ex)*100)+'%';
+}
+addEventListener('resize',()=>{if(S)fitScene()});
 function drawScene(t){
   const {P}=st;const k=clamp((S.min-16*60)/170,0,1),night=S.min>=17*60+20;
+  const EX=SCN.ex;
+  if(EX){P(lerpC('#d9806a','#141228',k),0,0,SW,EX+12);
+    if(k>.5)for(let i=0;i<14;i++){const x=(i*53+7)%SW,y=6+(i*29)%Math.max(4,EX-2);if((i+Math.floor(t))%7)P('#fbeed3',x,y)}
+    else for(const [cx,cy] of [[20,EX*.45],[84,EX*.7]]){const {E}=st;E('#f6c8a8',cx,cy+3,9,2.4);E('#f6c8a8',cx+5,cy+1,5,2.2)}
+  }
+  sc.save();sc.translate(0,EX);
   P(lerpC('#e8915a','#1b1830',k),0,0,SW,SH);P(lerpC('#f2b06a','#221d3a',k),0,12,SW,16);
   if(k<.8){const {E}=st;E(lerpC('#fff2c0','#e8604a',k),30,24+k*14,6,6)}
   for(const b of blds){P(lerpC('#7a5a7a','#2e2748',k),b.x,28-b.h,b.w,b.h);P(lerpC('#8a6a8a','#3a3258',k),b.x,28-b.h,b.w,1);
@@ -2569,6 +2589,7 @@ function drawScene(t){
   sc.drawImage(cat,SW-17,32);
   if(!reduce&&Math.floor(t)%3!==0){const z=Math.floor(t*2)%2;P('#fbeed3',SW-5,26-z,3,1);P('#fbeed3',SW-4,27-z,1,1);P('#fbeed3',SW-5,28-z,3,1)}
   P('#7a4a22',0,42,SW,6);P('#b0703a',0,42,SW,4);P('#cf8c4e',0,42,SW,1);P(INK,0,41,SW,1);
+  sc.restore();
   const awc=(AWNINGS[G.awning]||AWNINGS.do).c;
   for(let x=0;x<SW;x++){const kk=x%8,col=Math.floor(x/8)%2?'#fbeed3':awc;const dy=Math.round(2*Math.sqrt(Math.max(0,1-((kk-3.5)/4)**2)));P(col,x,0,1,4+dy);P(INK,x,4+dy,1,1)}
 }
