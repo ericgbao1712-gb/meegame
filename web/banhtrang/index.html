@@ -2486,7 +2486,7 @@ function renderRD(){
     <small class="rdstep">1. LOẠI MÓN</small><div class="rdgrid">${Object.keys(DISHES).map(k=>dishUnlocked(k)?rdChip('rd:dish:'+k,'d_'+k,d.dish===k,k===tr.dish,DISHES[k].short):'').join('')}</div>
     <small class="rdstep">2. BÁNH TRÁNG</small><div class="rdgrid">${RD_BASES[d.dish].filter(unlocked).map(id=>rdChip('rd:base:'+id,id,d.base===id,false)).join('')}</div>
     <small class="rdstep">3. SỐT (chọn 1)</small><div class="rdgrid">${SAUCE_IDS.filter(unlocked).map(id=>rdChip('rd:sauce:'+id,id,d.sauce===id,tr.items.includes(id))).join('')}</div>
-    <small class="rdstep">4. TOPPING (chọn 2–4)</small><div class="rdgrid">${rdTopsFor(d.dish).map(id=>rdChip('rd:top:'+id,id,d.tops.includes(id),tr.items.includes(id))).join('')}</div></div>`;
+    <small class="rdstep">4. TOPPING (chọn 2–8)</small><div class="rdgrid">${rdTopsFor(d.dish).map(id=>rdChip('rd:top:'+id,id,d.tops.includes(id),tr.items.includes(id))).join('')}</div></div>`;
   const ok=d.base&&d.sauce&&d.tops.length>=2,rc={...d},np=ok?normalPrice(rc):0,price=Math.round(np*d.mul/1000)*1000,hy=ok?hypeOf(rc,tr):0,mx=ok?maxOkPrice(rc,tr):0;
   h+=`<div class="rdcard pxb"><input class="pxin" id="rdName" maxlength="24" autocomplete="off" spellcheck="false" placeholder="Đặt tên món, vd Bánh tráng Bão Tố" value="${esc(d.name)}" aria-label="Tên món">`;
   if(!ok)h+=`<small>Chọn đủ bánh, 1 sốt và ít nhất 2 topping để xem giá và độ hype.</small>`;
@@ -2511,7 +2511,7 @@ function rdAct(act){
   if(a==='dish'&&dishUnlocked(b)){d.dish=b;rdDraft();sfx('tap')}
   else if(a==='base'){d.base=b;sfx('tap')}
   else if(a==='sauce'){d.sauce=d.sauce===b?null:b;sfx('tap')}
-  else if(a==='top'){const i=d.tops.indexOf(b);if(i>=0)d.tops.splice(i,1);else if(d.tops.length<4)d.tops.push(b);else{toast('Tối đa 4 topping thôi');sfx('bad')}sfx('tap')}
+  else if(a==='top'){const i=d.tops.indexOf(b);if(i>=0)d.tops.splice(i,1);else if(d.tops.length<8)d.tops.push(b);else{toast('Tối đa 8 topping thôi');sfx('bad')}sfx('tap')}
   else if(a==='mul'){d.mul=clamp(Math.round((d.mul+.25*(+b))*100)/100,1,5);sfx('tap')}
   else if(a==='rp'){const r=sigById(+b);if(r){const np=normalPrice(r),st=Math.max(1000,Math.round(np*.25/1000)*1000);r.price=clamp(r.price+st*(+c),np,np*5);sfx('tap')}}
   else if(a==='on'){const r=sigById(+b);if(r){r.on=!r.on;sfx('tap')}}
