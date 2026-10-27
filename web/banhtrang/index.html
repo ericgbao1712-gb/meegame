@@ -263,6 +263,8 @@ html,body,*{touch-action:manipulation}
 .bowlcol{display:flex;flex-direction:column;gap:9px;min-width:0}
 .bowlbox{position:relative;background:#6d4122;padding:3px;line-height:0;display:flex;justify-content:center}
 .bowlbox canvas{height:96px;width:auto;max-width:100%;object-fit:contain;display:block;touch-action:none;cursor:grab}
+.fcbox{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:center;padding:7px 9px;background:#e8f4ec;color:var(--ink)}
+.fcbox img{width:30px;height:30px;image-rendering:pixelated}.fcbox b{display:block;font-size:19px;font-weight:400;line-height:1}.fcbox small{display:block;font-size:15px;line-height:1.05;color:var(--txt2)}
 .bowltops{position:absolute;left:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:3px;max-width:62%;pointer-events:none;line-height:0;z-index:2}
 .bowltops img{width:18px;height:18px;padding:1px;background:#fffaf0;box-shadow:0 0 0 2px var(--ink);image-rendering:pixelated}
 .bowlbox.shake canvas{animation:shake .12s steps(2) infinite}
@@ -2346,13 +2348,14 @@ function renderMarket(){
   document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===mTab));
   const L=$('mlist');let h='';
   if(mTab==='food'){
-    const cm=M().costMul;
+    const cm=M().costMul,NEED=demandToday().need;
     const row=id=>{const it=ITEMS[id],st=G.stock[id],b=G.bought[id]||0,tag=PRICE.tags[id];
       return `<div class="mrow px2"><img src="${IMG[id]}" alt=""><div class="nm"><b>${it.name}${tag?`<span class="tagp ${tag}">${tag==='up'?'lên giá':'rẻ'}</span>`:''}</b>
-        <small class="${st<4?'low':''}">còn ${st} ${it.unit||'phần'}${it.perish?' · dễ héo':''}${G.menuOff[id]?' · ngưng bán':''}</small></div>
+        <small class="${st<(NEED[id]||0)?'low':''}">còn ${st}${NEED[id]?` · cần ${NEED[id]}`:''} ${it.unit||'phần'}${it.perish?' · dễ héo':''}${G.menuOff[id]?' · ngưng bán':''}</small></div>
         <div class="qty"><button class="qb" data-minus="${id}" ${b?'':'disabled'} aria-label="Trả lại 1 gói ${it.name}">−</button><span class="q">${b?'×'+b:''}</span>
         <button class="qb plus" data-plus="${id}" ${G.money<PRICE[id]?'disabled':''}>+${it.pack} · ${fmtK(PRICE[id])}</button></div></div>`};
     const hgA=G.haggleAll&&G.haggleAll.day===G.day?G.haggleAll:null,spent=paidToday();
+    h+=forecastHTML();
     h+=`<div class="hgbox pxb"><img src="${SELLERS.banh.url.happy}" alt=""><div><b>Trả giá cả giỏ</b><small>${hgA?(hgA.ok?`✓ Đã bớt ${Math.round(hgA.d*100)}% cho mọi món hôm nay`:'✗ Trả hụt, hôm nay giá +5%'):`Đã mua ${fmtK(spent)} sáng nay. Mua xong rồi trả giá một lần cho cả giỏ.`}</small></div>${hgA?'':'<button class="btn gold pxb" data-haggleall="1">Trả giá</button>'}</div>`;
     h+=`<p class="mnote">Mỗi lần mua là 1 gói. Rau răm, xoài, tắc để qua đêm sẽ héo.${cm<1?` Đang được giảm ${Math.round((1-cm)*100)}% giá nhập.`:''}</p>`;
     const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate','mohanh']],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','kho_muc','kho_ga','ruoc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim','lap_xuong']],
@@ -2368,9 +2371,45 @@ function renderMarket(){
   else h=renderBook();
   const sc=L.scrollTop;L.innerHTML=h;L.scrollTop=sc;if(NET.server&&!NET.player)mountGoogle(L);
   const stb=L.querySelector('.subtabs');if(stb){const a=stb.querySelector('[aria-pressed="true"]');stb.scrollLeft=SUBSCROLL[mTab]??(a?a.offsetLeft-stb.clientWidth/2+a.offsetWidth/2:0);arrows(stb);stb.addEventListener('scroll',()=>{SUBSCROLL[mTab]=stb.scrollLeft;arrows(stb)},{passive:true})}
-  $('openInfo').textContent=`~${estCustomers()} khách tới`;
+  {const f=forecast();$('openInfo').textContent=`${f.lo}–${f.hi} khách tới`}
 }
-function estCustomers(){return Math.round(200/spawnBase()*.9+1)}
+function estCustomers(){return Math.round(200/spawnBase()*(slotCount()>3?1.02:.92)+1)}   // quầy 3 chỗ hay đầy nên khách chờ bớt; 4-5 chỗ gần như không
+/* ---- dự báo khách + nhu cầu nguyên liệu (dùng cho ô dự báo và nút Mua gợi ý) ----
+   Mô phỏng đúng cách newCustomer tạo order: tỉ lệ món, loại bánh, sốt, số topping, topping "mới" hay được gọi,
+   cấp cay theo thành phố, mỡ hành, bao bì, món sáng chế. */
+function forecast(){
+  const n=estCustomers(),ds0=Object.keys(DISHES).filter(d=>dishUnlocked(d)&&!G.menuOff['d_'+d]),ds=ds0.length?ds0:['tron'],w={tron:1,cuon:.6,nuong:.6};
+  const sw=ds.reduce((a,d)=>a+w[d],0),sigs=level()>=RD_LV?rdS().recipes.filter(r=>r.on&&dishUnlocked(r.dish)&&[r.base,r.sauce,...r.tops].every(unlocked)):[];
+  let sigShare=0;if(sigs.length){const tr=trendNow();sigShare=.12+.3*Math.max(...sigs.map(r=>hypeOf(r,tr)))/100}
+  const by={};ds.forEach(d=>by[d]=n*(1-sigShare)*w[d]/sw);
+  return {n,lo:Math.max(1,Math.round(n*.8)),hi:Math.round(n*1.25),by,sigShare,sigs};
+}
+function demandToday(){
+  const f=forecast(),need={},add=(id,k)=>{if(id&&k>0)need[id]=(need[id]||0)+k},city=CITIES[G.city]||CITIES.sg,avg=a=>a.reduce((x,y)=>x+y,0)/a.length;
+  const QTY=1.12;   // khách mua 2-3 phần thỉnh thoảng
+  const sauces=SAUCE_IDS.filter(x=>unlocked(x)&&!G.menuOff[x]),sp=list=>{const l=list.filter(x=>sauces.includes(x));return l.length?l:(sauces.length?sauces:['st_tac'])};
+  const topsFor=d=>TOP_IDS.filter(t=>unlocked(t)&&!G.menuOff[t]&&(!ITEMS[t].only||ITEMS[t].only.includes(d)));
+  const fresh=TOP_IDS.filter(id=>unlocked(id)&&!G.menuOff[id]&&(ITEMS[id].lvl||1)>1&&(ITEMS[id].lvl||1)>=level()-2);
+  const UP=level()<5?1.1:1.25;   // mua đủ cho mức cao của dự báo (đầu game tiền ít thì dư ít hơn)
+  for(const [d,k0] of Object.entries(f.by)){const k=k0*UP;if(k<=0)continue;
+    let T=topsFor(d),avgTops=d==='cuon'?2.5:d==='nuong'?2:3,sl;
+    if(d==='tron'){const ps=unlocked('suong')?.32:0;add('soi',k*(1-ps)*QTY);add('suong',k*ps*QTY);sl=sauces.length?sauces:['st_tac'];add('sate',k*avg(city.cay));add('mohanh',k*avg([0,0,0,1,1,2,3])*QTY);add('hop_giay',k);add('dua',k)}
+    else if(d==='cuon'){add('suong',k*QTY);sl=sp(['st_me','st_tac','st_toi','st_phomai']);add('sate',k*avg([0,1,1,2,2,3]));add('bich_giay',k)}
+    else{add('bt_tron',k*QTY);sl=sp(['st_bo','st_me','st_phomai','st_trungmuoi','st_toi']);add('trung_cut',k*QTY);T=T.filter(t=>t!=='trung_cut');add('sate',k*avg([0,1,2,2,3]));add('mohanh',k*avg([1,1,2,2,3])*QTY);add('bich_giay',k)}
+    sl.forEach(x=>add(x,k/sl.length));
+    if(T.length){T.forEach(t=>add(t,k*avgTops*QTY/T.length));const fr=fresh.filter(t=>T.includes(t));if(fr.length)fr.forEach(t=>add(t,k*.45*QTY/fr.length))}
+  }
+  if(f.sigShare>0){const each=f.n*UP*f.sigShare/f.sigs.length;for(const r of f.sigs){add(r.base,each*QTY);add(r.sauce,each);r.tops.forEach(t=>add(t,each*QTY));add('sate',each*2);add('mohanh',each*(r.dish==='cuon'?0:1.3));packFor(r.dish).forEach(id=>add(id,each))}}
+  // dự phòng thêm cho lệch ngẫu nhiên giữa các topping
+  for(const id in need)need[id]=Math.ceil(need[id]*1.2+(ITEMS[id].kind==='top'?2:0));
+  return {need,f};
+}
+function forecastHTML(){
+  const {f}=demandToday(),parts=Object.entries(f.by).filter(([,k])=>k>=.5).map(([d,k])=>`${DISHES[d].short} ~${Math.round(k)}`);
+  if(f.sigShare>0)parts.push(`Món sáng chế ~${Math.round(f.n*f.sigShare)}`);
+  return `<div class="fcbox pxb"><img src="${IC.flyer}" alt=""><div><b>Dự báo hôm nay: ${f.lo}–${f.hi} khách</b><small>${parts.join(' · ')}</small></div></div>`;
+}
+
 function buy(id){const p=PRICE[id];if(G.money<p){toast('Không đủ tiền');sfx('bad');return false}
   G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;G.bought[id]=(G.bought[id]||0)+1;G.paid=G.paid||{};(G.paid[id]=G.paid[id]||[]).push(p);return true}
 $('mlist').addEventListener('click',e=>{
@@ -2386,10 +2425,9 @@ $('btnShop').onclick=()=>{sfx('tap');openSetup('edit',()=>{renderMarket();show('
 document.querySelectorAll('.tabs [data-ic]').forEach(b=>{const im=b.querySelector('img');if(im)im.src=IC[b.dataset.ic]||''});
 document.querySelectorAll('.tabs [data-tab]').forEach(b=>b.onclick=()=>{mTab=b.dataset.tab;frConfirm=false;sfx('tap');$('mlist').scrollTop=0;renderMarket()});
 $('btnAuto').onclick=()=>{
-  const target={soi:10,st_tac:6,sate:20,mohanh:15,hop_giay:15,dua:25};
-  if(unlocked('suong'))target.suong=6;if(unlocked('bt_tron'))target.bt_tron=6;if(unlocked('bich_giay'))target.bich_giay=12;
-  SAUCE_IDS.filter(x=>unlocked(x)&&x!=='st_tac'&&!G.menuOff[x]).forEach(x=>target[x]=4);
-  TOP_IDS.filter(x=>unlocked(x)&&!G.menuOff[x]).forEach(id=>target[id]=ITEMS[id].perish?3:4);
+  const {need}=demandToday(),target={};
+  const order=id=>{const k=ITEMS[id].kind;return k==='base'?0:k==='pack'?1:k==='sate'||k==='oil'?2:k==='sauce'?3:4};   // thiết yếu trước, topping sau
+  Object.keys(need).filter(id=>ITEMS[id]&&unlocked(id)).sort((a,b)=>order(a)-order(b)||need[b]-need[a]).forEach(id=>target[id]=need[id]);
   let spent=0,miss=false;
   for(const id of Object.keys(target)){while(G.stock[id]<target[id]){if(G.money<PRICE[id]){miss=true;break}const p=PRICE[id];buy(id);spent+=p}}
   sfx(spent?'coin':'tap');toast(spent?`Đã mua <b>${fmtK(spent)}</b>${miss?' · hết tiền giữa chừng':''}`:'Kho đã đủ cho hôm nay rồi');save();renderMarket();
@@ -3073,6 +3111,7 @@ function endService(){
       <span class="tot">Tiền mặt trong ngày</span><span class="tot ${profit>=0?'pos':'neg'}">${profit>=0?'+':'−'}${fmtK(Math.abs(profit))}</span>
     </div></div>
     ${spoiled.length?`<div class="sumcard pxb"><h3>Bỏ đi vì héo</h3><p style="margin:0;font-size:18px;line-height:1.05">${spoiled.join(', ')}</p></div>`:''}
+    <div class="sumcard pxb"><h3>Ngày mai</h3><div class="kv"><span>Dự kiến khách</span><span class="pos">${(()=>{const f=forecast();return f.lo+"–"+f.hi})()} khách</span>${(()=>{const f=forecast();return Object.entries(f.by).filter(([,k])=>k>=.5).map(([d,k])=>`<span>${DISHES[d].name}</span><span>~${Math.round(k)}</span>`).join('')+(f.sigShare>0?`<span>Món sáng chế</span><span>~${Math.round(f.n*f.sigShare)}</span>`:'')})()}</div></div>
     <div class="sumcard pxb"><h3>Cấp độ & nhiệm vụ</h3><div class="kv"><span>Kinh nghiệm hôm nay</span><span class="pos">+${xpToday} XP</span><span>Cấp hiện tại</span><span>Lv${level()} · ${LV_TITLE[level()]}</span></div>
       <div style="display:flex;flex-direction:column;gap:3px;margin-top:6px;font-size:16px;line-height:1.05">${(G.quests||[]).map(q=>`<span>${q.done?'✓':'·'} ${qLabel(q)}${q.done?` <b style="font-weight:400;color:var(--leafD)">+${q.xp}</b>`:''}</span>`).join('')}</div></div>
     <div class="sumcard pxb"><h3>Thách đấu với Ken</h3><div class="goalstrip" style="background:none;padding:0;color:var(--ink)">${goalHTML().replaceAll('color:var(--paper2)','')}</div></div>
