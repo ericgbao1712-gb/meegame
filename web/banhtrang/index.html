@@ -1009,10 +1009,10 @@ for(const id in ITEMS){ITEMS[id].id=id;ITEMS[id].short=ITEMS[id].short||ITEMS[id
 const BASE_IDS=['soi','suong','bt_tron'],SAUCE_IDS=Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='sauce');
 const TOP_IDS=Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='top');
 const UPG=[
-  {id:'thau',name:'Thau inox to',desc:'Trộn và cuốn nhanh hơn',price:120000},
-  {id:'ghe',name:'Ghế nhựa đỏ',desc:'Khách chịu chờ lâu hơn 30%',price:80000},
-  {id:'loa',name:'Loa mời khách',desc:'Khách tới dày hơn',price:100000},
-  {id:'den',name:'Bảng đèn LED',desc:'Khách thưởng thêm 10% mỗi món',price:150000},
+  {id:'thau',name:'Thau inox to',desc:'Trộn và cuốn nhanh hơn',price:180000},
+  {id:'ghe',name:'Ghế nhựa đỏ',desc:'Khách chịu chờ lâu hơn 30%',price:120000},
+  {id:'loa',name:'Loa mời khách',desc:'Khách tới dày hơn',price:160000},
+  {id:'den',name:'Bảng đèn LED',desc:'Khách thưởng thêm 10% mỗi món',price:300000},
 ];
 const DISHES={tron:{name:'Bánh tráng trộn',short:'Trộn',lvl:1},cuon:{name:'Bánh tráng cuốn',short:'Cuốn',lvl:6},nuong:{name:'Bánh tráng nướng',short:'Nướng',lvl:9}};
 const LV_XP=[0,0,100,240,420,640,900,1200,1550,1950,2400,2900,3450,4050,4700,5400];
@@ -1400,60 +1400,62 @@ $('btnRentBack').onclick=()=>{sfx('tap');renderMarket();show('market')};
    5e. KINH DOANH — nâng cấp, bảng giá, mở rộng, nhượng quyền
    ===================================================================== */
 const TOOLS=[
-  {id:'thau',ic:'bowl',name:'Thau inox to',desc:'Trộn nhanh gấp rưỡi',price:120000,lv:1},
-  {id:'ghe',ic:'stool',name:'Ghế nhựa đỏ',desc:'Khách chịu chờ lâu hơn 30%',price:80000,lv:2},
-  {id:'loa',ic:'loa',name:'Loa mời khách',desc:'Khách tới dày hơn',price:100000,lv:3},
-  {id:'den',ic:'led',name:'Bảng đèn LED',desc:'Khách thưởng thêm 10% mỗi món',price:150000,lv:5},
-  {id:'thot',ic:'board',name:'Thớt gỗ me to',desc:'Cuốn bánh nhanh gấp rưỡi',price:90000,lv:6},
-  {id:'tumat',ic:'cooler',name:'Thùng đá giữ lạnh',desc:'Rau, xoài, tắc, hành lá chỉ héo một nửa qua đêm',price:140000,lv:7},
-  {id:'bep',ic:'stove',name:'Bếp than tổ ong lớn',desc:'Vạch vàng giòn rộng hơn khi nướng',price:160000,lv:9},
-  {id:'gang',ic:'glove',name:'Găng tay, khẩu trang',desc:'Vệ sinh: đoàn kiểm tra ATTP xem đầu tiên',price:40000,lv:1,vs:true},
-  {id:'thungrac',ic:'trash',name:'Thùng rác có nắp',desc:'Vệ sinh: gánh sạch sẽ, không ruồi bu',price:50000,lv:1,vs:true},
-  {id:'tukinh',ic:'glass',name:'Tủ kính che topping',desc:'Vệ sinh: topping không dính bụi đường',price:150000,lv:2,vs:true},
-  {id:'giayattp',ic:'cert',name:'Giấy xác nhận ATTP',desc:'Vệ sinh: học lớp tập huấn, có giấy xác nhận',price:200000,lv:3,vs:true},
+  {id:'thau',ic:'bowl',name:'Thau inox to',desc:'Trộn nhanh gấp rưỡi',price:180000,lv:1},
+  {id:'ghe',ic:'stool',name:'Ghế nhựa đỏ',desc:'Khách chịu chờ lâu hơn 30%',price:120000,lv:2},
+  {id:'loa',ic:'loa',name:'Loa mời khách',desc:'Khách tới dày hơn',price:160000,lv:3},
+  {id:'den',ic:'led',name:'Bảng đèn LED',desc:'Khách thưởng thêm 10% mỗi món',price:300000,lv:5},
+  {id:'thot',ic:'board',name:'Thớt gỗ me to',desc:'Cuốn bánh nhanh gấp rưỡi',price:200000,lv:6},
+  {id:'tumat',ic:'cooler',name:'Thùng đá giữ lạnh',desc:'Rau, xoài, tắc, hành lá chỉ héo một nửa qua đêm',price:280000,lv:7},
+  {id:'bep',ic:'stove',name:'Bếp than tổ ong lớn',desc:'Vạch vàng giòn rộng hơn khi nướng',price:350000,lv:9},
+  {id:'gang',ic:'glove',name:'Găng tay, khẩu trang',desc:'Vệ sinh: đoàn kiểm tra ATTP xem đầu tiên',price:60000,lv:1,vs:true},
+  {id:'thungrac',ic:'trash',name:'Thùng rác có nắp',desc:'Vệ sinh: gánh sạch sẽ, không ruồi bu',price:75000,lv:1,vs:true},
+  {id:'tukinh',ic:'glass',name:'Tủ kính che topping',desc:'Vệ sinh: topping không dính bụi đường',price:220000,lv:2,vs:true},
+  {id:'giayattp',ic:'cert',name:'Giấy xác nhận ATTP',desc:'Vệ sinh: học lớp tập huấn, có giấy xác nhận',price:300000,lv:3,vs:true},
 ];
 const STAFF=[
-  {id:'na',name:'Bé Na',role:'Chạy bàn',desc:'Bưng nước mời khách, ai cũng chịu chờ thêm 15%',wage:30000,lv:3,look:{skin:'#f2c79b',hair:'#2b1a14',style:'long',shirt:'#f8cfe0',shirtD:'#e8a0b8',apron:true}},
-  {id:'mo',name:'Chị Mơ',role:'Đi chợ',desc:'Sáng nào cũng tự đi chợ mua hàng theo gợi ý',wage:25000,lv:4,look:{skin:'#e0a878',hair:'#3a2216',style:'nonla',shirt:'#9ad0e6',shirtD:'#6aa8c4'}},
-  {id:'tai',name:'Anh Tài',role:'Phụ trộn, phụ cuốn',desc:'Tự trộn và cuốn giùm khi đủ nguyên liệu',wage:45000,lv:5,look:{skin:'#d89a6a',hair:'#2b1a14',style:'short',shirt:'#5aa23a',shirtD:'#3b7a26',apron:true}},
-  {id:'hong',name:'Chị Hồng',role:'Thu ngân',desc:'Không ai quỵt được, khách bo thêm 5%',wage:35000,lv:6,look:{skin:'#f2c79b',hair:'#5a2a1a',style:'bun',shirt:'#e86a9a',shirtD:'#b84a74',glasses:true}},
-  {id:'tung',name:'Anh Tùng',role:'Bảo vệ',desc:'Tự xử lý chuyện phường, công trình, bợm nhậu',wage:40000,lv:7,look:{skin:'#c98a5a',hair:'#2b1a14',style:'cap',cap:'#3a3a42',shirt:'#3a3a42',shirtD:'#2a2a32'}},
-  {id:'lan',name:'Bé Lan',role:'Phụ nướng',desc:'Canh bếp, bánh vàng là gấp liền',wage:45000,lv:9,look:{skin:'#f6d0aa',hair:'#2b1a14',style:'ponytail',shirt:'#f2b84b',shirtD:'#c98a2a',apron:true}},
+  {id:'na',name:'Bé Na',role:'Chạy bàn',desc:'Bưng nước mời khách, ai cũng chịu chờ thêm 15%',wage:55000,lv:3,look:{skin:'#f2c79b',hair:'#2b1a14',style:'long',shirt:'#f8cfe0',shirtD:'#e8a0b8',apron:true}},
+  {id:'mo',name:'Chị Mơ',role:'Đi chợ',desc:'Sáng nào cũng tự đi chợ mua hàng theo gợi ý',wage:45000,lv:4,look:{skin:'#e0a878',hair:'#3a2216',style:'nonla',shirt:'#9ad0e6',shirtD:'#6aa8c4'}},
+  {id:'tai',name:'Anh Tài',role:'Phụ trộn, phụ cuốn',desc:'Tự trộn và cuốn giùm khi đủ nguyên liệu',wage:80000,lv:5,look:{skin:'#d89a6a',hair:'#2b1a14',style:'short',shirt:'#5aa23a',shirtD:'#3b7a26',apron:true}},
+  {id:'hong',name:'Chị Hồng',role:'Thu ngân',desc:'Không ai quỵt được, khách bo thêm 5%',wage:65000,lv:6,look:{skin:'#f2c79b',hair:'#5a2a1a',style:'bun',shirt:'#e86a9a',shirtD:'#b84a74',glasses:true}},
+  {id:'tung',name:'Anh Tùng',role:'Bảo vệ',desc:'Tự xử lý chuyện phường, công trình, bợm nhậu',wage:70000,lv:7,look:{skin:'#c98a5a',hair:'#2b1a14',style:'cap',cap:'#3a3a42',shirt:'#3a3a42',shirtD:'#2a2a32'}},
+  {id:'lan',name:'Bé Lan',role:'Phụ nướng',desc:'Canh bếp, bánh vàng là gấp liền',wage:80000,lv:9,look:{skin:'#f6d0aa',hair:'#2b1a14',style:'ponytail',shirt:'#f2b84b',shirtD:'#c98a2a',apron:true}},
 ];
 STAFF.forEach(x=>x.por=url(person(x.look,'happy')));
 const DECOR=[
-  {id:'cay',ic:'plant',name:'Chậu cây xanh',desc:'Quán mát mắt, khách chờ thêm 4%',price:60000,lv:2},
-  {id:'longden',ic:'lantern',name:'Dây đèn lồng đỏ',desc:'Khách chờ thêm 6%',price:90000,lv:3},
-  {id:'radio',ic:'radio',name:'Radio cổ',desc:'Nhạc xưa êm tai, khách chờ thêm 5%',price:110000,lv:4},
-  {id:'meo',ic:'cat',name:'Mèo thần tài',desc:'Món 5 sao được bo thêm 10%',price:150000,lv:6},
-  {id:'tranh',ic:'graffiti',name:'Tranh tường graffiti',desc:'Khách +5%',price:180000,lv:8},
-  {id:'songao',ic:'ring',name:'Góc sống ảo',desc:'Khách +7%',price:220000,lv:10},
+  {id:'cay',ic:'plant',name:'Chậu cây xanh',desc:'Quán mát mắt, khách chờ thêm 4%',price:100000,lv:2},
+  {id:'longden',ic:'lantern',name:'Dây đèn lồng đỏ',desc:'Khách chờ thêm 6%',price:160000,lv:3},
+  {id:'radio',ic:'radio',name:'Radio cổ',desc:'Nhạc xưa êm tai, khách chờ thêm 5%',price:200000,lv:4},
+  {id:'meo',ic:'cat',name:'Mèo thần tài',desc:'Món 5 sao được bo thêm 10%',price:300000,lv:6},
+  {id:'tranh',ic:'graffiti',name:'Tranh tường graffiti',desc:'Khách +5%',price:350000,lv:8},
+  {id:'songao',ic:'ring',name:'Góc sống ảo',desc:'Khách +7%',price:450000,lv:10},
 ];
 const AWNINGS={do:{name:'Đỏ kem',c:'#d8352a',price:0},bacha:{name:'Xanh bạc hà',c:'#3aa59a',price:50000},bien:{name:'Xanh biển',c:'#3a6ea5',price:50000},tim:{name:'Tím khoai môn',c:'#8a5aa8',price:50000},nghe:{name:'Vàng nghệ',c:'#e0a23a',price:50000}};
 const DISH_UPG={tron:{name:'Sốt trộn gia truyền'},cuon:{name:'Bánh cuốn dẻo mềm'},nuong:{name:'Bánh nướng giòn rụm'}};
-const DISH_COST=[120000,250000,450000,800000,1300000];
+const FR_PER=700000;   // nhượng quyền: +1 sao mỗi 700k tài sản (cũ 400k; giá mọi thứ đã tăng nên tài sản cũng cao hơn)
+const PRINT_COST=250000,SHIP_COST={combo:500000,own:700000};   // v·khó hơn: giá cũ 150k / 300k / 400k
+const DISH_COST=[200000,400000,750000,1300000,2200000];
 const PRICE_SUGG={tron:15000,cuon:12000,nuong:15000,top:4000};
 const TIERS=[
   {name:'Gánh lề đường',ic:'basket',desc:'Chỗ khởi nghiệp của bạn.',lv:1,price:0,traffic:1,pat:1,tip:1,rent:0},
-  {name:'Xe đẩy inox',ic:'cart',desc:'Có tủ kính, sạch sẽ. Khách +10%.',lv:4,price:300000,traffic:1.1,pat:1,tip:1,rent:10000},
-  {name:'Quán nhỏ có mái che',ic:'kiosk',desc:'Có bàn ghế. Khách +25%, chờ thêm 10%.',lv:7,price:800000,traffic:1.25,pat:1.1,tip:1,rent:40000},
-  {name:'Quán mặt tiền',ic:'store',desc:'Mặt tiền rộng. Khách +45%, chờ thêm 15%, bo +10%.',lv:10,price:2000000,traffic:1.45,pat:1.15,tip:1.1,rent:90000},
+  {name:'Xe đẩy inox',ic:'cart',desc:'Có tủ kính, sạch sẽ. Khách +10%.',lv:4,price:500000,traffic:1.1,pat:1,tip:1,rent:20000},
+  {name:'Quán nhỏ có mái che',ic:'kiosk',desc:'Có bàn ghế. Khách +25%, chờ thêm 10%.',lv:7,price:1500000,traffic:1.25,pat:1.1,tip:1,rent:70000},
+  {name:'Quán mặt tiền',ic:'store',desc:'Mặt tiền rộng. Khách +45%, chờ thêm 15%, bo +10%.',lv:10,price:4000000,traffic:1.45,pat:1.15,tip:1.1,rent:150000},
 ];
 const STREET=[
-  {id:'photo',ic:'photo',name:'Tiệm photocopy cạnh trường',desc:'Học sinh ghé đông, khách +4% mỗi bậc',price:300000},
-  {id:'xe',ic:'parking',name:'Bãi giữ xe',desc:'Khách +3% mỗi bậc',price:300000},
-  {id:'bang',ic:'tree',name:'Cây bàng che nắng',desc:'Khách chờ thêm 3% mỗi bậc',price:350000},
-  {id:'mia',ic:'cup',name:'Quầy nước mía',desc:'Món 5 sao bo thêm 4% mỗi bậc',price:400000},
-  {id:'vuon',ic:'garden',name:'Vườn rau sân thượng',desc:'Rau, xoài, tắc héo ít đi 20% mỗi bậc',price:400000},
-  {id:'tro',ic:'house',name:'Nhà trọ nhân viên',desc:'Lương nhân viên −6% mỗi bậc',price:500000},
-  {id:'tuong',ic:'statue',name:'Tượng hộp bánh tráng khổng lồ',desc:'Không có lợi ích gì, chỉ để khoe. Tài sản tăng mỗi bậc',price:1000000,max:99},
+  {id:'photo',ic:'photo',name:'Tiệm photocopy cạnh trường',desc:'Học sinh ghé đông, khách +4% mỗi bậc',price:600000},
+  {id:'xe',ic:'parking',name:'Bãi giữ xe',desc:'Khách +3% mỗi bậc',price:600000},
+  {id:'bang',ic:'tree',name:'Cây bàng che nắng',desc:'Khách chờ thêm 3% mỗi bậc',price:700000},
+  {id:'mia',ic:'cup',name:'Quầy nước mía',desc:'Món 5 sao bo thêm 4% mỗi bậc',price:800000},
+  {id:'vuon',ic:'garden',name:'Vườn rau sân thượng',desc:'Rau, xoài, tắc héo ít đi 20% mỗi bậc',price:800000},
+  {id:'tro',ic:'house',name:'Nhà trọ nhân viên',desc:'Lương nhân viên −6% mỗi bậc',price:1000000},
+  {id:'tuong',ic:'statue',name:'Tượng hộp bánh tráng khổng lồ',desc:'Không có lợi ích gì, chỉ để khoe. Tài sản tăng mỗi bậc',price:2000000,max:99},
 ];
 const PARTNERS=[
-  {id:'trangbang',ic:'basket',name:'Mối bánh tráng Trảng Bàng',desc:'Bánh tráng các loại rẻ 15%',price:250000,lv:5,off:.15,ids:()=>BASE_IDS},
-  {id:'hocmon',ic:'garden',name:'Vựa rau Hóc Môn',desc:'Rau, xoài, tắc, hành lá rẻ 20%',price:200000,lv:5,off:.2,ids:()=>Object.keys(ITEMS).filter(k=>ITEMS[k].perish)},
-  {id:'baobi',ic:'boxp',name:'Xưởng bao bì Chợ Lớn',desc:'Hộp, bịch, đũa rẻ 30%',price:300000,lv:6,off:.3,ids:()=>Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='pack')},
-  {id:'dalat',ic:'hands',name:'Mối đồ khô Đà Lạt',desc:'Khô bò, khô mực, khô gà, ruốc rẻ 15%',price:400000,lv:7,off:.15,ids:()=>['kho_bo','kho_muc','kho_ga','ruoc']},
-  {id:'sate',ic:'fire',name:'Lò sa tế Chợ Lớn',desc:'Sa tế và các loại sốt rẻ 15%',price:350000,lv:8,off:.15,ids:()=>['sate','mohanh',...SAUCE_IDS]},
+  {id:'trangbang',ic:'basket',name:'Mối bánh tráng Trảng Bàng',desc:'Bánh tráng các loại rẻ 15%',price:500000,lv:5,off:.15,ids:()=>BASE_IDS},
+  {id:'hocmon',ic:'garden',name:'Vựa rau Hóc Môn',desc:'Rau, xoài, tắc, hành lá rẻ 20%',price:400000,lv:5,off:.2,ids:()=>Object.keys(ITEMS).filter(k=>ITEMS[k].perish)},
+  {id:'baobi',ic:'boxp',name:'Xưởng bao bì Chợ Lớn',desc:'Hộp, bịch, đũa rẻ 30%',price:600000,lv:6,off:.3,ids:()=>Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='pack')},
+  {id:'dalat',ic:'hands',name:'Mối đồ khô Đà Lạt',desc:'Khô bò, khô mực, khô gà, ruốc rẻ 15%',price:800000,lv:7,off:.15,ids:()=>['kho_bo','kho_muc','kho_ga','ruoc']},
+  {id:'sate',ic:'fire',name:'Lò sa tế Chợ Lớn',desc:'Sa tế và các loại sốt rẻ 15%',price:700000,lv:8,off:.15,ids:()=>['sate','mohanh',...SAUCE_IDS]},
 ];
 const BOXCOL={kraft:{name:'Kraft',c:'#c9a06a'},trang:{name:'Trắng',c:'#efe6d6'},hong:{name:'Hồng',c:'#f3b8c8'},mint:{name:'Bạc hà',c:'#b5e0c8'}};
 const RQ={
@@ -1480,16 +1482,16 @@ const TAGS=[
   {id:'hoanggia',name:'Hoàng gia',conds:[RQ.fr(1)]},
 ];
 const BRANCHES=[
-  {id:'gv',name:'Gò Vấp',cost:600000,base:90000,rent:30000,wage:35000},
-  {id:'td',name:'Thủ Đức',cost:700000,base:105000,rent:30000,wage:35000},
-  {id:'bt',name:'Bình Thạnh',cost:800000,base:125000,rent:40000,wage:40000},
-  {id:'q1',name:'Quận 1',cost:1500000,base:230000,rent:90000,wage:50000},
+  {id:'gv',name:'Gò Vấp',cost:1200000,base:90000,rent:30000,wage:40000},
+  {id:'td',name:'Thủ Đức',cost:1400000,base:105000,rent:30000,wage:45000},
+  {id:'bt',name:'Bình Thạnh',cost:1600000,base:125000,rent:40000,wage:50000},
+  {id:'q1',name:'Quận 1',cost:3000000,base:230000,rent:90000,wage:65000},
 ];
 const ADS=[
-  {id:'tora',ic:'flyer',name:'Phát tờ rơi',desc:'Khách +15% trong 2 ngày',price:50000,days:2,boost:.15,lv:2},
-  {id:'fb',ic:'phone',name:'Đăng hội ăn vặt',desc:'Khách +20% trong 3 ngày',price:90000,days:3,boost:.2,lv:3},
-  {id:'kol',ic:'camera',name:'Thuê KOL review',desc:'Khách +35% trong 3 ngày',price:300000,days:3,boost:.35,lv:6},
-  {id:'bang',ic:'billboard',name:'Biển quảng cáo ngã tư',desc:'Khách +25% trong 7 ngày',price:600000,days:7,boost:.25,lv:9},
+  {id:'tora',ic:'flyer',name:'Phát tờ rơi',desc:'Khách +15% trong 2 ngày',price:80000,days:2,boost:.15,lv:2},
+  {id:'fb',ic:'phone',name:'Đăng hội ăn vặt',desc:'Khách +20% trong 3 ngày',price:150000,days:3,boost:.2,lv:3},
+  {id:'kol',ic:'camera',name:'Thuê KOL review',desc:'Khách +35% trong 3 ngày',price:500000,days:3,boost:.35,lv:6},
+  {id:'bang',ic:'billboard',name:'Biển quảng cáo ngã tư',desc:'Khách +25% trong 7 ngày',price:1000000,days:7,boost:.25,lv:9},
 ];
 const TITLES=[
   {id:'chamchi',name:'Chủ gánh chăm chỉ',price:300000,conds:[RQ.served(30)]},
@@ -1509,14 +1511,14 @@ const condsOk=x=>(x.conds||[]).every(c=>c.cur()>=c.need);
 function condsHTML(x){return (x.conds||[]).map(c=>{const v=Math.min(c.cur(),c.need),ok=v>=c.need;return `<span class="cond ${ok?'ok':''}">${ok?'✓':'·'} ${c.label} <b>${fmtN(v)}/${fmtN(c.need)}</b></span>`}).join('')}
 const fmtN=v=>Number(v).toLocaleString('vi-VN');
 const BRAND=[
-  {id:'gia',name:'Thương hiệu đắt giá',desc:'Mỗi món thu thêm 3% mỗi bậc',max:5,cost:l=>8+l*4},
-  {id:'biet',name:'Cả xóm biết tên',desc:'Khách +3% mỗi bậc',max:5,cost:l=>8+l*4},
-  {id:'than',name:'Khách trung thành',desc:'Khách chờ thêm 4% mỗi bậc',max:5,cost:l=>6+l*3},
+  {id:'gia',name:'Thương hiệu đắt giá',desc:'Mỗi món thu thêm 3% mỗi bậc',max:5,cost:l=>12+l*6},
+  {id:'biet',name:'Cả xóm biết tên',desc:'Khách +3% mỗi bậc',max:5,cost:l=>12+l*6},
+  {id:'than',name:'Khách trung thành',desc:'Khách chờ thêm 4% mỗi bậc',max:5,cost:l=>9+l*5},
 ];
 const CITIES={
   sg:{name:'Sài Gòn',desc:'Khách đông hơn 5%, gọi đủ mọi cấp cay',cost:0,traffic:1.05,price:1,cay:[0,1,2,2,3,3,3,4,4,5]},
-  hn:{name:'Hà Nội',desc:'Khách ăn ít cay, chịu chi: mỗi món thu thêm 8%',cost:30,traffic:1,price:1.08,cay:[0,0,1,1,1,2,2,3]},
-  dn:{name:'Đà Nẵng',desc:'Khách mê cay, hay gọi cấp 3–5, mỗi món thu thêm 4%',cost:30,traffic:1.02,price:1.04,cay:[2,3,3,4,4,5,5]},
+  hn:{name:'Hà Nội',desc:'Khách ăn ít cay, chịu chi: mỗi món thu thêm 8%',cost:45,traffic:1,price:1.08,cay:[0,0,1,1,1,2,2,3]},
+  dn:{name:'Đà Nẵng',desc:'Khách mê cay, hay gọi cấp 3–5, mỗi món thu thêm 4%',cost:45,traffic:1.02,price:1.04,cay:[2,3,3,4,4,5,5]},
 };
 const FR_PERKS=[
   {id:'von',name:'Vốn khởi nghiệp',desc:'Mở lại có thêm 300k vốn mỗi bậc',max:3,cost:l=>1+l},
@@ -1570,12 +1572,12 @@ function runDelivery(){
 function wagesToday(){const m=M();return STAFF.filter(x=>G.staff[x.id]).reduce((a,x)=>a+x.wage,0)*m.wageMul}
 function assets(){
   let a=G.money+TIERS.slice(0,(G.tier||0)+1).reduce((x,t)=>x+t.price*.6,0);
-  for(const s2 of STREET){const lv=nz(G.street[s2.id]);for(let i=0;i<lv;i++)a+=s2.price*Math.pow(1.6,i)}
+  for(const s2 of STREET){const lv=nz(G.street[s2.id]);for(let i=0;i<lv;i++)a+=s2.price*Math.pow(1.7,i)}
   for(const b of BRANCHES)if(G.branches[b.id])a+=b.cost*.7;
   for(const p2 of PARTNERS)if(G.partners[p2.id])a+=p2.price*.5;
   return Math.round(a);
 }
-function streetCost(s2){return Math.round(s2.price*Math.pow(1.6,nz(G.street[s2.id]))/1000)*1000}
+function streetCost(s2){return Math.round(s2.price*Math.pow(1.7,nz(G.street[s2.id]))/1000)*1000}
 function maxBranches(){const l=level();return l>=14?4:l>=12?2:l>=10?1:0}
 function branchIncome(b,st){const f=st.neglect>3?.5:1,r=rating();return Math.round((b.base*(r>=4.5?1.2:r>=4?1:.8)*f*(1+nz(st.boost))*(.85+R()*.3)-b.rent-b.wage)/1000)*1000}
 function checkTitles(){for(const t of TITLES)if(!t.price&&!G.titles[t.id]&&condsOk(t)){G.titles[t.id]=true;toast(`Mở khoá danh hiệu <b>${t.name}</b>!`,2400)}
@@ -1628,7 +1630,7 @@ function renderUpg(){
     h+=`<div class="boxshow pxb"><img src="${boxURL('box')}" alt="Hộp bánh tráng trộn"><img src="${boxURL('bag')}" alt="Bịch giấy"></div>`;
     h+=`<p class="mnote">Món trộn đựng hộp giấy kèm đũa, món cuốn và nướng đựng bịch giấy. Mua ở tab Chợ, nhóm Bao bì.</p>`;
     h+=pk.printed?c2('boxp','Đã in logo lên bao bì','Khách +4%, món 5 sao bo thêm 5%. Bao bì nhập đắt hơn 20%.','✓','own')
-      :c2('boxp','In logo lên hộp và bịch','Khách +4%, món 5 sao bo thêm 5%. Bao bì nhập đắt hơn 20%.',l<4?lockTag(4):buyBtn('print',150000),l<4?'lk':'');
+      :c2('boxp','In logo lên hộp và bịch','Khách +4%, món 5 sao bo thêm 5%. Bao bì nhập đắt hơn 20%.',l<4?lockTag(4):buyBtn('print',PRINT_COST),l<4?'lk':'');
     h+=`<div class="mgroup">Logo in trên bao bì</div><div class="logos">${Object.keys(LOGOS).map(k=>`<button class="px2" data-act="plogo:${k}" aria-pressed="${pk.logo===k}"><img src="${IMG['logo_'+k]}" alt="">${LOGOS[k].name}</button>`).join('')}</div>`;
     h+=`<div class="mgroup">Màu bao bì</div><div class="sws">${Object.entries(BOXCOL).map(([k,v])=>`<button class="sw px2" data-act="pcol:${k}" aria-pressed="${pk.color===k}" style="background:${v.c};color:var(--ink)">${v.name}</button>`).join('')}</div>`;
   }
@@ -1680,8 +1682,8 @@ function renderExp(){
     if(!dv.reg)h+=c2('scooter','Đăng ký app “Ăn Vặt Ship”',`Cần cấp 8 (${l>=8?'✓':'✗'}), từ 4,0 sao (${r>=4?'✓':'✗'}), đã bán 60 món (${Math.min(60,G.stats.served)}/60). Phí app 20% mỗi đơn.`,okReq?`<button class="btn gold pxb" data-act="ship:reg">Đăng ký</button>`:'🔒',okReq?'':'lk');
     else{
       h+=c2('scooter','Ăn Vặt Ship',dv.on?'Đang nhận đơn online mỗi tối':'Đang tạm tắt',`<button class="btn ${dv.on?'':'gold'} pxb" data-act="ship:toggle">${dv.on?'Tắt':'Bật'}</button>`,dv.on?'own':'');
-      h+=c2('phone','Combo giao hàng','Đơn online nhiều hơn 30%',dv.combo?'✓':l<9?lockTag(9):buyBtn('ship:combo',300000),dv.combo?'own':'');
-      h+=c2('scooter','Shipper riêng của quán','Phí app chỉ còn 10%',dv.own?'✓':l<11?lockTag(11):buyBtn('ship:own',400000),dv.own?'own':'');
+      h+=c2('phone','Combo giao hàng','Đơn online nhiều hơn 30%',dv.combo?'✓':l<9?lockTag(9):buyBtn('ship:combo',SHIP_COST.combo),dv.combo?'own':'');
+      h+=c2('scooter','Shipper riêng của quán','Phí app chỉ còn 10%',dv.own?'✓':l<11?lockTag(11):buyBtn('ship:own',SHIP_COST.own),dv.own?'own':'');
     }
   }else if(sub==='ads'){
     const act=(G.ads||[]).filter(a=>a.until>=G.day);
@@ -1704,11 +1706,11 @@ function renderExp(){
     for(const [k,c] of Object.entries(CITIES)){const own=G.cities[k],cur=G.city===k;
       h+=c2('city',c.name,c.desc,cur?'<span style="font-size:15px;color:var(--leafD)">Đang ở</span>':own?`<button class="btn pxb" data-act="city:${k}" ${G.cityDay===G.day?'disabled':''}>Chuyển</button>`:`<button class="btn gold pxb" data-act="city:${k}" ${G.rep>=c.cost?'':'disabled'}>${c.cost} DT</button>`,cur?'own':'')}
   }else if(sub==='fr'){
-    const stars=3+Math.floor(assets()/400000);
+    const stars=3+Math.floor(assets()/FR_PER);
     h+=`<div class="bigstat"><div>Đã nhượng quyền<b>${G.fr.count} lần</b></div><div>Sao nhượng quyền<b>${G.fr.stars}</b></div></div>
       <p class="mnote">Tới cấp ${LV_MAX}, bán thương hiệu cho nhà đầu tư rồi mở lại từ ngày 1 với 500k. Giữ tên quán, danh hiệu, thẻ tên, danh tiếng, thương hiệu, thành phố và nhận sao để mua ưu đãi vĩnh viễn.</p>`;
     if(l<LV_MAX)h+=c2('crown','Nhượng quyền thương hiệu',`Cần cấp ${LV_MAX} · hiện cấp ${l}`,lockTag(LV_MAX),'lk');
-    else h+=c2('crown','Nhượng quyền thương hiệu',`Nhận ${stars} sao (3 + 1 mỗi 400k tài sản)`,frConfirm?`<button class="btn hot pxb" data-act="fr:go">Chắc chắn</button>`:`<button class="btn hot pxb" data-act="fr:ask">Nhượng</button>`);
+    else h+=c2('crown','Nhượng quyền thương hiệu',`Nhận ${stars} sao (3 + 1 mỗi ${fmtK(FR_PER)} tài sản)`,frConfirm?`<button class="btn hot pxb" data-act="fr:go">Chắc chắn</button>`:`<button class="btn hot pxb" data-act="fr:ask">Nhượng</button>`);
     h+=`<div class="mgroup">Ưu đãi vĩnh viễn</div>`;
     for(const x of FR_PERKS){const lv=nz(G.fr.perks[x.id]),cost=x.cost(lv);h+=c2(`<img src="${IMG.star}" alt="">`,x.name,`${x.desc}${dots(lv,x.max)}`,lv>=x.max?max:`<button class="btn gold pxb" data-act="perk:${x.id}" ${G.fr.stars>=cost?'':'disabled'}>${cost} sao</button>`)}
   }else h+=renderRank();
@@ -1782,8 +1784,8 @@ function bizAct(act){
   else if(k==='city'){const c=CITIES[a];if(G.cities[a]){if(G.cityDay!==G.day){G.city=a;G.cityDay=G.day;sfx('tap');toast(`Chuyển gánh vô <b>${c.name}</b>`)}}else if(G.rep>=c.cost){G.rep-=c.cost;G.cities[a]=true;G.city=a;G.cityDay=G.day;sfx('coin');toast(`Mở thành phố <b>${c.name}</b>`)}}
   else if(k==='perk'){const x=FR_PERKS.find(y=>y.id===a),lv=nz(G.fr.perks[a]),c=x.cost(lv);if(G.fr.stars>=c&&lv<x.max){G.fr.stars-=c;G.fr.perks[a]=lv+1;sfx('coin')}}
   else if(k==='partner'){const x=PARTNERS.find(y=>y.id===a);if(pay(x.price)){G.partners[a]=true;dayPrices();toast(`Ký hợp đồng với <b>${x.name}</b>`)}}
-  else if(k==='ship'){const dv=G.delivery;if(a==='reg'){dv.reg=true;dv.on=true;sfx('coin');toast('Quán đã lên app <b>Ăn Vặt Ship</b>!')}else if(a==='toggle'){dv.on=!dv.on;sfx('tap')}else if(a==='combo'&&pay(300000))dv.combo=true;else if(a==='own'&&pay(400000))dv.own=true}
-  else if(k==='print'){if(l>=4&&pay(150000)){G.pkg.printed=true;dayPrices();toast('Bao bì giờ có in logo quán!')}}
+  else if(k==='ship'){const dv=G.delivery;if(a==='reg'){dv.reg=true;dv.on=true;sfx('coin');toast('Quán đã lên app <b>Ăn Vặt Ship</b>!')}else if(a==='toggle'){dv.on=!dv.on;sfx('tap')}else if(a==='combo'&&pay(SHIP_COST.combo))dv.combo=true;else if(a==='own'&&pay(SHIP_COST.own))dv.own=true}
+  else if(k==='print'){if(l>=4&&pay(PRINT_COST)){G.pkg.printed=true;dayPrices();toast('Bao bì giờ có in logo quán!')}}
   else if(k==='plogo'){G.pkg.logo=a;sfx('tap')}
   else if(k==='pcol'){G.pkg.color=a;sfx('tap')}
   else if(k==='tagb'){const x=TAGS.find(y=>y.id===a);if(condsOk(x)&&pay(x.price)){G.tags[a]=true;G.tag=a}}
@@ -1794,7 +1796,7 @@ function bizAct(act){
   checkTitles();save();applyProfile();renderMarket();if(['tagw','tagb','wear','title'].includes(k))pushBoard();
 }
 function doFranchise(){
-  const stars=3+Math.floor(assets()/400000);
+  const stars=3+Math.floor(assets()/FR_PER);
   const keep={profile:G.profile,titles:G.titles,title:G.title,tags:G.tags,tag:G.tag,rep:G.rep,brand:G.brand,city:G.city,cities:G.cities,stats:G.stats,hint:G.hint,
     fr:{count:G.fr.count+1,stars:G.fr.stars+stars,perks:G.fr.perks},awnings:G.awnings,awning:G.awning};
   G=bizDefaults(Object.assign(freshGame(),keep));
