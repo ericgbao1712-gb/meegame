@@ -1445,7 +1445,7 @@ const RIVALS=[
 ];
 const nz=v=>v||0;
 function bizDefaults(g){
-  for(const [k,v] of Object.entries({pkg:{printed:false,logo:'hop',color:'kraft'},partners:{},delivery:{on:false},haggle:{},haggleDay:0,favor:{},tags:{go:true},tag:'go',taxBase:0,taxPaid:0,inspectDay:4+Math.floor(R()*3),inspectCount:0,dishLv:{},staff:{},decor:{},awning:'do',awnings:{do:true},prices:{tron:15000,cuon:12000,nuong:15000,top:4000},menuOff:{},tier:0,street:{},branches:{},
+  for(const [k,v] of Object.entries({pkg:{printed:false,logo:'hop',color:'kraft'},partners:{},delivery:{on:false},haggle:{},haggleDay:0,favor:{},tags:{go:true},tag:'go',taxBase:0,taxInc:0,taxPaid:0,inspectDay:4+Math.floor(R()*3),inspectCount:0,dishLv:{},staff:{},decor:{},awning:'do',awnings:{do:true},prices:{tron:15000,cuon:12000,nuong:15000,top:4000},menuOff:{},tier:0,street:{},branches:{},
     titles:{},title:null,rep:0,brand:{},city:'sg',cities:{sg:true},cityDay:0,fr:{count:0,stars:0,perks:{}},ads:[],stats:{},ledger:[]}))if(g[k]===undefined)g[k]=JSON.parse(JSON.stringify(v));
   for(const k of ['served','spicy5','cuon','nuong5','fiveStars','earned','quests'])g.stats[k]=g.stats[k]||0;
   return g;
@@ -1636,7 +1636,7 @@ function renderBook(){
   h+=`<div class="mgroup">Nhiệm vụ hôm nay</div>`;
   for(const q of G.quests||[])h+=`<div class="quest px2 ${q.done?'done':''}"><b>${qLabel(q)}</b><span class="qp">${q.done?'Xong ✓':(q.type==='revenue'?fmtK(q.prog)+'/'+fmtK(q.target):q.prog+'/'+q.target)} · +${q.xp}</span>
     <span class="qb2"><i style="width:${clamp(q.prog/q.target*100,0,100)}%"></i></span></div>`;
-  h+=`<div class="mgroup">Thuế</div><p class="mnote">Cứ 7 ngày, chị Hằng bên thuế phường ghé thu thuế khoán 1,5% doanh thu tuần. Doanh thu chờ tính thuế: ${fmtK(nz(G.taxBase))}. Ngày thu tới: ngày ${Math.ceil(G.day/7)*7}. Đã nộp tổng cộng ${fmtK(nz(G.taxPaid))}.</p><div class="mgroup">Vệ sinh ATTP</div><p class="mnote">Đoàn kiểm tra ghé bất chợt giữa ca bán, xem ${hygieneChecks().length} mục: ${hygieneChecks().map(([t,v])=>(v?'✓ ':'✗ ')+t).join(', ')}. Thiếu từ 2 mục trở lên là bị phạt. Đã nộp phạt ${fmtK(nz(G.finePaid))}.</p>`;
+  h+=`<div class="mgroup">Thuế</div><p class="mnote">Cứ 7 ngày, chị Hằng bên thuế phường ghé thu thuế trên tiền lời của tuần, lũy tiến từng phần. Ngưỡng tháng chia theo tuần: ${taxBracketsText()}. Lời tuần này tới giờ: ${fmtK(Math.round(nz(G.taxInc)/1000)*1000)}, thuế tạm tính ${fmtK(weekTax(nz(G.taxInc)).tax)}. Ngày thu tới: ngày ${Math.ceil(G.day/7)*7}. Đã nộp tổng cộng ${fmtK(nz(G.taxPaid))}.</p><div class="mgroup">Vệ sinh ATTP</div><p class="mnote">Đoàn kiểm tra ghé bất chợt giữa ca bán, xem ${hygieneChecks().length} mục: ${hygieneChecks().map(([t,v])=>(v?'✓ ':'✗ ')+t).join(', ')}. Thiếu từ 2 mục trở lên là bị phạt. Đã nộp phạt ${fmtK(nz(G.finePaid))}.</p>`;
   h+=`<div class="mgroup">Lãi lỗ các ngày gần đây</div>`;
   const lg=(G.ledger||[]).slice(-7).reverse();
   h+=lg.length?lg.map(x=>`<div class="rank px2"><span class="no">${x.d}</span><div>Ngày ${x.d}<small>${x.n} món · thuê ${fmtK(x.rent)} · lương ${fmtK(x.wage)}${x.br?` · chi nhánh ${x.br>=0?'+':'−'}${fmtK(Math.abs(x.br))}`:''}${x.del?` · online +${fmtK(x.del)}`:''}</small></div><span style="color:${x.p>=0?'var(--leafD)':'var(--chili)'}">${x.p>=0?'+':'−'}${fmtK(Math.abs(x.p))}</span></div>`).join(''):'<p class="mnote">Chưa có ngày nào kết sổ.</p>';
@@ -2336,6 +2336,16 @@ function serve(){
   if(!S.eventDone&&S.served>=S.eventAt&&R()<.8){S.eventDone=true;setTimeout(()=>{if(current==='service'&&S&&!S.closingDone)openEvent()},1800)}
 }
 /* Đoàn kiểm tra vệ sinh an toàn thực phẩm: ghé ngẫu nhiên giữa ca bán */
+/* Thuế thu nhập lũy tiến từng phần, 5 bậc theo tháng; quy ra tuần = ngưỡng tháng × 7/30 */
+const TAX_BR=[[10e6,.05],[30e6,.10],[60e6,.20],[100e6,.30],[Infinity,.35]];
+const WEEK=7/30;
+function weekTax(inc){
+  let prev=0,tax=0;const rows=[];inc=Math.max(0,inc);
+  TAX_BR.forEach(([cap,r],i)=>{const hi=cap*WEEK,part=Math.max(0,Math.min(inc,hi)-prev);if(part>0){const t=Math.round(part*r/1000)*1000;tax+=t;rows.push({i:i+1,r,part,t})}prev=hi});
+  return {tax,rows};
+}
+function taxRowsText(rows){return rows.map(x=>`Bậc ${x.i} (${Math.round(x.r*100)}%): ${fmtK(Math.round(x.part/1000)*1000)} → ${fmtK(Math.round(x.t/1000)*1000)}`).join('\n')}
+function taxBracketsText(){return TAX_BR.map(([cap,r],i)=>{const lo=i?TAX_BR[i-1][0]*WEEK:0;return `Bậc ${i+1}: ${cap===Infinity?'trên '+fmtK(Math.round(lo/1000)*1000):(i?fmtK(Math.round(lo/1000)*1000)+' – ':'đến ')+fmtK(Math.round(cap*WEEK/1000)*1000)} · ${Math.round(r*100)}%`}).join('; ')}
 function hygieneChecks(){
   const w=Object.values(G.wilt||{}).some(Boolean);
   return [
@@ -2658,7 +2668,7 @@ function endService(){
   questEvent('day',{leftAngry:S.leftAngry,served:S.served});
   const xpToday=S.xpToday;
   const today=S.ratingsToday,profit=S.revenue-G.spentToday-rentT-wage+brSum+del.rev;
-  G.ledger=(G.ledger||[]).concat([{d:G.day,n:S.served,rent:rentT,wage,br:brSum,del:del.rev,rev:S.revenue,p:profit}]).slice(-14);G.ads=(G.ads||[]).filter(a=>a.until>G.day);checkTitles();
+  G.taxInc=nz(G.taxInc)+profit;G.ledger=(G.ledger||[]).concat([{d:G.day,n:S.served,rent:rentT,wage,br:brSum,del:del.rev,rev:S.revenue,p:profit}]).slice(-14);G.ads=(G.ads||[]).filter(a=>a.until>G.day);checkTitles();
   const day=G.day;
   const sayKey=today.length?avg(today):0;
   const line=!S.served?'Hôm nay ế quá ha con. Mai mua đủ đồ rồi bán sớm nha.':sayKey>=4.5?'Khách khen quá trời! Dì nghe tụi nhỏ kể hoài.':sayKey>=3.5?'Bán vậy là được rồi con. Nhớ trộn cho đều tay nha.':'Khách phàn nàn hơi nhiều. Coi kỹ order rồi hãy trộn nghen con.';
@@ -2685,18 +2695,19 @@ function endService(){
   document.querySelectorAll('#sumBody .goal span:first-child').forEach(s=>s.style.color='var(--ink)');
   const taxDue=day%7===0&&nz(G.taxBase)>0;
   S=null;G.day++;save();sfx('good');show('summary');pushBoard();
-  if(taxDue){const tax=Math.max(1000,Math.round(G.taxBase*.015/1000)*1000),base=G.taxBase;G.taxBase=0;save();
+  if(taxDue){const inc=nz(G.taxInc),wt=weekTax(inc),tax=wt.tax,base=G.taxBase;G.taxBase=0;G.taxInc=0;save();
     const good=base/7>=300000;
     const talk=[
       {bg:'@loc',chars:[['thue',36,'happy'],['ut',92,'neutral']],cap:`Tối ngày ${day} · dọn gánh`,who:null,text:'Lúc {name} đang lau gánh, một chị áo xanh đeo thẻ ngành dừng xe ghé lại.'},
       {who:'thue',mood:'happy',text:'Chào em, chị là Hằng bên đội thuế phường. Tuần này buôn bán sao rồi em?'},
       {who:'ut',mood:good?'happy':'neutral',text:good?`Dạ cũng đắt chị, bảy ngày thu được ${fmtK(base)} lận.`:`Dạ lai rai thôi chị, bảy ngày được ${fmtK(base)}.`},
-      {who:'thue',text:`Hộ kinh doanh nộp thuế khoán 1,5% doanh thu: 1% giá trị gia tăng với 0,5% thu nhập cá nhân. Tuần này của em là ${fmtK(tax)}.`},
+      {who:'thue',text:inc>0?`Thuế tính trên tiền lời, lũy tiến 5 bậc từ 5% tới 35%. Ngưỡng tính theo tháng, chị chia ra từng tuần cho em đỡ nặng. Tuần này em lời ${fmtK(Math.round(inc/1000)*1000)}, thuế ${fmtK(tax)}.`:'Tuần này em chưa có lời thì chưa phải nộp đồng nào. Ráng lên nghen!'},
       {who:'thue',mood:'happy',text:pick(['Nộp đủ là có biên lai, sau này mở rộng hay vay vốn cũng dễ nghen.','Bán đàng hoàng thì chị em mình gặp nhau vui vẻ thôi.','Bánh tráng em thơm ghê, bữa nào chị ghé mua ủng hộ!'])},
     ];
-    setTimeout(()=>playStory(talk,()=>{show('summary');openCard({img:CAST.thue.url.neutral,tag:'THUẾ',title:'Nộp thuế tuần',text:`Doanh thu 7 ngày: ${fmtK(base)}. Thuế khoán 1,5%: ${fmtK(tax)}.`,
+    setTimeout(()=>playStory(talk,()=>{show('summary');if(tax<=0){openCard({img:CAST.thue.url.neutral,tag:'THUẾ',title:'Tuần này chưa phải nộp',text:`Doanh thu 7 ngày: ${fmtK(base)}\nTiền lời: ${fmtK(Math.round(inc/1000)*1000)}\nChưa có lời nên chưa tính thuế.`,choices:[{t:'Dạ, cảm ơn chị',s:'',fx:()=>''}]});return}
+      openCard({img:CAST.thue.url.neutral,tag:'THUẾ',title:`Nộp thuế tuần · ${fmtK(tax)}`,text:`Doanh thu 7 ngày: ${fmtK(base)}\nTiền lời chịu thuế: ${fmtK(Math.round(inc/1000)*1000)}\n${taxRowsText(wt.rows)}`,
       choices:[{t:`Nộp đủ ${fmtK(tax)}`,s:'có biên lai, yên tâm làm ăn',fx:()=>{G.money-=tax;G.taxPaid=nz(G.taxPaid)+tax;save();$('sMoney').textContent=fmtK(G.money);return 'Đã nộp thuế đầy đủ'}},
-        {t:'Khai bớt doanh thu',s:'có thể bị truy thu và phạt gấp đôi',fx:()=>{if(R()<.55){const half=Math.round(tax/2000)*1000;G.money-=half;G.taxPaid=nz(G.taxPaid)+half;save();$('sMoney').textContent=fmtK(G.money);return 'Lần này trót lọt… nhưng lương tâm cắn rứt'}
+        {t:'Khai bớt tiền lời',s:'có thể bị truy thu và phạt gấp đôi',fx:()=>{if(R()<.55){const half=Math.round(tax/2000)*1000;G.money-=half;G.taxPaid=nz(G.taxPaid)+half;save();$('sMoney').textContent=fmtK(G.money);return 'Lần này trót lọt… nhưng lương tâm cắn rứt'}
           G.money-=tax*2;G.taxPaid=nz(G.taxPaid)+tax*2;G.ratings.push(2,2);save();$('sMoney').textContent=fmtK(G.money);return `Bị phát hiện! Truy thu và phạt ${fmtK(tax*2)}, tiếng xấu đồn xa`}}]})}),700)}
 }
 $('btnSleep').onclick=()=>{
