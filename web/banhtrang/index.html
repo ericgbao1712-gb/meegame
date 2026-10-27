@@ -1152,8 +1152,8 @@ function applyProfile(){
 let SET={mode:'new',draft:null,back:null};
 function openSetup(mode,back){
   SET={mode,back,draft:Object.assign({...DEFAULT_PROFILE},G.profile||{})};
-  $('setSub').textContent=mode==='new'?'Đặt tên, chọn nhân vật, logo':'Đổi xong bấm Lưu';
-  $('btnSetOk').textContent=mode==='new'?'Mở quán ›':'Lưu';
+  $('setSub').textContent=mode==='new'?'Có chỗ rồi! Giờ đặt tên quán':'Đổi xong bấm Lưu';
+  $('btnSetOk').textContent=mode==='new'?'Mở quán ›':'Lưu';$('btnSetBack').textContent=mode==='new'?'Để mặc định':'‹ Quay lại';
   $('inShop').value=SET.draft.shop;$('inName').value=SET.draft.name;
   $('shopIdeas').innerHTML=SHOP_IDEAS.map(n=>`<button class="px2" data-idea="${n}">${n}</button>`).join('');
   $('logoGrid').innerHTML=Object.entries(LOGOS).map(([k,v])=>`<button class="px2" data-logo="${k}"><img src="${IMG['logo_'+k]}" alt="">${v.name}</button>`).join('');
@@ -1188,9 +1188,9 @@ $('scr-setup').addEventListener('click',e=>{
 $('btnSetOk').onclick=()=>{
   const d=SET.draft;d.shop=d.shop.trim().replace(/\s+/g,' ')||DEFAULT_PROFILE.shop;d.name=d.name.trim().replace(/\s+/g,' ')||'Út';
   G.profile={...d};applyProfile();save();sfx('coin');
-  if(SET.mode==='new')playStory(INTRO,()=>openRent('start'));else{toast('Đã lưu thông tin quán');SET.back&&SET.back()}
+  if(SET.mode==='new'){G.setupDone=true;save();SET.back&&SET.back()}else{toast('Đã lưu thông tin quán');SET.back&&SET.back()}
 };
-$('btnSetBack').onclick=()=>{sfx('tap');applySkin((G.profile&&G.profile.skin)||SET.draft.skin||'hong');if(SET.mode==='new')renderTitle();else SET.back&&SET.back()};
+$('btnSetBack').onclick=()=>{sfx('tap');if(SET.mode==='new'){$('btnSetOk').onclick();return}applySkin((G.profile&&G.profile.skin)||SET.draft.skin||'hong');SET.back&&SET.back()};
 
 /* =====================================================================
    5c. CẤP ĐỘ, NHIỆM VỤ, THẺ THÔNG BÁO
@@ -1267,7 +1267,7 @@ $('rlist').addEventListener('click',e=>{
   G.loc=id;save();sfx('coin');
   const script=LOC_STORY[id].map(x=>({...x}));
   const first=!G.betDone;if(first){G.betDone=true;save();script.push(...kenBet())}
-  playStory(script,()=>enterMarket(first));
+  playStory(script,()=>{if(G.setupDone===false)openSetup('new',()=>enterMarket(true));else enterMarket(first)});
 });
 $('btnRentBack').onclick=()=>{sfx('tap');renderMarket();show('market')};
 
@@ -1945,13 +1945,13 @@ function renderTitle(){
   G=s||freshGame();applyProfile();
   show('title');
 }
-$('btnContinue').onclick=()=>{sfx('tap');G=load()||freshGame();applyProfile();if(!G.loc)openRent('start');else enterMarket(false)};
+$('btnContinue').onclick=()=>{sfx('tap');G=load()||freshGame();applyProfile();if(!G.loc)openRent('start');else if(G.setupDone===false)openSetup('new',()=>enterMarket(true));else enterMarket(false)};
 $('btnNew').onclick=()=>{sfx('tap');if(load()){$('newWarn').hidden=false;$('newConfirm').hidden=false;$('btnNew').hidden=true}else startNew()};
 $('btnNewNo').onclick=()=>{$('newWarn').hidden=true;$('newConfirm').hidden=true;$('btnNew').hidden=false};
 $('btnNewYes').onclick=()=>{clearSave();startNew()};
 $('btnCustomize').onclick=()=>{sfx('tap');openSetup('edit',renderTitle)};
 $('btnSoundT').onclick=()=>{setSound(!AU.on);sfx('tap')};
-function startNew(){const keep=G.profile;G=bizDefaults(freshGame());if(keep)G.profile={...keep};applyProfile();openSetup('new')}
+function startNew(){const keep=G.profile;G=bizDefaults(freshGame());if(keep)G.profile={...keep};G.setupDone=false;applyProfile();save();playStory(INTRO,()=>openRent('start'))}
 
 /* =====================================================================
    8. CỐT TRUYỆN (kiểu visual novel, chữ chạy từng ký tự)
@@ -2044,7 +2044,7 @@ function renderMarket(){
   const stb=L.querySelector('.subtabs');if(stb){const a=stb.querySelector('[aria-pressed="true"]');stb.scrollLeft=SUBSCROLL[mTab]??(a?a.offsetLeft-stb.clientWidth/2+a.offsetWidth/2:0);arrows(stb);stb.addEventListener('scroll',()=>{SUBSCROLL[mTab]=stb.scrollLeft;arrows(stb)},{passive:true})}
   $('openInfo').textContent=`~${estCustomers()} khách tới`;
 }
-function estCustomers(){return Math.round(200/spawnBase()*.75)}
+function estCustomers(){return Math.round(200/spawnBase()*.9+1)}
 function buy(id){const p=PRICE[id];if(G.money<p){toast('Không đủ tiền');sfx('bad');return false}
   G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;G.bought[id]=(G.bought[id]||0)+1;G.paid=G.paid||{};(G.paid[id]=G.paid[id]||[]).push(p);return true}
 $('mlist').addEventListener('click',e=>{
@@ -2084,7 +2084,12 @@ for(let i=0;i<3;i++){const d=document.createElement('button');d.className='slot'
   d.onclick=()=>{if(S&&S.slots[i]&&!S.slots[i].leave){S.active=i;sfx('tap');renderTicket(true);updateHints()}};slotsEl.appendChild(d)}
 for(let i=0;i<5;i++){const im=document.createElement('img');im.alt='';pipsEl.appendChild(im)}
 
-function spawnBase(){let b=11;if(G.owned.loa)b-=2.5;const r=rating();if(r<3.5)b*=1.35;else if(r>=4.5)b*=.9;return b/M().traffic}
+/* Khách tăng dần: ngày 1 ~60% lượng khách, ngày 7 đủ 100%; cấp cao giúp tăng nhanh hơn */
+function rampF(){return Math.min(1,.6+.065*(G.day-1)+.03*Math.max(0,level()-1))}
+/* Nhịp trong ngày: 16h lai rai, 17h-19h đông, gần 20h thưa lại */
+function hourF(m){const h=(m-960)/60;return h<.75?1.45:h<1?1.15:h<3?.85:h<3.5?1:1.3}
+function maxSlots(){return G.day<=2&&level()<3?2:3}
+function spawnBase(){let b=11/rampF();if(G.owned.loa)b-=2.5;const r=rating();if(r<3.5)b*=1.35;else if(r>=4.5)b*=.9;return b/M().traffic}
 function startService(){
   S={min:16*60,slots:[null,null,null],active:0,spawnT:1.5,holding:false,lastMix:0,lastHint:0,served:0,leftAngry:0,turned:0,revenue:0,
      ratingsToday:[],eventDone:false,eventAt:2+Math.floor(R()*3),rain:false,closing:false,hint:G.hint!==false,paused:false,lastMixSnd:0,
@@ -2508,12 +2513,12 @@ function tickService(dt,t){
     S.slots.forEach((c,i)=>{
       if(!c)return;
       if(c.enter<1)c.enter=Math.min(1,c.enter+dt*1.6);
-      if(c.leave){c.leave+=dt*.55;if(c.leave>1){S.slots[i]=null;S.spawnT=Math.min(S.spawnT,2+R()*3);pickActive();autoMode()}return}
+      if(c.leave){c.leave+=dt*.55;if(c.leave>1){S.slots[i]=null;if(S.slots.every(c=>!c))S.spawnT=Math.min(S.spawnT,3+R()*3);pickActive();autoMode()}return}
       c.pat-=dt;
       if(c.pat<=0){c.mood='angry';c.bubble='Lâu quá, thôi đi!';c.leave=.0001;rate(1);S.leftAngry++;S.streak=0;sfx('bad');toast(`${c.p.name} bỏ về, quán bị <b>1 sao</b>`,2200);pickActive()}
     });
-    if(!S.closing&&S.min>=S.blockUntil){S.spawnT-=dt;const empty=S.slots.findIndex(c=>!c);
-      if(empty>=0&&S.spawnT<=0){newCustomer(empty,false);S.spawnT=spawnBase()*(S.rain?1.6:1)*(.6+R()*.8);pickActive();autoMode();sfx('tap')}}
+    if(!S.closing&&S.min>=S.blockUntil){S.spawnT-=dt;const empty=S.slots.slice(0,maxSlots()).findIndex(c=>!c);
+      if(empty>=0&&S.spawnT<=0){newCustomer(empty,false);S.spawnT=spawnBase()*hourF(S.min)*(S.rain?1.6:1)*(.6+R()*.8);pickActive();autoMode();sfx('tap')}}
     if(S.closing&&S.slots.every(c=>!c)&&!S.closingDone){S.closingDone=true;setTimeout(endService,600)}
   }
   drawScene(t);drawStation(t);renderMix();
@@ -2616,4 +2621,5 @@ renderTitle();
 requestAnimationFrame(frame);
 })();
 </script>
+
 </body></html>
