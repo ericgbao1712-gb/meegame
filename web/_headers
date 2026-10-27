@@ -13,3 +13,8 @@
   Cache-Control: no-cache
 /tiramee/manifest.json
   Cache-Control: no-cache
+
+/banhtrang
+  Cache-Control: no-cache
+/banhtrang/index.html
+  Cache-Control: no-cache

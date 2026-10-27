@@ -15,7 +15,7 @@
 //   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   GET  /api/lau/codes/active                          → mã quà tặng còn hạn (+ redeemed nếu đã đăng nhập)
-//   Thêm &g=xoailac để dùng cho game Xoài Lắc, &g=tiramee cho Tiệm TiraMee (cùng bảng players, bản lưu tách theo game).
+//   Thêm &g=xoailac để dùng cho game Xoài Lắc, &g=tiramee cho Tiệm TiraMee, &g=banhtrang cho Bánh Tráng Nhà Mee (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/stats              (admin)      → số liệu tổng quan của game (&g=…)
 //   GET  /api/lau/admin/players            (admin)      ?q=&filter=all|flagged|hidden|cheat&sort=recent|money|level|pots|new&limit=&offset=
 //   GET  /api/lau/admin/players/:id        (admin)      → chi tiết: bản lưu từng game, bản sao lưu, mã đã nhận
@@ -30,9 +30,9 @@ import {
 } from './_player.js';
 
 // Các game dùng chung API này (chọn bằng &g=…, mặc định Lẩu Ơi). Cùng tài khoản / cookie MeeGame cho mọi game.
-const GAMES = new Set(['quanlau', 'xoailac', 'tiramee']);
+const GAMES = new Set(['quanlau', 'xoailac', 'tiramee', 'banhtrang']);
 const DEFAULT_GAME = 'quanlau';
-const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tiramee: 'Tiệm TiraMee' };
+const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee' };
 const MAX_SAVE_BYTES = 400 * 1024;
 const MIN_PUT_GAP_MS = 8 * 1000;          // chống spam: tối đa ~1 lần lưu / 8 giây
 const KEEP_BACKUPS = 10;
