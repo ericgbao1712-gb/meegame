@@ -1802,6 +1802,7 @@ body.ios-app .story .st-wrap { padding-top: calc(var(--app-top, 47px) + 8px); }
             <button type="button" id="btn-preset" class="btn primary" hidden disabled></button>
             <button type="button" id="btn-look" class="btn" hidden>Nhân vật &amp; tên quán</button>
             <button type="button" id="btn-fresh" class="btn ghost" hidden>Ván mới</button>
+            <button type="button" id="btn-install" class="btn ghost" hidden>📲 Cài game vào máy</button>
           </div>
           <div id="title-cloud" class="title-cloud"></div>
           <div class="title-row">
@@ -14493,5 +14494,37 @@ function __req(id) { if (!(id in __cache)) { __cache[id] = {}; __cache[id] = __d
 for (const id of Object.keys(__defs)) if (id !== "src/main.js") __req(id);
 for (const f of __link) f();
 __req("src/main.js");
+})();
+</script>
+<script>
+/* Cài game như app (Android/Chrome) + hướng dẫn khi không cài được (trình duyệt trong Zalo/Facebook, máy Samsung khoá màn hình chờ). Tự đứng riêng, không đụng code game. */
+(()=>{
+  const btn=document.getElementById('btn-install');if(!btn)return;
+  if(matchMedia('(display-mode: standalone)').matches||navigator.standalone)return;
+  const ua=navigator.userAgent,android=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua);
+  const inApp=/FBAN|FBAV|Instagram|Zalo|Line\/|; wv\)|Messenger|TikTok/i.test(ua);
+  let bip=null;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();bip=e;btn.textContent='📲 Cài game vào máy';btn.hidden=false});
+  addEventListener('appinstalled',()=>{bip=null;btn.hidden=true});
+  function guide(){
+    const first=ios?'Mở bằng <b>Safari</b> → nút Chia sẻ → <b>Thêm vào MH chính</b>.'
+      :inApp?'Đang mở trong Zalo/Facebook nên không cài được. Bấm <b>⋮ → Mở trong Chrome</b> rồi cài từ Chrome.'
+      :'Chrome: bấm <b>⋮ → Cài đặt ứng dụng</b>.';
+    const ov=document.createElement('div');
+    ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(40,24,16,.55);display:flex;align-items:center;justify-content:center;padding:16px';
+    ov.innerHTML=`<div style="max-width:340px;width:100%;background:#FFF4E4;color:#4a2c1a;border:3px solid #6B4027;border-radius:14px;padding:16px 16px 12px;font:15px/1.45 system-ui,sans-serif;box-shadow:0 8px 0 rgba(0,0,0,.2)">
+      <div style="font-weight:700;font-size:17px;margin-bottom:8px">📲 Cách cài game vào máy</div>
+      <p style="margin:0 0 8px">${first}</p>
+      <p style="margin:0 0 8px">Samsung báo <i>“Bố cục Màn hình chờ đã khóa”</i>: Cài đặt → Màn hình chờ → tắt <b>Khóa bố cục</b>.</p>
+      <p style="margin:0 0 12px">Báo <i>“đã cài”</i> mà không mở được: Cài đặt → Ứng dụng → gỡ <b>TiraMee</b> rồi cài lại.</p>
+      <button type="button" class="btn primary" style="width:100%">Đã hiểu</button></div>`;
+    ov.addEventListener('click',e=>{if(e.target===ov||e.target.tagName==='BUTTON')ov.remove()});
+    document.body.appendChild(ov);
+  }
+  btn.addEventListener('click',async()=>{
+    if(bip){bip.prompt();const r=await bip.userChoice.catch(()=>null);bip=null;btn.hidden=!!(r&&r.outcome==='accepted');return}
+    guide();
+  });
+  if(android||ios)setTimeout(()=>{if(!bip){btn.textContent='📲 Cách cài game vào máy';btn.hidden=false}},2500);
 })();
 </script>
