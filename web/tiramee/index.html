@@ -2085,6 +2085,7 @@ const actions = {
   cloudUnlink() { if (confirmTwice('unlink', 'Huỷ liên kết sẽ XOÁ ván trên mạng (ván trên máy vẫn còn). Bấm lần nữa để xác nhận')) cloud.unlink().then(() => { if (cloud.st.required && !cloud.st.player) { save(true); view.started = false; location.reload(); } }); },
   cloudAnswer(el) { cloud.answer(el.dataset.v === 'cloud'); },
   codeFill(el) { view.codeText = el.dataset.v; },
+  codeNews() { codeNews.check(true); },
   redeemCode() { cloud.redeem(view.codeText).then((ok) => { if (ok) { view.codeText = ''; save(true); } }); },
   new() {
     if (!confirmTwice('new', 'Bấm "Chơi lại từ đầu" lần nữa để XOÁ ván hiện tại')) return;
@@ -2526,6 +2527,82 @@ presetBtn.addEventListener('click', () => {
 });
 cloud.init();
 renderTitleCloud();
+/* v-codenews: bảng thông báo MÃ QUÀ MỚI (giống Lẩu Ơi / Xoài Lắc). Hiện 1 lần cho mỗi mã mới, đợi vào hẳn tiệm rồi mới báo. */
+function createCodeNews(o) {
+  const KEY = o.key, esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* đầy / bị chặn */ } };
+  if (!document.getElementById('mcn-css')) {
+    const st = document.createElement('style'); st.id = 'mcn-css';
+    st.textContent = `.mcn-ov{position:fixed;inset:0;z-index:9999;background:rgba(40,24,30,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:mcnF .2s ease}
+.mcn{width:min(440px,100%);max-height:calc(100% - 24px);overflow:auto;background:#fff8ef;color:#4a2f2a;border-radius:18px;border:3px solid #e7b98f;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:16px 16px 14px;font-family:inherit;animation:mcnP .28s cubic-bezier(.3,1.4,.6,1)}
+.mcn h3{margin:0 0 10px;font-size:20px;display:flex;align-items:center;gap:8px;color:#b5452e}
+.mcn-x{margin-left:auto;border:0;background:#f3dcc6;color:#7a4a3a;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer}
+.mcn-it{background:#fff;border:2px dashed #eac7a4;border-radius:12px;padding:10px;margin:0 0 8px}
+.mcn-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mcn-code{font:800 18px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:#b5452e;margin-right:auto;word-break:break-all}
+.mcn-b{border:0;border-radius:10px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:13px;line-height:1;cursor:pointer;background:#f3dcc6;color:#5a3a30}
+.mcn-b.go{background:#3f9d6d;color:#fff}.mcn-b.big{display:block;width:100%;padding:12px;font-size:16px;background:#d9533b;color:#fff;margin-top:6px}
+.mcn-done{font-weight:700;font-size:12px;line-height:1;color:#3f9d6d;background:#e2f4e9;border-radius:10px;padding:7px 10px}
+.mcn-inf{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:13px}.mcn-inf b{color:#3f7d4d}.mcn-m{opacity:.75}
+.mcn-how{background:#fdebd6;border-radius:12px;padding:10px 12px;margin-top:4px;font-size:13px;line-height:1.45}.mcn-how b{font-size:14px}.mcn-how ol{margin:6px 0 0;padding-left:20px}
+@keyframes mcnF{from{opacity:0}}@keyframes mcnP{from{transform:scale(.9);opacity:0}}`;
+    document.head.appendChild(st);
+  }
+  const date = (ms) => new Date(ms).toLocaleDateString('vi-VN');
+  const money = (k) => (Math.round(k * 1000)).toLocaleString('vi-VN') + 'đ';
+  let shownOnce = false, open = null;
+  function show(list) {
+    if (open) open.remove();
+    const ov = document.createElement('div'); ov.className = 'mcn-ov'; open = ov;
+    ov.innerHTML = `<div class="mcn" role="dialog" aria-label="Mã quà tặng mới"><h3>🎁 Mã quà tặng mới!<button type="button" class="mcn-x" aria-label="Đóng">✕</button></h3>
+      ${list.map((c, i) => {
+        const gifts = [c.money > 0 ? '+' + money(c.money) : '', c.xp > 0 ? '+' + Math.round(c.xp).toLocaleString('vi-VN') + ' XP' : ''].filter(Boolean).join(' · ');
+        return `<div class="mcn-it"><div class="mcn-top"><span class="mcn-code">${esc(c.code)}</span><button type="button" class="mcn-b" data-copy="${i}">Chép</button>
+          ${c.redeemed ? '<span class="mcn-done">✓ Đã nhận</span>' : `<button type="button" class="mcn-b go" data-use="${i}">Nhập mã</button>`}</div>
+          <div class="mcn-inf">${gifts ? `<b>${gifts}</b>` : ''}<span class="mcn-m">${c.expiresAt ? 'Hạn đến ' + date(c.expiresAt) : 'Không giới hạn thời gian'}</span>${c.left != null ? `<span class="mcn-m">Còn ${c.left} lượt</span>` : ''}</div>
+          ${c.note ? `<div class="mcn-m" style="font-size:12px;margin-top:4px">${esc(c.note)}</div>` : ''}</div>`;
+      }).join('')}
+      <div class="mcn-how"><b>Cách nhập mã</b><ol>${o.steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
+      <button type="button" class="mcn-b big">Đã hiểu</button></div>`;
+    const close = () => { ov.remove(); if (open === ov) open = null; };
+    ov.addEventListener('click', async (e) => {
+      const t = e.target;
+      if (t === ov || t.closest('.mcn-x') || t.closest('.big')) { close(); return; }
+      const cp = t.closest('[data-copy]'), use = t.closest('[data-use]');
+      if (cp) { const c = list[+cp.dataset.copy]; try { await navigator.clipboard.writeText(c.code); o.toast('Đã chép mã ' + c.code); } catch (er) { o.toast('Mã: ' + c.code); } }
+      if (use) { const c = list[+use.dataset.use]; close(); setTimeout(() => o.onUse(c.code), 150); }
+    });
+    document.body.appendChild(ov);
+  }
+  async function check(manual) {
+    if (!manual && !o.canShow()) { setTimeout(() => check(false), 4000); return; }
+    const all = await o.fetchCodes();
+    if (!all) { if (manual) o.toast('Chưa tải được danh sách mã (cần mạng).'); return; }
+    const fresh = all.filter((c) => !c.redeemed);
+    const newest = all.reduce((m, c) => Math.max(m, +c.createdAt || 0), 0);
+    if (!manual && (!fresh.length || newest <= +(lsGet(KEY) || 0))) return;
+    if (manual && !all.length) { o.toast('Hiện chưa có mã quà nào, theo dõi MeeGame để nhận mã nha!'); return; }
+    lsSet(KEY, String(newest));
+    show(manual ? all : fresh);
+  }
+  // tự kiểm tra 1 lần mỗi lần mở game, khi đã đăng nhập
+  const tick = setInterval(() => { if (shownOnce) { clearInterval(tick); return; } if (o.loggedIn()) { shownOnce = true; clearInterval(tick); setTimeout(() => check(false), 3500); } }, 3000);
+  return { check };
+}
+const codeNews = createCodeNews({
+  key: 'tiramee/codesSeenAt',
+  loggedIn: () => !!cloud.st.player,
+  canShow: () => view.started && title.hidden && !view.settingsOpen && !view.summaryOpen && !document.querySelector('#story:not([hidden])'),
+  fetchCodes: async () => { await cloud.loadCodes(); return cloud.st.ready ? (cloud.st.codes || []) : null; },
+  toast: (t) => toast(toastsEl, t, 'info'),
+  onUse: (code) => {
+    actions.openSettings(); view.codeText = code; refreshUi(true);
+    setTimeout(() => { const i = document.getElementById('gift-code'); if (i) { i.value = code; i.scrollIntoView({ block: 'center', behavior: 'smooth' }); i.focus({ preventScroll: true }); } }, 250);
+  },
+  steps: ['Đăng nhập Gmail trong game (Cài đặt ▸ Tài khoản Google).', 'Bấm nút ⚙ Cài đặt ở góc trên màn hình Tiệm TiraMee.',
+    'Tìm mục <b>Mã quà tặng</b>, gõ hoặc dán mã vào ô, bấm <b>Nhận quà</b>.', 'Hoặc bấm <b>Nhập mã</b> ở mã bên trên: game mở Cài đặt và điền sẵn mã, chỉ cần bấm <b>Nhận quà</b>. Mỗi tài khoản nhận mỗi mã 1 lần.'],
+});
 // tự cập nhật bản mới (chỉ bản thật trên MeeGame)
 const updates = setupUpdates({
   isSafe: () => !view.started || (titleEl && !titleEl.hidden) || (state.phase === 'PREP' && !state.kitchen.session && !state.decor && !mini.isOpen()),
@@ -11158,7 +11235,8 @@ function giftSection(view) {
       ${btn('redeemCode', c.codeBusy ? 'Đang đổi…' : 'Nhận quà', { cls: 'primary', disabled: c.codeBusy || !(view.codeText ?? '').trim() })}</div>
     ${c.codeMsg ? `<p class="why">${esc(c.codeMsg)}</p>` : ''}
     ${!c.player ? '<p class="muted small">Cần liên kết Google trước (mỗi tài khoản nhận 1 lần / mã).</p>' : ''}
-    ${list ? `<p class="muted small">Mã đang có:</p><ul class="code-list">${list}</ul>` : ''}`;
+    ${list ? `<p class="muted small">Mã đang có:</p><ul class="code-list">${list}</ul>` : ''}
+    <div class="row-btns">${btn('codeNews', '🎁 Xem mã quà đang có', { cls: 'small' })}</div>`;
 }
 function nameFields(view) {
   return `<label class="field" for="owner-name">Tên của bạn</label>

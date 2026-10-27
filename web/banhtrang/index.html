@@ -3288,7 +3288,8 @@ function codeBlock(){
   return `<input class="pxin codein" id="setCode" maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Nhập mã quà tặng" value="${esc(GIFT.code)}" aria-label="Mã quà tặng">
     <button class="btn gold pxb" id="btnRedeem" ${GIFT.busy||!GIFT.code.trim()?'disabled':''}>${GIFT.busy?'Đang đổi…':'Nhận quà'}</button>
     ${GIFT.msg?`<div class="codemsg ${GIFT.ok?'ok':''}" role="status">${GIFT.msg}</div>`:''}
-    ${chips?`<small>Mã đang có:</small><div class="codechips">${chips}</div>`:''}`;
+    ${chips?`<small>Mã đang có:</small><div class="codechips">${chips}</div>`:''}
+    <button type="button" class="btn pxb" id="btnCodeNews">🎁 Xem mã quà đang có</button>`;
 }
 function renderSettings(){
   const el=$('setBody');if(!el)return;
@@ -3346,6 +3347,79 @@ async function redeemCode(){
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 $('btnTutAgain').onclick=()=>{G.tut={force:1};save();closeSettings();if(current==='market')tutMarket();else if(current==='service')tutService();else toast('Hướng dẫn sẽ hiện khi bạn ra chợ và mở quầy',2400)};
 $('btnSetT').onclick=openSettings;$('btnSetM').onclick=openSettings;$('btnSetClose').onclick=closeSettings;
+/* v-codenews: bảng thông báo MÃ QUÀ MỚI (giống Lẩu Ơi / Xoài Lắc). Hiện 1 lần cho mỗi mã mới, đợi vào hẳn tiệm rồi mới báo. */
+function createCodeNews(o) {
+  const KEY = o.key, esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch (e) { /* đầy / bị chặn */ } };
+  if (!document.getElementById('mcn-css')) {
+    const st = document.createElement('style'); st.id = 'mcn-css';
+    st.textContent = `.mcn-ov{position:fixed;inset:0;z-index:9999;background:rgba(40,24,30,.55);display:flex;align-items:center;justify-content:center;padding:16px;animation:mcnF .2s ease}
+.mcn{width:min(440px,100%);max-height:calc(100% - 24px);overflow:auto;background:#fff8ef;color:#4a2f2a;border-radius:18px;border:3px solid #e7b98f;box-shadow:0 12px 40px rgba(0,0,0,.35);padding:16px 16px 14px;font-family:inherit;animation:mcnP .28s cubic-bezier(.3,1.4,.6,1)}
+.mcn h3{margin:0 0 10px;font-size:20px;display:flex;align-items:center;gap:8px;color:#b5452e}
+.mcn-x{margin-left:auto;border:0;background:#f3dcc6;color:#7a4a3a;width:30px;height:30px;border-radius:50%;font-size:16px;cursor:pointer}
+.mcn-it{background:#fff;border:2px dashed #eac7a4;border-radius:12px;padding:10px;margin:0 0 8px}
+.mcn-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.mcn-code{font:800 18px/1.2 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;color:#b5452e;margin-right:auto;word-break:break-all}
+.mcn-b{border:0;border-radius:10px;padding:7px 12px;font-family:inherit;font-weight:700;font-size:13px;line-height:1;cursor:pointer;background:#f3dcc6;color:#5a3a30}
+.mcn-b.go{background:#3f9d6d;color:#fff}.mcn-b.big{display:block;width:100%;padding:12px;font-size:16px;background:#d9533b;color:#fff;margin-top:6px}
+.mcn-done{font-weight:700;font-size:12px;line-height:1;color:#3f9d6d;background:#e2f4e9;border-radius:10px;padding:7px 10px}
+.mcn-inf{display:flex;flex-wrap:wrap;gap:4px 12px;margin-top:6px;font-size:13px}.mcn-inf b{color:#3f7d4d}.mcn-m{opacity:.75}
+.mcn-how{background:#fdebd6;border-radius:12px;padding:10px 12px;margin-top:4px;font-size:13px;line-height:1.45}.mcn-how b{font-size:14px}.mcn-how ol{margin:6px 0 0;padding-left:20px}
+@keyframes mcnF{from{opacity:0}}@keyframes mcnP{from{transform:scale(.9);opacity:0}}`;
+    document.head.appendChild(st);
+  }
+  const date = (ms) => new Date(ms).toLocaleDateString('vi-VN');
+  const money = (k) => (Math.round(k * 1000)).toLocaleString('vi-VN') + 'đ';
+  let shownOnce = false, open = null;
+  function show(list) {
+    if (open) open.remove();
+    const ov = document.createElement('div'); ov.className = 'mcn-ov'; open = ov;
+    ov.innerHTML = `<div class="mcn" role="dialog" aria-label="Mã quà tặng mới"><h3>🎁 Mã quà tặng mới!<button type="button" class="mcn-x" aria-label="Đóng">✕</button></h3>
+      ${list.map((c, i) => {
+        const gifts = [c.money > 0 ? '+' + money(c.money) : '', c.xp > 0 ? '+' + Math.round(c.xp).toLocaleString('vi-VN') + ' XP' : ''].filter(Boolean).join(' · ');
+        return `<div class="mcn-it"><div class="mcn-top"><span class="mcn-code">${esc(c.code)}</span><button type="button" class="mcn-b" data-copy="${i}">Chép</button>
+          ${c.redeemed ? '<span class="mcn-done">✓ Đã nhận</span>' : `<button type="button" class="mcn-b go" data-use="${i}">Nhập mã</button>`}</div>
+          <div class="mcn-inf">${gifts ? `<b>${gifts}</b>` : ''}<span class="mcn-m">${c.expiresAt ? 'Hạn đến ' + date(c.expiresAt) : 'Không giới hạn thời gian'}</span>${c.left != null ? `<span class="mcn-m">Còn ${c.left} lượt</span>` : ''}</div>
+          ${c.note ? `<div class="mcn-m" style="font-size:12px;margin-top:4px">${esc(c.note)}</div>` : ''}</div>`;
+      }).join('')}
+      <div class="mcn-how"><b>Cách nhập mã</b><ol>${o.steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
+      <button type="button" class="mcn-b big">Đã hiểu</button></div>`;
+    const close = () => { ov.remove(); if (open === ov) open = null; };
+    ov.addEventListener('click', async (e) => {
+      const t = e.target;
+      if (t === ov || t.closest('.mcn-x') || t.closest('.big')) { close(); return; }
+      const cp = t.closest('[data-copy]'), use = t.closest('[data-use]');
+      if (cp) { const c = list[+cp.dataset.copy]; try { await navigator.clipboard.writeText(c.code); o.toast('Đã chép mã ' + c.code); } catch (er) { o.toast('Mã: ' + c.code); } }
+      if (use) { const c = list[+use.dataset.use]; close(); setTimeout(() => o.onUse(c.code), 150); }
+    });
+    document.body.appendChild(ov);
+  }
+  async function check(manual) {
+    if (!manual && !o.canShow()) { setTimeout(() => check(false), 4000); return; }
+    const all = await o.fetchCodes();
+    if (!all) { if (manual) o.toast('Chưa tải được danh sách mã (cần mạng).'); return; }
+    const fresh = all.filter((c) => !c.redeemed);
+    const newest = all.reduce((m, c) => Math.max(m, +c.createdAt || 0), 0);
+    if (!manual && (!fresh.length || newest <= +(lsGet(KEY) || 0))) return;
+    if (manual && !all.length) { o.toast('Hiện chưa có mã quà nào, theo dõi MeeGame để nhận mã nha!'); return; }
+    lsSet(KEY, String(newest));
+    show(manual ? all : fresh);
+  }
+  // tự kiểm tra 1 lần mỗi lần mở game, khi đã đăng nhập
+  const tick = setInterval(() => { if (shownOnce) { clearInterval(tick); return; } if (o.loggedIn()) { shownOnce = true; clearInterval(tick); setTimeout(() => check(false), 3500); } }, 3000);
+  return { check };
+}
+const codeNews=createCodeNews({
+  key:'banhtrang/codesSeenAt',
+  loggedIn:()=>!!(NET.server&&NET.player),
+  canShow:()=>current!=='title'&&!document.querySelector('.ov:not([hidden])'),
+  fetchCodes:async()=>{const r=await meeApi('GET','codes/active');if(r.status!==200||!r.json)return null;GIFT.codes=r.json.codes||[];return GIFT.codes},
+  toast:(t)=>{try{toast(t)}catch(e){}},
+  onUse:(code)=>{openSettings();GIFT.code=code;GIFT.msg='';renderSettings();setTimeout(()=>{const i=$('setCode');if(i){i.scrollIntoView({block:'center',behavior:'smooth'});i.focus({preventScroll:true})}},250)},
+  steps:['Đăng nhập Gmail trong game (Cài đặt ▸ Tài khoản).','Bấm nút ⚙ Cài đặt trên màn hình Bánh Tráng Nhà Mee.','Tìm mục <b>Mã quà tặng</b>, gõ hoặc dán mã vào ô, bấm <b>Nhận quà</b>.','Hoặc bấm <b>Nhập mã</b> ở mã bên trên: game mở Cài đặt và điền sẵn mã, chỉ cần bấm <b>Nhận quà</b>. Mỗi tài khoản nhận mỗi mã 1 lần.'],
+});
+document.addEventListener('click',e=>{if(e.target.closest&&e.target.closest('#btnCodeNews')){sfx('tap');codeNews.check(true)}});
 $('setOv').addEventListener('click',e=>{if(e.target===$('setOv'))closeSettings()});
 $('btnSoundS').onclick=()=>{setSound(!AU.on);sfx('tap')};
 $('btnMusicS').onclick=()=>{setMusic(!MUS.on)};
