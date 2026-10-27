@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png"><link rel="manifest" href="/banhtrang/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Bánh Tráng Nhà Mee</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png"><link rel="manifest" href="/banhtrang/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.stage{padding-block:8px 24px}</style></head><body><title>Bánh Tráng Nhà Mee</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -418,6 +418,45 @@ html[data-skin="dem"] .ttl .btn:not(.hot):not(.go){color:var(--ink)}
 .subwrap .arr.l{left:0;background:linear-gradient(90deg,var(--night2) 40%,transparent)}
 @media (hover:hover){.subtabs{scrollbar-width:thin}}
 
+/* leaderboard */
+.rkhead{display:flex;align-items:center;gap:10px;background:linear-gradient(90deg,var(--gold),var(--hud));padding:8px 10px;flex:none;color:var(--ink)}
+.rkhead img{width:32px;height:32px}
+.rkhead b{display:block;font-weight:400;font-size:24px;line-height:1}
+.rkhead small{font-size:14px;opacity:.8}
+.seg2{display:grid;grid-template-columns:1fr 1fr;gap:8px;flex:none}
+.seg2 button{background:var(--paper2);color:var(--ink);font-size:17px;padding:3px 0 2px}
+.seg2 button[aria-pressed="true"]{background:var(--gold)}
+.podium{display:grid;grid-template-columns:1fr 1.15fr 1fr;align-items:end;gap:6px;background:linear-gradient(var(--soft),var(--paper));padding:12px 8px 0;flex:none;color:var(--ink)}
+.pod{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;text-align:center}
+.pod .lg{width:36px;height:36px}.pod.p1 .lg{width:48px;height:48px}
+.pod .crown{width:26px;height:26px;margin-bottom:-6px;animation:bob 1.2s steps(2) infinite}
+@keyframes bob{50%{transform:translateY(-2px)}}
+.pod .nt{font-size:14px;max-width:100%}
+.pod small{font-size:12px;color:var(--txt2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.pod .step{width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;margin-top:3px;box-shadow:0 -3px 0 0 var(--ink),-3px 0 0 0 var(--ink),3px 0 0 0 var(--ink),inset 0 3px 0 0 rgba(255,255,255,.5)}
+.pod .step b{font-weight:400;font-size:26px;line-height:.9}
+.pod .step span{font-size:14px}
+.p1 .step{height:74px;background:linear-gradient(#ffe7a0,#f2b84b);color:#6a4a10}
+.p2 .step{height:56px;background:linear-gradient(#f6f8fb,#c3ccd8);color:#45556a}
+.p3 .step{height:44px;background:linear-gradient(#f8d8b8,#d99a6a);color:#6a3a1a}
+.pod.me .nt{outline:2px dashed var(--chiliD);outline-offset:2px}
+.rk{display:grid;grid-template-columns:28px 28px minmax(0,1fr) auto;gap:8px;align-items:center;background:var(--paper);color:var(--ink);padding:6px 8px;flex:none}
+.rk .no{font-size:18px;text-align:center;background:var(--paper2);box-shadow:0 0 0 2px var(--ink);line-height:1.2}
+.rk img{width:28px;height:28px}
+.rk small{display:block;font-size:13px;color:var(--txt2);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rk .nt{font-size:16px}
+.rk .val{font-size:18px;color:var(--cash);font-variant-numeric:tabular-nums}
+.rk.me{background:#fff2c4}.rk.me .no{background:var(--gold)}
+.mybar{background:var(--ink);color:var(--paper);padding:5px 10px;font-size:16px;flex:none}
+.mybar b{font-weight:400;color:var(--gold)}
+.rkempty{background:var(--paper);color:var(--txt2);padding:16px;text-align:center;flex:none}
+.rkempty img{width:32px;height:32px;opacity:.6}.rkempty p{margin:6px 0 0;font-size:16px}
+.cond{display:block;font-size:13px;line-height:1.15;color:var(--txt2);margin-top:2px}
+.cond b{font-weight:400;color:var(--chiliD)}
+.cond.ok{color:var(--leafD)}.cond.ok b{color:var(--leafD)}
+.lk16{width:24px;height:24px}
+html[data-skin="dem"] :is(.rk,.podium,.rkempty,.rkhead){color:var(--ink)}
+
 /* name tags */
 .nt{display:inline-block;padding:1px 6px 0;line-height:1.1;box-shadow:0 0 0 2px var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .nt-go{background:repeating-linear-gradient(90deg,#e2b98a 0 6px,#d6a978 6px 8px);color:#4a2a14}
@@ -635,43 +674,7 @@ html[data-skin="dem"] .ttl .btn:not(.hot):not(.go){color:var(--ink)}
   </div>
 </section>
 
-<aside class="notes">
-  <h1>Bánh Tráng Nhà Mee</h1>
-  <p class="sub">Bản chơi hoàn chỉnh. Tên quán, nhân vật nam hoặc nữ, logo và màu bảng hiệu đều đổi được. Tiến độ tự lưu trong trình duyệt của bạn.</p>
-  <h2>Cốt truyện</h2>
-  <p style="margin:0">Bạn (mặc định tên Út) nghỉ việc văn phòng, về giữ gánh bánh tráng trộn cho Dì Tư đang đau lưng. Ken, chủ tiệm trà sữa bên kia đường, thách: trong 7 ngày phải có <b style="font-weight:400;color:var(--gold)">1.200k</b> và giữ đánh giá từ <b style="font-weight:400;color:var(--gold)">4,0 sao</b>.</p>
-  <h2>Cấp độ</h2>
-  <ul>
-    <li>Mỗi ngày có 3 nhiệm vụ, làm xong được XP. Bán món từ 3 sao cũng được XP.</li>
-    <li>Có 15 cấp. Lên cấp mở thêm sốt, topping và tính năng. Cấp 6 mở bánh tráng cuốn, cấp 9 mở bánh tráng nướng.</li>
-  </ul>
-  <h2>Mặt bằng</h2>
-  <p style="margin:0">Đầu game chọn 1 trong 4 chỗ thuê, mỗi chỗ có giá, lượng khách và rủi ro riêng. Có một chỗ rẻ bất ngờ là cái bẫy.</p>
-  <h2>Kinh doanh</h2>
-  <ul>
-    <li><b style="font-weight:400;color:var(--gold)">Nâng cấp</b>: món ăn, đồ nghề, nhân viên, trang trí.</li>
-    <li><b style="font-weight:400;color:var(--gold)">Bảng giá</b>: tự đặt giá từng món, tạm ngưng món trên thực đơn.</li>
-    <li><b style="font-weight:400;color:var(--gold)">Mở rộng</b>: mặt bằng, phố, chi nhánh, quảng cáo, danh hiệu, thương hiệu, nhượng quyền, bảng xếp hạng.</li>
-    <li>Nhạc nền du dương, bật/tắt ở màn hình đầu hoặc khi tạm nghỉ.</li>
-    <li>Trả giá ở chợ, nhập nhanh giá gốc khi đang bán mà hết đồ.</li>
-    <li>Hộp giấy, bịch giấy, đũa phải mua. Cấp 4 in được logo lên bao bì.</li>
-    <li>Từ cấp 4 đóng thuế khoán 1,5% doanh thu mỗi 7 ngày.</li>
-    <li>Bảng xếp hạng online với thẻ tên cho người chơi.</li>
-  </ul>
-  <h2>Một ngày</h2>
-  <ol>
-    <li>Sáng: đi chợ mua nguyên liệu, giá đổi theo ngày. Mua đồ nghề và công thức mới.</li>
-    <li>Chiều 16:00–20:00: mở quầy, trộn bánh theo order, xử lý chuyện trước quán.</li>
-    <li>Tối: kết sổ. Rau răm, xoài, tắc để qua đêm sẽ héo.</li>
-  </ol>
-  <h2>Điều khiển</h2>
-  <ul>
-    <li>Chạm khách để xem order. Chạm bánh, sốt, topping để bỏ vào thau.</li>
-    <li>Muỗng sa tế: mỗi lần là 1 cấp cay.</li>
-    <li>Xoay tay trong thau, giữ nút Giữ hoặc phím Space để trộn.</li>
-    <li>Bóng đèn bật/tắt gợi ý. Hết món thì bấm “Xin lỗi” để mời khách về.</li>
-  </ul>
-</aside>
+
 </main>
 
 <script>
@@ -807,6 +810,7 @@ const IC_DRAW={
   kiosk:({P})=>{P('#f3e2b8',2,7,12,7);for(let x=1;x<15;x+=4){P('#3aa59a',x,4,2,3);P('#fffaf0',x+2,4,2,3)}P('#8a4b22',7,9,3,5);P('#9ad0e6',3,9,3,3)},
   store:({P})=>{P('#e9dcc4',2,2,12,12);P('#9ad0e6',3,3,4,3);P('#9ad0e6',9,3,4,3);P('#e86a9a',3,7,10,2);P('#8a4b22',6,10,4,4);P('#9ad0e6',3,10,2,3);P('#9ad0e6',11,10,2,3)},
   boxp:ICON.hop_giay,
+  lock:({P})=>{P('#9aa6ae',5,2,6,1);P('#9aa6ae',4,3,1,5);P('#9aa6ae',11,3,1,5);P('#f2b84b',3,7,10,8);P('#ffd65a',4,8,1,5);P('#c98a2a',3,14,10,1);P('#5a3d4a',7,9,2,2);P('#5a3d4a',7.5,11,1,2)},
 };
 const IC={};for(const k in IC_DRAW)IC[k]=url(sprite(16,16,IC_DRAW[k]));
 const ic=(k,alt='')=>`<img src="${IC[k]||IMG[k]}" alt="${alt}">`;
@@ -1207,7 +1211,7 @@ function questEvent(kind,data){
       if((q.type==='cuon'||q.type==='nuong')&&o.dish===q.type&&st>=3)q.prog++;}
     if(q.type==='revenue'&&S)q.prog=Math.max(q.prog,S.revenue);
     if(kind==='day'&&q.type==='noangry')q.prog=(data.leftAngry===0&&data.served>=5)?1:0;
-    if(q.prog>=q.target){q.prog=q.target;q.done=true;toast(`Xong nhiệm vụ: <b>${qLabel(q)}</b> · +${q.xp} XP`,2400);sfx('good');gainXP(q.xp)}
+    if(q.prog>=q.target){q.prog=q.target;q.done=true;G.stats.quests=nz(G.stats.quests)+1;checkTitles();toast(`Xong nhiệm vụ: <b>${qLabel(q)}</b> · +${q.xp} XP`,2400);sfx('good');gainXP(q.xp)}
   }
 }
 const CARDQ=[];
@@ -1311,10 +1315,28 @@ const PARTNERS=[
   {id:'sate',ic:'fire',name:'Lò sa tế Chợ Lớn',desc:'Sa tế và các loại sốt rẻ 15%',price:350000,lv:8,off:.15,ids:()=>['sate',...SAUCE_IDS]},
 ];
 const BOXCOL={kraft:{name:'Kraft',c:'#c9a06a'},trang:{name:'Trắng',c:'#efe6d6'},hong:{name:'Hồng',c:'#f3b8c8'},mint:{name:'Bạc hà',c:'#b5e0c8'}};
+const RQ={
+  served:n=>({label:`Bán ${n} món`,cur:()=>nz(G.stats.served),need:n}),
+  five:n=>({label:`${n} lần 5 sao`,cur:()=>nz(G.stats.fiveStars),need:n}),
+  spicy:n=>({label:`${n} món cay cấp 5 đạt 4 sao`,cur:()=>nz(G.stats.spicy5),need:n}),
+  cuon:n=>({label:`${n} phần bánh tráng cuốn`,cur:()=>nz(G.stats.cuon),need:n}),
+  nuong:n=>({label:`${n} bánh nướng 5 sao`,cur:()=>nz(G.stats.nuong5),need:n}),
+  quest:n=>({label:`Hoàn thành ${n} nhiệm vụ`,cur:()=>nz(G.stats.quests),need:n}),
+  lv:n=>({label:`Đạt cấp ${n}`,cur:()=>level(),need:n}),
+  fr:n=>({label:`Nhượng quyền ${n} lần`,cur:()=>G.fr.count,need:n}),
+  ken:()=>({label:'Thắng vụ cá cược với Ken',cur:()=>G.stats.wonKen?1:0,need:1}),
+};
 const TAGS=[
-  {id:'go',name:'Gỗ mộc',price:0},{id:'kraft',name:'Giấy kraft',price:50000},{id:'hong',name:'Hồng phấn',price:150000},{id:'bacha',name:'Bạc hà',price:150000},
-  {id:'keo',name:'Kẹo sọc',price:300000},{id:'ot',name:'Ớt cay',req:'Bán 10 món cay cấp 5',test:()=>G.stats.spicy5>=10},{id:'vang',name:'Vàng kim',price:1000000},
-  {id:'ngoc',name:'Ngọc trai',req:'Đạt cấp 10',test:()=>level()>=10},{id:'cauvong',name:'Cầu vồng',price:3000000},{id:'hoanggia',name:'Hoàng gia',req:'Nhượng quyền 1 lần',test:()=>G.fr.count>=1},
+  {id:'go',name:'Gỗ mộc',price:0},
+  {id:'kraft',name:'Giấy kraft',price:200000,conds:[RQ.served(20)]},
+  {id:'hong',name:'Hồng phấn',price:600000,conds:[RQ.five(20)]},
+  {id:'bacha',name:'Bạc hà',price:600000,conds:[RQ.quest(10)]},
+  {id:'keo',name:'Kẹo sọc',price:1200000,conds:[RQ.lv(6)]},
+  {id:'ot',name:'Ớt cay',conds:[RQ.spicy(25)]},
+  {id:'vang',name:'Vàng kim',price:5000000,conds:[RQ.lv(8)]},
+  {id:'ngoc',name:'Ngọc trai',conds:[RQ.lv(12),RQ.five(150)]},
+  {id:'cauvong',name:'Cầu vồng',price:15000000,conds:[RQ.quest(40)]},
+  {id:'hoanggia',name:'Hoàng gia',conds:[RQ.fr(1)]},
 ];
 const BRANCHES=[
   {id:'gv',name:'Gò Vấp',cost:600000,base:90000,rent:30000,wage:35000},
@@ -1329,18 +1351,22 @@ const ADS=[
   {id:'bang',ic:'billboard',name:'Biển quảng cáo ngã tư',desc:'Khách +25% trong 7 ngày',price:600000,days:7,boost:.25,lv:9},
 ];
 const TITLES=[
-  {id:'chamchi',name:'Chủ gánh chăm chỉ',price:100000},
-  {id:'taytron',name:'Tay trộn có tiếng',price:500000},
-  {id:'vua',name:'Vua bánh tráng',price:2000000},
-  {id:'daigia',name:'Đại gia hẻm nhỏ',price:5000000},
-  {id:'thanhcay',name:'Thánh ăn cay',req:'Bán 20 món cay cấp 5',test:()=>G.stats.spicy5>=20},
-  {id:'baccuon',name:'Bậc thầy cuốn',req:'Bán 30 phần bánh tráng cuốn',test:()=>G.stats.cuon>=30},
-  {id:'thonuong',name:'Thợ nướng vàng',req:'20 bánh nướng 5 sao',test:()=>G.stats.nuong5>=20},
-  {id:'xom',name:'Người của xóm',req:'Bán tổng cộng 150 món',test:()=>G.stats.served>=150},
-  {id:'khactinh',name:'Khắc tinh trà sữa',req:'Thắng vụ cá cược với Ken',test:()=>!!G.stats.wonKen},
-  {id:'chuoi',name:'Ông chủ chuỗi',req:'Nhượng quyền 1 lần',test:()=>G.fr.count>=1},
-  {id:'deche',name:'Đế chế bánh tráng',req:'Nhượng quyền 5 lần',test:()=>G.fr.count>=5},
+  {id:'chamchi',name:'Chủ gánh chăm chỉ',price:300000,conds:[RQ.served(30)]},
+  {id:'nhiemvu',name:'Siêng làm nhiệm vụ',conds:[RQ.quest(30)]},
+  {id:'taytron',name:'Tay trộn có tiếng',price:800000,conds:[RQ.five(50)]},
+  {id:'thanhcay',name:'Thánh ăn cay',conds:[RQ.spicy(30)]},
+  {id:'xom',name:'Người của xóm',conds:[RQ.served(300)]},
+  {id:'baccuon',name:'Bậc thầy cuốn',conds:[RQ.cuon(60)]},
+  {id:'thonuong',name:'Thợ nướng vàng',conds:[RQ.nuong(40)]},
+  {id:'khactinh',name:'Khắc tinh trà sữa',conds:[RQ.ken()]},
+  {id:'vua',name:'Vua bánh tráng',price:8000000,conds:[RQ.lv(10)]},
+  {id:'daigia',name:'Đại gia hẻm nhỏ',price:20000000,conds:[RQ.lv(12)]},
+  {id:'chuoi',name:'Ông chủ chuỗi',conds:[RQ.fr(1)]},
+  {id:'deche',name:'Đế chế bánh tráng',conds:[RQ.fr(5)]},
 ];
+const condsOk=x=>(x.conds||[]).every(c=>c.cur()>=c.need);
+function condsHTML(x){return (x.conds||[]).map(c=>{const v=Math.min(c.cur(),c.need),ok=v>=c.need;return `<span class="cond ${ok?'ok':''}">${ok?'✓':'·'} ${c.label} <b>${fmtN(v)}/${fmtN(c.need)}</b></span>`}).join('')}
+const fmtN=v=>Number(v).toLocaleString('vi-VN');
 const BRAND=[
   {id:'gia',name:'Thương hiệu đắt giá',desc:'Mỗi món thu thêm 3% mỗi bậc',max:5,cost:l=>8+l*4},
   {id:'biet',name:'Cả xóm biết tên',desc:'Khách +3% mỗi bậc',max:5,cost:l=>8+l*4},
@@ -1366,7 +1392,7 @@ const nz=v=>v||0;
 function bizDefaults(g){
   for(const [k,v] of Object.entries({pkg:{printed:false,logo:'hop',color:'kraft'},partners:{},delivery:{on:false},haggle:{},haggleDay:0,favor:{},tags:{go:true},tag:'go',taxBase:0,taxPaid:0,dishLv:{},staff:{},decor:{},awning:'do',awnings:{do:true},prices:{tron:15000,cuon:12000,nuong:15000,top:4000},menuOff:{},tier:0,street:{},branches:{},
     titles:{},title:null,rep:0,brand:{},city:'sg',cities:{sg:true},cityDay:0,fr:{count:0,stars:0,perks:{}},ads:[],stats:{},ledger:[]}))if(g[k]===undefined)g[k]=JSON.parse(JSON.stringify(v));
-  for(const k of ['served','spicy5','cuon','nuong5','fiveStars','earned'])g.stats[k]=g.stats[k]||0;
+  for(const k of ['served','spicy5','cuon','nuong5','fiveStars','earned','quests'])g.stats[k]=g.stats[k]||0;
   return g;
 }
 const ZL=()=>G.owned.bep?55:65, ZH=()=>G.owned.bep?105:95;
@@ -1411,8 +1437,8 @@ function assets(){
 function streetCost(s2){return Math.round(s2.price*Math.pow(1.6,nz(G.street[s2.id]))/1000)*1000}
 function maxBranches(){const l=level();return l>=14?4:l>=12?2:l>=10?1:0}
 function branchIncome(b,st){const f=st.neglect>3?.5:1,r=rating();return Math.round((b.base*(r>=4.5?1.2:r>=4?1:.8)*f*(1+nz(st.boost))*(.85+R()*.3)-b.rent-b.wage)/1000)*1000}
-function checkTitles(){for(const t of TITLES)if(t.test&&!G.titles[t.id]&&t.test()){G.titles[t.id]=true;toast(`Mở khoá danh hiệu <b>${t.name}</b>!`,2400)}
-  for(const t of TAGS)if(t.test&&!G.tags[t.id]&&t.test()){G.tags[t.id]=true;toast(`Mở khoá thẻ tên <b>${t.name}</b>!`,2400)}}
+function checkTitles(){for(const t of TITLES)if(!t.price&&!G.titles[t.id]&&condsOk(t)){G.titles[t.id]=true;toast(`Mở khoá danh hiệu <b>${t.name}</b>!`,2400)}
+  for(const t of TAGS)if(!t.price&&t.conds&&!G.tags[t.id]&&condsOk(t)){G.tags[t.id]=true;toast(`Mở khoá thẻ tên <b>${t.name}</b>!`,2400)}}
 function titleName(){const t=TITLES.find(x=>x.id===G.title);return t?t.name:''}
 const SUBS={upg:[['dish','Món ăn'],['tool','Đồ nghề'],['staff','Nhân viên'],['decor','Trang trí'],['pack','Bao bì']],
   exp:[['loc','Mặt bằng'],['street','Phố'],['branch','Chi nhánh'],['partner','Đối tác'],['ship','Giao hàng'],['ads','Quảng cáo'],['title','Danh hiệu'],['tag','Thẻ tên'],['brand','Thương hiệu'],['fr','Nhượng quyền'],['rank','Xếp hạng']]};
@@ -1521,13 +1547,15 @@ function renderExp(){
     h+=`<p class="mnote">Quảng cáo kéo khách trong vài ngày. Nhiều chiến dịch cộng dồn, tối đa +100%. ${act.length?'Đang chạy: '+act.map(a=>`${a.name} (tới ngày ${a.until})`).join(', '):'Chưa chạy chiến dịch nào.'}</p>`;
     for(const a of ADS)h+=c2(a.ic,a.name,a.desc,l<a.lv?lockTag(a.lv):buyBtn('ad:'+a.id,a.price),l<a.lv?'lk':'');
   }else if(sub==='title'){
-    h+=`<p class="mnote">Danh hiệu hiện dưới tên quán ở màn hình đầu và bảng xếp hạng. Giữ lại cả khi nhượng quyền.</p>`;
-    for(const t of TITLES){const own=G.titles[t.id],cur=G.title===t.id;
-      h+=c2('medal',t.name,t.req?(own?'Đã đạt':t.req):(own?'Đã mua':fmtK(t.price)),cur?'<span style="font-size:15px;color:var(--leafD)">Đang đeo</span>':own?`<button class="btn pxb" data-act="wear:${t.id}">Đeo</button>`:t.req?'🔒':buyBtn('title:'+t.id,t.price),cur||own?'own':t.req?'lk':'')}
+    h+=`<p class="mnote">Danh hiệu hiện dưới tên quán ở màn hình đầu và bảng xếp hạng, giữ lại cả khi nhượng quyền. Món nào cũng phải đạt thành tích trước; có món còn phải trả thêm tiền.</p>`;
+    for(const t of TITLES){const own=G.titles[t.id],cur=G.title===t.id,ok=condsOk(t);
+      const right=cur?'<span style="font-size:15px;color:var(--leafD)">Đang đeo</span>':own?`<button class="btn pxb" data-act="wear:${t.id}">Đeo</button>`:!ok?`<img class="lk16" src="${IC.lock}" alt="Chưa mở">`:t.price?buyBtn('title:'+t.id,t.price):'';
+      h+=c2('medal',t.name,`${own?'Đã có':t.price?'Giá '+fmtK(t.price):'Tự mở khi đạt'}${own?'':condsHTML(t)}`,right,cur||own?'own':ok?'':'lk')}
   }else if(sub==='tag'){
     h+=`<p class="mnote">Thẻ tên bao quanh tên quán trên bảng xếp hạng online. Giữ lại cả khi nhượng quyền.</p>`;
-    for(const t of TAGS){const own=G.tags[t.id],cur=G.tag===t.id;
-      h+=`<div class="tagrow px2"><div><span class="nt nt-${t.id}">${P_.shop}</span><small>${t.name} · ${own?(cur?'Đang đeo':'Đã có'):t.req||fmtK(t.price)}</small></div><div>${cur?'<span style="font-size:15px;color:var(--leafD)">✓</span>':own?`<button class="btn pxb" data-act="tagw:${t.id}">Đeo</button>`:t.req?'🔒':buyBtn('tagb:'+t.id,t.price)}</div></div>`}
+    for(const t of TAGS){const own=G.tags[t.id],cur=G.tag===t.id,ok=condsOk(t);
+      const right=cur?'<span style="font-size:15px;color:var(--leafD)">Đang đeo</span>':own?`<button class="btn pxb" data-act="tagw:${t.id}">Đeo</button>`:!ok?`<img class="lk16" src="${IC.lock}" alt="Chưa mở">`:t.price?buyBtn('tagb:'+t.id,t.price):'';
+      h+=`<div class="tagrow px2"><div style="min-width:0"><span class="nt nt-${t.id}">${esc(P_.shop)}</span><small>${t.name} · ${own?'Đã có':t.price?'Giá '+fmtK(t.price):'Tự mở khi đạt'}</small>${own?'':condsHTML(t)}</div><div>${right}</div></div>`}
   }else if(sub==='brand'){
     h+=`<div class="bigstat"><div>Danh tiếng<b>${G.rep}</b></div><div>Thành phố<b>${CITIES[G.city].name}</b></div></div><p class="mnote">Mỗi món 5 sao được 1 danh tiếng. Dùng danh tiếng mở ưu đãi giữ mãi và thành phố mới.</p>`;
     for(const b of BRAND){const lv=nz(G.brand[b.id]),cost=b.cost(lv);h+=c2('rosette',`${b.name}`,`${b.desc}${dots(lv,b.max)}`,lv>=b.max?max:`<button class="btn gold pxb" data-act="brand:${b.id}" ${G.rep>=cost?'':'disabled'}>${cost} DT</button>`)}
@@ -1563,22 +1591,31 @@ function renderBook(){
 }
 function rankRow(i,shop,owner,val,extra,me,tag){return `<div class="rank px2 ${me?'me':''}"><span class="no">${i}</span><div style="min-width:0"><span class="nt nt-${tag||'go'}">${esc(shop)}</span><small>${esc(owner)}${extra?' · '+esc(extra):''}</small></div><span>${fmtK(val)}</span></div>`}
 const esc=v=>String(v==null?'':v).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function renderRank(){
-  let h='';const mine={shop:P_.shop,owner:P_.name,val:assets(),title:titleName(),tag:G.tag};
-  const online=NET.server?(NET.serverRows||[]):NET.rows;
-  h+=`<div class="mgroup">Bảng xếp hạng online</div>`;
-  if(NET.server)h+=NET.player?`<div class="tagrow px2"><div>Đã đăng nhập: <b style="font-weight:400">${esc(NET.player.name||NET.player.email||'')}</b><small>Quán tự lên bảng mỗi tối lúc kết sổ.</small></div><button class="btn pxb" data-act="mee:sync">Lưu ngay</button></div><button class="btn pxb" data-act="mee:out" style="font-size:15px">Đăng xuất</button>`
-    :`<div class="tagrow px2" style="grid-template-columns:1fr"><div>Đăng nhập Google để lên bảng xếp hạng MeeGame<small>Dùng chung tài khoản với Lẩu Ơi, Xoài Lắc, TiraMee.</small></div><div data-gsi style="min-height:44px">Đang tải nút Google…</div></div>`;
-  if(online.length){
-    const list=online.slice().sort((a,b)=>b.val-a.val).slice(0,30);
-    list.forEach((r,i)=>h+=rankRow(i+1,r.shop,r.owner,r.val,[r.title,'Lv'+r.level].filter(Boolean).join(' · '),r.me,r.tag));
-    h+=`<p class="netnote">${NET.server?'Bảng xếp hạng MeeGame, xếp theo tổng tiền đã kiếm.':'Người chơi mở game này trên Claude. Tự cập nhật mỗi tối lúc kết sổ.'}</p>`;
-  }else h+=`<p class="mnote">${NET.status}</p>`;
-  h+=`<div class="mgroup">Quán quanh vùng</div>`;
-  const list=[...rivalsToday().map(r=>({...r,tag:'go'})),{...mine,me:true}].sort((a,b)=>b.val-a.val);
-  list.forEach((r,i)=>h+=rankRow(i+1,r.shop,r.owner,r.val,r.title,r.me,r.tag));
-  return h+`<p class="netnote">Các quán quanh vùng do máy tạo, xếp theo tổng tài sản.</p>`;
+let rankView='online';
+function logoOf(r){if(r.logo&&IMG['logo_'+r.logo])return IMG['logo_'+r.logo];const ks=Object.keys(LOGOS);let h=0;for(const ch of String(r.shop||''))h=(h*31+ch.charCodeAt(0))>>>0;return IMG['logo_'+ks[h%ks.length]]}
+function podiumHTML(list){
+  const top=list.slice(0,3);if(!top.length)return '';
+  const order=[top[1],top[0],top[2]],cls=['p2','p1','p3'],num=[2,1,3];
+  return `<div class="podium pxb">${order.map((r,i)=>r?`<div class="pod ${cls[i]} ${r.me?'me':''}">${num[i]===1?`<img class="crown" src="${IC.crown}" alt="">`:''}<img class="lg" src="${logoOf(r)}" alt=""><span class="nt nt-${r.tag||'go'}">${esc(r.shop)}</span><small>${esc(r.owner||'')}${r.level?' · Lv'+r.level:''}</small><div class="step"><b>${num[i]}</b><span>${fmtK(r.val)}</span></div></div>`:'<div class="pod"></div>').join('')}</div>`;
 }
+function listHTML(list,from){return list.slice(from).map((r,i)=>`<div class="rk px2 ${r.me?'me':''}"><span class="no">${from+i+1}</span><img src="${logoOf(r)}" alt=""><div style="min-width:0"><span class="nt nt-${r.tag||'go'}">${esc(r.shop)}</span><small>${esc([r.owner,r.level?'Lv'+r.level:'',r.title].filter(Boolean).join(' · '))}</small></div><span class="val">${fmtK(r.val)}</span></div>`).join('')}
+function renderRank(){
+  const mine={shop:P_.shop,owner:P_.name,val:assets(),title:titleName(),tag:G.tag,level:level(),logo:P_.logo,me:true};
+  let h=`<div class="rkhead pxb"><img src="${IC.crown}" alt=""><div><b>Bảng xếp hạng</b><small>${rankView==='online'?(NET.server?'MeeGame · tổng tiền đã kiếm':'Người chơi trên Claude · tổng tài sản'):'Các quán quanh vùng · tổng tài sản'}</small></div></div>
+    <div class="seg2"><button class="px2" data-act="rview:online" aria-pressed="${rankView==='online'}">Online</button><button class="px2" data-act="rview:local" aria-pressed="${rankView==='local'}">Quanh vùng</button></div>`;
+  let list;
+  if(rankView==='online'){
+    if(NET.server)h+=NET.player?`<div class="tagrow px2"><div>Đã đăng nhập: <b style="font-weight:400">${esc(NET.player.name||NET.player.email||'')}</b><small>Quán tự lên bảng mỗi tối lúc kết sổ.</small></div><div style="display:flex;gap:6px"><button class="btn pxb" data-act="mee:sync">Lưu ngay</button><button class="btn pxb" data-act="mee:out">Thoát</button></div></div>`
+      :`<div class="tagrow px2" style="grid-template-columns:1fr"><div>Đăng nhập Google để lên bảng xếp hạng MeeGame<small>Dùng chung tài khoản với Lẩu Ơi, Xoài Lắc, TiraMee.</small></div><div data-gsi style="min-height:44px">Đang tải nút Google…</div></div>`;
+    list=(NET.server?(NET.serverRows||[]):NET.rows).slice().sort((a,b)=>b.val-a.val).slice(0,50);
+    if(!list.length)return h+`<div class="rkempty pxb"><img src="${IC.crown}" alt=""><p>${NET.status||'Chưa có ai trên bảng.'}</p></div>`;
+  }else list=[...rivalsToday().map(r=>({...r,tag:'go'})),mine].sort((a,b)=>b.val-a.val);
+  const myIdx=list.findIndex(r=>r.me);
+  h+=myIdx>=0?`<div class="mybar pxb">Hạng của bạn: <b>#${myIdx+1}</b> · ${fmtK(list[myIdx].val)}</div>`:`<div class="mybar pxb">Bạn chưa có trên bảng này. ${rankView==='online'?'Kết sổ một ngày để lên bảng.':''}</div>`;
+  h+=podiumHTML(list)+listHTML(list,3);
+  return h;
+}
+
 function bizAct(act){
   const [k,a,b]=act.split(':');const l=level();
   const pay=v=>{if(G.money<v){toast('Không đủ tiền');sfx('bad');return false}G.money-=v;G.spentToday+=v;sfx('coin');return true};
@@ -1597,7 +1634,7 @@ function bizAct(act){
   else if(k==='branch'){const x=BRANCHES.find(y=>y.id===a);if(Object.keys(G.branches).length<maxBranches()&&pay(x.cost)){G.branches[a]={visit:G.day,last:null};toast(`Khai trương chi nhánh <b>${x.name}</b>!`)}}
   else if(k==='visit'){G.branches[a].visit=G.day;sfx('tap');toast('Khảo sát xong, nhân viên chi nhánh làm ăn đàng hoàng lại')}
   else if(k==='ad'){const x=ADS.find(y=>y.id===a);if(pay(x.price)){G.ads=(G.ads||[]).filter(y=>y.until>=G.day);G.ads.push({id:x.id,name:x.name,boost:x.boost,until:G.day+x.days-1});toast(`Chạy <b>${x.name}</b>`)}}
-  else if(k==='title'){const x=TITLES.find(y=>y.id===a);if(pay(x.price)){G.titles[a]=true;G.title=a}}
+  else if(k==='title'){const x=TITLES.find(y=>y.id===a);if(condsOk(x)&&pay(x.price)){G.titles[a]=true;G.title=a}}
   else if(k==='wear'){G.title=a;sfx('tap')}
   else if(k==='brand'){const x=BRAND.find(y=>y.id===a),lv=nz(G.brand[a]),c=x.cost(lv);if(G.rep>=c&&lv<x.max){G.rep-=c;G.brand[a]=lv+1;sfx('coin')}}
   else if(k==='city'){const c=CITIES[a];if(G.cities[a]){if(G.cityDay!==G.day){G.city=a;G.cityDay=G.day;sfx('tap');toast(`Chuyển gánh vô <b>${c.name}</b>`)}}else if(G.rep>=c.cost){G.rep-=c.cost;G.cities[a]=true;G.city=a;G.cityDay=G.day;sfx('coin');toast(`Mở thành phố <b>${c.name}</b>`)}}
@@ -1607,8 +1644,9 @@ function bizAct(act){
   else if(k==='print'){if(l>=4&&pay(150000)){G.pkg.printed=true;dayPrices();toast('Bao bì giờ có in logo quán!')}}
   else if(k==='plogo'){G.pkg.logo=a;sfx('tap')}
   else if(k==='pcol'){G.pkg.color=a;sfx('tap')}
-  else if(k==='tagb'){const x=TAGS.find(y=>y.id===a);if(pay(x.price)){G.tags[a]=true;G.tag=a}}
+  else if(k==='tagb'){const x=TAGS.find(y=>y.id===a);if(condsOk(x)&&pay(x.price)){G.tags[a]=true;G.tag=a}}
   else if(k==='tagw'){G.tag=a;sfx('tap')}
+  else if(k==='rview'){rankView=a;sfx('tap');renderMarket();return}
   else if(k==='mee'){if(a==='sync'){serverSync().then(()=>toast('Đã lưu lên MeeGame'));return}if(a==='out'){meeSignOut();return}}
   else if(k==='fr'){if(a==='ask'){frConfirm=true;sfx('tap')}else{doFranchise();return}}
   checkTitles();save();applyProfile();renderMarket();if(['tagw','tagb','wear','title'].includes(k))pushBoard();
@@ -1701,14 +1739,14 @@ async function loadServerBoard(){
     if(c&&c.use){const [db,user]=await Promise.all([c.use('db'),c.use('user')]);
       if(db&&user){NET.uid=await user.id();NET.db=db;NET.status='Chưa có ai lên bảng. Kết sổ một ngày để lên bảng!';
         db.collection('board').orderBy('assets','desc').limit(40).onSnapshot(sn=>{
-          NET.rows=sn.docs.map(d=>{const x=d.data()||{};return {shop:x.shop,owner:x.owner,val:+x.assets||0,title:x.title,tag:x.tag,level:x.level,me:d.id===NET.uid}});
+          NET.rows=sn.docs.map(d=>{const x=d.data()||{};return {shop:x.shop,owner:x.owner,val:+x.assets||0,title:x.title,tag:x.tag,level:x.level,logo:x.logo,me:d.id===NET.uid}});
           if(current==='market'&&mTab==='exp'&&mSub.exp==='rank')renderMarket()},()=>{NET.status='Không đọc được bảng xếp hạng lúc này.'});
         pushBoard();return}}
     NET.status='Bảng xếp hạng online cần mở game trên Claude (đã đăng nhập) hoặc trên trang MeeGame.';
   }catch(e){NET.status='Không kết nối được bảng xếp hạng online.'}
 })();
 function pushBoard(){
-  if(NET.db&&NET.uid){NET.db.doc('board/'+NET.uid).set({shop:P_.shop.slice(0,24),owner:P_.name.slice(0,12),title:titleName(),tag:G.tag||'go',level:level(),assets:assets(),served:G.stats.served,fr:G.fr.count,day:G.day,updatedAt:Date.now()}).catch(()=>{})}
+  if(NET.db&&NET.uid){NET.db.doc('board/'+NET.uid).set({logo:P_.logo,shop:P_.shop.slice(0,24),owner:P_.name.slice(0,12),title:titleName(),tag:G.tag||'go',level:level(),assets:assets(),served:G.stats.served,fr:G.fr.count,day:G.day,updatedAt:Date.now()}).catch(()=>{})}
   if(NET.server&&NET.player)serverSync();
 }
 async function serverSync(){
