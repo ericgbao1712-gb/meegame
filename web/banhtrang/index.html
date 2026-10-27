@@ -263,6 +263,8 @@ html,body,*{touch-action:manipulation}
 .bowlcol{display:flex;flex-direction:column;gap:9px;min-width:0}
 .bowlbox{position:relative;background:#6d4122;padding:3px;line-height:0;display:flex;justify-content:center}
 .bowlbox canvas{height:96px;width:auto;max-width:100%;object-fit:contain;display:block;touch-action:none;cursor:grab}
+.bowltops{position:absolute;left:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:3px;max-width:62%;pointer-events:none;line-height:0;z-index:2}
+.bowltops img{width:18px;height:18px;padding:1px;background:#fffaf0;box-shadow:0 0 0 2px var(--ink);image-rendering:pixelated}
 .bowlbox.shake canvas{animation:shake .12s steps(2) infinite}
 @keyframes shake{0%{transform:translate(0,0)}50%{transform:translate(2px,-1px)}100%{transform:translate(-1px,1px)}}
 .bowlhint{position:absolute;inset:auto 0 5px 0;margin:0;text-align:center;font-size:15px;line-height:1;color:var(--paper);text-shadow:2px 2px 0 var(--ink);pointer-events:none}
@@ -732,6 +734,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
             <div class="modes" id="modes"></div>
             <canvas id="bowlCv" width="96" height="64" aria-label="Khu làm món: thau trộn, thớt cuốn hoặc bếp nướng"></canvas>
             <p class="bowlhint" id="bowlHint"></p>
+            <div class="bowltops" id="bowlTops" aria-label="Đã bỏ vào"></div>
           </div>
           <div class="actions">
             <button class="serve pxb" id="serveBtn">Giao món<small id="packInfo"></small></button>
@@ -2495,7 +2498,7 @@ function addBits(cols,n,size,spread,opts={}){
     if(opts.spread){const aa=R()*Math.PI*2,rr=Math.sqrt(R())*.9;hx=Math.cos(aa)*rr;hy=Math.sin(aa)*rr}
     else{hx=cx+(R()-.5)*spread;hy=cy+(R()-.5)*spread*1.3;const m=Math.hypot(hx,hy);if(m>.9){hx*=.9/m;hy*=.9/m}}
     const ma=R()*Math.PI*2,mr=Math.sqrt(R())*.92;
-    B.bits.push({hx,hy,mx:Math.cos(ma)*mr,my:Math.sin(ma)*mr,c:cols[i%cols.length],w:size[0],h:size[1],mm:0,k:.7+R()*.6,base:!!opts.base})}
+    B.bits.push({hx,hy,mx:Math.cos(ma)*mr,my:Math.sin(ma)*mr,c:cols[i%cols.length],w:size[0],h:size[1],mm:0,k:.7+R()*.6,base:!!opts.base,top:!!opts.top})}
 }
 function needBase(){if(!B.base){const w={tron:'Lấy <b>bánh tráng</b> bỏ vào thau trước đã',cuon:'Trải <b>bánh tráng phơi sương</b> lên thớt trước đã',nuong:'Đặt <b>bánh tráng tròn</b> lên bếp trước đã'};toast(w[S.mode]);sfx('bad');return true}return false}
 function addItem(id,el){
@@ -2515,7 +2518,7 @@ function addItem(id,el){
     if(B.tops.includes(id)){toast(`Có ${it.name.toLowerCase()} rồi`);return}
     if(B.dish==='cuon'&&B.roll>=30){toast('Cuốn lại rồi, không thêm nhân được');sfx('bad');return}
     if(B.dish==='nuong'&&B.folded){toast('Bánh gấp rồi, không thêm được');sfx('bad');return}
-    B.tops.push(id);addBits(it.cols,it.n,it.s,B.dish==='tron'?.42:.5);
+    B.tops.push(id);addBits(it.cols,Math.max(6,Math.round(it.n*.7)),[Math.max(2,it.s[0]),Math.max(2,it.s[1])],B.dish==='tron'?.42:.95,{top:true});
   }
   G.stock[id]--;B.used.push(id);fly(el,IMG[id]);sfx('drop');refresh();
 }
@@ -2798,6 +2801,7 @@ function refresh(){
   $('moLbl').textContent=B.mo?`Mỡ hành ${B.mo}`:'Không mỡ';$('moCnt').textContent='còn '+G.stock.mohanh;
   {const d=B.dish||(S?S.mode:'tron');$('packInfo').textContent=packFor(d).map(id=>`${ITEMS[id].short.toLowerCase()} ${G.stock[id]}`).join(' · ')}
   const m=S?S.mode:'tron';
+  {const ids=B.base?[B.sauce,...B.tops].filter(Boolean):[],k=ids.join();const bt2=$('bowlTops');if(bt2.dataset.k!==k){bt2.dataset.k=k;bt2.innerHTML=ids.map(id=>`<img src="${IMG[id]}" alt="${ITEMS[id].name}" title="${ITEMS[id].name}">`).join('')}}
   $('bowlHint').textContent=B.base?'':{tron:'Chọn bánh tráng trên quầy',cuon:'Trải bánh phơi sương lên thớt',nuong:'Đặt bánh tráng tròn lên bếp'}[m];
   if(S){renderTicket();updateHints()}
 }
@@ -2937,7 +2941,7 @@ function drawBoard(){
   const p=B.roll/100,top=19,bot=56,flatB=Math.round(bot-(bot-top)*p*.9);
   for(let y=top;y<flatB;y++){const inset=(y===top||y===bot-1)?2:(y===top+1?1:0);P('#f3e2b8',16+inset,y,60-inset*2,1)}
   for(let y=top+2;y<flatB;y+=3)for(let x=19+(y%2)*2;x<74;x+=5)P('#e2c98e',x,y);
-  for(const b of B.bits){const x=46+b.hx*24,y=47+b.hy*6;if(y<flatB-1)P(b.c,x-b.w/2,y,b.w,b.h)}
+  for(const b of B.bits){const x=46+b.hx*25,y=38+b.hy*14;if(y<flatB-2)drawBit(P,b,x,y)}
   if(p>0){const th=Math.round(3+7*p),ry=flatB;P(INK,15,ry-1,62,th+2);P('#efe0b8',16,ry,60,th);P('#fff3d6',16,ry+1,60,1);P('#d9c08a',16,ry+th-1,60,1);
     const cols=B.tops.flatMap(id=>ITEMS[id].cols);cols.forEach((c,i)=>{P(c,16,ry+1+(i%Math.max(1,th-2)),1,1);P(c,75,ry+1+((i+1)%Math.max(1,th-2)),1,1)});
     if(p>=1){P(INK,36,ry-1,1,th+2);P(INK,56,ry-1,1,th+2)}}
@@ -2956,12 +2960,13 @@ function drawGrill(t){
   if(c>40)for(let i=-24;i<=24;i+=8)for(let k=0;k<8;k++){const x=cx+i+k-4,y=cy-4+k;if(!half||y<=cy)if(((x-cx)/rx)**2+((y-cy)/ry)**2<.8)P(lerpC(col,'#5a3418',.4),x,y)}
   if(!half){
     if(B.tops.includes('trung_cut'))EC(lerpC('#f5c84a','#c98a2a',clamp(c/140,0,1)),cx-4,cy,18,5);
-    for(const b of B.bits){const x=cx+b.hx*26,y=cy+b.hy*8;P(b.c,x-b.w/2,y,b.w,b.h)}
     if(B.sauce){const sc2=ITEMS[B.sauce].col;for(let x=22;x<74;x++)P(sc2,x,cy-3+((Math.floor(x/3))%2?2:-1)+Math.round((x-48)/16))}
+    for(const b of B.bits){const x=cx+b.hx*26,y=cy+b.hy*8;drawBit(P,b,x,y)}
   }else{P(lerpC(col,'#5a3418',.3),cx-rx+2,cy,rx*2-3,1);B.tops.slice(0,3).forEach((id,i)=>P(ITEMS[id].cols[0],cx-10+i*9,cy,4,1))}
   for(let i=0;i<5;i++)P('#2b1a14',cx-20+i*9,cy-5+(i%2)*3);
   if(c>100&&!half)for(let i=0;i<10;i++){const y=cy-6-((t*18+i*7)%20);P(c>120?'#6a6a70':'#cfd8e0',cx-18+i*4+Math.round(Math.sin(t*3+i)*2),y,2,2)}
 }
+function drawBit(P,b,x,y){if(b.top)P(lerpC(b.c,'#2b1a14',.62),x-b.w/2-1,y-1,b.w+2,b.h+2);P(b.c,x-b.w/2,y,b.w,b.h);if(b.top&&b.w>=2&&b.h>=2)P(lerpC(b.c,'#ffffff',.35),x-b.w/2,y,1,1)}
 function drawBowl(){
   const {P,E}=bt;bc.clearRect(0,0,96,64);
   E('#5a3418',48,52,44,10);E(INK,48,36,43.5,23.5);E('#aeb9c1',48,36,42.5,22.5);P('#d4dce1',12,38,3,8);P('#d4dce1',16,46,2,4);
@@ -2971,7 +2976,8 @@ function drawBowl(){
   const ca=Math.cos(B.swirl),sa=Math.sin(B.swirl);
   for(const b of B.bits){const m=b.mm/100,e=m*m*(3-2*m),x=b.hx+(b.mx-b.hx)*e,y=b.hy+(b.my-b.hy)*e,rx=x*ca-y*sa,ry=x*sa+y*ca,r2=rx*rx+ry*ry;
     const px=48+rx*33,py=29+ry*8.5-(b.base?(1-r2)*4:(1-r2)*4+1);
-    P(b.base&&tint?lerpC(b.c,tint,Math.min(.85,str)*e):b.c,px-b.w/2,py,b.w,b.h)}
+    if(b.top)continue;P(b.base&&tint?lerpC(b.c,tint,Math.min(.85,str)*e):b.c,px-b.w/2,py,b.w,b.h)}
+  for(const b of B.bits){if(!b.top)continue;const m=b.mm/100,e=m*m*(3-2*m),x=b.hx+(b.mx-b.hx)*e,y=b.hy+(b.my-b.hy)*e,rx=x*ca-y*sa,ry=x*sa+y*ca,r2=rx*rx+ry*ry;drawBit(P,b,48+rx*33,29+ry*8.5-(1-r2)*4-1)}   // topping vẽ sau cùng, nằm trên bánh
 }
 
 /* ---- điều khiển quầy ---- */
