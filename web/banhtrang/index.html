@@ -672,6 +672,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
       </div>
       <button class="btn pxb" id="btnCustomize" hidden style="font-size:17px">Đổi tên quán, nhân vật</button>
       <div class="acct pxb" id="acct" hidden></div>
+      <button class="btn go pxb" id="btnInstall" hidden style="font-size:17px">Cài game vào máy</button>
       <div class="row snd"><button class="btn pxb" id="btnSoundT" style="font-size:16px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicT" style="font-size:16px">Nhạc: Bật</button><button class="btn pxb" id="btnSetT" style="font-size:16px">Cài đặt</button></div>
     </div>
   </div>
@@ -3468,6 +3469,31 @@ function frame(now){
 setSound(AU.on);setMusic(MUS.on);
 renderTitle();
 requestAnimationFrame(frame);
+
+/* ---- Cài game như app (Android/Chrome). Nút chỉ hiện khi chưa cài và đang mở bằng trình duyệt ---- */
+(()=>{
+  const btn=$('btnInstall');if(!btn)return;
+  const standalone=matchMedia('(display-mode: standalone)').matches||navigator.standalone;
+  if(standalone)return;
+  const ua=navigator.userAgent,android=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua);
+  const inApp=/FBAN|FBAV|Instagram|Zalo|Line\/|; wv\)|Messenger|TikTok/i.test(ua);
+  let bip=null;
+  addEventListener('beforeinstallprompt',e=>{e.preventDefault();bip=e;btn.textContent='Cài game vào máy';btn.hidden=false});
+  addEventListener('appinstalled',()=>{bip=null;btn.hidden=true;toast('Đã cài <b>Bánh Tráng</b> vào máy')});
+  const guide=()=>{
+    const steps=ios?'Mở bằng Safari → nút Chia sẻ → “Thêm vào MH chính”.'
+      :inApp?'Đang mở trong Zalo/Facebook nên không cài được. Bấm ⋮ → “Mở trong Chrome” rồi cài từ Chrome.'
+      :'Chrome: bấm ⋮ → “Cài đặt ứng dụng”.';
+    openCard({img:IC.crown,tag:'CÀI GAME',title:'Cách cài game vào máy',
+      text:steps+'\n\nSamsung báo “Bố cục Màn hình chờ đã khóa”: Cài đặt → Màn hình chờ → tắt Khóa bố cục.\n\nBáo “đã cài” mà không mở được: Cài đặt → Ứng dụng → gỡ Bánh Tráng Nhà Mee rồi cài lại.',
+      choices:[{t:'Đã hiểu',s:'',fx:()=>''}]});
+  };
+  btn.onclick=async()=>{sfx('tap');
+    if(bip){bip.prompt();const r=await bip.userChoice.catch(()=>null);bip=null;if(!r||r.outcome!=='accepted')btn.hidden=false;else btn.hidden=true;return}
+    guide()};
+  // Không có lời mời cài (trình duyệt trong app, iPhone, hoặc đã cài) thì nút chuyển thành hướng dẫn
+  if(android||ios)setTimeout(()=>{if(!bip){btn.textContent='Cách cài game vào máy';btn.hidden=false}},2500);
+})();
 })();
 </script>
 
