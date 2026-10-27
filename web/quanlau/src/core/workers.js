@@ -362,9 +362,11 @@ function tickChef(G, a, m, dtMin, open) {
   if (a.path) { stepActor(L, a, dtMin); a.pose = 'walk'; return; }
   if (!a.task) {
     if (open) {
-      for (const t of w.tickets) {
+      // v1.27: bếp ưu tiên phiếu ship trước (ship lên là làm ngay, không đợi 1.5 phút)
+      const order = w.tickets.filter((t) => t.ship).concat(w.tickets.filter((t) => !t.ship));
+      for (const t of order) {
         if (t.status !== 'new' || t.claimedBy || (t.chefBlock || 0) > w.tMin) continue;
-        if (w.tMin - t.createdAt < 1.5) continue;
+        if (!t.ship && w.tMin - t.createdAt < 1.5) continue;
         const lack = stockBlocked(G, t);
         if (lack) { warnOut(G, lack); t.chefBlock = w.tMin + 6; continue; }
         t.status = 'chef'; t.claimedBy = a.id;

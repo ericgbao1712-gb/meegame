@@ -750,7 +750,7 @@ export const LIQUIDATE = { buyer: 'Cô Ba đầu hẻm', rates: [0.35, 0.5, 0.6]
 export const QUANKHO_RUN = { lowAt: 6, horizonMin: 120, cooldown: 10, minBuy: 15, buyMin: 240, usageShare: 0.5, tripMin: 6, runMult: 2 };
 
 // ───────────────────────────── OFFLINE & CHAIN ─────────────────────────────
-export const OFFLINE = { minAwaySec: 120, shopShare: 0.125 /* v1.2: halved */, chainShare: 0.5 /* v1.2: halved */, daySec: 240 /* offline pays as if a day took 4 min (kept when days became 9 min) */, shopCapSec: 4 * 3600, chainCapSec: 8 * 3600 };
+export const OFFLINE = { minAwaySec: 120, shopShare: 0.05 /* v1.27: 40% of 0.125 */, chainShare: 0.2 /* v1.27: 40% of 0.5 */, daySec: 240 /* offline pays as if a day took 4 min (kept when days became 9 min) */, shopCapSec: 4 * 3600, chainCapSec: 8 * 3600 };
 export const BRANCHES = [
   { id: 'dalat',   name: 'Đà Lạt',   dish: 'Lẩu gà lá é',          cost: 70000,   income: 0.9 },  // k per real second at level 1 (×240/540 when days went 4 → 9 min)
   { id: 'vungtau', name: 'Vũng Tàu', dish: 'Lẩu hải sản',           cost: 140000,  income: 1.6 },
