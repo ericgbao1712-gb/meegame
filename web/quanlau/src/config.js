@@ -328,11 +328,11 @@ export const LOTTERY = {
   // Một vé chỉ lãnh giải cao nhất. v1.18 thêm giải năm: trúng ~16% số vé (≈ 2 ngày mua đủ 5 vé là có giải); trung bình trả ~80% tiền vé (vé số thật luôn lỗ nha).
   tiers: [
     { id: 'db',   name: 'Giải đặc biệt', digits: 6, count: 1, prize: 100000 },
-    { id: 'nhat', name: 'Giải nhất',     digits: 5, count: 1, prize: 15000 },
-    { id: 'nhi',  name: 'Giải nhì',      digits: 4, count: 1, prize: 3000 },
-    { id: 'ba',   name: 'Giải ba',       digits: 3, count: 2, prize: 600 },
-    { id: 'tu',   name: 'Giải tư',       digits: 2, count: 6, prize: 60 },
-    { id: 'nam',  name: 'Giải năm',      digits: 2, count: 10, prize: 30 },   // v1.18: ~10%/vé → mua đều tay cứ ~2 ngày trúng 1 lần
+    { id: 'nhat', name: 'Giải nhất',     digits: 5, count: 2, prize: 15000 },
+    { id: 'nhi',  name: 'Giải nhì',      digits: 4, count: 3, prize: 3000 },
+    { id: 'ba',   name: 'Giải ba',       digits: 3, count: 6, prize: 600 },
+    { id: 'tu',   name: 'Giải tư',       digits: 2, count: 12, prize: 60 },
+    { id: 'nam',  name: 'Giải năm',      digits: 2, count: 20, prize: 30 },   // v1.27: tăng tỷ lệ trúng — 2 số cuối trúng ~32%, cả vé ~33% (≈ 1/3 vé có giải)
   ],
   claimDays: 7,           // vé trúng phải lãnh trong 7 ngày (vé thật 30 ngày)
   keepDays: 14,           // vé cũ hơn thì cất khỏi sổ
