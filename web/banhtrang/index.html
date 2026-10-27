@@ -960,6 +960,14 @@ ICON.st_me=sauceIcon('#8a4b22','#5e2f14','#b06a3a');
 ICON.st_toi=sauceIcon('#e2603a','#b04020','#f08a5a');
 ICON.st_phomai=sauceIcon('#ffe08a','#e0b84a','#fff3c0');
 ICON.st_trungmuoi=sauceIcon('#f2a03a','#c87a1a','#ffc870');
+const cupIcon=(liq,top,extra)=>({P,E})=>{P('#e9f6fa',4,3,8,12);P(liq,5,6,6,8);P(top,5,6,6,1);P('#cfe8f0',6,4,1,10);P('#d8352a',9,0,1,6);P('#e9f6fa',3,2,10,1);if(extra)extra({P,E})};
+ICON.tra_da=cupIcon('#c9883a','#e0a85a',({P})=>{P('#e9f6fa',6,8,2,2);P('#e9f6fa',8,11,2,2);P('#ffffff',6,8,1,1)});
+ICON.nuoc_sam=cupIcon('#a8743a','#c89a5a',({P})=>{P('#6fbe4a',8,7,2,1)});
+ICON.sua_dau=({P,E})=>{P('#fffaf0',4,4,8,11);P('#efe2c4',5,6,6,8);P('#fffaf0',5,6,6,1);P('#3b7a26',4,3,8,2);P('#9aa6ae',6,1,4,2);E('#d9a066',11,12,1.6,1.6)};
+ICON.rau_ma=cupIcon('#4f9a3a','#8ac46a',({P})=>{P('#f2e2a8',5,12,6,2);P('#e9d27a',6,13,1,1);P('#e9d27a',9,12,1,1)});
+ICON.nuoc_mia=cupIcon('#d6e08a','#f0f0c0',({P})=>{P('#7fb83a',9,7,2,2);P('#d6e86a',9,7,1,1)});
+ICON.tra_sua=({P,E})=>{P('#e9f6fa',4,3,8,12);P('#e0c09a',5,6,6,8);P('#f0d8b8',5,6,6,1);for(const [x,y] of [[5,12],[7,13],[9,12],[6,10],[10,13]])E('#2b1a14',x+.5,y+.5,.9,.9);P('#e86a9a',7,0,2,6);P('#e9f6fa',3,2,10,1)};
+ICON.nuoc_dua=({P,E})=>{E('#5aa23a',8,10,6,5);E('#7fc85a',7,9,3,2);P('#fffaf0',6,4,4,2);E('#fffaf0',8,5,2.4,1);P('#e86a9a',9,0,1,5);P('#3b7a26',2,12,12,1)};
 ICON.tra_tac=({P,E})=>{P('#e9f6fa',4,3,8,12);P('#f2c84b',5,6,6,8);P('#ffe08a',5,6,6,1);E('#7fb83a',7,9,1.6,1.6);E('#d6e86a',7,9,.8,.8);P('#cfe8f0',6,4,1,10);P('#d8352a',9,0,1,6);P('#e9f6fa',3,2,10,1)};
 ICON.tom_kho=({E,P},r)=>{for(let i=0;i<5;i++){const x=3+(i%3)*4,y=4+Math.floor(i/3)*5;E('#f08a5a',x+1,y+1,2.4,1.6,.4);P('#f5b08a',x,y,2,1);P('#c84a2a',x+3,y+2,1,1)}};
 ICON.st_satetom=sauceIcon('#d84a2a','#a83018','#f08a5a');
@@ -1126,7 +1134,14 @@ const ITEMS={
   hop_giay:{name:'Hộp giấy kraft',short:'Hộp',kind:'pack',pack:20,price:17000,unit:'cái'},
   bich_giay:{name:'Bịch giấy',short:'Bịch',kind:'pack',pack:20,price:12000,unit:'cái',lvl:6},
   dua:{name:'Đũa tre',short:'Đũa',kind:'pack',pack:50,price:8500,unit:'đôi'},
+  tra_da:{name:'Trà đá',short:'Trà đá',kind:'drink',pack:30,price:15000,unit:'ly',lvl:2},
   tra_tac:{name:'Trà tắc',short:'Trà tắc',kind:'drink',pack:20,price:24000,unit:'ly',lvl:4},
+  nuoc_sam:{name:'Nước sâm',short:'Nước sâm',kind:'drink',pack:20,price:60000,unit:'ly',lvl:6},
+  sua_dau:{name:'Sữa đậu nành',short:'Sữa đậu',kind:'drink',pack:20,price:70000,unit:'ly',lvl:8},
+  rau_ma:{name:'Rau má đậu xanh',short:'Rau má',kind:'drink',pack:20,price:100000,unit:'ly',lvl:12,perish:true},
+  nuoc_mia:{name:'Nước mía',short:'Nước mía',kind:'drink',pack:20,price:80000,unit:'ly',lvl:14,perish:true},
+  tra_sua:{name:'Trà sữa trân châu',short:'Trà sữa',kind:'drink',pack:20,price:140000,unit:'ly',lvl:17},
+  nuoc_dua:{name:'Nước dừa tươi',short:'Dừa',kind:'drink',pack:10,price:120000,unit:'trái',lvl:21},
   tom_kho:{name:'Tôm khô',kind:'top',pack:5,price:12000,extra:3000,lvl:16,n:12,cols:['#f08a5a','#f5b08a'],s:[2,1]},
   st_satetom:{name:'Sốt sa tế tôm',short:'Sa tế tôm',kind:'sauce',pack:10,price:14000,col:'#d84a2a',lvl:19,extra:2000},
   da_heo:{name:'Da heo chiên',short:'Da heo',kind:'top',pack:5,price:9000,extra:2000,lvl:21,n:10,cols:['#f2c87a','#e0a24a'],s:[3,2]},
@@ -1137,6 +1152,13 @@ const ITEMS={
 for(const id in ITEMS){ITEMS[id].id=id;ITEMS[id].short=ITEMS[id].short||ITEMS[id].name}
 const BASE_IDS=['soi','suong','bt_tron'],SAUCE_IDS=Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='sauce');
 const TOP_IDS=Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='top');
+const DRINK_IDS=Object.keys(ITEMS).filter(k=>ITEMS[k].kind==='drink');
+/* Giá bán mỗi ly; số thao tác cần (trà sữa: rót + trân châu, dừa: chặt + cắm ống) */
+const DRINK={tra_da:{sell:3000},tra_tac:{sell:8000},nuoc_sam:{sell:10000},sua_dau:{sell:10000,hot:true},rau_ma:{sell:15000},nuoc_mia:{sell:12000},
+  tra_sua:{sell:20000,steps:2,stepTxt:['Rót trà sữa','Thêm trân châu']},nuoc_dua:{sell:25000,steps:2,stepTxt:['Chặt dừa','Cắm ống hút']}};
+const dk=o=>o?o.drink===1?'tra_tac':(o.drink||null):null;   // đơn cũ lưu drink:1 = trà tắc
+const drinkName=o=>{const d=dk(o);return d?ITEMS[d].name.toLowerCase()+(DRINK[d].hot?(o.hot?' nóng':' đá'):''):''};
+function drinkDone(o){const d=dk(o);if(!d)return !B.drink;if(B.drink!==d)return false;const st=DRINK[d].steps||1;if(B.dstep<st)return false;if(DRINK[d].hot&&!!o.hot!==B.hot)return false;return true}
 const UPG=[
   {id:'thau',name:'Thau inox to',desc:'Trộn và cuốn nhanh hơn',price:180000},
   {id:'ghe',name:'Ghế nhựa đỏ',desc:'Khách chịu chờ lâu hơn 30%',price:120000},
@@ -1298,7 +1320,9 @@ const QTYPES=[
   {type:'haggle',lvl:3,gen:()=>({target:1,xp:40}),label:()=>'Trả giá cả giỏ thành công ở chợ sáng'},
   {type:'nowaste',lvl:4,gen:()=>({target:1,xp:45}),label:()=>'Không để nguyên liệu nào héo qua đêm (bán từ 5 món)'},
   {type:'si',lvl:4,gen:()=>({target:1,xp:60}),label:()=>'Giao 1 đơn Mua sỉ đạt 4 sao'},
-  {type:'drink',lvl:4,gen:l=>({target:3+Math.min(5,Math.floor(l/4)),xp:50}),label:q=>`Bán kèm ${q.target} ly trà tắc`},
+  {type:'drink',lvl:2,gen:l=>({target:3+Math.min(5,Math.floor(l/4)),xp:50}),label:q=>`Bán kèm ${q.target} ly nước`},
+  {type:'drinkone',lvl:6,gen:()=>({target:3,xp:55,dr:pick(DRINK_IDS.filter(unlocked))}),label:q=>`Bán ${q.target} ${q.dr==='nuoc_dua'?'trái':'ly'} ${nameOf(q.dr)}`},
+  {type:'drinkmix',lvl:8,gen:()=>({target:4,xp:70}),label:q=>`Bán đủ ${q.target} loại nước trong ngày`},
   {type:'profit',lvl:5,gen:l=>({target:(150+l*30)*1000,xp:75}),label:q=>`Lãi ròng trong ngày từ ${fmtK(q.target)}`},
   {type:'hen',lvl:7,gen:()=>({target:1,xp:70}),label:()=>'Giao đúng hẹn 1 đơn đặt trước'},
   {type:'golden',lvl:20,gen:()=>({target:4,xp:80}),label:q=>`Bán ${q.target} món trong Giờ vàng (17:00–18:00)`},
@@ -1347,7 +1371,7 @@ const rating=()=>avg(G.ratings.slice(-60));
 function addMoney(v){G.money+=v}
 function rate(n){G.ratings.push(n);if(S)S.ratingsToday.push(n)}
 let S=null;
-const B={dish:null,base:null,sauce:null,tops:[],sate:0,mo:0,drink:false,swirl:0,bits:[],used:[],roll:0,cook:0,folded:false,cookFinal:0};
+const B={dish:null,base:null,sauce:null,tops:[],sate:0,mo:0,drink:null,dstep:0,hot:false,swirl:0,bits:[],used:[],roll:0,cook:0,folded:false,cookFinal:0};
 
 
 /* =====================================================================
@@ -1501,7 +1525,10 @@ function questEvent(kind,data){
       if(q.type==='si'&&data.kind==='si'&&st>=4)q.prog++;
       if(q.type==='hen'&&(data.kind==='hen'||data.kind==='cty')&&st>=3)q.prog++;
       if(q.type==='mo'&&nz(o.mo)>0&&!iss.some(x=>/mỡ hành/.test(x)))q.prog++;
-      if(q.type==='drink'&&nz(o.drink)&&!iss.some(x=>/trà/.test(x)))q.prog+=data.qty||1;
+      const okDr=dk(o)&&!iss.some(x=>/nước|Quên|Dư ly|trân châu|ống|sữa/.test(x));
+      if(q.type==='drink'&&okDr)q.prog++;
+      if(q.type==='drinkone'&&okDr&&dk(o)===q.dr)q.prog++;
+      if(q.type==='drinkmix'&&okDr){q.seen=q.seen||[];if(!q.seen.includes(dk(o)))q.seen.push(dk(o));q.prog=q.seen.length}
       if(q.type==='golden'&&data.golden)q.prog++;}
     if(kind==='haggle'&&q.type==='haggle')q.prog++;
     if(kind==='night'){if(q.type==='profit')q.prog=Math.max(q.prog,Math.max(0,data.profit));if(q.type==='nowaste'&&!data.spoiled&&data.served>=5)q.prog=1}
@@ -1587,7 +1614,7 @@ STAFF.push({id:'vy',name:'Chị Vy',role:'Phụ bỏ sốt',desc:'Bạn chọn b
   {id:'tho',name:'Bé Thơ',role:'Phụ bỏ topping',desc:'Bạn chọn bánh xong là bé tự bỏ đủ topping khách gọi. Sốt, sa tế, mỡ hành vẫn do bạn bỏ',wage:60000,lv:6,look:{skin:'#f6d0aa',hair:'#2b1a14',style:'long',shirt:'#8fd1a0',shirtD:'#4f9d6c',apron:true}});
 STAFF.push({id:'khoa',name:'Anh Khoa',role:'Làm đơn ship',desc:'Chuyên đóng gói đơn app: đơn online mỗi tối nhiều hơn 50%. Cần đăng ký app Ăn Vặt Ship (Mở rộng ▸ Giao hàng)',wage:60000,lv:8,look:{skin:'#d89a6a',hair:'#2b1a14',style:'cap',cap:'#3aa59a',shirt:'#3aa59a',shirtD:'#2a7a72'}});
 STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) trong 6–9 giây cho khách đang chờ, không phải khách bạn đang chọn. Đôi khi lệch vị: món 3–5 sao, nửa XP.',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
-STAFF.push({id:'hau',name:'Bé Hậu',role:'Pha trà',desc:'Khách gọi trà tắc là bé tự rót, bạn chỉ lo phần bánh',wage:50000,lv:18,look:{skin:'#f2c79b',hair:'#3a2216',style:'ponytail',shirt:'#c8e07a',shirtD:'#8ab83a',apron:true}},
+STAFF.push({id:'hau',name:'Bé Hậu',role:'Pha trà',desc:'Khách gọi nước gì bé pha nước đó (cả trà sữa, dừa, sữa nóng/đá), bạn chỉ lo phần bánh',wage:50000,lv:18,look:{skin:'#f2c79b',hair:'#3a2216',style:'ponytail',shirt:'#c8e07a',shirtD:'#8ab83a',apron:true}},
   {id:'quan',name:'Anh Quân',role:'Quản lý',desc:'Thương lượng mối hàng: nguyên liệu rẻ thêm 8%, nhân viên làm việc hăng hơn',wage:150000,lv:27,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8b8',tie:'#5a1a14',glasses:true}});
 STAFF.forEach(x=>x.por=url(person(x.look,'happy')));
 const DECOR=[
@@ -2555,6 +2582,7 @@ function preTick(){
   }
 }
 function afterServe(c,stars){
+  if(dk(c.order)==='tra_sua'&&stars>=3&&!G.kenTS){G.kenTS=true;setTimeout(()=>openCard({img:CAST.ken.url.angry,tag:'KEN GHÉ NGANG',title:'“Bán luôn trà sữa của anh hả?!”',text:'Ken đứng trước quán, tay cầm ly Boba Bự: “Bánh tráng chưa đủ hay sao mà em bán luôn trà sữa? Được, để coi ly nào ngon hơn!”',choices:[{t:'Mời anh uống thử một ly',s:'tốn 1 ly trà sữa, khách vỗ tay',fx:()=>{G.stock.tra_sua=Math.max(0,G.stock.tra_sua-1);rate(5);return 'Ken uống xong im re, lén hỏi công thức trân châu'}},{t:'Cạnh tranh công bằng nha anh',s:'',fx:()=>'Ken hừ một tiếng rồi về tiệm'}]}),1800)}
   if(c.pre&&stars>=3)c.pre.done=true;
   if(cupOn()&&stars===5){G.cup.count++;if([5,9,14].includes(G.cup.count))toast(`Giải Bánh Tráng Vàng: <b>${G.cup.count}</b> món 5 sao · ${G.cup.count>=14?'đủ Vàng!':G.cup.count>=9?'đủ Bạc!':'đủ Đồng!'}`,2200)}
 }
@@ -2607,7 +2635,7 @@ function renderMarket(){
     h+=featuresHTML();h+=forecastHTML();
     h+=`<div class="hgbox pxb"><img src="${SELLERS.banh.url.happy}" alt=""><div><b>Trả giá cả giỏ</b><small>${hgA?(hgA.ok?`✓ Đã bớt ${Math.round(hgA.d*100)}% cho mọi món hôm nay`:'✗ Trả hụt, hôm nay giá +5%'):`Đã mua ${fmtK(spent)} sáng nay. Mua xong rồi trả giá một lần cho cả giỏ.`}</small></div>${hgA?'':'<button class="btn gold pxb" data-haggleall="1">Trả giá</button>'}</div>`;
     h+=`<p class="mnote">Mỗi lần mua là 1 gói. Rau, xoài, tắc để qua đêm héo mất một nửa. Đồ khô để dành mai bán tiếp.${cm<1?` Đang được giảm ${Math.round((1-cm)*100)}% giá nhập.`:''}</p>`;
-    const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate','mohanh','tra_tac']],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','bo_dalat','kho_muc','kho_ga','tom_kho','ruoc','tep','cha_bong','da_heo','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim','lap_xuong']],
+    const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate','mohanh']],['Quầy nước · Cô Ba',DRINK_IDS],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','bo_dalat','kho_muc','kho_ga','tom_kho','ruoc','tep','cha_bong','da_heo','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim','lap_xuong']],
       ['Sạp trứng, rau trái · Chị Bảy',['trung_cut','trung_muoi','xuc_xich','xx_phomai','cha_lua','pho_mai','bo_dau','thit_bam','xoai','bo_bia','rau_ram','hanh_la','tac']]];
     for(const [title,ids] of groups){const open=ids.filter(unlocked);if(!open.length)continue;h+=`<div class="mgroup">${title}</div>`;for(const id of open)h+=row(id)}
     const locked=Object.keys(ITEMS).filter(id=>!unlocked(id)).sort((a,b)=>ITEMS[a].lvl-ITEMS[b].lvl);
@@ -2646,7 +2674,7 @@ function demandToday(){
     if(d==='tron'){const ps=unlocked('suong')?.32:0;add('soi',k*(1-ps)*QTY);add('suong',k*ps*QTY);sl=sauces.length?sauces:['st_tac'];add('sate',k*avg(city.cay));add('mohanh',k*avg([0,0,0,1,1,2,3])*QTY);add('hop_giay',k);add('dua',k)}
     else if(d==='cuon'){add('suong',k*QTY);sl=sp(['st_me','st_tac','st_toi','st_phomai']);add('sate',k*avg([0,1,1,2,2,3]));add('bich_giay',k)}
     else{add('bt_tron',k*QTY);sl=sp(['st_bo','st_me','st_phomai','st_trungmuoi','st_toi']);add('trung_cut',k*QTY);T=T.filter(t=>t!=='trung_cut');add('sate',k*avg([0,1,2,2,3]));add('mohanh',k*avg([1,1,2,2,3])*QTY);add('bich_giay',k)}
-    sl.forEach(x=>add(x,k/sl.length));if(unlocked('tra_tac')&&!G.menuOff.tra_tac)add('tra_tac',k*.3);
+    sl.forEach(x=>add(x,k/sl.length));{const ds=DRINK_IDS.filter(d=>unlocked(d)&&!G.menuOff[d]);ds.forEach(d=>add(d,k*.38/ds.length*(d==='tra_tac'||d==='tra_da'?1.4:1)))}
     if(T.length){T.forEach(t=>add(t,k*avgTops*QTY/T.length));const fr=fresh.filter(t=>T.includes(t));if(fr.length)fr.forEach(t=>add(t,k*.45*QTY/fr.length))}
   }
   if(f.sigShare>0){const each=f.n*UP*f.sigShare/f.sigs.length;for(const r of f.sigs){add(r.base,each*QTY);add(r.sauce,each);r.tops.forEach(t=>add(t,each*QTY));add('sate',each*2);add('mohanh',each*(r.dish==='cuon'?0:1.3));packFor(r.dish).forEach(id=>add(id,each))}}
@@ -2702,11 +2730,11 @@ const TRAY_GROUPS=[['ĐỒ KHÔ · MẶN',['kho_bo','bo_dalat','kho_muc','kho_ga
   ['TRỨNG · THỊT · PHÔ MAI',['trung_cut','trung_muoi','xuc_xich','xx_phomai','cha_lua','pho_mai','bo_dau','thit_bam']],['RAU · TRÁI',['xoai','bo_bia','rau_ram','hanh_la','tac']]];
 function buildTray(){
   const m=B.dish||(S?S.mode:'tron'),fit=id=>unlocked(id)&&(!ITEMS[id].only||ITEMS[id].only.includes(m)||B.tops.includes(id));
-  const key=m+'|'+TOP_IDS.filter(fit).join()+(unlocked('tra_tac')?'|tra':'');if(tray.dataset.k===key)return;tray.dataset.k=key;tray.innerHTML='';fitWideSoon();
+  const key=m+'|'+TOP_IDS.filter(fit).join()+'|'+DRINK_IDS.filter(d=>unlocked(d)&&!G.menuOff[d]).join();if(tray.dataset.k===key)return;tray.dataset.k=key;tray.innerHTML='';fitWideSoon();
   const seen=new Set(),group=(t,ids)=>{if(!ids.length)return;const lb=document.createElement('div');lb.className='tgl';lb.textContent=t;tray.appendChild(lb);ids.forEach(id=>tray.appendChild(tile(id)))};
   for(const [t,ids] of TRAY_GROUPS){ids.forEach(i=>seen.add(i));group(t,ids.filter(fit))}
   group('KHÁC',TOP_IDS.filter(id=>!seen.has(id)&&fit(id)));
-  group('ĐỒ UỐNG',['tra_tac'].filter(id=>unlocked(id)&&!G.menuOff[id]));
+  group('ĐỒ UỐNG',DRINK_IDS.filter(id=>unlocked(id)&&!G.menuOff[id]));
 }
 function buildSlotsDOM(){const n=slotCount();if(slotsEl.children.length===n)return;slotsEl.innerHTML='';slotsEl.style.gridTemplateColumns=`repeat(${n},1fr)`;
 for(let i=0;i<n;i++){const d=document.createElement('button');d.className='slot';d.innerHTML='<span class="tag"></span><span class="bar"><i></i></span>';
@@ -2759,7 +2787,13 @@ function newCustomer(slot,instant){
   else if(dish==='nuong'&&!G.menuOff.trung_cut){const t=tops.filter(x=>x!=='trung_cut');order={dish,base:'bt_tron',sauce:sp(['st_bo','st_me','st_phomai','st_trungmuoi','st_toi']),tops:['trung_cut',...t.slice(0,1+Math.floor(R()*2))],cay:pick([0,1,2,2,3])}}
   else order={dish:'tron',base:R()<.68||!unlocked('suong')?'soi':'suong',sauce:sp(sauces),tops:tops.slice(0,2+Math.floor(R()*3)),cay:pick(city.cay)};
   if(K.mild)order.cay=Math.min(order.cay,1);
-  order.drink=unlocked('tra_tac')&&!G.menuOff.tra_tac&&!K.qty&&R()<(kind==='tay'?.6:.3)?1:0;
+  order.drink=0;
+  {const ds=DRINK_IDS.filter(d=>unlocked(d)&&!G.menuOff[d]);
+   if(ds.length&&!K.qty&&R()<(kind==='tay'?.6:.32+.02*Math.min(5,ds.length))){
+     const ev=weekEv(),w=d=>1*(kind==='tay'&&d==='nuoc_dua'?5:1)*(kind==='tay'&&d==='tra_da'?2:1)*((kind==='voi'||ev==='thicu')&&d==='nuoc_sam'?3:1)*(kind==='voi'&&d==='tra_sua'?2:1)
+       *(order.cay>=4&&d==='tra_da'?4:1)*(ev==='mua'&&d==='sua_dau'?3:1)*(d==='tra_tac'||d==='tra_da'?1.5:1);
+     let r=R()*ds.reduce((a,d)=>a+w(d),0);for(const d of ds){r-=w(d);if(r<=0){order.drink=d;break}}if(!order.drink)order.drink=ds[0];
+     if(DRINK[order.drink].hot)order.hot=ev==='mua'?R()<.75:R()<.4;}}
   order.mo=order.dish==='cuon'?0:order.dish==='nuong'?pick([1,1,2,2,3]):pick([0,0,0,1,1,2,3]);
   let qty=1;if(K.qty){qty=2+(R()<.4?1:0);const need=[order.base,...order.tops];if(!need.every(id=>G.stock[id]>=qty))qty=1}
   if(kind==='review')S.reviewDone=true;
@@ -2807,8 +2841,14 @@ function addItem(id,el){
     if(B.sauce){toast(B.sauce===id?'Đã có sốt này rồi':'Mỗi món chỉ một loại sốt thôi');return}
     B.sauce=id;if(B.dish==='tron')addBits([it.col],22,[2,1],1.1);
   }else if(it.kind==='drink'){
-    if(B.drink){toast('Có ly trà tắc rồi');return}
-    B.drink=true;
+    const D=DRINK[id],st=D.steps||1;
+    if(B.drink&&B.drink!==id){toast(`Đã rót ${nameOf(B.drink)} rồi, muốn đổi thì bấm <b>Đổ</b>`);sfx('bad');return}
+    if(B.drink===id){
+      if(D.hot){B.dstep++;B.hot=!B.hot;toast(`Sữa đậu nành <b>${B.hot?'nóng':'đá'}</b>`);sfx('tap');refresh();return}
+      if(B.dstep<st){B.dstep++;toast(D.stepTxt[B.dstep-1]+(B.dstep>=st?' · xong!':''));sfx('drop');refresh();return}
+      toast(`Có ly ${nameOf(id)} rồi`);return}
+    B.drink=id;B.dstep=1;B.hot=false;
+    if(D.steps)toast(D.stepTxt[0]+` · bấm thêm để ${D.stepTxt[1].toLowerCase()}`);else if(D.hot)toast('Sữa đậu nành <b>đá</b> · bấm lần nữa để đổi sang nóng');
   }else{
     if(B.tops.includes(id)){toast(`Có ${it.name.toLowerCase()} rồi`);return}
     if(B.dish==='cuon'&&B.roll>=30){toast('Cuốn lại rồi, không thêm nhân được');sfx('bad');return}
@@ -2854,7 +2894,7 @@ function doMix(amount,dAng){
   B.swirl+=dAng;S.lastMix=performance.now();
   if(S.lastMix-S.lastMixSnd>280){S.lastMixSnd=S.lastMix;sfx('mix')}
 }
-function resetBowl(silent){Object.assign(B,{dish:null,base:null,sauce:null,tops:[],sate:0,mo:0,drink:false,bits:[],swirl:0,used:[],roll:0,cook:0,folded:false,cookFinal:0});if(!silent){refresh();if(S)autoMode()}}
+function resetBowl(silent){Object.assign(B,{dish:null,base:null,sauce:null,tops:[],sate:0,mo:0,drink:null,dstep:0,hot:false,bits:[],swirl:0,used:[],roll:0,cook:0,folded:false,cookFinal:0});if(!silent){refresh();if(S)autoMode()}}
 function fly(fromEl,src){
   if(reduce)return;
   const r=fromEl.getBoundingClientRect(),b=$('bowlCv').getBoundingClientRect();
@@ -2865,7 +2905,7 @@ function fly(fromEl,src){
 }
 
 /* ---- giao món & chấm sao ---- */
-const nameOf=id=>id==='sate'?'sa tế':id==='mohanh'?'mỡ hành':ITEMS[id].name.toLowerCase();
+const nameOf=id=>!id?'':id==='sate'?'sa tế':id==='mohanh'?'mỡ hành':ITEMS[id].name.toLowerCase();
 function evaluate(o){
   let s=5;const issues=[];
   if(B.dish!==o.dish){s-=3;issues.push('Sai món')}
@@ -2875,7 +2915,12 @@ function evaluate(o){
   if(miss.length){s-=miss.length;issues.push('Thiếu '+miss.map(nameOf).join(', '))}
   if(extra.length){s-=.5*extra.length;issues.push('Dư '+extra.map(nameOf).join(', '))}
   const d=B.sate-o.cay;if(d){s-=Math.min(2,Math.abs(d));issues.push(d>0?`Cay hơn ${d} cấp`:`Thiếu cay ${-d} cấp`)}
-  if(nz(o.drink)&&!B.drink){s-=1;issues.push('Quên trà tắc')}else if(B.drink&&!nz(o.drink)){s-=.5;issues.push('Dư ly trà')}
+  {const d=dk(o);
+   if(d&&!B.drink){s-=1;issues.push('Quên '+nameOf(d))}
+   else if(d&&B.drink!==d){s-=1;issues.push('Sai nước: khách gọi '+nameOf(d))}
+   else if(!d&&B.drink){s-=.5;issues.push('Dư ly '+nameOf(B.drink))}
+   else if(d){const D=DRINK[d];if(D.steps&&B.dstep<D.steps){s-=.5;issues.push(d==='tra_sua'?'Trà sữa thiếu trân châu':'Dừa chưa cắm ống')}
+     if(D.hot&&!!o.hot!==B.hot){s-=.5;issues.push(o.hot?'Khách muốn sữa nóng':'Khách muốn sữa đá')}}}
   const dm=B.mo-nz(o.mo);if(dm){s-=Math.min(1.5,Math.abs(dm)*.75);issues.push(dm>0?`Dư ${dm} muỗng mỡ hành`:`Thiếu ${-dm} muỗng mỡ hành`)}
   let bad='';
   if(tooPricey(o)){s-=1;issues.push('Khách chê đắt');bad='Bán gì mắc quá vậy!'}
@@ -2886,9 +2931,9 @@ function evaluate(o){
     else if(c>115){s-=2;issues.push('Cháy khét');bad='Khét lẹt luôn!'}else if(c>ZH()){s-=1;issues.push('Hơi sém')}}
   return {stars:clamp(Math.round(s),1,5),issues,d,bad};
 }
-function drinkPrice(){return 8000+(G.owned.eptac?3000:0)}
+function drinkPrice(d){d=d||'tra_tac';return DRINK[d].sell+(d==='tra_tac'&&G.owned.eptac?3000:0)+(d==='nuoc_mia'&&nz(G.street.mia)?2000:0)}
 function goldenNow(){return !!(S&&G.golden&&level()>=20&&S.min>=17*60&&S.min<18*60)}
-function orderPrice(o){return Math.round((orderPrice0(o)+(nz(o.drink)?drinkPrice()*M().priceMul:0))*(goldenNow()?.9:1))}
+function orderPrice(o){const d=dk(o);return Math.round((orderPrice0(o)+(d?drinkPrice(d)*M().priceMul:0))*(goldenNow()?.9:1))}
 function orderPrice0(o){if(o.sig){const rc=sigById(o.sig);if(rc)return Math.round((rc.price+1000*nz(o.mo))*M().priceMul)}const top=G.prices.top||4000;return Math.round((((G.prices[o.dish]||PRICE_SUGG[o.dish]))*(1+.06*nz(G.dishLv[o.dish]))+top*o.tops.length+1000*nz(o.mo)+o.tops.reduce((a,t)=>a+(ITEMS[t].extra||0),0)+(ITEMS[o.base].extra||0))*M().priceMul)}
 const LINES={5:['Ngon xỉu luôn!','Đúng vị, mai ghé nữa!','Ngon hơn trà sữa!'],4:['Ngon nè, lệch xíu thôi.','Ổn áp đó!'],3:['Cũng được…','Thiếu thiếu gì á.'],2:['Ủa đâu có gọi vậy?'],1:['Thôi khỏi luôn…']};
 function serve(){
@@ -2991,13 +3036,13 @@ function helperStep(){
   const c=S.slots[S.active];if(!c||c.leave||c.chef||!B.base)return;
   const o=c.order;if(B.dish!==o.dish)return;
   const el=id=>document.querySelector(`.tile[data-id="${id}"]`)||$('bowlCv');
-  if(G.staff.hau&&nz(o.drink)&&!B.drink&&G.stock.tra_tac>0){addItem('tra_tac',el('tra_tac'));return}
+  if(G.staff.hau&&dk(o)&&!drinkDone(o)&&(B.drink===dk(o)||(!B.drink&&G.stock[dk(o)]>0))){addItem(dk(o),el(dk(o)));return}
   if(G.staff.vy&&!B.sauce&&G.stock[o.sauce]>0){addItem(o.sauce,el(o.sauce));return}
   if(G.staff.tho&&!(B.dish==='cuon'&&B.roll>=30)&&!(B.dish==='nuong'&&B.folded)){
     const t=o.tops.find(t=>!B.tops.includes(t)&&G.stock[t]>0);if(t)addItem(t,el(t))}
 }
 function chefNeed(o,qty){const n={},add=(id,k)=>{if(k>0)n[id]=(n[id]||0)+k};
-  add(o.base,qty);add(o.sauce,1);o.tops.forEach(t=>add(t,qty));add('sate',o.cay);add('mohanh',nz(o.mo)*qty);add('tra_tac',nz(o.drink));packFor(o.dish).forEach(id=>add(id,1));return n}
+  add(o.base,qty);add(o.sauce,1);o.tops.forEach(t=>add(t,qty));add('sate',o.cay);add('mohanh',nz(o.mo)*qty);if(dk(o))add(dk(o),1);packFor(o.dish).forEach(id=>add(id,1));return n}
 function chefTick(dt){
   const jobs=S.chefs=S.chefs||[];
   for(const ch of jobs.slice()){const c=S.slots[ch.slot];
@@ -3055,7 +3100,7 @@ function renderHud(){
   $('moneyLbl').textContent=fmtK(G.money);updateHudCommon();
 }
 let lastTicketSig='';
-function orderHTML(c){let t=orderHTML0(c);const m=nz(c.order.mo);if(m)t=t.replace(/ nha!$/,`, <strong>${m} muỗng mỡ hành</strong> nha!`);if(nz(c.order.drink))t=t.replace(/ nha!$/,`, thêm <strong>1 ly trà tắc</strong> nha!`);return c.qty>1?t.replace(/ nha!$/,`, làm <strong>${c.qty} phần</strong> nha!`):t}
+function orderHTML(c){let t=orderHTML0(c);const m=nz(c.order.mo);if(m)t=t.replace(/ nha!$/,`, <strong>${m} muỗng mỡ hành</strong> nha!`);if(dk(c.order))t=t.replace(/ nha!$/,`, thêm <strong>1 ${c.order.drink==='nuoc_dua'?'trái':'ly'} ${drinkName(c.order)}</strong> nha!`);return c.qty>1?t.replace(/ nha!$/,`, làm <strong>${c.qty} phần</strong> nha!`):t}
 function orderHTML0(c){
   const o=c.order,tops=o.tops.map(nameOf),tl=tops.length>1?tops.slice(0,-1).join(', ')+' với '+tops.at(-1):tops[0];
   const cay=`<strong>${o.cay?'cay cấp '+o.cay:'không cay'}</strong>`,call=T(c.p.call);
@@ -3084,7 +3129,7 @@ function renderTicket(force){
     ...o.tops.map(t=>[ITEMS[t].name+(G.stock[t]<=0&&!B.tops.includes(t)?' (hết)':''),B.tops.includes(t)?'ok':G.stock[t]<=0?'bad':'']),
     ...B.tops.filter(t=>!o.tops.includes(t)).map(t=>['Dư '+nameOf(t),'bad']),
     ['Cay '+o.cay+' muỗng',B.sate===o.cay?(B.base?'ok':''):B.sate>o.cay?'bad':''],
-    ...(nz(o.drink)||B.drink?[[nz(o.drink)?'Trà tắc':'Dư trà tắc',B.drink?(nz(o.drink)?'ok':'bad'):(G.stock.tra_tac<=0?'bad':'')]]:[]),
+    ...(dk(o)||B.drink?[[dk(o)?ITEMS[dk(o)].short+(DRINK[dk(o)].hot?(o.hot?' nóng':' đá'):'')+(G.stock[dk(o)]<=0&&!B.drink?' (hết)':''):'Dư '+nameOf(B.drink),B.drink?(drinkDone(o)?'ok':dk(o)&&B.drink===dk(o)?'':'bad'):(dk(o)&&G.stock[dk(o)]<=0?'bad':'')]]:[]),
     ...(nz(o.mo)||B.mo?[['Mỡ hành '+nz(o.mo),B.mo===nz(o.mo)?(B.base?'ok':''):B.mo>nz(o.mo)?'bad':'']]:[]),[fin.lbl,fin.ok?'ok':fin.bad?'bad':'']];
   const KK=KINDS[c.kind]||KINDS.thuong;
   el.innerHTML=`<img src="${c.p.url.neutral}" alt="${c.p.name}"><p>${KK.lbl?`<span class="kind" style="background:${KK.col}">${KK.lbl}</span> `:''}${orderHTML(c)}</p>
@@ -3129,7 +3174,8 @@ function updateHints(){
       if(!B.sauce){need.add(o.sauce);parts.push(`<b>${nameOf(o.sauce)}</b>`)}
       if(B.sate<o.cay){need.add('sate');parts.push(`<b>+${o.cay-B.sate} muỗng</b> sa tế`)}
       if(B.mo<nz(o.mo)){need.add('mohanh');parts.push(`<b>+${nz(o.mo)-B.mo} muỗng</b> mỡ hành`)}
-      if(nz(o.drink)&&!B.drink){need.add('tra_tac');parts.push('<b>1 ly trà tắc</b>')}
+      {const d=dk(o);if(d&&!drinkDone(o)&&(!B.drink||B.drink===d)){need.add(d);const D=DRINK[d];
+        parts.push(!B.drink?`<b>1 ${d==='nuoc_dua'?'trái':'ly'} ${drinkName(o)}</b>`:D.steps?`<b>${D.stepTxt[1].toLowerCase()}</b>`:`đổi sữa sang <b>${o.hot?'nóng':'đá'}</b>`)}}
       const miss='Thiếu: '+parts.join(' · ');
       if(B.dish==='nuong'&&!B.folded){
         if(B.cook<ZL())msg=parts.length?miss+' · bánh đang nướng':'Chờ bánh vàng tới vạch xanh rồi bấm <b>Gấp</b>';
