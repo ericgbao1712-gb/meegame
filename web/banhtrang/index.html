@@ -417,6 +417,45 @@ html,body,*{touch-action:manipulation}
 @media (max-width:520px){.stage{padding-block:6px 32px}}
 @media (max-width:360px){.tile img{width:28px;height:28px}.ttl h1{font-size:48px}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* ===================== MÀN HÌNH RỘNG (máy tính / iPad ngang) =====================
+   Chỉ màn bán hàng và chợ giãn ra; các màn khác giữ khung 400px cho dễ đọc. */
+@media (min-width:980px) and (min-height:600px){
+  .game:has(#scr-service:not([hidden])),.game:has(#scr-market:not([hidden])){width:min(1240px,96vw)}
+  .stage:has(#scr-service:not([hidden])),.stage:has(#scr-market:not([hidden])){flex-direction:column;align-items:center}
+  .stage:has(#scr-service:not([hidden])) .notes,.stage:has(#scr-market:not([hidden])) .notes{display:none}
+  /* --- bán hàng: 3 cột --- */
+  #scr-service{display:grid;height:auto;min-height:0;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr);align-content:start;
+    grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"hud hud hud" "scene ctr ctr" "ticket ctr ctr";column-gap:12px}
+  #scr-service>.hud{grid-area:hud}
+  #scr-service>.scene{grid-area:scene;margin:10px 0 0 10px;align-self:start}
+  #scr-service>.ticket{grid-area:ticket;margin:10px 0 10px 10px;align-self:start}
+  #scr-service .counter{grid-area:ctr;margin:10px 10px 10px 0;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);
+    grid-template-rows:auto auto minmax(0,1fr);grid-template-areas:"hint hint" "station shelf" "station tray";gap:10px 12px;border-top:0;padding:10px;min-height:0;align-self:start}
+  #scr-service .hintbar{grid-area:hint;margin:0}
+  #scr-service .shelf{grid-area:shelf}
+  #scr-service .station{grid-area:station;margin:0;flex:none;min-height:0;align-self:start}
+  #scr-service .tray{grid-area:tray;align-content:start;overflow-y:auto;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));margin:0;padding:3px}
+  #scr-service .tray .tile img{width:34px;height:34px}#scr-service .tray .tile .lbl{font-size:12px}
+  #scr-service .shelf.dense .tile img{width:30px;height:30px}
+  #scr-service .bowlbox{min-height:300px}
+  #scr-service .bowlbox canvas{height:min(calc(100% - 6px),320px)}
+  #scr-service .shelf{grid-template-columns:repeat(auto-fill,minmax(52px,1fr))!important}
+  #scr-service .ticket p{font-size:19px}
+  /* --- chợ: thanh tab dọc bên trái, nội dung lưới bên phải --- */
+  #scr-market{display:grid;height:var(--gh);grid-template-columns:260px minmax(0,1fr);
+    grid-template-rows:auto auto auto auto auto minmax(0,1fr);grid-template-areas:"hud hud" "cv list" "goal list" "tabs list" "foot list" ". list"}
+  #scr-market>.hud{grid-area:hud}
+  #scr-market>#marketCv{grid-area:cv}
+  #scr-market>.goalstrip{grid-area:goal;grid-template-columns:1fr}
+  #scr-market>.tabs{grid-area:tabs;display:flex;flex-direction:column;gap:6px!important;padding:10px!important}
+  #scr-market>.tabs .tab{flex-direction:row;justify-content:flex-start;gap:8px;padding:6px 10px!important;font-size:17px!important}
+  #scr-market>.tabs .tab span{text-align:left}
+  #scr-market>.mlist{grid-area:list;display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));align-content:start;gap:8px 10px;border-left:3px solid var(--ink);padding:10px 14px 14px}
+  #scr-market>.mlist>*{grid-column:1/-1}
+  #scr-market>.mlist>:is(.mrow,.card2,.rdmenu,.pricebox,.tagrow,.quest,.rank){grid-column:auto}
+  #scr-market>.mfoot{grid-area:foot;grid-template-columns:1fr;border-top:0;background:none;padding:0 10px}
+}
+
 
 /* ===== pastel theme ===== */
 :root{--night:#f6e8ef;--night2:#fff6ec;--ink:#5a3d4a;--paper:#fffaf3;--paper2:#f6e5d5;--chili:#ef8d8d;--chiliD:#d0667a;--gold:#ffd98c;--leaf:#8fd1a0;--leafD:#4f9d6c;
@@ -2911,11 +2950,12 @@ function fitScene(){
   const sateNat=last?last.getBoundingClientRect().bottom-sc2.getBoundingClientRect().top+4:0;
   const stH=bb.closest('.station').clientHeight,bowlNat=BOWL_H+6+$('serveBtn').parentElement.offsetHeight+9;
   const ppr=cv.clientWidth/128||3,extra=Math.min(bb.clientHeight-BOWL_H,stH-Math.max(bowlNat,sateNat));
-  const ex=clamp(Math.floor(extra/ppr),0,34);SCN.ex=ex;
+  const wide=matchMedia('(min-width:980px) and (min-height:600px)').matches;
+  const ex=wide?34:clamp(Math.floor(extra/ppr),0,34);SCN.ex=ex;
   if(ex){cv.height=48+ex;sc.imageSmoothingEnabled=false}
   $('bubbles').style.height=(48/(48+ex)*100)+'%';
 }
-addEventListener('resize',()=>{if(S)fitScene()});
+addEventListener('resize',()=>{if(S)fitScene();if(current==='market')renderMarket()});
 function drawScene(t){
   const {P}=st;const k=clamp((S.min-16*60)/170,0,1),night=S.min>=17*60+20;
   const EX=SCN.ex;
