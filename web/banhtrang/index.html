@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png?v=2"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png?v=2"><link rel="manifest" href="/banhtrang/manifest.json?v=2"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.stage{padding-block:8px calc(env(safe-area-inset-bottom,0px)*.5 + 12px)!important}:root{--gh:clamp(600px,calc(100svh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)*.5 - 28px),900px)}</style></head><body><title>Bánh Tráng Nhà Mee</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png?v=2"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png?v=2"><link rel="manifest" href="/banhtrang/manifest.json?v=2"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.stage{padding-block:8px calc(env(safe-area-inset-bottom,0px)*.5 + 12px)!important}:root{--gh:clamp(600px,calc(100svh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px)*.5 - 28px),900px)}</style></head><body><title>Bánh Tráng Nhà Mee</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -254,6 +254,8 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .meter i{display:block;width:100%;background:repeating-linear-gradient(0deg,var(--gold) 0 4px,#e8912f 4px 6px)}
 .meter.full i{background:repeating-linear-gradient(0deg,#8fcf5a 0 4px,var(--leaf) 4px 6px)}
 .pct{font-size:16px;line-height:.9;font-variant-numeric:tabular-nums}
+/* chống zoom khi chạm 2 lần liên tiếp (iOS / Android); các phần kéo thả bên dưới vẫn dùng touch-action:none */
+html,body,*{touch-action:manipulation}
 .mixbtn{width:44px;padding:2px 0;background:var(--gold);display:flex;flex-direction:column;align-items:center;font-size:14px;line-height:.85;touch-action:none}
 .mixbtn img{width:22px;height:22px}
 .mixbtn.on{background:#ffd27a;transform:translateY(2px)}
@@ -2931,6 +2933,9 @@ async function redeemCode(){
   if(current==='market')renderMarket();else if(current==='title'){const keep=!$('setOv').hidden;renderTitle();$('setOv').hidden=!keep}
   setTimeout(serverSync,600);   // quà phải lên mạng ngay (máy chủ cộng quà vào phép kiểm tra gian lận)
 }
+/* iOS Safari bỏ qua user-scalable=no: chặn thêm cử chỉ zoom và double-click zoom */
+['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
+document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
 $('btnSetT').onclick=openSettings;$('btnSetM').onclick=openSettings;$('btnSetClose').onclick=closeSettings;
 $('setOv').addEventListener('click',e=>{if(e.target===$('setOv'))closeSettings()});
 $('btnSoundS').onclick=()=>{setSound(!AU.on);sfx('tap')};
