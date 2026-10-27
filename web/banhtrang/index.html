@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Bánh Tráng Nhà Mee</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png"><link rel="manifest" href="/banhtrang/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style></head><body><title>Bánh Tráng Nhà Mee</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -388,6 +388,36 @@ body{background-image:radial-gradient(rgba(140,90,120,.10) 1px,transparent 1px)}
 .mlist .sw{flex:1;height:30px;font-size:14px}
 .mlist .sw[aria-pressed="true"]{outline:3px solid var(--chiliD);outline-offset:2px}
 .card2 .ic img.por{width:24px;height:34px}
+/* skins (màu giao diện) */
+:root{--title:#e8707f;--bgA:#fbe9f0;--story:#fbeef3}
+#scr-title,#scr-end{background:linear-gradient(var(--bgA),var(--night2))}
+.ttl h1{color:var(--title)}
+#scr-story{background:var(--story)}
+.notes h1{color:var(--title)}
+html[data-skin="bacha"]{--night:#e6f4ee;--night2:#f6fbf7;--hud:#bfe6d4;--soft:#dff1ea;--chili:#f2a07a;--chiliD:#d9775a;--gold:#ffe08a;--leaf:#7fcfa8;--leafD:#3f9a74;--wood:#e8d2b0;--woodD:#c9ad84;--woodL:#f3e4c8;--paper2:#e8f1e6;--title:#3f9a74;--bgA:#e3f5ec;--story:#e9f6f0;--ink:#3d4a45;--txt:#3d4a45;--txt2:#6a7d74;--cash:#c0563f}
+html[data-skin="tim"]{--night:#ece8f6;--night2:#f8f5ff;--hud:#d9cff3;--soft:#e8e1f8;--chili:#e38bb0;--chiliD:#b8659a;--gold:#ffd98c;--leaf:#9ad3b5;--leafD:#5a9f80;--wood:#e6cdb8;--woodD:#c4a68e;--woodL:#f3e3d4;--paper2:#efe7f5;--title:#9b77d0;--bgA:#efe8fb;--story:#f1ecfb;--ink:#4a3d5a;--txt:#4a3d5a;--txt2:#7a6c8a;--cash:#b8659a}
+html[data-skin="dao"]{--night:#fbeee4;--night2:#fff7f0;--hud:#ffd3b8;--soft:#fde6d8;--chili:#f39a7a;--chiliD:#d9705a;--gold:#ffd27a;--leaf:#a6d69a;--leafD:#5f9f55;--wood:#efc59c;--woodD:#cf9c70;--woodL:#f8dcc0;--paper2:#f9e3d2;--title:#e07a5a;--bgA:#fff0e4;--story:#fff1e6;--ink:#5a3e34;--txt:#5a3e34;--txt2:#8a6a5c;--cash:#c0563f}
+html[data-skin="bien"]{--night:#e6eef8;--night2:#f5f9ff;--hud:#c6dcf5;--soft:#e0eaf8;--chili:#f28c8c;--chiliD:#cf6a7a;--gold:#ffd98c;--leaf:#8fd1b0;--leafD:#4f9d80;--wood:#e8cdb0;--woodD:#c8a888;--woodL:#f3e1cf;--paper2:#e8eef6;--title:#4f86c6;--bgA:#e8f1fc;--story:#edf3fc;--ink:#3a4560;--txt:#3a4560;--txt2:#6a7590;--cash:#cf6a7a}
+html[data-skin="dem"]{--night:#1b1830;--night2:#262140;--hud:#3a2f5a;--soft:#2e2850;--chili:#ef6f6f;--chiliD:#c9505f;--gold:#f2b84b;--leaf:#6fbe7a;--leafD:#3b8a4a;--wood:#b0703a;--woodD:#7a4a22;--woodL:#cf8c4e;--paper:#fbeed3;--paper2:#ecd6ae;--title:#f2b84b;--bgA:#1b1830;--story:#1b1830;--ink:#2b1a14;--txt:#fbeed3;--txt2:#c9b8d8;--cash:#f2b84b;color-scheme:dark}
+html[data-skin="dem"] body{background-image:radial-gradient(rgba(251,238,211,.06) 1px,transparent 1px)}
+html[data-skin="dem"] :is(.subtabs button,.mlist .logos button,.tagrow,.toggle,.pricebox,.quest,.lvcard,.mrow,.upg,.card2,.rcard,.rank,.fld,.sumcard,.dlg,.card,.ticket,.tile){color:var(--ink)}
+html[data-skin="dem"] .ttl h1{text-shadow:3px 3px 0 var(--chiliD),6px 6px 0 #000}
+html[data-skin="dem"] .ttl .btn:not(.hot):not(.go){color:var(--ink)}
+.skins{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.skins button{display:flex;flex-direction:column;align-items:center;gap:3px;padding:5px 2px 4px;background:var(--paper);color:var(--ink);font-size:14px;line-height:1}
+.skins button[aria-pressed="true"]{outline:3px solid var(--chiliD);outline-offset:2px}
+.skins i{display:flex;width:44px;height:16px;box-shadow:0 0 0 2px var(--ink)}
+.skins i b{flex:1}
+/* kéo ngang bằng chuột */
+.subtabs,.tray,.shelf.many,.chips{cursor:grab}
+.dragging{cursor:grabbing!important;user-select:none}
+.dragging *{pointer-events:none}
+.subwrap{position:relative;flex:none}
+.subwrap .arr{position:absolute;top:0;bottom:6px;width:26px;display:flex;align-items:center;justify-content:center;font-size:20px;color:var(--ink);background:linear-gradient(90deg,var(--night2),transparent);z-index:2}
+.subwrap .arr.r{right:0;background:linear-gradient(270deg,var(--night2) 40%,transparent)}
+.subwrap .arr.l{left:0;background:linear-gradient(90deg,var(--night2) 40%,transparent)}
+@media (hover:hover){.subtabs{scrollbar-width:thin}}
+
 /* name tags */
 .nt{display:inline-block;padding:1px 6px 0;line-height:1.1;box-shadow:0 0 0 2px var(--ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
 .nt-go{background:repeating-linear-gradient(90deg,#e2b98a 0 6px,#d6a978 6px 8px);color:#4a2a14}
@@ -448,6 +478,10 @@ body{background-image:radial-gradient(rgba(140,90,120,.10) 1px,transparent 1px)}
         <label for="inName" style="margin-top:4px">Tên gọi</label>
         <input class="pxin" id="inName" maxlength="12" autocomplete="off" spellcheck="false">
         <p class="hintsm" id="pronHint"></p>
+      </div>
+      <div class="fld pxb">
+        <span>Màu giao diện</span>
+        <div class="skins" id="skinGrid"></div>
       </div>
       <div class="fld pxb">
         <span>Logo quán</span>
@@ -1012,7 +1046,7 @@ function setSound(on){AU.on=on;try{localStorage.setItem('btdt-sound',on?'1':'0')
    G = dữ liệu lâu dài (lưu localStorage). S = phiên bán hàng. B = thau trộn.
    ===================================================================== */
 const SAVE_KEY='btdt-save-v1';
-const DEFAULT_PROFILE={shop:'Bánh Tráng Nhà Mee',name:'Út',gender:'f',logo:'bich',color:'red'};
+const DEFAULT_PROFILE={shop:'Bánh Tráng Nhà Mee',name:'Út',gender:'f',logo:'bich',color:'red',skin:''};
 function freshGame(){
   const stock={};for(const id in ITEMS)stock[id]=0;
   Object.assign(stock,{soi:6,st_tac:4,sate:10,dau_phong:4,hanh_phi:4,muoi_tom:4,trung_cut:3,hop_giay:10,dua:20});
@@ -1061,6 +1095,11 @@ const LOGOS={
 delete LOGOS.bich_old;
 const LOGO_CV={};for(const k in LOGOS){LOGO_CV[k]=sprite(16,16,LOGOS[k].draw);IMG['logo_'+k]=url(LOGO_CV[k])}
 const SIGN_COLORS={red:{name:'Đỏ',bg:'#5a1a14',fg:'#f2b84b'},green:{name:'Xanh lá',bg:'#1f4a24',fg:'#f5d76a'},blue:{name:'Xanh',bg:'#1a2f5a',fg:'#9ad0e6'},purple:{name:'Tím',bg:'#3a1f5a',fg:'#ffb3d0'}};
+const SKINS={hong:{name:'Hồng phấn',c:['#f9cfd8','#fff6ec','#ef8d8d']},bacha:{name:'Bạc hà',c:['#bfe6d4','#f6fbf7','#f2a07a']},tim:{name:'Tím khoai',c:['#d9cff3','#f8f5ff','#e38bb0']},
+  dao:{name:'Đào cam',c:['#ffd3b8','#fff7f0','#f39a7a']},bien:{name:'Trời xanh',c:['#c6dcf5','#f5f9ff','#f28c8c']},dem:{name:'Chợ đêm',c:['#3a2f5a','#262140','#f2b84b']}};
+function applySkin(k){k=SKINS[k]?k:'hong';document.documentElement.dataset.skin=k;try{localStorage.setItem('btdt-skin',k)}catch(e){}
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=SKINS[k].c[0]}
+try{applySkin(localStorage.getItem('btdt-skin')||'hong')}catch(e){applySkin('hong')}
 const SHOP_IDEAS=['Bánh Tráng Nhà Mee','Bánh Tráng Cô Út','Gánh Đêm Hoa Sứ','Bánh Tráng Cay Xé'];
 let P_={...DEFAULT_PROFILE};
 function playerLook(g){return g==='m'
@@ -1081,7 +1120,7 @@ function paintSign(root,p){
   root.querySelectorAll('.signName,#pvName').forEach(e=>{e.textContent=big;e.style.fontSize=big.length>14?'15px':big.length>10?'17px':''});
 }
 function applyProfile(){
-  P_=Object.assign({...DEFAULT_PROFILE},G.profile||{});
+  P_=Object.assign({...DEFAULT_PROFILE},G.profile||{});if(P_.skin)applySkin(P_.skin);
   const c=SIGN_COLORS[P_.color]||SIGN_COLORS.red;
   $('game').style.setProperty('--signbg',c.bg);$('game').style.setProperty('--signfg',c.fg);
   CAST.ut=makeChar({name:P_.name,look:playerLook(P_.gender)});
@@ -1101,6 +1140,7 @@ function openSetup(mode,back){
   $('inShop').value=SET.draft.shop;$('inName').value=SET.draft.name;
   $('shopIdeas').innerHTML=SHOP_IDEAS.map(n=>`<button class="px2" data-idea="${n}">${n}</button>`).join('');
   $('logoGrid').innerHTML=Object.entries(LOGOS).map(([k,v])=>`<button class="px2" data-logo="${k}"><img src="${IMG['logo_'+k]}" alt="">${v.name}</button>`).join('');
+  $('skinGrid').innerHTML=Object.entries(SKINS).map(([k,v])=>`<button class="px2" data-skin="${k}"><i>${v.c.map(c=>`<b style="background:${c}"></b>`).join('')}</i>${v.name}</button>`).join('');
   $('swGrid').innerHTML=Object.entries(SIGN_COLORS).map(([k,v])=>`<button class="sw px2" data-sw="${k}" style="background:${v.bg};color:${v.fg}">${v.name}</button>`).join('');
   renderSetup();show('setup');
 }
@@ -1109,6 +1149,7 @@ function renderSetup(){
   $('gF').setAttribute('aria-pressed',d.gender==='f');$('gM').setAttribute('aria-pressed',d.gender==='m');
   document.querySelectorAll('[data-logo]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.logo===d.logo));
   document.querySelectorAll('[data-sw]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.sw===d.color));
+  const curSkin=d.skin||document.documentElement.dataset.skin||'hong';document.querySelectorAll('[data-skin]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.skin===curSkin));
   const c=SIGN_COLORS[d.color];const sg=$('pvSign');sg.style.setProperty('--signbg',c.bg);sg.style.setProperty('--signfg',c.fg);
   $('pvLogo').src=IMG['logo_'+d.logo];
   paintSign($('pvSign'),{...d,shop:d.shop.trim()||DEFAULT_PROFILE.shop});
@@ -1121,7 +1162,8 @@ $('inName').addEventListener('input',e=>{SET.draft.name=e.target.value;renderSet
 $('gF').onclick=()=>{SET.draft.gender='f';sfx('tap');renderSetup()};
 $('gM').onclick=()=>{SET.draft.gender='m';sfx('tap');renderSetup()};
 $('scr-setup').addEventListener('click',e=>{
-  const lg=e.target.closest('[data-logo]'),sw=e.target.closest('[data-sw]'),id=e.target.closest('[data-idea]');
+  const lg=e.target.closest('[data-logo]'),sw=e.target.closest('[data-sw]'),id=e.target.closest('[data-idea]'),sk=e.target.closest('[data-skin]');
+  if(sk){SET.draft.skin=sk.dataset.skin;applySkin(sk.dataset.skin);sfx('tap');renderSetup()}
   if(lg){SET.draft.logo=lg.dataset.logo;sfx('tap');renderSetup()}
   if(sw){SET.draft.color=sw.dataset.sw;sfx('tap');renderSetup()}
   if(id){SET.draft.shop=id.dataset.idea;$('inShop').value=SET.draft.shop;sfx('tap');renderSetup()}
@@ -1131,7 +1173,7 @@ $('btnSetOk').onclick=()=>{
   G.profile={...d};applyProfile();save();sfx('coin');
   if(SET.mode==='new')playStory(INTRO,()=>openRent('start'));else{toast('Đã lưu thông tin quán');SET.back&&SET.back()}
 };
-$('btnSetBack').onclick=()=>{sfx('tap');if(SET.mode==='new')renderTitle();else SET.back&&SET.back()};
+$('btnSetBack').onclick=()=>{sfx('tap');applySkin((G.profile&&G.profile.skin)||SET.draft.skin||'hong');if(SET.mode==='new')renderTitle();else SET.back&&SET.back()};
 
 /* =====================================================================
    5c. CẤP ĐỘ, NHIỆM VỤ, THẺ THÔNG BÁO
@@ -1374,9 +1416,20 @@ function checkTitles(){for(const t of TITLES)if(t.test&&!G.titles[t.id]&&t.test(
 function titleName(){const t=TITLES.find(x=>x.id===G.title);return t?t.name:''}
 const SUBS={upg:[['dish','Món ăn'],['tool','Đồ nghề'],['staff','Nhân viên'],['decor','Trang trí'],['pack','Bao bì']],
   exp:[['loc','Mặt bằng'],['street','Phố'],['branch','Chi nhánh'],['partner','Đối tác'],['ship','Giao hàng'],['ads','Quảng cáo'],['title','Danh hiệu'],['tag','Thẻ tên'],['brand','Thương hiệu'],['fr','Nhượng quyền'],['rank','Xếp hạng']]};
-const mSub={upg:'dish',exp:'loc'};
+const mSub={upg:'dish',exp:'loc'};const SUBSCROLL={};
+function arrows(el){const w=el.parentElement;if(!w||!w.classList.contains('subwrap'))return;const l=w.querySelector('.arr.l'),r=w.querySelector('.arr.r');
+  l.hidden=el.scrollLeft<4;r.hidden=el.scrollLeft+el.clientWidth>=el.scrollWidth-4}
+/* kéo ngang bằng chuột + con lăn cho mọi thanh cuộn ngang */
+(()=>{let drag=null;
+  const HS='.subtabs,.tray,.shelf.many,.chips';
+  document.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;const el=e.target.closest(HS);if(!el||el.scrollWidth<=el.clientWidth)return;drag={el,x:e.clientX,sl:el.scrollLeft,moved:false}});
+  document.addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-drag.x;if(Math.abs(dx)>5&&!drag.moved){drag.moved=true;drag.el.classList.add('dragging')}if(drag.moved)drag.el.scrollLeft=drag.sl-dx});
+  document.addEventListener('pointerup',()=>{if(!drag)return;const d=drag;drag=null;d.el.classList.remove('dragging');if(d.moved){const stop=ev=>{ev.stopPropagation();ev.preventDefault()};window.addEventListener('click',stop,{capture:true,once:true});setTimeout(()=>window.removeEventListener('click',stop,true),50)}});
+  document.addEventListener('wheel',e=>{const el=e.target.closest(HS);if(!el||el.scrollWidth<=el.clientWidth||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;const before=el.scrollLeft;el.scrollLeft+=e.deltaY;if(el.scrollLeft!==before)e.preventDefault()},{passive:false});
+  document.addEventListener('click',e=>{const b=e.target.closest('[data-scroll]');if(!b)return;const st=b.parentElement.querySelector('.subtabs');st.scrollBy({left:+b.dataset.scroll*st.clientWidth*.7,behavior:'smooth'})});
+})();
 let frConfirm=false;
-function subtabsHTML(tab){return `<div class="subtabs">${SUBS[tab].map(([k,n])=>`<button class="px2" data-act="sub:${tab}:${k}" aria-pressed="${mSub[tab]===k}">${n}</button>`).join('')}</div>`}
+function subtabsHTML(tab){return `<div class="subwrap"><button class="arr l" data-scroll="-1" aria-label="Tab trước" hidden>‹</button><div class="subtabs">${SUBS[tab].map(([k,n])=>`<button class="px2" data-act="sub:${tab}:${k}" aria-pressed="${mSub[tab]===k}">${n}</button>`).join('')}</div><button class="arr r" data-scroll="1" aria-label="Tab sau">›</button></div>`}
 function c2(icon,name,desc,right,cls=''){if(icon&&!icon.startsWith('<'))icon=ic(icon);return `<div class="card2 px2 ${cls}"><span class="ic">${icon}</span><div><b>${name}</b><small>${desc}</small></div><div>${right}</div></div>`}
 function buyBtn(act,price,enabled=true,label){return `<button class="btn gold pxb" data-act="${act}" ${G.money>=price&&enabled?'':'disabled'}>${label||fmtK(price)}</button>`}
 const lockTag=l=>`<span style="font-size:15px">Lv${l}</span>`;
@@ -1930,6 +1983,7 @@ function renderMarket(){
   else if(mTab==='exp')h=renderExp();
   else h=renderBook();
   const sc=L.scrollTop;L.innerHTML=h;L.scrollTop=sc;if(NET.server&&!NET.player)mountGoogle();
+  const stb=L.querySelector('.subtabs');if(stb){const a=stb.querySelector('[aria-pressed="true"]');stb.scrollLeft=SUBSCROLL[mTab]??(a?a.offsetLeft-stb.clientWidth/2+a.offsetWidth/2:0);arrows(stb);stb.addEventListener('scroll',()=>{SUBSCROLL[mTab]=stb.scrollLeft;arrows(stb)},{passive:true})}
   $('openInfo').textContent=`~${estCustomers()} khách tới`;
 }
 function estCustomers(){return Math.round(200/spawnBase()*.75)}

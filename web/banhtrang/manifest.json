@@ -1,0 +1,15 @@
+{
+  "name": "Bánh Tráng Nhà Mee",
+  "short_name": "Bánh Tráng",
+  "start_url": "/banhtrang/",
+  "scope": "/banhtrang/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff6ec",
+  "theme_color": "#f9cfd8",
+  "icons": [
+    { "src": "/banhtrang/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/banhtrang/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/banhtrang/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
