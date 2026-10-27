@@ -65,7 +65,21 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 
 /* ---------- title ---------- */
 #scr-title{background:var(--night)}
-.ttl{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:10px 24px 18px;text-align:center}
+.ttl{flex:1;min-height:0;display:flex;flex-direction:column;align-items:center;justify-content:safe center;gap:10px;padding:10px 24px 18px;text-align:center;overflow-y:auto;overscroll-behavior:contain}
+#scr-title .cv{flex:none}
+.ttl .row.snd .btn{font-size:15px;padding:5px 8px 4px;white-space:nowrap}
+/* Màn hình thấp (điện thoại có thanh trình duyệt): thu gọn ảnh bìa, logo, chữ để mọi nút nằm gọn trong khung */
+@media (max-height:820px){
+  #titleCv{height:clamp(96px,20svh,180px);object-fit:cover;object-position:50% 100%}
+  .ttl{gap:7px;padding:8px 20px 12px}
+  .ttl .eyebrow{font-size:13px}
+  .tlogo{width:44px;height:44px;margin-bottom:-2px}
+  .ttl h1{font-size:44px}
+  .ttl p{font-size:16px;margin:0}
+  .ttl:has(#btnContinue:not([hidden])) > p{display:none}
+  .ttl .btn{font-size:19px;padding:6px 10px 5px}
+  .acct{padding:6px 8px;gap:4px;font-size:15px}
+}
 .ttl .eyebrow{font-size:15px;letter-spacing:.24em;color:var(--paper2)}
 .ttl h1{margin:0;font-weight:400;font-size:58px;line-height:.82;color:var(--gold);text-shadow:3px 3px 0 var(--chiliD),6px 6px 0 var(--ink)}
 .ttl p{margin:0 0 6px;font-size:18px;color:var(--paper2);max-width:28ch}
@@ -513,7 +527,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
       </div>
       <button class="btn pxb" id="btnCustomize" hidden style="font-size:17px">Đổi tên quán, nhân vật</button>
       <div class="acct pxb" id="acct" hidden></div>
-      <div class="row"><button class="btn pxb" id="btnSoundT" style="font-size:16px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicT" style="font-size:16px">Nhạc: Bật</button></div>
+      <div class="row snd"><button class="btn pxb" id="btnSoundT" style="font-size:16px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicT" style="font-size:16px">Nhạc: Bật</button></div>
     </div>
   </div>
 
@@ -1839,7 +1853,7 @@ async function meeSignOut(){await meeApi('POST','auth/logout',{});NET.player=nul
 function renderAcct(){
   const el=$('acct');if(!el)return;el.hidden=!NET.server;if(!NET.server)return;
   if(NET.player){el.innerHTML=`<div><small>Đã đăng nhập Google</small><b>${esc(NET.player.name||NET.player.email||'')}</b></div><button class="btn pxb" id="btnAcctOut">Thoát</button>`;$('btnAcctOut').onclick=()=>{sfx('tap');meeSignOut()}}
-  else{el.innerHTML=`<p>Đăng nhập Google để lưu tiến trình lên mạng và lên bảng xếp hạng</p><div data-gsi style="min-height:44px;width:100%;display:flex;justify-content:center"></div>`;mountGoogle(el)}
+  else{el.innerHTML=`<p>Lưu tiến trình online, chơi tiếp trên máy khác và lên bảng xếp hạng</p><div data-gsi style="min-height:44px;width:100%;display:flex;justify-content:center"></div>`;mountGoogle(el)}
 }
 function fromCloud(s){
   const g={...s};g.money=s.gmoney!=null?s.gmoney:Math.round((+s.money||0)*1000);
