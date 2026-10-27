@@ -1,4 +1,4 @@
-<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png"><link rel="manifest" href="/banhtrang/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.stage{padding-block:8px 24px}</style></head><body><title>Bánh Tráng Nhà Mee</title>
+<!doctype html><html lang="vi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#f9cfd8"><link rel="icon" type="image/png" sizes="32x32" href="/banhtrang/favicon.png"><link rel="icon" type="image/png" sizes="192x192" href="/banhtrang/icon-192.png"><link rel="apple-touch-icon" href="/banhtrang/apple-touch-icon.png"><link rel="manifest" href="/banhtrang/manifest.json"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Bánh Tráng"><meta name="apple-mobile-web-app-status-bar-style" content="default"><style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}.stage{padding-block:8px 24px}:root{--gh:clamp(600px,calc(100svh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 48px),880px)}</style></head><body><title>Bánh Tráng Nhà Mee</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +12,7 @@
   --wood:#b0703a; --woodD:#7a4a22; --woodL:#cf8c4e; --mute:#8c7b66;
   --f:"VT323", ui-monospace, "Courier New", monospace;
   --signbg:#5a1a14; --signfg:#f2b84b;
-  --gh:clamp(600px, calc(100svh - 12px), 690px);
+  --gh:clamp(600px, calc(100svh - 48px), 780px);
   color-scheme: dark;
 }
 html,body{background:var(--night);color:var(--paper)}
@@ -69,7 +69,7 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 #scr-title .cv{flex:none}
 .ttl .row.snd .btn{font-size:15px;padding:5px 8px 4px;white-space:nowrap}
 /* Màn hình thấp (điện thoại có thanh trình duyệt): thu gọn ảnh bìa, logo, chữ để mọi nút nằm gọn trong khung */
-@media (max-height:820px){
+@media (max-height:780px){
   #titleCv{height:clamp(96px,20svh,180px);object-fit:cover;object-position:50% 100%}
   .ttl{gap:7px;padding:8px 20px 12px}
   .ttl .eyebrow{font-size:13px}
@@ -2769,4 +2769,5 @@ requestAnimationFrame(frame);
 })();
 </script>
 
+<style>:root{--gh:clamp(600px,calc(100svh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 48px),880px)}</style>
 </body></html>
