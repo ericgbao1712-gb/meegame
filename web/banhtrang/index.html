@@ -1425,7 +1425,7 @@ const STAFF=[
 ];
 STAFF.push({id:'vy',name:'Chị Vy',role:'Phụ bỏ sốt',desc:'Bạn chọn bánh xong là chị tự rưới đúng sốt khách gọi. Sa tế, mỡ hành vẫn do bạn bỏ',wage:40000,lv:4,look:{skin:'#f2c79b',hair:'#3a2216',style:'bun',shirt:'#f2b84b',shirtD:'#c98a2a',apron:true}},
   {id:'tho',name:'Bé Thơ',role:'Phụ bỏ topping',desc:'Bạn chọn bánh xong là bé tự bỏ đủ topping khách gọi. Sốt, sa tế, mỡ hành vẫn do bạn bỏ',wage:60000,lv:6,look:{skin:'#f6d0aa',hair:'#2b1a14',style:'long',shirt:'#8fd1a0',shirtD:'#4f9d6c',apron:true}});
-STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) cho khách đang chờ, không phải khách bạn đang chọn. Chậm hơn bạn, đôi khi lệch vị: món 3–5 sao, nửa XP',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
+STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) trong 6–9 giây cho khách đang chờ, không phải khách bạn đang chọn. Đôi khi lệch vị: món 3–5 sao, nửa XP.',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
 STAFF.forEach(x=>x.por=url(person(x.look,'happy')));
 const DECOR=[
   {id:'cay',ic:'plant',name:'Chậu cây xanh',desc:'Quán mát mắt, khách chờ thêm 4%',price:100000,lv:2},
@@ -1575,7 +1575,7 @@ function runDelivery(){
   }
   dv.lastN=n;dv.lastRev=rev;G.stats.earned+=rev;return {n,rev};
 }
-function wagesToday(){const m=M();return STAFF.filter(x=>G.staff[x.id]).reduce((a,x)=>a+x.wage,0)*m.wageMul}
+function wagesToday(){const m=M();return STAFF.filter(x=>G.staff[x.id]).reduce((a,x)=>a+x.wage*(x.id==='bao'?chefN():1),0)*m.wageMul}
 function assets(){
   let a=G.money+TIERS.slice(0,(G.tier||0)+1).reduce((x,t)=>x+t.price*.6,0);
   for(const s2 of STREET){const lv=nz(G.street[s2.id]);for(let i=0;i<lv;i++)a+=s2.price*Math.pow(1.7,i)}
@@ -1624,6 +1624,8 @@ function renderUpg(){
   }else if(sub==='staff'){
     h+=`<p class="mnote">Lương trả mỗi tối lúc kết sổ. Cho nghỉ lúc nào cũng được. Hiện trả ${fmtK(wagesToday())}/ngày.</p>`;
     for(const x of STAFF){const on=G.staff[x.id];
+      if(x.id==='bao'){const n=chefN();h+=c2(`<img class="por" src="${x.por}" alt="">`,`Đầu bếp cao cấp · đang thuê ${n}/${CHEF_MAX}`,`${x.desc} Thuê nhiều người thì mỗi người làm một khách riêng. · lương ${fmtK(x.wage)}/người/ngày`,
+        l<x.lv?lockTag(x.lv):`<div style="display:flex;gap:4px">${n?`<button class="btn pxb" data-act="staff:bao:-1">−</button>`:''}${n<CHEF_MAX?`<button class="btn gold pxb" data-act="staff:bao:1">${n?'+1':'Thuê'}</button>`:''}</div>`,n?'own':l<x.lv?'lk':'');continue}
       h+=c2(`<img class="por" src="${x.por}" alt="">`,`${x.name} · ${x.role}`,`${x.desc} · lương ${fmtK(x.wage)}/ngày`,l<x.lv?lockTag(x.lv):`<button class="btn ${on?'':'gold'} pxb" data-act="staff:${x.id}">${on?'Cho nghỉ':'Thuê'}</button>`,on?'own':l<x.lv?'lk':'')}
   }else if(sub==='decor'){
     h+=`<p class="mnote">Đồ trang trí hiện ngay trong cảnh trước quán, mỗi món có ích một chút.</p>`;
@@ -1774,6 +1776,7 @@ function bizAct(act){
   else if(k==='dish'){const lv=nz(G.dishLv[a]);if(lv<5&&pay(DISH_COST[lv])){G.dishLv[a]=lv+1;toast(`${DISHES[a].name} lên bậc ${lv+1}`)}}
   else if(k==='slots'){const nx=SLOT_UPG[nz(G.slotLv)];if(nx&&l>=nx.lv&&pay(nx.price)){G.slotLv=nz(G.slotLv)+1;toast(`Quầy giờ có <b>${slotCount()} chỗ order</b>!`)}}
   else if(k==='tool'){const t=TOOLS.find(x=>x.id===a);if(pay(t.price)){G.owned[a]=true;toast(`Đã mua <b>${t.name}</b>`)}}
+  else if(k==='staff'&&a==='bao'){const n=Math.max(0,Math.min(CHEF_MAX,chefN()+(+b||0)));G.staff.bao=n;sfx('tap');toast(+b>0?`Đã thuê thêm đầu bếp, giờ có <b>${n}</b> người · lương trả tối nay`:n?`Còn <b>${n}</b> đầu bếp`:'Đầu bếp nghỉ hết rồi')}
   else if(k==='staff'){const x=STAFF.find(y=>y.id===a);G.staff[a]=!G.staff[a];sfx('tap');toast(G.staff[a]?`Đã thuê <b>${x.name}</b>, lương trả tối nay`:`${x.name} nghỉ rồi`)}
   else if(k==='decor'){const x=DECOR.find(y=>y.id===a);if(pay(x.price)){G.decor[a]=true;toast(`Đã đặt <b>${x.name}</b> trước quán`)}}
   else if(k==='awn'){if(G.awnings[a]){G.awning=a;sfx('tap')}else if(pay(AWNINGS[a].price)){G.awnings[a]=true;G.awning=a}}
@@ -2506,7 +2509,9 @@ function sorry(){
 }
 /* ---- Anh Bảo · đầu bếp (cấp 12): tự nhận một khách đang chờ, lấy nguyên liệu trong kho, làm trọn món ----
    Không đụng khách người chơi đang chọn; chậm hơn người chơi, món 3–5 sao, nửa XP. Khách bỏ về giữa chừng → trả lại nguyên liệu. */
-const CHEF_T={tron:11,cuon:14,nuong:15};
+const CHEF_T={tron:6,cuon:8,nuong:9};   // giây cho 1 món (cũ 11/14/15)
+const CHEF_MAX=3;   // thuê tối đa 3 đầu bếp cao cấp, mỗi người làm một khách riêng
+const chefN=()=>G.staff.bao===true?1:Math.max(0,Math.min(CHEF_MAX,Math.floor(nz(G.staff.bao))));
 /* Chị Vy (phụ sốt) / Bé Thơ (phụ topping): người chơi chọn bánh xong, tự bỏ sốt / topping đúng order của khách đang chọn.
    Không bao giờ chọn bánh, bỏ sa tế hay mỡ hành — phần đó người chơi tự làm. Hết hàng thì bỏ qua (người chơi tự nhập nhanh). */
 function helperStep(){
@@ -2520,22 +2525,22 @@ function helperStep(){
 function chefNeed(o,qty){const n={},add=(id,k)=>{if(k>0)n[id]=(n[id]||0)+k};
   add(o.base,qty);add(o.sauce,1);o.tops.forEach(t=>add(t,qty));add('sate',o.cay);add('mohanh',nz(o.mo)*qty);packFor(o.dish).forEach(id=>add(id,1));return n}
 function chefTick(dt){
-  const ch=S.chef;
-  if(ch){const c=S.slots[ch.slot];
-    if(!c||c.leave||c.p!==ch.p){for(const id in ch.need)G.stock[id]+=ch.need[id];if(c)c.chef=false;S.chef=null;return}
-    ch.t-=dt;if(ch.t<=0){S.chef=null;chefServe(ch.slot)}return}
-  if(!G.staff.bao)return;
-  S.chefWait=(S.chefWait||0)-dt;if(S.chefWait>0)return;S.chefWait=1;
+  const jobs=S.chefs=S.chefs||[];
+  for(const ch of jobs.slice()){const c=S.slots[ch.slot];
+    if(!c||c.leave||c.p!==ch.p){for(const id in ch.need)G.stock[id]+=ch.need[id];if(c)c.chef=false;jobs.splice(jobs.indexOf(ch),1);continue}
+    ch.t-=dt;if(ch.t<=0){jobs.splice(jobs.indexOf(ch),1);chefServe(ch.slot)}}
+  if(jobs.length>=chefN())return;
+  S.chefWait=(S.chefWait||0)-dt;if(S.chefWait>0)return;S.chefWait=.6;
   const busy=!!B.base;
   for(let i=0;i<S.slots.length;i++){const c=S.slots[i];
     if(!c||c.leave||c.chef||c.chefSkip||c.enter<1||c.max-c.pat<3)continue;
     if(i===S.active&&(busy||S.slots.some((x,j)=>j!==i&&x&&!x.leave&&!x.chef)))continue;   // khách người chơi đang làm → bỏ qua
     if(!dishUnlocked(c.order.dish))continue;
     const qty=c.qty||1,need=chefNeed(c.order,qty),miss=Object.keys(need).filter(id=>G.stock[id]<need[id]);
-    if(miss.length){c.chefSkip=true;toast(`Anh Bảo thiếu <b>${miss.slice(0,2).map(nameOf).join(', ')}</b> nên không làm được món của ${c.p.name}`,2200);continue}
+    if(miss.length){c.chefSkip=true;toast(`Bếp thiếu <b>${miss.slice(0,2).map(nameOf).join(', ')}</b> nên không làm được món của ${c.p.name}`,2200);continue}
     for(const id in need)G.stock[id]-=need[id];
-    S.chef={slot:i,p:c.p,need,t:CHEF_T[c.order.dish]*(1+.4*(qty-1))*(.85+R()*.3)};
-    c.chef=true;c.bubble='Anh Bảo làm liền nha!';c.bubT=2.2;
+    jobs.push({slot:i,p:c.p,need,t:CHEF_T[c.order.dish]*(1+.4*(qty-1))*(.85+R()*.3)});
+    c.chef=true;c.bubble=chefN()>1?'Bếp làm liền nha!':'Anh Bảo làm liền nha!';c.bubT=2.2;
     if(i===S.active){pickActive();autoMode()}
     refresh();renderTicket(true);return}
 }
@@ -2553,7 +2558,7 @@ function chefServe(i){
   c.chef=false;c.mood=stars>=4?'happy':'neutral';c.bubble=pick(LINES[stars]);c.bubT=3;c.leave=.0001;
   let xp=stars>=3?stars*3:0;if(qty>1)xp=xp*(1+.5*(qty-1));xp=Math.round(xp/2);
   if(c.kind==='review')setTimeout(()=>reviewResult(stars),2700);
-  toast(`Anh Bảo giao món cho ${c.p.name}: <b>+${fmtK(earn)}</b> · ${'★'.repeat(stars)}${'☆'.repeat(5-stars)}${xp?` · +${xp} XP`:''}`,2200);
+  toast(`Bếp giao món cho ${c.p.name}: <b>+${fmtK(earn)}</b> · ${'★'.repeat(stars)}${'☆'.repeat(5-stars)}${xp?` · +${xp} XP`:''}`,2200);
   sfx(stars>=4?'coin':'tap');
   pickActive();autoMode();refresh();renderTicket(true);
   gainXP(xp);questEvent('serve',{order:o,stars});
@@ -2830,7 +2835,7 @@ function tickService(dt,t){
       const ready=o0&&B.dish===o0.dish&&o0.tops.every(t=>B.tops.includes(t))&&B.sauce&&B.sate>=o0.cay&&B.mo>=nz(o0.mo);
       if(ready&&B.dish==='tron'&&mixPct()<100)doMix(dt*22,dt*2);if(ready&&B.dish==='cuon'&&B.roll<100)doRoll(dt*20)}
     if(G.staff.lan&&B.base&&B.dish==='nuong'&&!B.folded&&B.cook>=(ZL()+ZH())/2){fold();toast('Bé Lan gấp bánh giùm, vàng giòn!')}
-    if(G.staff.bao||S.chef)chefTick(dt);
+    if(chefN()||(S.chefs&&S.chefs.length))chefTick(dt);
     if(B.base&&!S.holding&&(G.staff.vy||G.staff.tho)){S.helpT=(S.helpT||0)-dt;if(S.helpT<=0){S.helpT=.55;helperStep()}}
     if(B.base&&B.dish==='nuong'&&!B.folded){const before=B.cook;B.cook+=dt*9;if(before<=115&&B.cook>115){toast('Bánh bắt đầu <b>cháy</b>!');sfx('bad')}}
     S.slots.forEach((c,i)=>{
