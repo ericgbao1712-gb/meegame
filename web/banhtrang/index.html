@@ -1616,6 +1616,7 @@ STAFF.push({id:'khoa',name:'Anh Khoa',role:'Làm đơn ship',desc:'Chuyên đón
 STAFF.push({id:'bao',name:'Anh Bảo',role:'Đầu bếp cao cấp',desc:'Nhân viên cao cấp: tự làm TRỌN món (chọn bánh, sốt, topping, sa tế, mỡ hành) trong 6–9 giây cho khách đang chờ, không phải khách bạn đang chọn. Đôi khi lệch vị: món 3–5 sao, nửa XP.',wage:180000,lv:12,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8bb',apron:true}});
 STAFF.push({id:'hau',name:'Bé Hậu',role:'Pha trà',desc:'Khách gọi nước gì bé pha nước đó (cả trà sữa, dừa, sữa nóng/đá), bạn chỉ lo phần bánh',wage:50000,lv:18,look:{skin:'#f2c79b',hair:'#3a2216',style:'ponytail',shirt:'#c8e07a',shirtD:'#8ab83a',apron:true}},
   {id:'quan',name:'Anh Quân',role:'Quản lý',desc:'Thương lượng mối hàng: nguyên liệu rẻ thêm 8%, nhân viên làm việc hăng hơn',wage:150000,lv:27,look:{skin:'#e0a878',hair:'#2b1a14',style:'short',shirt:'#f4f1ea',shirtD:'#cfc8b8',tie:'#5a1a14',glasses:true}});
+STAFF.push({id:'thu',name:'Chú Thứ',role:'Quản kho',desc:'Giữa ca hết nguyên liệu nào là chú tự chạy đi mua 1 gói, rẻ hơn nhập nhanh 2%. Bạn không cần bấm Nhập nhanh nữa',wage:55000,lv:5,look:{skin:'#c98a5a',hair:'#6a6a70',style:'cap',cap:'#8a5a2a',shirt:'#6a8a5a',shirtD:'#4a6a3e',glasses:true}});
 STAFF.forEach(x=>x.por=url(person(x.look,'happy')));
 const DECOR=[
   {id:'cay',ic:'plant',name:'Chậu cây xanh',desc:'Quán mát mắt, khách chờ thêm 4%',price:100000,lv:2},
@@ -1773,7 +1774,7 @@ const STAFF_MAXLV=4,TRAIN_DAYS=[3,6,10,15],TRAIN_COST=[3,5,8,12];
 const sL=id=>Math.max(0,Math.min(STAFF_MAXLV,Math.floor(nz((G.staffLv||{})[id]))));
 const trainGate=(x,l)=>Math.min(15,x.lv+2*(l+1));   // cấp quán cần để lên bậc l+2
 const staffWage=x=>Math.round(x.wage*(1+.12*sL(x.id))/1000)*1000;
-const STAFF_UP={hau:'rót trà nhanh hơn',quan:'nguyên liệu rẻ thêm 1%',na:'khách chờ thêm 5%',hong:'khách bo thêm 3%',mo:'đi chợ rẻ thêm 2%',tai:'trộn, cuốn nhanh thêm 25%',tung:'xử lý sự cố chắc hơn',lan:'bánh chín nhanh thêm 10%',
+const STAFF_UP={thu:'mua rẻ thêm 1%, chạy nhanh hơn',hau:'rót trà nhanh hơn',quan:'nguyên liệu rẻ thêm 1%',na:'khách chờ thêm 5%',hong:'khách bo thêm 3%',mo:'đi chợ rẻ thêm 2%',tai:'trộn, cuốn nhanh thêm 25%',tung:'xử lý sự cố chắc hơn',lan:'bánh chín nhanh thêm 10%',
   vy:'rưới sốt nhanh hơn',tho:'bỏ topping nhanh hơn',khoa:'đơn ship thêm 15%',bao:'làm nhanh thêm 12%, nhiều món 5 sao hơn'};
 function trainHTML(x){const L=sL(x.id),d=nz((G.staffDays||{})[x.id]);
   let h=`<span class="stlv">${'★'.repeat(L+1)}${'☆'.repeat(STAFF_MAXLV-L)} Bậc ${L+1}/${STAFF_MAXLV+1} · đã làm ${d} ngày</span>`;
@@ -2060,7 +2061,31 @@ function boxURL(kind){
 function packFor(d){return d==='tron'?['hop_giay','dua']:['bich_giay']}
 function basePrice(id){const it=ITEMS[id];return Math.max(500,Math.round(it.price*M().costMul*partnerMul(id)*(it.kind==='pack'&&G.pkg.printed?1.2:1)/500)*500)}
 function quickBuy(id){const p=basePrice(id);if(G.money<p){toast('Không đủ tiền');sfx('bad');return false}G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;sfx('buy');return true}
+/* Chú Thứ (quản kho): hết hàng giữa ca thì tự đi mua 1 gói, rẻ hơn nhập nhanh 2% (mỗi bậc đào tạo rẻ thêm 1%) */
+function stockerPrice(id){return Math.max(500,Math.round(basePrice(id)*(.98-.01*sL('thu'))/500)*500)}
+function stockerBuy(id,quiet){
+  const p=stockerPrice(id);
+  if(G.money<p){if(!S||!S.noCashT||S.noCashT<performance.now()){toast(`Chú Thứ: không đủ tiền mua <b>${nameOf(id)}</b> (${fmtK(p)})`,2200);if(S)S.noCashT=performance.now()+8000}return false}
+  G.money-=p;G.spentToday+=p;G.stock[id]+=ITEMS[id].pack;G.stats.stockerBuys=nz(G.stats.stockerBuys)+1;
+  if(!quiet){toast(`Chú Thứ mua về <b>${ITEMS[id].pack} ${ITEMS[id].unit||'phần'} ${nameOf(id)}</b> · ${fmtK(p)}`,2000);sfx('buy')}
+  if(S)refresh();return true;
+}
+function orderNeeds(o){const d=dk(o);return [o.base,o.sauce,...o.tops,...(o.cay?['sate']:[]),...(nz(o.mo)?['mohanh']:[]),...(d?[d]:[]),...packFor(o.dish)]}
+function stockTick(dt){
+  S.st0=S.st0||Object.fromEntries(Object.keys(ITEMS).map(id=>[id,G.stock[id]]));
+  S.buying=S.buying||{};
+  for(const id in S.buying){S.buying[id]-=dt;if(S.buying[id]<=0){delete S.buying[id];if(G.stock[id]<=0)stockerBuy(id)}}
+  S.stockCd=(S.stockCd||0)-dt;if(S.stockCd>0)return;S.stockCd=.6;
+  const live=S.slots.filter(c=>c&&!c.leave);if(S.closing&&!live.length)return;
+  const want=new Set(),act=S.slots[S.active];if(act&&!act.leave&&!act.chef)orderNeeds(act.order).forEach(id=>want.add(id));   // chỉ món của khách đang làm, không tự mua đồ bạn không bán
+  for(const id in ITEMS){
+    if(G.stock[id]>0||S.buying[id]!=null||!unlocked(id))continue;
+    if(!(want.has(id)||S.st0[id]>0))continue;
+    S.buying[id]=Math.max(1,3-.4*sL('thu'));toast(`Hết <b>${nameOf(id)}</b>, Chú Thứ chạy đi mua liền!`,1600);
+  }
+}
 function askQuick(id){
+  if(G.staff.thu&&S){if(S.buying&&S.buying[id]!=null){toast(`Chú Thứ đang đi mua <b>${nameOf(id)}</b>, chờ xíu`);return}if(stockerBuy(id))return}
   const it=ITEMS[id],p=basePrice(id);
   openCard({img:IMG[id],tag:'NHẬP NHANH',title:`Hết ${it.name.toLowerCase()}`,text:`Chạy qua tiệm tạp hoá đầu hẻm mua 1 gói (${it.pack} ${it.unit||'phần'}) theo giá gốc, không lời không lỗ nhưng cũng không trả giá được.`,
     choices:[{t:`Nhập nhanh · ${fmtK(p)}`,s:`+${it.pack} ${it.unit||'phần'}`,fx:()=>{if(!quickBuy(id))return '';if(S)refresh();return `Đã nhập ${it.name.toLowerCase()}`}},{t:'Thôi',s:'',fx:()=>''}]});
@@ -2941,7 +2966,8 @@ function serve(){
   if(!c||c.leave){toast('Chưa có khách nào để giao');return}
   if(c.chef){toast('Anh Bảo đang làm món cho khách này, chọn khách khác nha');sfx('bad');return}
   if(!B.base){toast('Chưa làm gì hết, giao gì đây?');sfx('bad');return}
-  const need=packFor(B.dish),missP=need.filter(id=>G.stock[id]<=0);
+  const need=packFor(B.dish);let missP=need.filter(id=>G.stock[id]<=0);
+  if(missP.length&&G.staff.thu){missP.forEach(id=>stockerBuy(id));missP=need.filter(id=>G.stock[id]<=0)}
   if(missP.length&&!S.noPack){
     const cost=missP.reduce((a,id)=>a+basePrice(id),0);
     openCard({img:IMG[missP[0]],tag:'HẾT BAO BÌ',title:`Hết ${missP.map(nameOf).join(' và ')}!`,text:'Món làm xong rồi mà không có đồ đựng. Chạy qua tạp hoá đầu hẻm mua giá gốc, hoặc đựng tạm bịch nilon.',
@@ -3376,6 +3402,7 @@ function tickService(dt,t){
     });
     if(!S.inspDone&&!S.closing&&G.day>=nz(G.inspectDay)&&S.min>=S.inspAt&&$('eventOv').hidden){S.inspDone=true;openInspection()}
     if(G.pre&&G.pre.length)preTick();
+    if(G.staff.thu)stockTick(dt);
     if(!S.closing&&S.min>=S.blockUntil){S.spawnT-=dt*(goldenNow()?1.5:1);const empty=S.slots.slice(0,maxSlots()).findIndex(c=>!c);
       if(empty>=0&&S.spawnT<=0){newCustomer(empty,false);S.spawnT=spawnBase()*hourF(S.min)*(S.rain?1.6:1)*(.6+R()*.8);pickActive();autoMode();sfx('tap')}}
     if(S.closing&&S.slots.every(c=>!c)&&!S.closingDone){S.closingDone=true;setTimeout(endService,600)}
