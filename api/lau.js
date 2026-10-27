@@ -473,8 +473,10 @@ export default async function handler(req, res) {
         sql: 'SELECT COALESCE(sum(money), 0) AS m FROM gift_redemptions WHERE player_id = ? AND game = ? AND created_at > ?',
         args: [pid, GAME, prev ? num(prev.updated_at) - 60e3 : 0],
       });
-      const reason = num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs, num(giftRow.rows[0] && giftRow.rows[0].m));
-      const flagged = num(prev && prev.flagged) || reason ? 1 : 0;
+      // Tài khoản admin được tự chỉnh cấp / tiền để thử tính năng → không đánh dấu nghi gian lận, vẫn hiện trên bảng xếp hạng (kèm chữ ADMIN)
+      const adminAcct = isAdminPlayerEmail(p.email);
+      const reason = adminAcct || num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs, num(giftRow.rows[0] && giftRow.rows[0].m));
+      const flagged = !adminAcct && (num(prev && prev.flagged) || reason) ? 1 : 0;
       if (prev) {
         await db.execute({
           sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
