@@ -1315,6 +1315,7 @@ $('btnSetOk').onclick=()=>{
   const d=SET.draft;d.shop=d.shop.trim().replace(/\s+/g,' ')||DEFAULT_PROFILE.shop;d.name=d.name.trim().replace(/\s+/g,' ')||'Út';
   G.profile={...d};applyProfile();save();sfx('coin');
   if(SET.mode==='new'){G.setupDone=true;save();SET.back&&SET.back()}else{toast('Đã lưu thông tin quán');SET.back&&SET.back()}
+  pushBoard();   // tên quán / logo mới lên bảng xếp hạng ngay, không đợi tới lúc kết sổ
 };
 $('btnSetBack').onclick=()=>{sfx('tap');if(SET.mode==='new'){$('btnSetOk').onclick();return}applySkin((G.profile&&G.profile.skin)||SET.draft.skin||'hong');SET.back&&SET.back()};
 
@@ -1903,14 +1904,14 @@ function pushBoard(){
   if(NET.server&&NET.player)serverSync();
 }
 async function serverSync(){
-  if(NET.busy)return;NET.busy=true;
+  if(NET.busy){NET.again=true;return}NET.busy=true;   // đang gửi dở → gửi lại lần nữa khi xong để không mất thay đổi mới nhất
   try{
     const tag=G.tag||'go';
     const save={...G,started:true,level:level(),xp:G.xp||0,gmoney:G.money,money:Math.round(G.money/1000),shopName:P_.shop,day:G.day,savedAt:Date.now(),
       stats:{...G.stats,moneyEarned:Math.round(nz(G.stats.earned)/1000),potsSold:G.stats.served,daysPlayed:Math.max(0,G.day-1)},box:{badge:'bx_b_'+tag,got:{['bx_b_'+tag]:1}}};
     const r=await meeApi('PUT','save',{save,force:true});
     if(r.status===200){NET.lastSync=Date.now();loadServerBoard()}else if(r.status===401){NET.player=null}
-  }finally{NET.busy=false}
+  }finally{NET.busy=false;if(NET.again){NET.again=false;setTimeout(serverSync,300)}}
 }
 let gisP=null,gisInit=false;
 function loadGis(){if(window.google&&window.google.accounts&&window.google.accounts.id)return Promise.resolve(window.google);
