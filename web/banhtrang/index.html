@@ -829,6 +829,11 @@ const ICON={
   pho_mai:({P})=>{for(let i=0;i<9;i++)P('#f5d76a',3,5+i,2+i*1.2,1);P('#f5d76a',3,13,12,1);P('#d8b040',5,10,2,2);P('#d8b040',9,12,1,1);P('#fff0a0',4,7,1,3)},
   ga_xe:({L,P})=>{L('#ead2a2',2,6,9,13,2);L('#f3e2bf',5,3,12,11,2);L('#d9b77a',4,11,13,5,2);P('#4f9a3a',7,7);P('#4f9a3a',10,10)},
   muc_rim:({E,L})=>{E('#b5502a',8,6,4,4);L('#b5502a',5,9,3,14,1);L('#b5502a',7,9,7,14,1);L('#b5502a',9,9,10,14,1);L('#b5502a',11,9,13,13,1);E('#e0804a',7,5,1.5,1.5)},
+  bo_bia:({L,P})=>{for(let k=0;k<5;k++){const x=2+k*2.6;L('#f6f0dc',x,3+k%2,x+1.2,13,2);L('#d9c9a0',x+1.6,4,x+2.2,13,1)}P('#a8804a',3,3);P('#a8804a',8,4)},
+  bo_dau:({E,P})=>{E('#e9eef1',8,10,6.5,4);E('#cfd8e0',8,11,6,3);E('#f7d24a',8,9.5,5,2.8);E('#ffe58a',6.5,8.6,2,1);P('#e8b020',10,10);P('#e8b020',6,10)},
+  lap_xuong:({E,L,P})=>{L('#9a2a2a',2,12,8,5,3);L('#b83a32',2,11,8,4,1);[[11,6],[12,11],[7,13]].forEach(([x,y])=>{E('#9a2a2a',x,y,2.6,2.6);E('#c84a40',x,y,1.8,1.8);P('#f2c8b8',x-1,y);P('#f2c8b8',x,y-1)})},
+  thit_bam:({E,P},r)=>{E('#a8604a',8,10,6.2,4.2);for(let k=0;k<44;k++){const x=2+Math.floor(r()*13),y=6+Math.floor(r()*9);if(((x+.5-8)/6.2)**2+((y+.5-10)/4.2)**2<=.9)P(['#c98a6a','#8a4a32','#e0a888'][k%3],x,y)}P('#6fbe4a',6,8);P('#6fbe4a',11,11)},
+  xx_phomai:({L,E,P})=>{L('#c94a4a',2,13,12,3,3);L('#e86a6a',2,12,12,2,1);E('#f5d76a',8,8,3,1.6);P('#f5d76a',6,9,1,3);P('#f5d76a',9,9,1,4);P('#fff0a0',7,7,2,1)},
   soi:({L,P})=>{for(let i=0;i<6;i++){const y=3+i*2;L(i%2?'#e2c98e':'#f3e2b8',2,y,13,y+1,2)}P('#5aa23a',7,2,2,13);P('#3b7a26',8,2,1,13)},
   suong:({E,P})=>{E('#f3e2b8',8,8,6.6,6.6);for(let y=3;y<14;y+=2)for(let x=3;x<14;x+=2){const X=x+(y%4?1:0);if(((X+.5-8)/6)**2+((y+.5-8)/6)**2<=1)P('#e2c98e',X,y)}E('#fff3d6',6,5.5,3,1.6,-0.6)},
   sate:({P},r)=>{P('#e2b84b',3,2,10,3);P('#c42a1a',2,5,12,9);P('#8e1b10',2,12,12,2);for(let i=0;i<14;i++)P(['#e0602a','#f08a4a','#7a140c'][i%3],3+Math.floor(r()*10),6+Math.floor(r()*6));P('#fbeed3',4,8,8,3);P('#d8352a',6,9,4,1)},
@@ -1003,6 +1008,11 @@ const ITEMS={
   ga_xe:{name:'Gà xé',kind:'top',pack:10,price:25000,extra:3000,lvl:10,n:12,cols:['#ead2a2','#f3e2bf'],s:[3,1]},
   trung_muoi:{name:'Trứng muối',kind:'top',lvl:11,pack:10,price:30000,extra:3000,n:14,cols:['#f2a03a','#ffc85a'],s:[1,1]},
   muc_rim:{name:'Mực rim',kind:'top',pack:10,price:40000,extra:5000,lvl:12,n:10,cols:['#b5502a','#e0804a'],s:[2,1]},
+  bo_bia:{name:'Củ sắn (bò bía)',short:'Củ sắn',kind:'top',pack:5,price:5000,perish:true,lvl:3,only:['tron'],n:12,cols:['#f6f0dc','#e8dcb8'],s:[3,1]},
+  bo_dau:{name:'Bơ dầu (bơ trứng gà)',short:'Bơ dầu',kind:'top',pack:10,price:18000,lvl:6,only:['cuon'],n:10,cols:['#f7d24a','#ffe58a'],s:[2,1]},
+  lap_xuong:{name:'Lạp xưởng',kind:'top',pack:10,price:25000,extra:2000,lvl:7,n:10,cols:['#9a2a2a','#e8b0a0'],s:[2,2]},
+  thit_bam:{name:'Thịt bằm',kind:'top',pack:10,price:30000,extra:3000,lvl:9,only:['nuong'],n:14,cols:['#c98a6a','#a8604a'],s:[1,1]},
+  xx_phomai:{name:'Xúc xích phô mai',short:'XX phô mai',kind:'top',pack:10,price:40000,extra:5000,lvl:12,only:['tron','nuong'],n:8,cols:['#e86a6a','#f5d76a'],s:[2,2]},
   hop_giay:{name:'Hộp giấy kraft',short:'Hộp',kind:'pack',pack:20,price:20000,unit:'cái'},
   bich_giay:{name:'Bịch giấy',short:'Bịch',kind:'pack',pack:20,price:14000,unit:'cái',lvl:6},
   dua:{name:'Đũa tre',short:'Đũa',kind:'pack',pack:50,price:10000,unit:'đôi'},
@@ -1859,7 +1869,7 @@ const SELLERS={
   kho:makeChar({name:'Cô Tư',look:{skin:'#e0a878',hair:'#2b1a14',style:'long',shirt:'#c94a6a',shirtD:'#9a2e4a',glasses:true}}),
   rau:makeChar({name:'Chị Bảy',look:{skin:'#d89a6a',hair:'#3a2216',style:'nonla',shirt:'#5aa23a',shirtD:'#3b7a26'}}),
 };
-function sellerOf(id){const k=ITEMS[id].kind;if(k!=='top')return 'banh';return ['kho_bo','kho_muc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','ga_xe','muc_rim','ruoc','kho_ga','rong_bien'].includes(id)?'kho':'rau'}
+function sellerOf(id){const k=ITEMS[id].kind;if(k!=='top')return 'banh';return ['kho_bo','kho_muc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','ga_xe','muc_rim','ruoc','kho_ga','rong_bien','lap_xuong'].includes(id)?'kho':'rau'}
 function paidToday(){return Object.values(G.paid||{}).flat().reduce((a,b)=>a+b,0)}
 function haggleAll(){
   const h=G.haggleAll;if(h&&h.day===G.day){toast('Hôm nay trả giá rồi, mai quay lại nha');return}
@@ -2196,8 +2206,8 @@ function renderMarket(){
     const hgA=G.haggleAll&&G.haggleAll.day===G.day?G.haggleAll:null,spent=paidToday();
     h+=`<div class="hgbox pxb"><img src="${SELLERS.banh.url.happy}" alt=""><div><b>Trả giá cả giỏ</b><small>${hgA?(hgA.ok?`✓ Đã bớt ${Math.round(hgA.d*100)}% cho mọi món hôm nay`:'✗ Trả hụt, hôm nay giá +5%'):`Đã mua ${fmtK(spent)} sáng nay. Mua xong rồi trả giá một lần cho cả giỏ.`}</small></div>${hgA?'':'<button class="btn gold pxb" data-haggleall="1">Trả giá</button>'}</div>`;
     h+=`<p class="mnote">Mỗi lần mua là 1 gói. Rau răm, xoài, tắc để qua đêm sẽ héo.${cm<1?` Đang được giảm ${Math.round((1-cm)*100)}% giá nhập.`:''}</p>`;
-    const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate','mohanh']],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','kho_muc','kho_ga','ruoc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim']],
-      ['Sạp trứng, rau trái · Chị Bảy',['trung_cut','trung_muoi','xuc_xich','pho_mai','xoai','rau_ram','hanh_la','tac']]];
+    const groups=[['Sạp bánh tráng & sốt · Bà Năm',[...BASE_IDS,...SAUCE_IDS,'sate','mohanh']],['Bao bì · Bà Năm',['hop_giay','bich_giay','dua']],['Sạp đồ khô · Cô Tư',['kho_bo','kho_muc','kho_ga','ruoc','tep','cha_bong','dau_phong','hanh_phi','muoi_tom','rong_bien','ga_xe','muc_rim','lap_xuong']],
+      ['Sạp trứng, rau trái · Chị Bảy',['trung_cut','trung_muoi','xuc_xich','xx_phomai','pho_mai','bo_dau','thit_bam','xoai','bo_bia','rau_ram','hanh_la','tac']]];
     for(const [title,ids] of groups){const open=ids.filter(unlocked);if(!open.length)continue;h+=`<div class="mgroup">${title}</div>`;for(const id of open)h+=row(id)}
     const locked=Object.keys(ITEMS).filter(id=>!unlocked(id)).sort((a,b)=>ITEMS[a].lvl-ITEMS[b].lvl);
     if(locked.length){h+=`<div class="mgroup">Chưa mở khoá</div>`;
@@ -2286,7 +2296,7 @@ function newCustomer(slot,instant){
   const p=K.ppl?SPECIAL[K.ppl]:pick(PEOPLE.filter(x=>!used.includes(x)));
   const ds0=Object.keys(DISHES).filter(d=>dishUnlocked(d)&&!G.menuOff['d_'+d]),ds=ds0.length?ds0:['tron'],w={tron:1,cuon:.6,nuong:.6};
   let r=R()*ds.reduce((a,d)=>a+w[d],0),dish='tron';for(const d of ds){r-=w[d];if(r<=0){dish=d;break}}
-  const tops=TOP_IDS.filter(t=>unlocked(t)&&!G.menuOff[t]).sort(()=>R()-.5);const city=CITIES[G.city]||CITIES.sg;
+  const tops=TOP_IDS.filter(t=>unlocked(t)&&!G.menuOff[t]&&(!ITEMS[t].only||ITEMS[t].only.includes(dish))).sort(()=>R()-.5);const city=CITIES[G.city]||CITIES.sg;
   const fresh=tops.filter(id=>(ITEMS[id].lvl||1)>1&&(ITEMS[id].lvl||1)>=level()-2);
   if(fresh.length&&R()<.45){const f=pick(fresh);tops.splice(tops.indexOf(f),1);tops.unshift(f)}
   const sauces=SAUCE_IDS.filter(x=>unlocked(x)&&!G.menuOff[x]);const sp=list=>{const l=list.filter(x=>sauces.includes(x));return l.length?pick(l):(sauces[0]||'st_tac')};
