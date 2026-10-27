@@ -1145,7 +1145,7 @@ const UPG=[
 ];
 const DISHES={tron:{name:'Bánh tráng trộn',short:'Trộn',lvl:1},cuon:{name:'Bánh tráng cuốn',short:'Cuốn',lvl:6},nuong:{name:'Bánh tráng nướng',short:'Nướng',lvl:9}};
 const LV_XP=[0,0,100,240,420,640,900,1200,1550,1950,2400,2900,3450,4050,4700,5400];
-for(let l=16,d=750;l<=30;l++,d+=50)LV_XP.push(LV_XP[l-1]+d);   // Lv16–30: mỗi cấp cần thêm 750, 800 … 1450 XP
+for(let l=16,d=750;l<=30;l++,d+=50)LV_XP.push(LV_XP[l-1]+Math.round(d*2.6/50)*50);   // Lv16–30: mỗi cấp cần thêm ~1.950 … 3.750 XP (×2,6 để thời gian lên full gấp đôi)
 const LV_MAX=LV_XP.length-1;
 const LV_TITLE=['','Tập sự','Phụ gánh','Tay trộn','Chủ gánh','Có nghề','Tay cuốn','Sành ăn','Có tiếng','Thợ nướng','Chủ quán','Có thương hiệu','Đại lý','Ông bầu ăn vặt','Ông trùm','Huyền thoại',
   'Vua vỉa hè','Tay chợ đêm','Bậc thầy pha trà','Bậc thầy sốt','Đầu bếp phố','Giờ vàng','Chủ chuỗi','Thương hiệu quận','Vua sốt mắm','Ngôi sao livestream','Thương hiệu thành phố','Nghệ nhân bếp than','Đại sứ ẩm thực','Bếp vàng','Truyền nhân Dì Tư'];
