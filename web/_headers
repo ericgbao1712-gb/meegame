@@ -20,3 +20,6 @@
   Cache-Control: no-cache
 /banhtrang/manifest.json
   Cache-Control: no-cache
+/banhtrang/sw.js
+  Service-Worker-Allowed: /banhtrang
+  Cache-Control: no-cache
