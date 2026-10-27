@@ -33,7 +33,12 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
   box-shadow:0 -4px 0 0 var(--ink),0 4px 0 0 var(--ink),-4px 0 0 0 var(--ink),4px 0 0 0 var(--ink),0 12px 0 0 rgba(0,0,0,.35);
   user-select:none;-webkit-user-select:none}
 .screen{display:flex;flex-direction:column;height:var(--gh)}
-#scr-service{height:auto}
+#scr-service{height:auto;min-height:var(--gh)}
+/* Màn bán hàng kéo dài hết khung: phần dư dồn cho khu thau trộn, thau to theo */
+#scr-service .counter{flex:1;display:flex;flex-direction:column}
+#scr-service .station{flex:1}
+#scr-service .bowlbox{flex:1;min-height:102px}
+#scr-service .bowlbox canvas{position:absolute;left:3px;top:3px;width:calc(100% - 6px);height:calc(100% - 6px);max-width:none;object-fit:contain}
 
 /* shared buttons */
 .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:7px 10px 6px;background:var(--paper2);color:var(--ink);font-size:21px}
