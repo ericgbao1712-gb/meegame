@@ -263,6 +263,16 @@ html,body,*{touch-action:manipulation}
 .bowlcol{display:flex;flex-direction:column;gap:9px;min-width:0}
 .bowlbox{position:relative;background:#6d4122;padding:3px;line-height:0;display:flex;justify-content:center}
 .bowlbox canvas{height:96px;width:auto;max-width:100%;object-fit:contain;display:block;touch-action:none;cursor:grab}
+#coach{position:fixed;inset:0;z-index:100}
+#coach.dim{background:rgba(30,20,30,.6)}
+#coach .cspot{position:fixed;border-radius:8px;box-shadow:0 0 0 9999px rgba(30,20,30,.6),0 0 0 3px var(--gold);pointer-events:none;transition:all .18s}
+#coach .cbub{position:fixed;width:min(330px,calc(100vw - 16px));background:var(--paper);color:var(--ink);padding:10px 12px 12px;display:flex;flex-direction:column;gap:5px}
+#coach .cstep{font-size:13px;letter-spacing:.12em;color:var(--chiliD)}
+#coach .ct{font-weight:400;font-size:22px;line-height:1}
+#coach .cx{margin:0;font-size:17px;line-height:1.1;color:#5a4636}
+#coach .cx b{font-weight:400;color:var(--chiliD)}
+#coach .cbtns{display:flex;gap:8px;justify-content:flex-end;margin-top:4px}#coach .cbtns .btn{font-size:17px;padding:4px 12px}
+@media (min-width:980px) and (min-height:600px){#coach .cbub{width:420px;padding:14px 16px 16px}#coach .ct{font-size:28px}#coach .cx{font-size:22px}#coach .cstep{font-size:15px}#coach .cbtns .btn{font-size:21px;padding:6px 16px}}
 .fcbox{display:grid;grid-template-columns:30px 1fr;gap:8px;align-items:center;padding:7px 9px;background:#e8f4ec;color:var(--ink)}
 .fcbox img{width:30px;height:30px;image-rendering:pixelated}.fcbox b{display:block;font-size:19px;font-weight:400;line-height:1}.fcbox small{display:block;font-size:15px;line-height:1.05;color:var(--txt2)}
 .bowltops{position:absolute;left:6px;bottom:6px;display:flex;flex-wrap:wrap;gap:3px;max-width:62%;pointer-events:none;line-height:0;z-index:2}
@@ -844,6 +854,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
       <h3 id="setTitle">Cài đặt</h3>
       <div class="setsec"><b>Âm thanh</b><div class="row2"><button class="btn pxb" id="btnSoundS">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicS">Nhạc: Bật</button></div></div>
       <div id="setBody" style="display:contents"></div>
+      <button class="btn pxb" id="btnTutAgain">Xem lại hướng dẫn</button>
       <button class="btn pxb" id="btnSetClose">Đóng</button>
     </div>
   </div>
@@ -1758,7 +1769,7 @@ function renderPrice(){
   for(const t of [...SAUCE_IDS,...TOP_IDS].filter(unlocked))h+=`<button class="toggle px2 ${G.menuOff[t]?'off':''}" data-act="menu:${t}"><i></i>${ITEMS[t].name}</button>`;
   return h+'</div>';
 }
-function rivalsToday(){const d=G.day+G.fr.count*7;return RIVALS.map(([shop,owner,base,grow],i)=>({shop,owner,val:Math.round((base+grow*d*(1+((i*7+d)%5)/20))/1000)*1000}))}
+function rivalsToday(){const d=G.day+G.fr.count*7;return RIVALS.map(([shop,owner,base,grow],i)=>({shop,owner,val:Math.round((base+grow*3*d*(1+((i*7+d)%5)/20))/1000)*1000}))}
 function renderExp(){
   let h=subtabsHTML('exp');const l=level(),sub=mSub.exp;
   const max='<span style="font-size:15px;color:var(--leafD)">Tối đa</span>';
@@ -1852,8 +1863,8 @@ function podiumHTML(list){
 }
 function listHTML(list,from){return list.slice(from).map((r,i)=>`<div class="rk px2 ${r.me?'me':''}"><span class="no">${from+i+1}</span><img src="${logoOf(r)}" alt=""><div style="min-width:0"><span class="nt nt-${r.tag||'go'}">${esc(r.shop)}</span><small>${admTag(r)}${esc([r.owner,r.level?'Lv'+r.level:'',r.title].filter(Boolean).join(' · '))}</small></div><span class="val">${fmtK(r.val)}</span></div>`).join('')}
 function renderRank(){
-  const mine={shop:P_.shop,owner:P_.name,val:assets(),title:titleName(),tag:G.tag,level:level(),logo:P_.logo,me:true};
-  let h=`<div class="rkhead pxb"><img src="${IC.crown}" alt=""><div><b>Bảng xếp hạng</b><small>${rankView==='online'?(NET.server?'MeeGame · tổng tiền đã kiếm':'Người chơi trên Claude · tổng tài sản'):'Các quán quanh vùng · tổng tài sản'}</small></div></div>
+  const mine={shop:P_.shop,owner:P_.name,val:nz(G.stats.earned),title:titleName(),tag:G.tag,level:level(),logo:P_.logo,me:true};
+  let h=`<div class="rkhead pxb"><img src="${IC.crown}" alt=""><div><b>Bảng xếp hạng</b><small>${rankView==='online'?(NET.server?'MeeGame · tổng doanh thu':'Người chơi trên Claude · tổng doanh thu'):'Các quán quanh vùng · tổng doanh thu'}</small></div></div>
     <div class="seg2"><button class="px2" data-act="rview:online" aria-pressed="${rankView==='online'}">Online</button><button class="px2" data-act="rview:local" aria-pressed="${rankView==='local'}">Quanh vùng</button></div>`;
   let list;
   if(rankView==='online'){
@@ -2008,7 +2019,7 @@ async function loadServerBoard(){
   }catch(e){NET.status='Không kết nối được bảng xếp hạng online.'}
 })();
 function pushBoard(){
-  if(NET.db&&NET.uid){NET.db.doc('board/'+NET.uid).set({logo:P_.logo,shop:P_.shop.slice(0,24),owner:P_.name.slice(0,12),title:titleName(),tag:G.tag||'go',level:level(),assets:assets(),served:G.stats.served,fr:G.fr.count,day:G.day,updatedAt:Date.now()}).catch(()=>{})}
+  if(NET.db&&NET.uid){NET.db.doc('board/'+NET.uid).set({logo:P_.logo,shop:P_.shop.slice(0,24),owner:P_.name.slice(0,12),title:titleName(),tag:G.tag||'go',level:level(),assets:nz(G.stats.earned),served:G.stats.served,fr:G.fr.count,day:G.day,updatedAt:Date.now()}).catch(()=>{})}
   if(NET.server&&NET.player)serverSync();
 }
 async function serverSync(){
@@ -2229,6 +2240,54 @@ $('btnNewNo').onclick=()=>{$('newWarn').hidden=true;$('newConfirm').hidden=true;
 $('btnNewYes').onclick=()=>{clearSave();startNew()};
 $('btnCustomize').onclick=()=>{sfx('tap');openSetup('edit',renderTitle)};
 $('btnSoundT').onclick=()=>{setSound(!AU.on);sfx('tap')};
+
+/* =====================================================================
+   HƯỚNG DẪN NGƯỜI MỚI — khoanh sáng từng chỗ, 1 lần ở chợ + 1 lần ở ca bán đầu tiên.
+   G.tut={m:1,s:1}; G.tut.force=1 khi bấm "Xem lại hướng dẫn" trong Cài đặt.
+   ===================================================================== */
+const TUT_MKT=[
+  {t:'Chào chủ gánh mới!',x:'Mỗi ngày có 3 bước: <b>đi chợ sáng</b> mua nguyên liệu → <b>mở quầy</b> bán từ 16h tới 20h → <b>kết sổ</b> cuối ngày.'},
+  {sel:'.fcbox',t:'Dự báo khách',x:'Ước tính hôm nay có bao nhiêu khách và gọi món gì, để mua cho vừa.'},
+  {sel:'#btnAuto',t:'Mua gợi ý',x:'Bấm để tự mua đủ nguyên liệu cho cả ngày. Muốn mua thêm món nào thì bấm <b>+</b> ở hàng đó.'},
+  {sel:'#scr-market .tabs',t:'Các mục khác',x:'<b>Nâng cấp</b> đồ nghề, nhân viên · <b>Giá bán</b> · <b>Sáng chế</b> món riêng · <b>Mở rộng</b> quán · <b>Sổ sách</b> và nhiệm vụ lên cấp.'},
+  {sel:'#btnOpen',t:'Mở quầy',x:'Mua xong thì bấm đây để bắt đầu bán hàng.'}];
+const TUT_SVC=[
+  {sel:'#ticket',t:'Khách gọi món',x:'Đọc phiếu: loại món, bánh, sốt, topping, độ cay. Ô chuyển <b>xanh</b> là đã làm đúng.'},
+  {sel:'#slots',t:'Hàng khách',x:'Chạm vào khách để chọn người cần làm. Thanh màu dưới tên là độ kiên nhẫn, hết thì khách bỏ về.'},
+  {sel:'#shelf',t:'1. Chọn bánh tráng',x:'Bấm đúng loại bánh khách gọi để bỏ vào thau. Sốt cũng nằm ở kệ này.'},
+  {sel:'#tray',t:'2. Bỏ topping',x:'Bấm từng topping khách gọi. Số nhỏ ở góc là lượng còn trong kho.'},
+  {sel:'#scr-service .satecol',t:'3. Sa tế và mỡ hành',x:'Mỗi lần bấm là <b>+1 muỗng</b>. Khách gọi cay cấp mấy thì bỏ bấy nhiêu muỗng sa tế.'},
+  {sel:'#mixBtn',t:'4. Trộn đều',x:'Nhấn giữ nút này (hoặc phím Space) tới khi đầy 100%. Bánh nướng thì bấm <b>Gấp</b> lúc bánh vàng giòn.'},
+  {sel:'#serveBtn',t:'5. Giao món',x:'Làm đủ thì bấm Giao món. Đúng order được 5 sao và tiền bo. Lỡ sai thì bấm <b>Đổ</b> làm lại.'},
+  {sel:'#hintBtn',t:'Gợi ý',x:'Bóng đèn bật thì thanh vàng nhắc bước tiếp theo. Chúc bán đắt hàng!'}];
+const COACH={steps:null,i:0,el:null,onEnd:null};
+function needTut(k){G.tut=G.tut||{};if(G.tut[k])return false;if(G.tut.force)return true;
+  if(G.day>2||nz(G.stats.served)>15){G.tut[k]=1;return false}return true}
+function tutDone(k){G.tut=G.tut||{};G.tut[k]=1;if(G.tut.m&&G.tut.s)delete G.tut.force;save()}
+function coachWhenFree(fn){if(!$('eventOv').hidden||!$('scr-story').hidden||!$('setOv').hidden){setTimeout(()=>coachWhenFree(fn),500);return}fn()}
+function coachStart(steps,onEnd){
+  COACH.steps=steps;COACH.i=0;COACH.onEnd=onEnd;
+  if(!COACH.el){const d=document.createElement('div');d.id='coach';d.hidden=true;
+    d.innerHTML='<div class="cspot"></div><div class="cbub pxb" role="dialog" aria-live="polite"><small class="cstep"></small><b class="ct"></b><p class="cx"></p><div class="cbtns"><button class="btn pxb" data-c="skip">Bỏ qua</button><button class="btn gold pxb" data-c="next">Tiếp ›</button></div></div>';
+    document.body.appendChild(d);d.addEventListener('click',e=>{const b=e.target.closest('[data-c]');if(!b)return;sfx('tap');b.dataset.c==='skip'?coachEnd():coachNext()});
+    COACH.el=d;addEventListener('resize',coachPlace);addEventListener('scroll',coachPlace,true)}
+  COACH.el.hidden=false;coachShow();
+}
+function coachShow(){const st=COACH.steps[COACH.i],t=st.sel&&document.querySelector(st.sel),E=COACH.el;
+  if(t)t.scrollIntoView({block:'center'});
+  E.querySelector('.ct').textContent=st.t;E.querySelector('.cx').innerHTML=st.x;E.querySelector('.cstep').textContent=`HƯỚNG DẪN · ${COACH.i+1}/${COACH.steps.length}`;
+  E.querySelector('[data-c=next]').textContent=COACH.i===COACH.steps.length-1?'Bắt đầu!':'Tiếp ›';requestAnimationFrame(coachPlace)}
+function coachPlace(){if(!COACH.el||COACH.el.hidden||!COACH.steps)return;
+  const st=COACH.steps[COACH.i],t=st.sel&&document.querySelector(st.sel),sp=COACH.el.querySelector('.cspot'),bb=COACH.el.querySelector('.cbub'),H=bb.offsetHeight,W=bb.offsetWidth;
+  COACH.el.classList.toggle('dim',!t);
+  if(t){const r=t.getBoundingClientRect();Object.assign(sp.style,{display:'block',left:r.left-6+'px',top:r.top-6+'px',width:r.width+12+'px',height:r.height+12+'px'});
+    const top=r.bottom+16+H<=innerHeight?r.bottom+16:r.top-16-H>=0?r.top-16-H:Math.max(8,innerHeight-H-8);
+    bb.style.top=top+'px';bb.style.left=clamp(r.left+r.width/2-W/2,8,innerWidth-W-8)+'px'}
+  else{sp.style.display='none';bb.style.top=Math.max(8,(innerHeight-H)/2)+'px';bb.style.left=Math.max(8,(innerWidth-W)/2)+'px'}}
+function coachNext(){COACH.i++;if(COACH.i>=COACH.steps.length)coachEnd();else coachShow()}
+function coachEnd(){if(COACH.el)COACH.el.hidden=true;const f=COACH.onEnd;COACH.steps=null;COACH.onEnd=null;f&&f()}
+function tutMarket(){if(!needTut('m'))return;coachWhenFree(()=>{if(current!=='market'||COACH.steps)return;mTab='food';renderMarket();coachStart(TUT_MKT,()=>tutDone('m'))})}
+function tutService(){if(!needTut('s'))return;coachWhenFree(()=>{if(current!=='service'||!S||COACH.steps)return;S.paused=true;coachStart(TUT_SVC,()=>{tutDone('s');if(S&&$('pauseOv').hidden)S.paused=false})})}
 function startNew(){const keep=G.profile;G=bizDefaults(freshGame());if(keep)G.profile={...keep};G.setupDone=false;applyProfile();save();playStory(INTRO,()=>openRent('start'))}
 
 /* =====================================================================
@@ -2386,6 +2445,7 @@ function enterMarket(firstTime){
   if(G.staff.mo&&G.moDay!==G.day){G.moDay=G.day;const before=G.money;$('btnAuto').onclick();const sp=before-G.money;setTimeout(()=>toast(`Chị Mơ đi chợ về, đã mua <b>${fmtK(sp)}</b>`,2400),400)}
   save();renderMarket();show('market');
   if(firstTime)setTimeout(()=>toast('Bấm <b>Mua gợi ý</b> nếu chưa biết mua gì',2600),300);
+  setTimeout(tutMarket,600);
 }
 function goalHTML(){
   const m=G.money,r=rating();
@@ -2535,6 +2595,7 @@ function startService(){
   newCustomer(0,true);autoMode();renderModes();
   refresh();renderHud();updateSlotsDOM();renderTicket(true);updateHints();
   show('service');requestAnimationFrame(()=>{fitScene();fitWide()});
+  setTimeout(tutService,700);
   toast(`<b>16:00</b> · Mở quầy ở ${(LOCS[G.loc]||LOCS.hem).name}!`,1800);
 }
 function pickKind(){
@@ -3138,7 +3199,7 @@ function endService(){
   const loc=LOCS[G.loc]||LOCS.hem;const mm=M();const rentT=mm.rent;G.money-=rentT;
   const wage=Math.round(wagesToday()/1000)*1000;G.money-=wage;
   let brSum=0;const brLines=[];for(const b of BRANCHES){const st=G.branches[b.id];if(!st)continue;st.neglect=G.day-st.visit;const inc=branchIncome(b,st);st.last=inc;brSum+=inc;brLines.push(`${b.name} ${inc>=0?'+':'−'}${fmtK(Math.abs(inc))}`)}
-  G.money+=brSum;
+  G.money+=brSum;if(brSum>0)G.stats.earned=nz(G.stats.earned)+brSum;   // lãi chi nhánh tính vào doanh thu
   const del=runDelivery();G.money+=del.rev;
   G.taxBase=nz(G.taxBase)+S.revenue+del.rev;
   questEvent('day',{leftAngry:S.leftAngry,served:S.served});
@@ -3283,6 +3344,7 @@ async function redeemCode(){
 /* iOS Safari bỏ qua user-scalable=no: chặn thêm cử chỉ zoom và double-click zoom */
 ['gesturestart','gesturechange'].forEach(ev=>document.addEventListener(ev,e=>e.preventDefault(),{passive:false}));
 document.addEventListener('dblclick',e=>e.preventDefault(),{passive:false});
+$('btnTutAgain').onclick=()=>{G.tut={force:1};save();closeSettings();if(current==='market')tutMarket();else if(current==='service')tutService();else toast('Hướng dẫn sẽ hiện khi bạn ra chợ và mở quầy',2400)};
 $('btnSetT').onclick=openSettings;$('btnSetM').onclick=openSettings;$('btnSetClose').onclick=closeSettings;
 $('setOv').addEventListener('click',e=>{if(e.target===$('setOv'))closeSettings()});
 $('btnSoundS').onclick=()=>{setSound(!AU.on);sfx('tap')};

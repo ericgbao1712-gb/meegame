@@ -66,7 +66,8 @@ export function saveSummary(save, game = DEFAULT_GAME) {
     avatar: Math.max(0, Math.min(99, Math.floor(num(save.avatar ?? save.owner?.look?.avatar)))),
     level,
     xp: Math.max(0, num(save.xp)),
-    money_earned: Math.max(money, num(stats.moneyEarned) / K),
+    // Bánh Tráng: xếp hạng theo TỔNG DOANH THU (tiền bán + giao hàng + chi nhánh), không lấy tiền đang có (tránh tiền quà / admin đẩy hạng)
+    money_earned: game === 'banhtrang' ? Math.max(0, num(stats.moneyEarned)) : Math.max(money, num(stats.moneyEarned) / K),
     pots_sold: Math.max(0, Math.floor(num(stats.potsSold))),
     day: Math.max(1, Math.floor(num(save.day, 1))),
     days_played: Math.max(0, Math.floor(num(stats.daysPlayed))),
