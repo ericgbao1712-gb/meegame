@@ -232,6 +232,26 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .hintbar b{font-weight:400;color:var(--chili)}
 .shelf{display:grid;gap:7px;grid-template-columns:repeat(5,1fr)}
 .tray{display:grid;gap:4px;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));padding:3px 3px 4px;margin:-3px -3px 0}
+.shelf{gap:5px}.shelf .tile{padding:3px 1px 2px}.shelf .tile img{width:28px;height:28px}
+.shelf .tile .lbl{white-space:normal;font-size:12px;line-height:1;min-height:2em;display:flex;align-items:center;justify-content:center;overflow:visible;padding:0 1px}
+/* ---- cột gia vị: sa tế + mỡ hành, mỗi khối: tên & số còn / nút +1 / 5 ô đếm / mức ---- */
+.station{grid-template-columns:52px 1fr 78px!important}
+.satecol{gap:6px!important;padding:5px 4px!important;justify-content:flex-start}
+.gv{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%}
+.gv.mosec{margin:0!important;padding:6px 0 0!important;border-top:2px dashed var(--paper2)}
+.gvhd{display:flex;align-items:center;justify-content:center;gap:4px;min-width:0}
+.gvhd img{flex:none;width:22px!important;height:auto!important;image-rendering:pixelated}
+.gvhd>span{display:flex;flex-direction:column;min-width:0;line-height:1}
+.gvhd b{font-weight:400;font-size:13px;white-space:nowrap}
+.gvhd .jarcnt{font-size:12px;line-height:1;white-space:nowrap}
+.satecol .spoon{width:100%!important;display:flex;flex-direction:row;align-items:center;justify-content:center;gap:3px;padding:4px 2px 3px!important;font-size:12px!important;line-height:1}
+.satecol .spoon img{display:block;flex:none;width:16px!important;height:9px!important}
+.satecol .spoon span{white-space:nowrap}
+.pips{display:grid!important;grid-template-columns:repeat(5,1fr);gap:2px;width:100%}
+.pips i{display:block;height:7px;background:var(--paper2);box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.pips i.on{background:var(--chili)}.pips.mo i.on{background:#5aa23a}
+.satecol .cay{font-size:12px;line-height:1;white-space:normal;text-align:center;min-height:1em}
+@media (min-width:980px) and (min-height:600px){.satecol .spoon{font-size:15px!important;padding:6px 2px 5px!important}.gvhd b{font-size:16px}.gvhd .jarcnt{font-size:14px}.gvhd img{width:30px!important}.pips i{height:10px}.satecol .cay{font-size:15px}}
 .tray .tgl{grid-column:1/-1;font-size:13px;line-height:1;letter-spacing:.06em;margin:3px 0 -1px;opacity:.85}
 .tile{position:relative;display:flex;flex-direction:column;align-items:center;gap:0;padding:2px 1px 2px;background:var(--paper);color:var(--ink);min-width:0;
   box-shadow:0 -2px 0 0 var(--ink),0 2px 0 0 var(--ink),-2px 0 0 0 var(--ink),2px 0 0 0 var(--ink),inset 0 -2px 0 0 rgba(0,0,0,.14)}
@@ -797,16 +817,16 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
           </div>
         </div>
         <div class="satecol pxb">
-          <img class="jar" id="jarImg" alt="Hũ sa tế">
-          <span class="jarcnt" id="jarCnt"></span>
-          <button class="spoon pxb" id="spoonBtn"><img id="spoonImg" alt="">+1 muỗng</button>
-          <div class="pips" id="pips"></div>
-          <div class="cay" id="cayLbl"></div>
-          <div class="mosec">
-            <img class="mobowl" id="moImg" alt="Tô mỡ hành">
-            <span class="jarcnt" id="moCnt"></span>
-            <button class="spoon mo pxb" id="moBtn"><img id="moSpoonImg" alt="">+1 muỗng</button>
-            <div class="pips" id="moPips"></div>
+          <div class="gv">
+            <div class="gvhd"><img class="jar" id="jarImg" alt="Hũ sa tế"><span><b>Sa tế</b><span class="jarcnt" id="jarCnt"></span></span></div>
+            <button class="spoon pxb" id="spoonBtn"><img id="spoonImg" alt=""><span>+1 muỗng</span></button>
+            <div class="pips" id="pips"></div>
+            <div class="cay" id="cayLbl"></div>
+          </div>
+          <div class="gv mosec">
+            <div class="gvhd"><img class="mobowl" id="moImg" alt="Tô mỡ hành"><span><b>Mỡ hành</b><span class="jarcnt" id="moCnt"></span></span></div>
+            <button class="spoon mo pxb" id="moBtn"><img id="moSpoonImg" alt=""><span>+1 muỗng</span></button>
+            <div class="pips mo" id="moPips"></div>
             <div class="cay" id="moLbl"></div>
           </div>
         </div>
@@ -2747,7 +2767,7 @@ function buildCounter(){
   if(typeof fitScene==='function')requestAnimationFrame(fitScene);
   shelf.innerHTML='';tray.innerHTML='';tray.dataset.k='';
   const sh=[...BASE_IDS.filter(unlocked),...SAUCE_IDS.filter(unlocked)];sh.forEach(id=>shelf.appendChild(tile(id)));
-  shelf.classList.remove('many');shelf.classList.toggle('dense',sh.length>6);shelf.style.gridTemplateColumns=`repeat(${sh.length},minmax(0,1fr))`;
+  shelf.classList.remove('many','dense');shelf.style.gridTemplateColumns=`repeat(${Math.min(6,sh.length)},minmax(0,1fr))`;
   buildTray();
 }
 /* Khay topping: chia nhóm theo loại, hiện hết (không kéo ngang). Chỉ hiện topping hợp với món đang làm. */
@@ -2764,8 +2784,8 @@ function buildTray(){
 function buildSlotsDOM(){const n=slotCount();if(slotsEl.children.length===n)return;slotsEl.innerHTML='';slotsEl.style.gridTemplateColumns=`repeat(${n},1fr)`;
 for(let i=0;i<n;i++){const d=document.createElement('button');d.className='slot';d.innerHTML='<span class="tag"></span><span class="bar"><i></i></span>';
   d.onclick=()=>{if(S&&S.slots[i]&&!S.slots[i].leave){if(S.slots[i].chef){toast('Anh Bảo đang làm món cho khách này');sfx('tap');return}S.active=i;sfx('tap');renderTicket(true);updateHints()}};slotsEl.appendChild(d)}}
-for(let i=0;i<5;i++){const im=document.createElement('img');im.alt='';pipsEl.appendChild(im)}
-$('moPips').classList.add('mo');for(let i=0;i<5;i++){const im=document.createElement('img');im.alt='';$('moPips').appendChild(im)}
+for(let i=0;i<5;i++){const im=document.createElement('i');pipsEl.appendChild(im)}
+for(let i=0;i<5;i++){const im=document.createElement('i');$('moPips').appendChild(im)}
 
 /* Khách tăng dần: ngày 1 ~60% lượng khách, ngày 7 đủ 100%; cấp cao giúp tăng nhanh hơn */
 function rampF(){return Math.min(1,.6+.065*(G.day-1)+.03*Math.max(0,level()-1))}
@@ -3166,11 +3186,11 @@ function renderTicket(force){
 function refresh(){
   document.querySelectorAll('#shelf .tile,#tray .tile').forEach(el=>{const id=el.dataset.id,st=G.stock[id],inB=B.base===id||B.sauce===id||B.tops.includes(id);
     el.classList.toggle('in',inB);el.classList.toggle('out',st<=0&&!inB);const c=el.querySelector('.cnt');c.textContent=st;c.classList.toggle('zero',st<=0)});
-  [...pipsEl.children].forEach((im,i)=>im.src=i<B.sate?IMG.chili:IMG.chiliOff);
+  [...pipsEl.children].forEach((im,i)=>im.classList.toggle('on',i<B.sate));
   $('cayLbl').textContent=CAY[B.sate];
   $('jarCnt').textContent='còn '+G.stock.sate;
-  [...$('moPips').children].forEach((im,i)=>im.src=i<B.mo?IMG.moOn:IMG.moOff);
-  $('moLbl').textContent=B.mo?`Mỡ hành ${B.mo}`:'Không mỡ';$('moCnt').textContent='còn '+G.stock.mohanh;
+  [...$('moPips').children].forEach((im,i)=>im.classList.toggle('on',i<B.mo));
+  $('moLbl').textContent=B.mo?`${B.mo} muỗng`:'Không mỡ';$('moCnt').textContent='còn '+G.stock.mohanh;
   {const d=B.dish||(S?S.mode:'tron');$('packInfo').textContent=packFor(d).map(id=>`${ITEMS[id].short.toLowerCase()} ${G.stock[id]}`).join(' · ')}
   const m=S?S.mode:'tron';
   {const ids=B.base?[B.sauce,...B.tops].filter(Boolean):[],k=ids.join();const bt2=$('bowlTops');if(bt2.dataset.k!==k){bt2.dataset.k=k;bt2.innerHTML=ids.map(id=>`<img src="${IMG[id]}" alt="${ITEMS[id].name}" title="${ITEMS[id].name}">`).join('')}}
