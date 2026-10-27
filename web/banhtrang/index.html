@@ -375,6 +375,20 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .toast.show{opacity:1}
 .toast b{color:var(--gold);font-weight:400}
 .flyer{position:fixed;width:32px;height:32px;pointer-events:none;z-index:50}
+.setcard{max-height:calc(100% - 8px);overflow-y:auto;gap:10px;text-align:left;align-items:stretch}
+.setcard .tagred{align-self:center}.setcard h3{text-align:center}
+.setsec{display:flex;flex-direction:column;gap:6px;padding-top:8px;border-top:2px dashed var(--paper2)}
+.setsec>b{font-weight:400;font-size:19px;color:var(--chiliD)}
+.setsec small{font-size:15px;line-height:1.05;color:#8a6f7a}
+.setsec .row2{display:flex;gap:8px}.setsec .row2>*{flex:1}
+.setsec .btn{font-size:17px}
+.codein{text-transform:uppercase;letter-spacing:.06em;font-size:20px}
+.codemsg{font-size:16px;line-height:1.05;color:var(--chiliD)}.codemsg.ok{color:var(--leafD)}
+.codechips{display:flex;flex-wrap:wrap;gap:6px}
+.codechip{font-family:var(--f);font-size:15px;line-height:1;padding:5px 8px 4px;border:0;background:var(--paper2);color:var(--ink);cursor:pointer;text-align:left}
+.codechip.done{opacity:.5;text-decoration:line-through;cursor:default}
+.codechip span{display:block;font-size:13px;opacity:.8}
+.sq.gear{font-size:19px;line-height:1;color:var(--ink);font-family:system-ui,sans-serif}
 .ov{position:absolute;inset:0;background:rgba(18,14,32,.74);display:flex;align-items:center;justify-content:center;z-index:10;padding:18px}
 .card{background:var(--paper);color:var(--ink);width:100%;max-width:330px;padding:14px 14px 16px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px}
 .card .ava{width:64px;height:auto;background:#f6d58a;padding:6px 10px}
@@ -558,7 +572,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
       </div>
       <button class="btn pxb" id="btnCustomize" hidden style="font-size:17px">Đổi tên quán, nhân vật</button>
       <div class="acct pxb" id="acct" hidden></div>
-      <div class="row snd"><button class="btn pxb" id="btnSoundT" style="font-size:16px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicT" style="font-size:16px">Nhạc: Bật</button></div>
+      <div class="row snd"><button class="btn pxb" id="btnSoundT" style="font-size:16px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicT" style="font-size:16px">Nhạc: Bật</button><button class="btn pxb" id="btnSetT" style="font-size:16px">Cài đặt</button></div>
     </div>
   </div>
 
@@ -621,6 +635,7 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
   <div class="screen" id="scr-market" hidden>
     <header class="hud">
       <button class="sq mq pxb" id="btnShop" aria-label="Đổi tên quán, nhân vật, logo" title="Quán của bạn"><img class="shopLogo" alt=""></button>
+      <button class="sq gear pxb" id="btnSetM" aria-label="Cài đặt" title="Cài đặt · nhập mã quà tặng">⚙</button>
       <div class="day"><b id="mDay">Ngày 1</b><small>Chợ sáng</small></div>
       <div class="money"><img class="coin" alt=""><b id="mMoney"></b></div>
       <div class="rating"><img class="star" alt=""><b class="rLbl"></b></div>
@@ -731,6 +746,15 @@ html[data-skin="dem"] .rkhead{background:linear-gradient(90deg,var(--gold),var(-
       <div class="row" style="display:flex;gap:10px;width:100%"><button class="btn pxb" id="btnSoundP" style="flex:1;font-size:17px">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicP" style="flex:1;font-size:17px">Nhạc: Bật</button></div>
       <button class="btn pxb" id="btnClose">Dọn hàng sớm<small>khách còn lại sẽ về</small></button>
       <button class="btn pxb" id="btnHome">Về màn hình chính<small>hôm nay chưa được lưu</small></button>
+    </div>
+  </div>
+
+  <div class="ov" id="setOv" hidden>
+    <div class="card pxb setcard" role="dialog" aria-modal="true" aria-labelledby="setTitle">
+      <h3 id="setTitle">Cài đặt</h3>
+      <div class="setsec"><b>Âm thanh</b><div class="row2"><button class="btn pxb" id="btnSoundS">Âm thanh: Bật</button><button class="btn pxb" id="btnMusicS">Nhạc: Bật</button></div></div>
+      <div id="setBody" style="display:contents"></div>
+      <button class="btn pxb" id="btnSetClose">Đóng</button>
     </div>
   </div>
 
@@ -1153,7 +1177,7 @@ function sfx(k){
   }catch(e){}
 }
 function setSound(on){AU.on=on;try{localStorage.setItem('btdt-sound',on?'1':'0')}catch(e){}
-  ['btnSoundT','btnSoundP'].forEach(id=>$(id).textContent='Âm thanh: '+(on?'Bật':'Tắt'))}
+  ['btnSoundT','btnSoundP','btnSoundS'].forEach(id=>$(id).textContent='Âm thanh: '+(on?'Bật':'Tắt'))}
 
 /* =====================================================================
    5. TRẠNG THÁI + LƯU GAME
@@ -1893,10 +1917,11 @@ function mountGoogle(root){
 async function meeSignIn(cred){
   if(!cred)return;const r=await meeApi('POST','auth/google',{credential:cred});
   if(r.status===200&&r.json&&r.json.player){NET.player=r.json.player;toast(`Đã đăng nhập <b>${esc(NET.player.name||NET.player.email||'')}</b>`);
-    if(current==='title'){renderAcct();await cloudCheck(true)}else{await serverSync();renderMarket()}}
+    if(current==='title'){renderAcct();await cloudCheck(true)}else{await serverSync();renderMarket()}
+    if(!$('setOv').hidden){renderSettings();loadCodes()}}
   else toast(r.json&&r.json.message||'Đăng nhập chưa được',2400);
 }
-async function meeSignOut(){await meeApi('POST','auth/logout',{});NET.player=null;if(current==='title')renderAcct();else renderMarket()}
+async function meeSignOut(){await meeApi('POST','auth/logout',{});NET.player=null;if(current==='title')renderAcct();else renderMarket();if(!$('setOv').hidden)renderSettings()}
 function renderAcct(){
   const el=$('acct');if(!el)return;el.hidden=!NET.server;if(!NET.server)return;
   if(NET.player){el.innerHTML=`<div><small>Đã đăng nhập Google</small><b>${esc(NET.player.name||NET.player.email||'')}</b></div><button class="btn pxb" id="btnAcctOut">Thoát</button>`;$('btnAcctOut').onclick=()=>{sfx('tap');meeSignOut()}}
@@ -1958,7 +1983,7 @@ function musStart(){
 }
 function musStop(){if(!MUS.timer)return;clearInterval(MUS.timer);MUS.timer=null;try{const c=MUS.ctx;MUS.gain.gain.cancelScheduledValues(c.currentTime);MUS.gain.gain.setValueAtTime(MUS.gain.gain.value,c.currentTime);MUS.gain.gain.linearRampToValueAtTime(.0001,c.currentTime+.6)}catch(e){}}
 function setMusic(on){MUS.on=on;try{localStorage.setItem('btdt-music',on?'1':'0')}catch(e){}
-  ['btnMusicT','btnMusicP'].forEach(id=>{const b=$(id);if(b)b.textContent='Nhạc: '+(on?'Bật':'Tắt')});on?musStart():musStop()}
+  ['btnMusicT','btnMusicP','btnMusicS'].forEach(id=>{const b=$(id);if(b)b.textContent='Nhạc: '+(on?'Bật':'Tắt')});on?musStart():musStop()}
 addEventListener('pointerdown',()=>{if(!MUS.on)return;if(MUS.ctx&&MUS.ctx.state==='suspended')MUS.ctx.resume();if(!MUS.timer)musStart()});
 document.addEventListener('visibilitychange',()=>{if(!MUS.ctx)return;if(document.hidden)MUS.ctx.suspend();else if(MUS.on)MUS.ctx.resume()});
 
@@ -2833,6 +2858,66 @@ function showEnd(win){
 $('btnFree').onclick=()=>{G.free=true;save();enterMarket(false)};
 $('btnRestart').onclick=()=>{clearSave();startNew()};
 $('btnMusicT').onclick=()=>{setMusic(!MUS.on)};
+/* ---- CÀI ĐẶT + MÃ QUÀ TẶNG ----
+   Admin tạo mã ở /admin/games (chọn game "Bánh Tráng Nhà Mee" hoặc "Mọi game").
+   Máy chủ: POST /api/lau?g=banhtrang&r=code/redeem → { money (NGHÌN đồng), xp }, mỗi tài khoản 1 lần / mã. */
+const GIFT={code:'',busy:false,msg:'',ok:false,codes:null};
+function openSettings(){sfx('tap');GIFT.msg='';GIFT.ok=false;$('setOv').hidden=false;renderSettings();if(NET.server)loadCodes()}
+function closeSettings(){$('setOv').hidden=true;sfx('tap')}
+async function loadCodes(){const r=await meeApi('GET','codes/active');if(r.status===200&&r.json){GIFT.codes=r.json.codes||[];if(!$('setOv').hidden)renderSettings()}}
+function giftText(money,xp){return [money?'+'+fmtK(money):'',xp?`+${xp.toLocaleString('vi-VN')} XP`:''].filter(Boolean).join(' · ')}
+function codeBlock(){
+  if(!NET.server)return '<small>Nhập mã quà tặng chỉ dùng được khi chơi trên trang MeeGame.</small>';
+  if(!NET.player)return '<small>Đăng nhập Google ở trên rồi mới nhập mã được nha.</small>';
+  if(current==='title'&&!load())return '<small>Bắt đầu chơi rồi quay lại đây nhận quà nha.</small>';
+  const chips=(GIFT.codes||[]).slice(0,6).map(k=>`<button type="button" class="codechip ${k.redeemed?'done':''}" data-code="${esc(k.code)}" ${k.redeemed?'disabled':''}>${esc(k.code)}<span>${giftText((+k.money||0)*1000,+k.xp||0)}${k.redeemed?' · đã nhận':''}${k.note?' · '+esc(k.note):''}</span></button>`).join('');
+  return `<input class="pxin codein" id="setCode" maxlength="32" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="Nhập mã quà tặng" value="${esc(GIFT.code)}" aria-label="Mã quà tặng">
+    <button class="btn gold pxb" id="btnRedeem" ${GIFT.busy||!GIFT.code.trim()?'disabled':''}>${GIFT.busy?'Đang đổi…':'Nhận quà'}</button>
+    ${GIFT.msg?`<div class="codemsg ${GIFT.ok?'ok':''}" role="status">${GIFT.msg}</div>`:''}
+    ${chips?`<small>Mã đang có:</small><div class="codechips">${chips}</div>`:''}`;
+}
+function renderSettings(){
+  const el=$('setBody');if(!el)return;
+  let acct='';
+  if(NET.server)acct=NET.player?`<div class="setsec"><b>Tài khoản</b><small>Đã đăng nhập Google</small><div class="row2"><span style="font-size:18px;align-self:center;overflow:hidden;text-overflow:ellipsis">${esc(NET.player.name||NET.player.email||'')}</span><button class="btn pxb" id="btnSetOut" style="flex:none;width:auto">Thoát</button></div></div>`
+    :`<div class="setsec"><b>Tài khoản</b><small>Lưu tiến trình online, lên bảng xếp hạng và nhận mã quà tặng.</small><div data-gsi style="min-height:44px;display:flex;justify-content:center">Đang tải nút Google…</div></div>`;
+  el.innerHTML=acct+`<div class="setsec"><b>Mã quà tặng</b>${codeBlock()}</div>`;
+  if(NET.server&&!NET.player)mountGoogle(el);
+  const out=$('btnSetOut');if(out)out.onclick=()=>{sfx('tap');meeSignOut()};
+  const inp=$('setCode'),btn=$('btnRedeem');
+  if(inp){inp.oninput=()=>{GIFT.code=inp.value.toUpperCase().replace(/\s+/g,'');btn.disabled=GIFT.busy||!GIFT.code};inp.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();redeemCode()}}}
+  if(btn)btn.onclick=redeemCode;
+  el.querySelectorAll('.codechip:not(.done)').forEach(b=>b.onclick=()=>{sfx('tap');GIFT.code=b.dataset.code;GIFT.msg='';renderSettings();const i=$('setCode');if(i)i.focus()});
+}
+function giveGift(money,xp){
+  G.money+=money;
+  const a=level();G.xp=(G.xp||0)+xp;const b=level();
+  for(let l=a+1;l<=b;l++){const un=unlocksAt(l);
+    openCard({img:IMG.star,tag:'LÊN CẤP',title:`Cấp ${l} · ${LV_TITLE[l]}`,text:un.length?'Mở khoá: '+un.join(', ')+'. Nhớ mua nguyên liệu mới ở chợ.':'Tay nghề lên một bậc!',choices:[{t:'Tuyệt!',s:'',fx:()=>''}]})}
+}
+async function redeemCode(){
+  const code=GIFT.code.trim().toUpperCase();if(!code||GIFT.busy)return;
+  if(!NET.server||!NET.player||(current==='title'&&!load())){renderSettings();return}
+  GIFT.busy=true;GIFT.msg='';GIFT.ok=false;renderSettings();
+  const r=await meeApi('POST','code/redeem',{code});
+  GIFT.busy=false;
+  if(r.status!==200){
+    if(r.status===401)NET.player=null;
+    GIFT.msg=esc(r.json&&r.json.message||(r.status===0?'Mất mạng, thử lại sau nha.':'Mã không dùng được.'));sfx('bad');renderSettings();return}
+  const money=Math.max(0,(+r.json.money||0)*1000),xp=Math.max(0,Math.round(+r.json.xp||0));   // mã quà tính tiền theo NGHÌN đồng (500 = 500.000đ)
+  if(current==='title'){const s=load();if(s)G=s}
+  giveGift(money,xp);save();
+  GIFT.code='';GIFT.ok=true;GIFT.msg=`Đã nhận quà mã <b>${esc(code)}</b>: ${giftText(money,xp)}`;sfx('coin');
+  toast(`Nhận quà: <b>${giftText(money,xp)}</b>`,2400);
+  renderSettings();loadCodes();
+  if(current==='market')renderMarket();else if(current==='title'){const keep=!$('setOv').hidden;renderTitle();$('setOv').hidden=!keep}
+  setTimeout(serverSync,600);   // quà phải lên mạng ngay (máy chủ cộng quà vào phép kiểm tra gian lận)
+}
+$('btnSetT').onclick=openSettings;$('btnSetM').onclick=openSettings;$('btnSetClose').onclick=closeSettings;
+$('setOv').addEventListener('click',e=>{if(e.target===$('setOv'))closeSettings()});
+$('btnSoundS').onclick=()=>{setSound(!AU.on);sfx('tap')};
+$('btnMusicS').onclick=()=>{setMusic(!MUS.on)};
+
 $('btnMusicP').onclick=()=>{setMusic(!MUS.on)};
 
 /* =====================================================================
