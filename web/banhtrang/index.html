@@ -37,10 +37,10 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 /* Màn bán hàng kéo dài hết khung: phần dư dồn cho khu thau trộn, thau to theo */
 #scr-service .counter{flex:1;display:flex;flex-direction:column}
 #scr-service .station{flex:1}
-#scr-service .bowlbox{flex:1;min-height:102px}
+#scr-service .bowlbox{flex:1;min-height:140px}
 #bubbles{position:absolute;left:0;right:0;bottom:0;height:100%;pointer-events:none}
 #bubbles .bubble{pointer-events:auto}
-#scr-service .bowlbox canvas{position:absolute;inset:3px;margin:auto;width:calc(100% - 6px);height:min(calc(100% - 6px),136px);max-width:none;object-fit:contain}
+#scr-service .bowlbox canvas{position:absolute;inset:3px;margin:auto;width:calc(100% - 6px);height:min(calc(100% - 6px),176px);max-width:none;object-fit:contain}
 
 /* shared buttons */
 .btn{display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;padding:7px 10px 6px;background:var(--paper2);color:var(--ink);font-size:21px}
@@ -232,10 +232,12 @@ img,canvas{image-rendering:pixelated;image-rendering:crisp-edges}
 .hintbar b{font-weight:400;color:var(--chili)}
 .shelf{display:grid;gap:7px;grid-template-columns:repeat(5,1fr)}
 .tray{display:grid;gap:4px;grid-template-columns:repeat(auto-fill,minmax(40px,1fr));padding:3px 3px 4px;margin:-3px -3px 0}
-.shelf{gap:5px}.shelf .tile{padding:3px 1px 2px}.shelf .tile img{width:28px;height:28px}
-.shelf .tile .lbl{white-space:normal;font-size:12px;line-height:1;min-height:2em;display:flex;align-items:center;justify-content:center;overflow:visible;padding:0 1px}
+.shelf{gap:4px}.shelf .tile{padding:2px 1px 1px}.shelf .tile img{width:20px;height:20px}.shelf .tile .cnt{font-size:10px}
+.shelf .tile .lbl{white-space:normal;font-size:11px;line-height:.95;min-height:1.9em;display:flex;align-items:center;justify-content:center;overflow:visible;padding:0 1px}
 /* ---- cột gia vị: sa tế + mỡ hành, mỗi khối: tên & số còn / nút +1 / 5 ô đếm / mức ---- */
-.station{grid-template-columns:52px 1fr 78px!important}
+.station{grid-template-columns:46px 1fr 70px!important;gap:6px!important}
+.mixcol{padding:4px 2px!important}.mixcol .mixbtn{width:40px}
+.satecol .spoon{font-size:11px!important}
 .satecol{gap:6px!important;padding:5px 4px!important;justify-content:flex-start}
 .gv{display:flex;flex-direction:column;align-items:stretch;gap:4px;width:100%}
 .gv.mosec{margin:0!important;padding:6px 0 0!important;border-top:2px dashed var(--paper2)}
@@ -3259,7 +3261,7 @@ const blds=[];{let x=-4;const r=seeded(7);while(x<SW+6){const w=12+Math.floor(r(
 const lerpC=(a,b,t)=>{const A=hex(a),Bc=hex(b);return '#'+A.map((v,i)=>Math.round(v+(Bc[i]-v)*t).toString(16).padStart(2,'0')).join('')};
 const hex=c=>[1,3,5].map(i=>parseInt(c.slice(i,i+2),16));
 /* Khung cảnh ngoài phố cao thêm khi màn hình còn dư chỗ: thêm EX hàng trời phía trên, thau trộn giữ cỡ vừa phải */
-const SCN={ex:0};const BOWL_H=128;
+const SCN={ex:0};const BOWL_H=168;
 function fitScene(){
   const cv=$('sceneCv'),bb=$('bowlBox');if(!cv||!bb||current!=='service')return;
   if(cv.height!==48){cv.height=48;sc.imageSmoothingEnabled=false}
