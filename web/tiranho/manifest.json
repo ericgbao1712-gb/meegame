@@ -1,7 +1,7 @@
 {
   "id": "/tiranho",
-  "name": "Tira Nhỏ",
-  "short_name": "Tira Nhỏ",
+  "name": "Tira Xe Đẩy",
+  "short_name": "Tira Xe Đẩy",
   "description": "Game bán tiramisu xe đẩy ngoài phố: đi chợ, làm khay bánh, xắn bánh, thuê nhân viên, mở tiệm.",
   "lang": "vi",
   "start_url": "/tiranho",

@@ -15,7 +15,7 @@
 //   POST /api/lau/admin/codes/:code        (admin)      { disabled } | { delete: true } → khóa / mở / xóa mã
 //   GET  /api/lau/leaderboard?by=level|money|pots       → top 50 + hạng của mình
 //   GET  /api/lau/codes/active                          → mã quà tặng còn hạn (+ redeemed nếu đã đăng nhập)
-//   Thêm &g=xoailac để dùng cho game Xoài Lắc, &g=tiramee cho Tiệm TiraMee, &g=banhtrang cho Bánh Tráng Nhà Mee, &g=tiranho cho Tira Nhỏ (cùng bảng players, bản lưu tách theo game).
+//   Thêm &g=xoailac để dùng cho game Xoài Lắc, &g=tiramee cho Tiệm TiraMee, &g=banhtrang cho Bánh Tráng Nhà Mee, &g=tiranho cho Tira Xe Đẩy (cùng bảng players, bản lưu tách theo game).
 //   GET  /api/lau/admin/stats              (admin)      → số liệu tổng quan của game (&g=…)
 //   GET  /api/lau/admin/players            (admin)      ?q=&filter=all|flagged|hidden|cheat&sort=recent|money|level|pots|new&limit=&offset=
 //   GET  /api/lau/admin/players/:id        (admin)      → chi tiết: bản lưu từng game, bản sao lưu, mã đã nhận
@@ -32,7 +32,7 @@ import {
 // Các game dùng chung API này (chọn bằng &g=…, mặc định Lẩu Ơi). Cùng tài khoản / cookie MeeGame cho mọi game.
 const GAMES = new Set(['quanlau', 'xoailac', 'tiramee', 'banhtrang', 'tiranho']);
 const DEFAULT_GAME = 'quanlau';
-const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee', tiranho: 'Tira Nhỏ' };
+const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee', tiranho: 'Tira Xe Đẩy' };
 const MAX_SAVE_BYTES = 400 * 1024;
 const MIN_PUT_GAP_MS = 8 * 1000;          // chống spam: tối đa ~1 lần lưu / 8 giây
 const KEEP_BACKUPS = 10;
@@ -57,7 +57,7 @@ export function saveSummary(save, game = DEFAULT_GAME) {
   if (!save || typeof save !== 'object' || Array.isArray(save) || !save.started) return null;
   const level = Math.floor(num(save.level));
   // Tiệm TiraMee lưu tiền theo ĐỒNG; Lẩu Ơi / Xoài Lắc theo NGHÌN đồng → đổi về nghìn để xếp hạng & chống gian lận dùng chung một thang
-  const K = game === 'tiramee' || game === 'tiranho' ? 1000 : 1;   // Tira Nhỏ cũng lưu tiền theo ĐỒNG
+  const K = game === 'tiramee' || game === 'tiranho' ? 1000 : 1;   // Tira Xe Đẩy cũng lưu tiền theo ĐỒNG
   const money = num(save.money, -1) / K;
   if (!(level >= 1 && level <= 100000) || !(money >= 0) || !Number.isFinite(money)) return null;   // Xoài Lắc không có cấp tối đa (mã quà có thể tặng rất nhiều XP)
   const stats = save.stats && typeof save.stats === 'object' ? save.stats : {};

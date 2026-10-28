@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tira Nhỏ</title>
+<title>Tira Xe Đẩy</title>
 <meta name="theme-color" content="#FFE6DC">
 <link rel="icon" type="image/png" href="/tiranho/favicon.png">
 <link rel="apple-touch-icon" href="/tiranho/apple-touch-icon.png">
 <link rel="manifest" href="/tiranho/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tira Nhỏ">
+<meta name="apple-mobile-web-app-title" content="Tira Xe Đẩy">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -242,7 +242,7 @@
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="cv" aria-label="Game Tira Nhỏ"></canvas>
+<div id="wrap"><canvas id="cv" aria-label="Game Tira Xe Đẩy"></canvas>
 <div id="ov" hidden><div class="sheet"><header><h2 id="ovTitle"></h2><button id="ovClose" aria-label="Đóng">✕</button></header><nav id="ovTabs"></nav><div id="ovTabBar"><button id="tabL" aria-label="Tab trước">◀</button><div id="tabTrack"><i id="tabThumb"></i></div><button id="tabR" aria-label="Tab sau">▶</button></div><div id="ovBody"></div><footer id="ovFoot"></footer></div></div>
 <div id="toast" role="status"></div><div id="lvToast" role="status"></div>
 </div>
@@ -1404,8 +1404,8 @@ function drawTitle(t) {
   g.fillStyle = 'rgba(255,240,245,.55)'; g.fillRect(0, 0, W, H);
   g.save(); g.translate(W / 2, 240 + Math.sin(t * 2) * 6);
   fillRR(-280, -110, 560, 220, 48, '#FFF7EE', '#F2A7BA', 6);
-  text('Tira Nhỏ', 0, -22, { size: 104, color: '#C2416B', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
-  text('tiramisu xe đẩy', 0, 62, { size: 40, color: '#8A4B2A', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 8 });
+  text('Tira', 0, -38, { size: 96, color: '#C2416B', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
+  text('Xe Đẩy', 0, 48, { size: 72, color: '#8A4B2A', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
   daisy(-230, -80, 22, t); daisy(236, 70, 18, -t); mint(250, -70, 1.6, .4);
   g.restore();
   ['xoai', 'vietquat', 'dualuoi', 'oreo', 'gau', 'saurieng'].forEach((fk, i) => { const x = 70 + i * 98, y = 430; fillRR(x - 4, y - 4, 92, 300, 10, '#C9D0D6', '#8E99A3', 2); for (let p = 0; p < 4; p++) portionTop(fk, x + 2, y + 2 + p * 73, 80, 70, hsh(fk + p), t); });
@@ -1425,7 +1425,7 @@ function drawTitle(t) {
   }
   button('settings', 'Cài đặt', 40, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[gear]]' });
   button('rank', 'Xếp hạng', W - 240, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[trophy]]' });
-  text(`Tira Nhỏ · bản ${GAME_VER}`, W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 600 });
+  text(`Tira Xe Đẩy · bản ${GAME_VER}`, W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 600 });
 }
 
 // ================================================================ BẮT ĐẦU NGÀY
@@ -1813,7 +1813,7 @@ function applyProfile() {
   CAST.mee = { name: S.profile.name, look: ownerSpec() };
   for (const L of Object.values(LOCS)) { L.name0 ??= L.name; L.mood0 ??= L.mood; L.name = T(L.name0); L.mood = T(L.mood0); }
   for (const c of CHAPTERS) { c.desc0 ??= c.desc; c.desc = T(c.desc0); }
-  document.title = S.profile.shop + ' · Tira Nhỏ';
+  document.title = S.profile.shop + ' · Tira Xe Đẩy';
 }
 
 // ================================================================ CẤP ĐỘ & KINH NGHIỆM
@@ -2134,7 +2134,7 @@ function renderRank(body) {
   const me = `<div class="card slim on"><canvas class="lgc" id="rkLogo" width="88" height="88"></canvas><div class="cb"><h4>${esc(S.profile.shop)}</h4><p>Cấp ${level()} · ${S.totalSold} hộp · tổng doanh thu ${vnd(S.stats?.earned || 0)}</p></div></div>`;
   let list;
   if (!NET.server) list = '<p class="note">Bảng xếp hạng online chỉ có khi chơi trên trang MeeGame (đăng nhập Google). Ở đây bạn xem được thành tích của mình.</p>';
-  else if (!CLOUD_READY) list = '<p class="note">Bảng xếp hạng Tira Nhỏ sẽ mở khi máy chủ MeeGame bật lưu online cho game này.</p>';
+  else if (!CLOUD_READY) list = '<p class="note">Bảng xếp hạng Tira Xe Đẩy sẽ mở khi máy chủ MeeGame bật lưu online cho game này.</p>';
   else if (!NET.rows) { list = `<p class="note">${esc(NET.status || 'Đang tải bảng xếp hạng…')}</p>`; if (!NET.rankTried) loadRank(); }
   else list = NET.rows.length ? `<ol class="rank">${NET.rows.map((x, i) => `<li class="${x.me ? 'me' : ''}"><em>${i + 1}</em><b>${esc(x.shop)}</b><span>Cấp ${x.level}</span><i>${vnd(x.val)}</i></li>`).join('')}</ol>` : '<p class="note">Chưa có ai lên bảng. Đăng nhập rồi bán một ngày để lên bảng!</p>';
   body.innerHTML = me + list;
@@ -4258,7 +4258,7 @@ function renderSettings(body) {
     ${S.profile ? setRow('[[shop]]', 'Quán của bạn', esc(S.profile.shop), 'sShop') : ''}
     ${!standalone && installEvt ? setRow('[[install]]', 'Cài game như ứng dụng', 'Cài vào máy', 'sInstall') : ''}
     <button class="srow danger" id="sWipe"><span class="si">[[warn]]</span><b>Chơi lại từ đầu</b><em></em></button>
-  </div>${acct}<p class="ver">Tira Nhỏ · bản ${GAME_VER}</p>`;
+  </div>${acct}<p class="ver">Tira Xe Đẩy · bản ${GAME_VER}</p>`;
   if (NET.server && !NET.player) mountGoogle(body);
   const cyc = (arr, v) => arr[(arr.indexOf(v) + 1) % arr.length];
   $('sGuide').onclick = () => { PREF.guide = cyc(['auto', 'on', 'off'], PREF.guide); savePref(); renderOv(); };
