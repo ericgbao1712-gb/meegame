@@ -200,7 +200,8 @@ export function openGate({ offline = false } = {}) {
     gbtn, errEl,
     offline ? span('bk-err', 'Chưa kết nối được máy chủ MeeGame.') : null,
     span('muted xs cl-gate-note', 'Game chỉ lấy tên, email, ảnh đại diện để nhận ra bạn. Bảng xếp hạng chỉ hiện tên quán.'),
-    alts);
+    alts,
+    span('mg-dev', 'DEV Như Huyền - MeeGame'));
   const upd = () => { if (!gateEl) { st.listeners.delete(upd); return; } errEl.textContent = st.busy ? 'Đang đăng nhập…' : (st.lastErr || ''); };
   st.listeners.add(upd);
   gateEl = div('cl-gate', card);

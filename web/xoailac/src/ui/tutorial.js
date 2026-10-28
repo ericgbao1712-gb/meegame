@@ -339,6 +339,7 @@ export function createTutorial({ coachRoot }) {
     // v2.8 bìa: cổng trường + cánh phượng rơi
     el.append(div('cv-scene'), div('cv-glow'),
       div('cv-petals', ...Array.from({ length: 14 }, (_, i) => h('i', { style: { '--i': i } }))));
+    el.append(span('mg-dev mg-dev-abs', 'DEV Như Huyền - MeeGame'));
     root.appendChild(el);
     hideCoach();
 
@@ -435,7 +436,7 @@ export function createTutorial({ coachRoot }) {
     const btn = h('button', { class: 'sp-play', type: 'button' }, 'Bắt đầu chơi');
     el.append(div('cv-scene'), div('sp-rays'), div('sp-awning'),
       div('cv-petals', ...Array.from({ length: 14 }, (_, i) => h('i', { style: { '--i': i } }))),
-      div('sp-col', plate, title, who, btn));
+      div('sp-col', plate, title, who, btn, span('mg-dev', 'DEV Như Huyền - MeeGame')));
     (document.getElementById('app') || document.body).appendChild(el);
     let gone = false;
     const go = () => {

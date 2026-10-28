@@ -350,6 +350,7 @@ export function createTutorial({ coachRoot }) {
     el.append(div('cv-scene'), div('cv-glow'),
       div('cv-lanterns', propImg('den_long_do', 3, 'cv-lan l'), propImg('den_long_do', 3, 'cv-lan r')),
       div('cv-embers', ...Array.from({ length: 10 }, (_, i) => h('i', { style: { '--i': i } }))));
+    el.append(span('mg-dev mg-dev-abs', 'DEV Như Huyền - MeeGame'));
     root.appendChild(el);
     hideCoach();
 
@@ -448,7 +449,7 @@ export function createTutorial({ coachRoot }) {
     el.append(div('cv-scene'), div('sp-rays'),
       div('cv-lanterns', propImg('den_long_do', 3, 'cv-lan l'), propImg('den_long_do', 3, 'cv-lan r')),
       div('cv-embers', ...Array.from({ length: 10 }, (_, i) => h('i', { style: { '--i': i } }))),
-      div('sp-col', plate, title, who, btn));
+      div('sp-col', plate, title, who, btn, span('mg-dev', 'DEV Như Huyền - MeeGame')));
     (document.getElementById('app') || document.body).appendChild(el);
     let gone = false;
     const go = () => {
