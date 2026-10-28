@@ -27,9 +27,9 @@
   #wrap { container-type: inline-size; }
   #ov { position: absolute; inset: 0; z-index: 5; display: flex; align-items: stretch; justify-content: center; background: rgba(40, 22, 16, .55); font-family: 'Be Vietnam Pro', system-ui, sans-serif; color: #3A2219; font-size: clamp(13px, 3.4cqw, 18px); }
   #ov[hidden] { display: none; }
-  #ov .sheet { margin: 3.5cqw 3cqw; flex: 1; display: flex; flex-direction: column; background: #FFF9F1; border: 3px solid #F2A7BA; border-radius: 5cqw; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
+  #ov .sheet { margin: 3.5cqw 3cqw; flex: 1; display: flex; flex-direction: column; background: #FFF9F1; border: 3px solid #D9B48E; border-radius: 5cqw; overflow: hidden; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
   #ov header { display: flex; align-items: center; gap: 8px; padding: 3.2cqw 4cqw 1.6cqw; }
-  #ov h2 { flex: 1; margin: 0; font: 800 clamp(20px, 6.4cqw, 34px)/1.1 'Baloo 2', 'Be Vietnam Pro', sans-serif; color: #C2416B; }
+  #ov h2 { flex: 1; margin: 0; font: 800 clamp(20px, 6.4cqw, 34px)/1.1 'Baloo 2', 'Be Vietnam Pro', sans-serif; color: #7A4528; }
   #ovClose { width: 10cqw; height: 10cqw; min-width: 40px; min-height: 40px; border-radius: 50%; border: 0; background: #F6E3D6; color: #8A4B2A; font-size: 1.3em; font-weight: 800; cursor: pointer; }
   #ovClose[hidden] { display: none; }
   #ovTabs { display: flex; gap: 1cqw; overflow-x: auto; overflow-y: hidden; padding: 1.2cqw 3cqw 0; margin: 0 1cqw; scrollbar-width: none; -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain; background: var(--tabbg, #F3E3D0); border-radius: 4cqw 4cqw 0 0; cursor: grab; user-select: none; }
@@ -47,7 +47,7 @@
   #ovFoot { display: flex; gap: 2.5cqw; padding: 2.5cqw 4cqw 3.5cqw; border-top: 2px dashed #F1D9C6; }
   #ovFoot:empty { display: none; }
   #ovFoot .btn { flex: 1; padding: .8em; font-size: 1.05em; }
-  #ov .btn { border: 0; border-radius: 99px; padding: .6em 1.1em; background: linear-gradient(#EE7393, #E8557A); color: #fff; font: 800 .95em 'Be Vietnam Pro', sans-serif; box-shadow: 0 3px 0 #B8395A; cursor: pointer; }
+  #ov .btn { border: 0; border-radius: 99px; padding: .6em 1.1em; background: linear-gradient(#B8784A, #A0603A); color: #fff; font: 800 .95em 'Be Vietnam Pro', sans-serif; box-shadow: 0 3px 0 #6E3E22; cursor: pointer; }
   #ov .btn.go { background: linear-gradient(#5DB377, #3E9A5A); box-shadow: 0 3px 0 #2E7442; }
   #ov .btn.ghost { background: #F6E3D6; color: #8A4B2A; box-shadow: 0 3px 0 #E0C2AE; }
   #ov .btn.sm { font-size: .85em; padding: .5em .9em; }
@@ -68,7 +68,7 @@
   .icn { width: 1.3em; height: 1.3em; vertical-align: -.3em; margin: 0 .12em; }
   #ov .card .cb { flex: 1; min-width: 0; }
   #ov .card h4 { margin: 0 0 .2em; font-size: 1.05em; }
-  #ov .card h4 span { font-weight: 600; color: #C2416B; font-size: .82em; }
+  #ov .card h4 span { font-weight: 600; color: #7A4528; font-size: .82em; }
   #ov .card p { margin: 0 0 .45em; color: #5A3E2E; font-size: .86em; line-height: 1.4; }
   #ov .meta { font-size: .8em; color: #8A6A5A; margin-bottom: .5em; }
   #ov .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
@@ -80,32 +80,32 @@
   #ov .stats b { display: block; font-size: 1.1em; }
   #ov .stats small { color: #8A6A5A; }
   /* màn tạo quán */
-  #ov .pv { display: flex; align-items: flex-end; gap: 3cqw; background: linear-gradient(#FFE9EF, #FFF6EC); border-radius: 4cqw; padding: 2cqw 3cqw; margin-bottom: .8em; }
+  #ov .pv { display: flex; align-items: flex-end; gap: 3cqw; background: linear-gradient(#F7EBDD, #FFF6EC); border-radius: 4cqw; padding: 2cqw 3cqw; margin-bottom: .8em; }
   #ov .pv #pvChar { width: 28cqw; height: 35cqw; flex: none; }
-  #ov .pvSign { flex: 1; display: flex; align-items: center; gap: 2.4cqw; background: #FFF7EE; border: 3px solid var(--c1, #E897AE); border-radius: 3.5cqw; padding: 2cqw; margin-bottom: 4cqw; box-shadow: 0 6px 0 var(--c0, #F9C9D6); min-width: 0; }
+  #ov .pvSign { flex: 1; display: flex; align-items: center; gap: 2.4cqw; background: #FFF7EE; border: 3px solid var(--c1, #C9A27A); border-radius: 3.5cqw; padding: 2cqw; margin-bottom: 4cqw; box-shadow: 0 6px 0 var(--c0, #EAD3B8); min-width: 0; }
   #ov .pvSign canvas { width: 14cqw; height: 14cqw; flex: none; }
-  #ov .pvSign b { display: block; font: 800 1.15em/1.1 'Baloo 2', sans-serif; color: #C2416B; overflow-wrap: anywhere; }
+  #ov .pvSign b { display: block; font: 800 1.15em/1.1 'Baloo 2', sans-serif; color: #7A4528; overflow-wrap: anywhere; }
   #ov .pvSign small { color: #8A5A4A; font-size: .75em; }
   #ov .fld { display: block; font-weight: 800; font-size: .9em; margin: .5em 0 .3em; }
   #ov .fld input, #ov input { display: block; width: 100%; box-sizing: border-box; margin-top: .3em; padding: .6em .8em; border: 2px solid #E3CDB6; border-radius: 3cqw; font: 700 1.05em 'Be Vietnam Pro', sans-serif; color: #3A2219; background: #fff; }
   #ov .row input { flex: 1; width: auto; margin: 0; }
-  #ov input:focus { outline: none; border-color: #E8557A; }
+  #ov input:focus { outline: none; border-color: #A0603A; }
   #ov .ideas { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: .4em; }
   #ov .grp { margin: .8em 0; }
   #ov .grp h5 { margin: 0 0 .4em; font-size: .9em; }
   #ov .grp small { display: block; color: #8A6A5A; margin-top: .3em; }
   #ov .chip { border: 2px solid #E3CDB6; background: #fff; color: #5A3E2E; border-radius: 99px; padding: .4em .8em; margin: 0 4px 5px 0; font: 700 .85em 'Be Vietnam Pro', sans-serif; cursor: pointer; }
-  #ov .chip[aria-pressed="true"] { border-color: #E8557A; background: #FFE3EA; color: #A8304F; }
+  #ov .chip[aria-pressed="true"] { border-color: #A0603A; background: #F3E3CF; color: #6E3E22; }
   #ov .chip.cartc i { display: inline-block; width: 1em; height: 1em; border-radius: 4px; margin-right: .35em; vertical-align: -2px; }
   #ov .sw { width: 9cqw; height: 9cqw; min-width: 34px; min-height: 34px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #E3CDB6; margin: 0 6px 8px 0; cursor: pointer; color: #B5302A; font-weight: 800; }
-  #ov .sw[aria-pressed="true"] { box-shadow: 0 0 0 3px #E8557A; }
+  #ov .sw[aria-pressed="true"] { box-shadow: 0 0 0 3px #A0603A; }
   #ov .sws { margin-top: .4em; }
   #ov .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
   #ov .pre, #ov .lg { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid #E3CDB6; background: #fff; border-radius: 3cqw; padding: 4px; font: 700 .8em 'Be Vietnam Pro', sans-serif; color: #5A3E2E; cursor: pointer; }
   #ov .pre canvas { width: 100%; aspect-ratio: 120 / 150; height: auto; }
   #ov .logos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   #ov .lg canvas { width: 70%; aspect-ratio: 1; height: auto; }
-  #ov .lg[aria-pressed="true"] { border-color: #E8557A; background: #FFE3EA; }
+  #ov .lg[aria-pressed="true"] { border-color: #A0603A; background: #F3E3CF; }
   /* cài đặt */
   #ov .setsec { background: #fff; border: 2px solid #EBD9C8; border-radius: 4cqw; padding: .8em .9em; margin-bottom: .7em; }
   #ov .setsec > b { display: block; margin-bottom: .2em; }
@@ -119,8 +119,8 @@
   #ov .ver { text-align: center; color: #A08B7A; font-size: .78em; }
   #ov .rank { list-style: none; padding: 0; margin: 0; }
   #ov .rank li { display: grid; grid-template-columns: 2em 1fr auto; gap: 2px 8px; align-items: center; background: #fff; border: 2px solid #EBD9C8; border-radius: 3cqw; padding: .5em .7em; margin-bottom: 5px; }
-  #ov .rank li.me { border-color: #E8557A; background: #FFF0F4; }
-  #ov .rank em { grid-row: span 2; font-style: normal; font-weight: 800; color: #C2416B; font-size: 1.2em; }
+  #ov .rank li.me { border-color: #A0603A; background: #FBF3EA; }
+  #ov .rank em { grid-row: span 2; font-style: normal; font-weight: 800; color: #7A4528; font-size: 1.2em; }
   #ov .rank span { color: #8A6A5A; font-size: .8em; }
   #ov .rank i { grid-column: 3; grid-row: 1 / span 2; font-style: normal; font-weight: 800; }
   #ov .prow .pv2, #ov .pv2 { min-width: 6.5em; text-align: center; font-size: 1.05em; }
@@ -131,25 +131,25 @@
   #ov .rdtop canvas { width: 26cqw; height: 26cqw; flex: none; }
   #ov .rdtop small { display: block; color: #7A5A48; font-size: .8em; }
   #ov .hot { height: 10px; border-radius: 6px; background: #F1E6DA; overflow: hidden; margin: .3em 0; }
-  #ov .hot s { display: block; height: 100%; background: linear-gradient(90deg, #F7A9BE, #E8557A); }
+  #ov .hot s { display: block; height: 100%; background: linear-gradient(90deg, #E3C29E, #A0603A); }
   #ov .rdform .btn.go { width: 100%; margin-top: .6em; padding: .8em; }
   #ov .chip:disabled { opacity: .4; }
   #toast, #lvToast { position: absolute; left: 50%; transform: translate(-50%, -20px); opacity: 0; pointer-events: none; transition: .25s; z-index: 9; font-family: 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; }
   #toast { top: 3cqw; background: rgba(58,34,25,.92); color: #fff; padding: .6em 1.1em; border-radius: 99px; font-size: clamp(13px, 3.4cqw, 17px); font-weight: 700; max-width: 86%; }
   #lvToast { top: 28%; width: 78%; background: #FFF9F1; border: 4px solid #F2B632; border-radius: 5cqw; padding: 1em; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
-  #lvToast b { display: block; font: 800 clamp(20px, 6.2cqw, 32px)/1.15 'Baloo 2', sans-serif; color: #C2416B; }
+  #lvToast b { display: block; font: 800 clamp(20px, 6.2cqw, 32px)/1.15 'Baloo 2', sans-serif; color: #7A4528; }
   #lvToast span { display: block; margin-top: .3em; color: #5A3E2E; font-size: clamp(13px, 3.4cqw, 17px); font-weight: 600; line-height: 1.4; }
   #toast.on, #lvToast.on { opacity: 1; transform: translate(-50%, 0); }
   #lvToast.on { pointer-events: auto; cursor: pointer; }
   /* kinh doanh quán */
-  #ov .sec { margin: 1em 0 .5em; font-size: .95em; color: #C2416B; }
+  #ov .sec { margin: 1em 0 .5em; font-size: .95em; color: #7A4528; }
   #ov .stats.s3 { grid-template-columns: repeat(3, 1fr); margin: .5em 0; }
   #ov .stats.s3 b { font-size: .95em; }
   #ov .setsec .btn { margin-top: .5em; }
   #ov .setsec.gold { border-color: #F2C766; background: #FFF9E8; }
   #ov .warnrow { border-color: #F2B2A4 !important; background: #FFF4F1 !important; }
   #ov .pbar { height: 9px; border-radius: 6px; background: #F1E6DA; overflow: hidden; margin: .35em 0 .5em; }
-  #ov .pbar s { display: block; height: 100%; background: linear-gradient(90deg, #F2D06B, #E8557A); }
+  #ov .pbar s { display: block; height: 100%; background: linear-gradient(90deg, #F2D06B, #A0603A); }
   #ov .kho { display: flex; align-items: center; gap: 8px; background: #fff; border: 2px solid #EBD9C8; border-radius: 3cqw; padding: .55em .7em; margin-bottom: 5px; }
   #ov .kho > div { flex: 1; min-width: 0; }
   #ov .kho small { display: block; color: #8A6A5A; font-size: .8em; }
@@ -167,7 +167,7 @@
   #ov .post .row { margin-top: .4em; }
   #ov .post .chip { font-size: .74em; padding: .35em .65em; margin: 0; }
   #ov .st { color: #F0A020; letter-spacing: 1px; font-size: .9em; }
-  #ov .rep { margin-top: .4em; padding: .4em .6em; background: #FFF3F6; border-radius: 2cqw; font-size: .82em; color: #8A3B55; }
+  #ov .rep { margin-top: .4em; padding: .4em .6em; background: #FBF3EA; border-radius: 2cqw; font-size: .82em; color: #6E3E22; }
   #ov .rvsum { display: flex; gap: 4cqw; align-items: center; background: #fff; border: 2px solid #EBD9C8; border-radius: 4cqw; padding: .7em; margin-bottom: .6em; }
   #ov .rvsum .big { text-align: center; flex: none; }
   #ov .rvsum .big b { display: block; font: 800 2.2em/1 'Baloo 2', sans-serif; }
@@ -189,10 +189,10 @@
   #ov .legend span::before { content: ''; display: inline-block; width: .8em; height: .8em; border-radius: 3px; margin-right: .3em; vertical-align: -1px; }
   #ov .best { margin: 0; padding: 0; list-style: none; counter-reset: b; }
   #ov .best li { display: flex; justify-content: space-between; background: #fff; border: 2px solid #EBD9C8; border-radius: 3cqw; padding: .45em .7em; margin-bottom: 4px; font-size: .9em; }
-  #ov .best li span::before { counter-increment: b; content: counter(b) '. '; font-weight: 800; color: #C2416B; }
+  #ov .best li span::before { counter-increment: b; content: counter(b) '. '; font-weight: 800; color: #7A4528; }
   /* màu giao diện */
-  #ov .sheet { background: var(--sheet, #FFF9F1); border-color: var(--edge, #F2A7BA); }
-  #ov[data-theme="dau"] { --sheet: #FFF4F6; --edge: #F49AB3; --tabbg: #FBDDE5; }
+  #ov .sheet { background: var(--sheet, #FFF9F1); border-color: var(--edge, #D9B48E); }
+  #ov[data-theme="dau"] { --sheet: #FBF3EA; --edge: #D4A373; --tabbg: #F0E0CC; }
   #ov[data-theme="matcha"] { --sheet: #F6FAF0; --edge: #9CC46A; --tabbg: #E2EED3; }
   #ov[data-theme="matcha"] h2 { color: #4E7A2E; }
   #ov[data-theme="socola"] { --sheet: #FBF3EC; --edge: #8A5A3A; --tabbg: #EAD9CA; }
@@ -214,9 +214,9 @@
   #ov .pz { text-align: center; padding: .2em .4em 1em; }
   #ov .pz h3 { margin: .3em 0 .5em; font: 800 1.6em 'Baloo 2', sans-serif; color: #3A2219; }
   #ov .pz p { color: #6A4A3A; margin: 0 0 1em; line-height: 1.45; }
-  #ov .pzic { width: 4.4em; height: 4.4em; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #FBD0DC, #F2A7BA); border: 3px solid #5A2A18; display: flex; align-items: center; justify-content: center; gap: .45em; }
+  #ov .pzic { width: 4.4em; height: 4.4em; margin: 0 auto; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #F0D9BF, #D9B48E); border: 3px solid #5A2A18; display: flex; align-items: center; justify-content: center; gap: .45em; }
   #ov .pzic .icn { width: 2.6em; height: 2.6em; }
-  #ov .pzic.pause i { display: block; width: .7em; height: 2em; border: 3px solid #5A2A18; border-radius: .4em; background: #FFE9EF; }
+  #ov .pzic.pause i { display: block; width: .7em; height: 2em; border: 3px solid #5A2A18; border-radius: .4em; background: #F7EBDD; }
   #ov .pzrow { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: .8em; }
   #ov .pzrow .chip { margin: 0; border-radius: 3cqw; padding: .6em; background: #FFF3E6; }
   #ov .btn.wide { display: block; width: 100%; padding: .85em; font-size: 1.1em; margin-top: .6em; border-radius: 3.5cqw; }
@@ -226,7 +226,7 @@
   #dockStrip { flex: 1; display: flex; gap: .5cqw; overflow-x: auto; overflow-y: hidden; padding: .6cqw 1cqw 0; scrollbar-width: none; cursor: grab; user-select: none; }
   #dockStrip::-webkit-scrollbar { display: none; }
   #dockStrip button { flex: 0 0 auto; min-width: 15cqw; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: .2cqw; border: 0; background: transparent; border-radius: 2.5cqw; padding: .4cqw .8cqw; font: 400 3.1cqw/1.05 'Patrick Hand', 'Be Vietnam Pro', sans-serif; color: #4A2E22; cursor: pointer; white-space: nowrap; }
-  #dockStrip button:hover, #dockStrip button:focus-visible { background: rgba(244,154,179,.18); outline: none; }
+  #dockStrip button:hover, #dockStrip button:focus-visible { background: rgba(212,163,115,.18); outline: none; }
   #dockStrip button .icn { width: 6.2cqw; height: 6.2cqw; margin: 0; }
   #dockBar { display: flex; align-items: center; gap: 1.5cqw; padding: .4cqw 2cqw .8cqw; }
   #dockBar button { border: 0; background: none; color: #8A6A5A; font-size: 2.2cqw; cursor: pointer; padding: 0 .4em; }
@@ -239,12 +239,12 @@
   #ov h2 { font-weight: 400; font-size: clamp(24px, 7.4cqw, 40px); }
   #ov .card h4 { font-weight: 400; font-size: 1.2em; }
   #ovTabs button { font-weight: 400; font-size: .9em; }
-  #titleAcct { position: absolute; left: 14%; right: 14%; top: 84.4%; z-index: 4; display: flex; justify-content: center; }
+  #titleAcct { position: absolute; left: 8%; right: 8%; top: 68%; height: 6%; z-index: 4; display: flex; justify-content: center; align-items: stretch; }
   #titleAcct[hidden] { display: none; }
-  #titleAcct .ta-out, #titleAcct .ta-in { background: rgba(255,251,244,.95); border: 2px solid #F2A7BA; border-radius: 4cqw; padding: 1cqw 2.5cqw; box-shadow: 0 4px 14px rgba(90,50,30,.15); font: 600 3.2cqw/1.3 'Be Vietnam Pro', sans-serif; color: #5A3E2E; }
-  #titleAcct .ta-out { display: flex; flex-direction: column; align-items: center; gap: 1cqw; text-align: center; }
+  #titleAcct .ta-out, #titleAcct .ta-in { background: rgba(255,251,244,.95); border: 2px solid #D9B48E; border-radius: 4cqw; padding: 1cqw 2.5cqw; box-shadow: 0 4px 14px rgba(90,50,30,.15); font: 600 3.2cqw/1.3 'Be Vietnam Pro', sans-serif; color: #5A3E2E; }
+  #titleAcct .ta-out { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   #titleAcct .gsi { min-height: 40px; max-width: 100%; text-align: center; font-size: .9em; display: flex; align-items: center; justify-content: center; }
-  #titleAcct .ta-in { display: flex; align-items: center; gap: 2cqw; }
+  #titleAcct .ta-in { flex: 1; display: flex; align-items: center; gap: 2.5cqw; }
   #titleAcct .ta-in img { width: 8cqw; height: 8cqw; border-radius: 50%; }
   #titleAcct .ta-in span { flex: 1; min-width: 0; }
   #titleAcct .ta-in small { display: block; color: #8A6A5A; font-size: .82em; }
@@ -449,7 +449,7 @@ function sliceSide0(fk, x, y, w, h, seed = 1) {
 
 // ================================================================ BỘ ICON VẼ BẰNG CODE (thay emoji mặc định của máy)
 // Mỗi icon vẽ trong khung ±20 quanh tâm (0,0). Dùng trong chữ trên canvas bằng mã [[tên]], trong HTML qua hydrateIcons().
-const IK = { ink: '#5A3420', pink: '#E8557A', pink2: '#F7A9BE', cream: '#FFF6E8', gold: '#F2B632', gold2: '#FFD45E', mint: '#5DB38A', blue: '#7EB6D9', grey: '#9AA4AE', brown: '#C27A43', red: '#E0503F' };
+const IK = { ink: '#5A3420', pink: '#A0603A', pink2: '#E3C29E', cream: '#FFF6E8', gold: '#F2B632', gold2: '#FFD45E', mint: '#5DB38A', blue: '#7EB6D9', grey: '#9AA4AE', brown: '#C27A43', red: '#E0503F' };
 function icStroke(c, w) { g.strokeStyle = c; g.lineWidth = w; g.lineCap = 'round'; g.lineJoin = 'round'; }
 function icLine(pts, c, w) { icStroke(c, w); g.beginPath(); pts.forEach(([x, y], i) => (i ? g.lineTo(x, y) : g.moveTo(x, y))); g.stroke(); }
 function icStar(r1, r2, n = 5, rot = -Math.PI / 2) { g.beginPath(); for (let i = 0; i < n * 2; i++) { const a = rot + i * Math.PI / n, r = i % 2 ? r2 : r1; g.lineTo(Math.cos(a) * r, Math.sin(a) * r); } g.closePath(); }
@@ -463,7 +463,7 @@ const ICONS = {
     g.save(); g.beginPath(); g.rect(-18, -18, 36, 12); for (let i = 0; i < 6; i++) g.arc(-15 + i * 6, -6, 3, 0, Math.PI); g.clip();
     for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? '#FFFFFF' : IK.pink; g.fillRect(-18 + i * 6, -18, 6, 18); } g.restore();
   },
-  gift() { fillRR(-14, -4, 28, 20, 3, IK.pink); fillRR(-16, -11, 32, 8, 3, '#F07A9B'); g.fillStyle = IK.gold; g.fillRect(-3, -11, 6, 27); for (const s of [-1, 1]) { g.save(); g.translate(s * 6, -14); g.rotate(s * .5); ell(0, 0, 6, 3.6, IK.gold); g.restore(); } ell(0, -12, 2.6, 2.6, '#E09A10'); },
+  gift() { fillRR(-14, -4, 28, 20, 3, IK.pink); fillRR(-16, -11, 32, 8, 3, '#B8784A'); g.fillStyle = IK.gold; g.fillRect(-3, -11, 6, 27); for (const s of [-1, 1]) { g.save(); g.translate(s * 6, -14); g.rotate(s * .5); ell(0, 0, 6, 3.6, IK.gold); g.restore(); } ell(0, -12, 2.6, 2.6, '#E09A10'); },
   gear() { g.fillStyle = '#8A98A6'; for (let i = 0; i < 8; i++) { g.save(); g.rotate(i * Math.PI / 4); fillRR(-3.5, -18, 7, 9, 2, '#8A98A6'); g.restore(); } ell(0, 0, 13, 13, '#A9B5C0'); ell(0, 0, 5.5, 5.5, IK.cream); },
   trophy() { icStroke('#E0A010', 3.4); g.beginPath(); g.arc(-12, -6, 5, Math.PI * .5, Math.PI * 1.5); g.stroke(); g.beginPath(); g.arc(12, -6, 5, -Math.PI * .5, Math.PI * .5); g.stroke(); g.beginPath(); g.moveTo(-12, -14); g.lineTo(12, -14); g.quadraticCurveTo(12, 6, 0, 7); g.quadraticCurveTo(-12, 6, -12, -14); g.fillStyle = lg(0, -14, 0, 7, [IK.gold2, '#E8A21A']); g.fill(); fillRR(-3, 6, 6, 6, 1, '#E0A010'); fillRR(-9, 12, 18, 6, 2, IK.brown); ell(-5, -8, 2.4, 4, 'rgba(255,255,255,.6)'); },
   sun() { icStroke(IK.gold, 3); for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4; g.beginPath(); g.moveTo(Math.cos(a) * 13, Math.sin(a) * 13); g.lineTo(Math.cos(a) * 18, Math.sin(a) * 18); g.stroke(); } ell(0, 0, 10, 10, lg(0, -10, 0, 10, [IK.gold2, '#F29A20'])); },
@@ -471,12 +471,12 @@ const ICONS = {
   basket() { icStroke('#8A5A30', 3); g.beginPath(); g.arc(0, -2, 12, Math.PI, 0); g.stroke(); ell(-6, -4, 5.5, 5, '#FF9C0A'); ell(5, -5, 5, 4.6, '#86C449'); ell(0, -7, 4, 4, IK.red); g.beginPath(); g.moveTo(-17, -2); g.lineTo(17, -2); g.lineTo(13, 16); g.lineTo(-13, 16); g.closePath(); g.fillStyle = '#C9935F'; g.fill(); icStroke('rgba(255,235,200,.55)', 1.6); for (let i = 1; i < 4; i++) { g.beginPath(); g.moveTo(-16 + i * .6, -2 + i * 4.5); g.lineTo(16 - i * .6, -2 + i * 4.5); g.stroke(); } },
   bowl() { icLine([[6, -2], [16, -18]], '#8A98A6', 2.6); ell(16, -18, 2.6, 4, null, '#8A98A6', 2); g.beginPath(); g.moveTo(-17, -2); g.lineTo(17, -2); g.quadraticCurveTo(15, 16, 0, 16); g.quadraticCurveTo(-15, 16, -17, -2); g.fillStyle = lg(-17, 0, 17, 0, ['#C9D0D6', '#F2F5F7', '#AEB7BE']); g.fill(); ell(0, -2, 17, 4, '#FFF8EC'); },
   cart() { fillRR(-15, -6, 30, 15, 5, IK.pink2); fillRR(-12, -9, 24, 5, 2, '#EEF2F4'); icLine([[-14, -6], [-14, -16], [14, -16], [14, -6]], '#AAB4BC', 2.4); icLine([[15, -2], [20, -8]], '#AAB4BC', 2.6); for (const x of [-8, 8]) { ell(x, 13, 5, 5, '#4A3A40'); ell(x, 13, 1.8, 1.8, '#C9D0D6'); } },
-  ledger() { fillRR(-13, -17, 26, 34, 4, '#8A3B55'); fillRR(-9, -17, 20, 34, 2, IK.cream); fillRR(-13, -17, 6, 34, 3, '#8A3B55'); for (let i = 0; i < 4; i++) icLine([[-3, -9 + i * 6], [8, -9 + i * 6]], '#D8C3A8', 2); g.fillStyle = IK.pink; g.beginPath(); g.moveTo(4, -17); g.lineTo(9, -17); g.lineTo(9, -6); g.lineTo(6.5, -9); g.lineTo(4, -6); g.fill(); },
+  ledger() { fillRR(-13, -17, 26, 34, 4, '#6E3E22'); fillRR(-9, -17, 20, 34, 2, IK.cream); fillRR(-13, -17, 6, 34, 3, '#6E3E22'); for (let i = 0; i < 4; i++) icLine([[-3, -9 + i * 6], [8, -9 + i * 6]], '#D8C3A8', 2); g.fillStyle = IK.pink; g.beginPath(); g.moveTo(4, -17); g.lineTo(9, -17); g.lineTo(9, -6); g.lineTo(6.5, -9); g.lineTo(4, -6); g.fill(); },
   chef() { g.scale(1.12, 1.12); g.translate(0, 1.5); ell(0, 8, 10, 10, '#F7D5BC'); g.beginPath(); g.arc(0, 6, 10.5, Math.PI * 1.05, Math.PI * 1.95); g.fillStyle = '#4A2E22'; g.fill(); ell(-3.5, 9, 1.4, 1.6, IK.ink); ell(3.5, 9, 1.4, 1.6, IK.ink); ell(-6, 12, 2.2, 1.3, 'rgba(240,110,140,.5)'); ell(6, 12, 2.2, 1.3, 'rgba(240,110,140,.5)'); fillRR(-9, -5, 18, 6, 2, '#FFFFFF', '#D9CFC4', 1.2); ell(-6, -10, 6, 6, '#FFFFFF'); ell(6, -10, 6, 6, '#FFFFFF'); ell(0, -13, 7, 7, '#FFFFFF'); },
-  mega() { g.save(); g.rotate(-.3); g.beginPath(); g.moveTo(-12, -5); g.lineTo(6, -13); g.lineTo(6, 13); g.lineTo(-12, 5); g.closePath(); g.fillStyle = IK.pink; g.fill(); fillRR(-16, -6, 6, 12, 2, '#C2416B'); ell(6, 0, 3, 13, '#F07A9B'); fillRR(-10, 5, 5, 9, 2, '#8A3B55'); g.restore(); icStroke(IK.gold, 2.4); for (const r of [6, 11]) { g.beginPath(); g.arc(9, -3, r, -.7, .5); g.stroke(); } },
+  mega() { g.save(); g.rotate(-.3); g.beginPath(); g.moveTo(-12, -5); g.lineTo(6, -13); g.lineTo(6, 13); g.lineTo(-12, 5); g.closePath(); g.fillStyle = IK.pink; g.fill(); fillRR(-16, -6, 6, 12, 2, '#7A4528'); ell(6, 0, 3, 13, '#B8784A'); fillRR(-10, 5, 5, 9, 2, '#6E3E22'); g.restore(); icStroke(IK.gold, 2.4); for (const r of [6, 11]) { g.beginPath(); g.arc(9, -3, r, -.7, .5); g.stroke(); } },
   lock() { icStroke('#8A98A6', 3.4); g.beginPath(); g.arc(0, -5, 8, Math.PI, 0); g.lineTo(8, 1); g.moveTo(-8, 1); g.lineTo(-8, -5); g.stroke(); fillRR(-12, -1, 24, 18, 4, lg(0, -1, 0, 17, [IK.gold2, '#E8A21A'])); ell(0, 6, 2.6, 2.6, '#8A5A0A'); g.fillStyle = '#8A5A0A'; g.fillRect(-1.2, 6, 2.4, 6); },
   sparkle() { icStar(17, 4, 4); g.fillStyle = IK.gold; g.fill(); g.save(); g.translate(11, -11); icStar(7, 2, 4); g.fillStyle = IK.gold2; g.fill(); g.restore(); },
-  phone() { fillRR(-10, -17, 20, 34, 5, '#2E2A30'); fillRR(-8, -13, 16, 25, 2, lg(0, -13, 0, 12, ['#F7A9BE', '#C2416B'])); ell(0, 14.5, 1.8, 1.8, '#6A6470'); ell(0, -1, 5, 5, null, 'rgba(255,255,255,.85)', 1.8); },
+  phone() { fillRR(-10, -17, 20, 34, 5, '#2E2A30'); fillRR(-8, -13, 16, 25, 2, lg(0, -13, 0, 12, ['#E3C29E', '#7A4528'])); ell(0, 14.5, 1.8, 1.8, '#6A6470'); ell(0, -1, 5, 5, null, 'rgba(255,255,255,.85)', 1.8); },
   cake() { fillRR(-15, 2, 30, 13, 3, '#C27A43'); fillRR(-15, 0, 30, 5, 2, IK.cream); fillRR(-10, -9, 20, 11, 3, IK.pink2); fillRR(-10, -10, 20, 4, 2, IK.cream); fillRR(-1.5, -17, 3, 8, 1, '#7EB6D9'); ell(0, -19, 2.4, 3.4, IK.gold); ell(0, -18.4, 1, 1.6, '#FFFFFF'); },
   box() { fillRR(-16, 0, 32, 14, 3, '#F3E8D2', '#C9B48E', 1.8); fillRR(-15, -11, 30, 12, 4, '#F7EEDC', '#C9B48E', 1.8); icLine([[-12, 7], [12, 7]], 'rgba(201,180,142,.8)', 1.4); heartPath(0, -6, 4.2); g.fillStyle = IK.pink; g.fill(); },
   bag() { icStroke('#B89068', 2.6); g.beginPath(); g.arc(-5, -8, 5, Math.PI, 0); g.stroke(); g.beginPath(); g.arc(5, -8, 5, Math.PI, 0); g.stroke(); fillRR(-14, -8, 28, 25, 3, lg(-14, 0, 14, 0, ['#F2E0BE', '#E2C99E'])); heartPath(0, 4, 5); g.fillStyle = IK.pink; g.fill(); },
@@ -927,7 +927,7 @@ const CHAR_BY_ID = Object.fromEntries(CHARS.CAST.map((c) => [c.id, c]));
 // khách ngẫu nhiên: phối tóc, áo, phụ kiện theo seed (cùng hệ nét D)
 const SKINS = ['#F7D5BC', '#EEC2A0', '#E2AE88', '#FADFC9', '#D9A07A'];
 const HAIRS = ['#2B1B15', '#3E2A20', '#5A3A28', '#1B1412', '#7A4E30', '#4A2E22'];
-const TOPS = ['#F3F1EC', '#2E3B55', '#E85D75', '#7EB6D9', '#F2C14E', '#5C8D6B', '#D9C8F0', '#B23A3A', '#F49AB3', '#8FCBB5'];
+const TOPS = ['#F3F1EC', '#2E3B55', '#E85D75', '#7EB6D9', '#F2C14E', '#5C8D6B', '#D9C8F0', '#B23A3A', '#D4A373', '#8FCBB5'];
 const BOTTOMS = ['#3E4A5E', '#7088AA', '#2E2A2E', '#4A4038', '#E9E1D6', '#5A6A4A'];
 function makeLook(seed) {
   const R = rand(seed), pick = (a) => a[Math.floor(R() * a.length)];
@@ -986,7 +986,7 @@ const SHOPS = {
     { w: 160, h: 300, c: '#5A4A6A', sign: 'ỐC ĐÊM', sc: '#D9534F' }, { w: 150, h: 340, c: '#4E5A7A', sign: 'CHÈ CÔ TƯ', sc: '#E8A33A' },
     { w: 170, h: 320, c: '#6A4F5A', sign: 'BẮP XÀO', sc: '#3E9A5A' }, { w: 150, h: 360, c: '#4A5670', sign: 'NƯỚC MÍA', sc: '#7EB6D9' }],
   phodibo: [
-    { w: 180, h: 400, c: '#E9D6C2', sign: 'BOOK CAFÉ', sc: '#8A4B2A' }, { w: 160, h: 380, c: '#D9E4F0', sign: 'LƯU NIỆM', sc: '#C2416B' },
+    { w: 180, h: 400, c: '#E9D6C2', sign: 'BOOK CAFÉ', sc: '#8A4B2A' }, { w: 160, h: 380, c: '#D9E4F0', sign: 'LƯU NIỆM', sc: '#7A4528' },
     { w: 170, h: 420, c: '#F2E2D6', sign: 'KEM Ý', sc: '#3D6FC4' }, { w: 150, h: 360, c: '#E4ECD8', sign: 'HOA TƯƠI', sc: '#5C8D6B' }],
 };
 const LOCS = {
@@ -1067,18 +1067,18 @@ function cartFrame(t) {
   g.save(); g.translate(30, 556); g.rotate(-.04);
   const led = S.tools?.led;
   if (led) { fillRR(-8, -8, 236, 92, 22, `rgba(255,214,90,${.35 + .2 * Math.sin(t * 5)})`); }
-  fillRR(0, 0, 220, 76, 16, '#FFF7EE', led ? '#F2B632' : '#F2A7BA', 4);
+  fillRR(0, 0, 220, 76, 16, '#FFF7EE', led ? '#F2B632' : '#D9B48E', 4);
   if (led) for (let i = 0; i < 12; i++) ell(10 + i * 18.2, 2, 3, 3, (Math.floor(t * 4) + i) % 3 ? '#FFE27A' : '#FFFFFF');
   drawLogo(S.profile?.logo ?? 'mascot', 36, 38, 26);
-  text(S.profile?.shop ?? 'Tiramisu Xe Đẩy', 136, 30, { size: 19, color: '#C2416B', weight: 800, font: TITLE, max: 150 });
+  text(S.profile?.shop ?? 'Tiramisu Xe Đẩy', 136, 30, { size: 19, color: '#7A4528', weight: 800, font: TITLE, max: 150 });
   text('35k – 45k / hộp', 136, 56, { size: 14, color: '#8A5A4A', weight: 700 });
   g.restore();
   if (S.tools?.loa) { g.save(); g.translate(W - 70, 236); g.rotate(-.3); fillRR(-14, -10, 22, 20, 4, '#5A6470'); g.beginPath(); g.moveTo(8, -10); g.lineTo(30, -22); g.lineTo(30, 22); g.lineTo(8, 10); g.closePath(); g.fillStyle = '#E9EEF2'; g.fill(); g.strokeStyle = '#5A6470'; g.lineWidth = 2; g.stroke(); g.restore(); }
   // bảng mã QR chuyển khoản
   g.save(); g.translate(600, 548); g.rotate(.05);
-  fillRR(0, 0, 92, 84, 12, '#FFFFFF', '#F2A7BA', 4);
+  fillRR(0, 0, 92, 84, 12, '#FFFFFF', '#D9B48E', 4);
   const R = rand(42); for (let yy = 0; yy < 9; yy++) for (let xx = 0; xx < 9; xx++) if (R() < .5 || (xx < 3 && yy < 3) || (xx > 5 && yy < 3) || (xx < 3 && yy > 5)) { g.fillStyle = '#2A2422'; g.fillRect(14 + xx * 6, 8 + yy * 6, 6, 6); }
-  text('Quét QR', 46, 72, { size: 13, color: '#C2416B', weight: 800 });
+  text('Quét QR', 46, 72, { size: 13, color: '#7A4528', weight: 800 });
   g.restore();
 }
 function coolerBox() {
@@ -1113,8 +1113,8 @@ function trayDraw(fk, r, remaining, t, highlight = 0, liftIdx = -1) {
   g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(x + 2, y + 6, 2, h - 12);
   if (highlight > 0) { g.strokeStyle = `rgba(255,214,64,${highlight})`; g.lineWidth = 6; rr(x - 4, y - 4, w + 8, h + 8, 12); g.stroke(); }
   // nhãn vị
-  fillRR(x + 4, y + h - 2, w - 8, 26, 9, '#FFFFFF', '#E897AE', 2);
-  text(F.name, x + w / 2, y + h + 11, { size: 15, color: '#8A3B55', weight: 800, max: w - 14 });
+  fillRR(x + 4, y + h - 2, w - 8, 26, 9, '#FFFFFF', '#C9A27A', 2);
+  text(F.name, x + w / 2, y + h + 11, { size: 15, color: '#6E3E22', weight: 800, max: w - 14 });
   if (remaining === 0) { fillRR(x + 10, y + h / 2 - 22, w - 20, 44, 12, 'rgba(58,34,25,.8)'); text('HẾT', x + w / 2, y + h / 2, { size: 22, color: '#fff', weight: 800 }); }
 }
 /** Hộp bã mía (mở nắp) + túi giấy ở mặt bàn trước mặt người bán. */
@@ -1143,15 +1143,15 @@ function bagDraw(x, y, s = 1, full = false) {
   g.strokeStyle = '#C9B48E'; g.lineWidth = 7; g.beginPath(); g.arc(-22, -6, 18, Math.PI, 0); g.stroke(); g.beginPath(); g.arc(22, -6, 18, Math.PI, 0); g.stroke();
   fillRR(-62, -4, 124, 100, 8, lg(-62, 0, 62, 0, ['#F7EEDC', '#EDE0C6']), '#CDBB98', 2);
   fillRR(-46, 14, 92, 66, 8, '#FFFFFF');
-  drawLogo(S.profile?.logo ?? 'mascot', 0, 38, 18, '#F2A7BA');
-  text(S.profile?.shop ?? 'Tiramisu', 0, 68, { size: 11, color: '#C2416B', weight: 800, max: 84 });
+  drawLogo(S.profile?.logo ?? 'mascot', 0, 38, 18, '#D9B48E');
+  text(S.profile?.shop ?? 'Tiramisu', 0, 68, { size: 11, color: '#7A4528', weight: 800, max: 84 });
   if (full) { g.fillStyle = '#E3D3B5'; g.fillRect(-56, -14, 112, 12); }
   g.restore();
 }
 
 // ---------------------------------------------------------------- nút bấm trên canvas
 let buttons = [];
-function button(id, label, x, y, w, h, { color = '#E8557A', tc = '#FFFFFF', size = 26, pulse = false, disabled = false, t = 0, icon = null } = {}) {
+function button(id, label, x, y, w, h, { color = '#A0603A', tc = '#FFFFFF', size = 26, pulse = false, disabled = false, t = 0, icon = null } = {}) {
   const k = pulse && !disabled ? 1 + Math.sin(t * 6) * .04 : 1;
   g.save(); g.translate(x + w / 2, y + h / 2); g.scale(k, k);
   fillRR(-w / 2, -h / 2 + 6, w, h, h / 2.6, 'rgba(0,0,0,.2)');
@@ -1346,8 +1346,8 @@ function drawDialog(t) {
     person(who.look, px2, 700, 1.5, line.who === 'mai' || line.who === 'na' ? 'happy' : 'wait', t);
     if (line.who === 'ba') { g.strokeStyle = '#C9A46B'; g.lineWidth = 14; rr(px2 - 170, 420, 340, 470, 20); g.stroke(); }
   }
-  fillRR(24, 880, W - 48, 360, 30, '#FFF9F1', '#C2416B', 5);
-  if (who) { g.font = `800 24px ${FONT}`; const nw = g.measureText(who.name).width + 48; fillRR(52, 856, nw, 52, 26, '#C2416B'); text(who.name, 52 + nw / 2, 882, { size: 24, color: '#fff', weight: 800 }); }
+  fillRR(24, 880, W - 48, 360, 30, '#FFF9F1', '#7A4528', 5);
+  if (who) { g.font = `800 24px ${FONT}`; const nw = g.measureText(who.name).width + 48; fillRR(52, 856, nw, 52, 26, '#7A4528'); text(who.name, 52 + nw / 2, 882, { size: 24, color: '#fff', weight: 800 }); }
   const shown = Math.floor((S.t - d.t0) * 45);
   const str = [...T(line.text)].slice(0, shown).join('');
   wrap(str, W - 120, 30, who ? 600 : 500).forEach((l, i) => text(l, 60, 950 + i * 44, { size: 30, color: who ? '#3A2219' : '#6A4A3A', weight: who ? 600 : 500, align: 'left' }));
@@ -1362,7 +1362,7 @@ function storyBg(t) {
   g.strokeStyle = 'rgba(255,255,255,.7)'; g.lineWidth = 2; for (let i = 0; i < 26; i++) { const x = 430 + ((i * 37 + t * 220) % 230), y = 100 + ((i * 53 + t * 400) % 240); g.beginPath(); g.moveTo(x, y); g.lineTo(x - 4, y + 14); g.stroke(); }
   g.fillStyle = '#B07A48'; g.fillRect(0, 760, W, H - 760);
   // sổ công thức trên bàn
-  g.save(); g.translate(150, 680); g.rotate(-.08); fillRR(-90, -60, 180, 120, 10, '#8A3B55'); fillRR(-80, -52, 160, 104, 6, '#F6EEDF'); text('Sổ công thức', 0, -20, { size: 18, color: '#8A3B55', weight: 800, font: TITLE }); text('của Bà', 0, 6, { size: 16, color: '#8A5A4A', weight: 700 }); daisy(50, 32, 12, .3); g.restore();
+  g.save(); g.translate(150, 680); g.rotate(-.08); fillRR(-90, -60, 180, 120, 10, '#6E3E22'); fillRR(-80, -52, 160, 104, 6, '#F6EEDF'); text('Sổ công thức', 0, -20, { size: 18, color: '#6E3E22', weight: 800, font: TITLE }); text('của Bà', 0, 6, { size: 16, color: '#8A5A4A', weight: 700 }); daisy(50, 32, 12, .3); g.restore();
   // xe đẩy hồng phủ khăn
   fillRR(360, 520, 300, 220, 24, lg(0, 520, 0, 740, [cartTheme()[0], cartTheme()[2]])); ell(400, 760, 26, 26, '#5A4A50'); ell(620, 760, 26, 26, '#5A4A50');
   g.strokeStyle = '#E9E3DA'; g.lineWidth = 8; g.beginPath(); g.moveTo(370, 520); g.lineTo(370, 430); g.lineTo(650, 430); g.lineTo(650, 520); g.stroke();
@@ -1370,11 +1370,11 @@ function storyBg(t) {
 
 // ================================================================ HUD & BẢNG NHIỆM VỤ
 function hud(t, { timer = false } = {}) {
-  fillRR(14, 14, 240, 54, 27, 'rgba(255,255,255,.94)', '#F2A7BA', 3); text(`[[coin]] ${vnd(S.money)}`, 134, 42, { size: 23, color: '#3A2219', weight: 800 });
+  fillRR(14, 14, 240, 54, 27, 'rgba(255,255,255,.94)', '#D9B48E', 3); text(`[[coin]] ${vnd(S.money)}`, 134, 42, { size: 23, color: '#3A2219', weight: 800 });
   const right = timer ? `[[clock]] ${clockTxt()} · ${S.today.sold} hộp` : `Ngày ${S.day} · [[star]] ${fmtStar(shopRating())}`;
-  fillRR(W - 300, 14, 212, 54, 27, 'rgba(255,255,255,.94)', '#F2A7BA', 3); text(right, W - 194, 42, { size: 20, color: '#3A2219', weight: 800 });
+  fillRR(W - 300, 14, 212, 54, 27, 'rgba(255,255,255,.94)', '#D9B48E', 3); text(right, W - 194, 42, { size: 20, color: '#3A2219', weight: 800 });
   const doneN = S.daily.filter((q) => dailyProg(q) >= q.n).length;
-  fillRR(W - 78, 14, 64, 54, 27, '#C2416B'); text('[[clip]]', W - 46, 41, { size: 26 });
+  fillRR(W - 78, 14, 64, 54, 27, '#7A4528'); text('[[clip]]', W - 46, 41, { size: 26 });
   if (doneN) { ell(W - 22, 18, 13, 13, '#4E9A3C', '#fff', 2); text(String(doneN), W - 22, 19, { size: 15, color: '#fff', weight: 800 }); }
   buttons.push({ id: 'quests', x: W - 78, y: 14, w: 64, h: 54 });
   if (timer) staffChips(t);
@@ -1382,14 +1382,14 @@ function hud(t, { timer = false } = {}) {
 }
 function drawQuests(t) {
   g.fillStyle = 'rgba(30,18,14,.6)'; g.fillRect(0, 0, W, H);
-  fillRR(40, 120, W - 80, 1000, 36, '#FFF9F1', '#C2416B', 5);
-  text('Nhiệm vụ', W / 2, 180, { size: 46, color: '#C2416B', weight: 800, font: TITLE });
+  fillRR(40, 120, W - 80, 1000, 36, '#FFF9F1', '#7A4528', 5);
+  text('Nhiệm vụ', W / 2, 180, { size: 46, color: '#7A4528', weight: 800, font: TITLE });
   // chương
   const c = CHAPTERS[Math.min(S.chapter, CHAPTERS.length - 1)], p = chapterProg();
-  fillRR(70, 220, W - 140, 220, 24, '#FFFFFF', '#F2A7BA', 3);
+  fillRR(70, 220, W - 140, 220, 24, '#FFFFFF', '#D9B48E', 3);
   text(S.ended ? 'Đã hoàn thành cốt truyện' : `Chương ${S.chapter + 1}/5 · ${c.title}`, 100, 258, { size: 26, color: '#3A2219', weight: 800, align: 'left' });
   text(c.desc, 100, 300, { size: 22, color: '#5A3E2E', weight: 600, align: 'left' });
-  fillRR(100, 336, W - 200, 26, 13, '#F1E6DA'); fillRR(100, 336, (W - 200) * p.k, 26, 13, lg(0, 0, W, 0, ['#F2A7BA', '#E8557A']));
+  fillRR(100, 336, W - 200, 26, 13, '#F1E6DA'); fillRR(100, 336, (W - 200) * p.k, 26, 13, lg(0, 0, W, 0, ['#D9B48E', '#A0603A']));
   text(p.n > 100 ? `${vnd(Math.min(p.v, p.n))} / ${vnd(p.n)}` : `${Math.min(p.v, p.n)} / ${p.n}`, W / 2, 349, { size: 17, color: '#3A2219', weight: 800 });
   text(`Bán ở: ${LOCS[sellLoc()].name}`, 100, 400, { size: 19, color: '#8A6A5A', weight: 600, align: 'left' });
   // hằng ngày
@@ -1397,7 +1397,7 @@ function drawQuests(t) {
   S.daily.forEach((q, i) => {
     const y = 520 + i * 150, v = dailyProg(q), ok = v >= q.n || q.claimed;
     fillRR(70, y, W - 140, 130, 22, ok ? '#E9F5E1' : '#FFFFFF', ok ? '#4E9A3C' : '#E3CDB6', 3);
-    text(ok ? '✓' : '○', 106, y + 46, { size: 32, color: ok ? '#3E7A2E' : '#C2416B', weight: 800 });
+    text(ok ? '✓' : '○', 106, y + 46, { size: 32, color: ok ? '#3E7A2E' : '#7A4528', weight: 800 });
     text(q.label, 140, y + 44, { size: 22, color: '#3A2219', weight: 700, align: 'left', max: W - 230 });
     fillRR(140, y + 80, 300, 16, 8, '#F1E6DA'); fillRR(140, y + 80, 300 * clamp(v / q.n), 16, 8, ok ? '#7CC35A' : '#F2B632');
     text(`${Math.min(v, q.n) > 1000 ? vnd(Math.min(v, q.n)) : Math.min(v, q.n)}/${q.n > 1000 ? vnd(q.n) : q.n}`, 456, y + 88, { size: 15, color: '#7A5A48', weight: 700, align: 'left' });
@@ -1413,24 +1413,24 @@ function drawTitle(t) {
   street(t, 'hem');
   g.fillStyle = 'rgba(255,240,245,.55)'; g.fillRect(0, 0, W, H);
   g.save(); g.translate(W / 2, 240 + Math.sin(t * 2) * 6);
-  fillRR(-280, -110, 560, 220, 48, '#FFF7EE', '#F2A7BA', 6);
-  text('Tiramisu', 0, -38, { size: 86, color: '#C2416B', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
+  fillRR(-280, -110, 560, 220, 48, '#FFF7EE', '#D9B48E', 6);
+  text('Tiramisu', 0, -38, { size: 86, color: '#7A4528', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
   text('Xe Đẩy', 0, 48, { size: 72, color: '#8A4B2A', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
   daisy(-230, -80, 22, t); daisy(236, 70, 18, -t); mint(250, -70, 1.6, .4);
   g.restore();
   ['xoai', 'vietquat', 'dualuoi', 'oreo', 'gau', 'saurieng'].forEach((fk, i) => { const x = 70 + i * 98, y = 430; fillRR(x - 4, y - 4, 92, 300, 10, '#C9D0D6', '#8E99A3', 2); for (let p = 0; p < 4; p++) portionTop(fk, x + 2, y + 2 + p * 73, 80, 70, hsh(fk + p), t); });
-  fillRR(40, 770, W - 80, 170, 26, 'rgba(255,249,241,.96)', '#F2A7BA', 3);
-  text('Từ chiếc xe đẩy hồng của bà ngoại,', W / 2, 812, { size: 24, color: '#3A2219', weight: 800 });
-  text('đi chợ – làm bánh – ra phố bán, để dành', W / 2, 850, { size: 22, color: '#5A3E2E', weight: 600 });
-  text(`tiền mở "${shopTitle()}".`, W / 2, 884, { size: 22, color: '#5A3E2E', weight: 600 });
+  fillRR(40, 748, W - 80, 112, 24, 'rgba(255,249,241,.96)', '#D9B48E', 3);
+  text('Từ chiếc xe đẩy hồng của bà ngoại,', W / 2, 778, { size: 22, color: '#3A2219', weight: 800 });
+  text('đi chợ – làm bánh – ra phố bán, để dành', W / 2, 806, { size: 19, color: '#5A3E2E', weight: 600 });
+  text(`tiền mở "${shopTitle()}".`, W / 2, 832, { size: 19, color: '#5A3E2E', weight: 600 });
   const cont = hasSave();
-  button('new', cont ? 'Chơi mới' : 'Bắt đầu câu chuyện', W / 2 - 220, cont ? 1080 : 980, 440, cont ? 80 : 96, { t, pulse: !cont, size: cont ? 26 : 32, color: cont ? '#B07A48' : '#E8557A' });
-  if (cont) { const d = loadSave(); button('continue', `Chơi tiếp · ngày ${d.day}`, W / 2 - 220, 975, 440, 92, { t, pulse: true, size: 32 }); }
+  button('new', cont ? 'Chơi mới' : 'Bắt đầu câu chuyện', W / 2 - 220, cont ? 1066 : 980, 440, cont ? 70 : 92, { t, pulse: !cont, size: cont ? 26 : 32, color: cont ? '#B07A48' : '#A0603A' });
+  if (cont) { const d = loadSave(); button('continue', `Chơi tiếp · ngày ${d.day}`, W / 2 - 220, 966, 440, 88, { t, pulse: true, size: 32 }); }
   // xe của bạn
   if (cont || S.flags?.setupDone || PREF.profile) {
     g.font = `800 26px ${TITLE}`; const nw = Math.min(440, Math.max(g.measureText(S.profile.shop).width, 180)), bw = nw + 120, bx = W / 2 - bw / 2;
-    fillRR(bx, 364, bw, 56, 28, 'rgba(255,249,241,.97)', '#F2A7BA', 3); drawLogo(S.profile.logo, bx + 34, 392, 23);
-    text(S.profile.shop, bx + 66, 383, { size: 24, color: '#C2416B', weight: 800, font: TITLE, align: 'left', max: nw + 30 });
+    fillRR(bx, 364, bw, 56, 28, 'rgba(255,249,241,.97)', '#D9B48E', 3); drawLogo(S.profile.logo, bx + 34, 392, 23);
+    text(S.profile.shop, bx + 66, 383, { size: 24, color: '#7A4528', weight: 800, font: TITLE, align: 'left', max: nw + 30 });
     text(`Chủ xe: ${S.profile.name}`, bx + 66, 406, { size: 15, color: '#7A5A48', weight: 700, align: 'left' });
   }
   button('settings', 'Cài đặt', 40, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[gear]]' });
@@ -1506,7 +1506,7 @@ function need(c) { const left = [...c.order]; for (const f of c.got) { const i =
 function msg(s, col = '#3A2219') { S.msgs.push({ s, col, t: 0 }); }
 function effects(dt) {
   S.coins = S.coins.filter((o) => (o.t += dt) < 1.2); for (const o of S.coins) { o.vy += 900 * dt; o.x += o.vx * dt; o.y += o.vy * dt; ell(o.x, o.y, 14, 14, rg(o.x - 4, o.y - 4, 1, 16, ['#FFF2A8', '#F2B632', '#C98A12']), '#9A6A0A', 2); }
-  S.hearts = S.hearts.filter((o) => (o.t += dt) < 1.4); for (const o of S.hearts) { g.globalAlpha = 1 - o.t / 1.4; text('[[heart]]', o.x + Math.sin(o.t * 6 + o.r * 9) * 16, o.y - o.t * 160, { size: 40, color: '#E8557A' }); g.globalAlpha = 1; }
+  S.hearts = S.hearts.filter((o) => (o.t += dt) < 1.4); for (const o of S.hearts) { g.globalAlpha = 1 - o.t / 1.4; text('[[heart]]', o.x + Math.sin(o.t * 6 + o.r * 9) * 16, o.y - o.t * 160, { size: 40, color: '#A0603A' }); g.globalAlpha = 1; }
   S.msgs = S.msgs.filter((m) => (m.t += dt) < 1.8); const MY = S.scene === 'street' ? 340 : 560; S.msgs.slice(-3).forEach((m, i) => { g.globalAlpha = clamp(1.8 - m.t); fillRR(W / 2 - 280, MY - i * 56 - m.t * 20, 560, 48, 24, 'rgba(255,255,255,.96)', m.col, 3); text(m.s, W / 2, MY + 24 - i * 56 - m.t * 20, { size: 21, color: m.col, weight: 800, max: 540 }); g.globalAlpha = 1; });
 }
 
@@ -1546,28 +1546,28 @@ function drawEnding(t) {
   street(t, 'phodibo');
   g.fillStyle = 'rgba(255,245,240,.35)'; g.fillRect(0, 0, W, H);
   // mặt tiền tiệm
-  fillRR(80, 300, 560, 480, 24, '#FFF7EE', '#C2416B', 6);
-  fillRR(110, 330, 500, 90, 18, '#C2416B'); text(shopTitle(), W / 2, 376, { size: 36, color: '#fff', weight: 800, font: TITLE, max: 460 });
-  for (let i = 0; i < 12; i++) { g.fillStyle = i % 2 ? '#F2A7BA' : '#FFFFFF'; g.fillRect(110 + i * 41.6, 420, 42, 40); }
+  fillRR(80, 300, 560, 480, 24, '#FFF7EE', '#7A4528', 6);
+  fillRR(110, 330, 500, 90, 18, '#7A4528'); text(shopTitle(), W / 2, 376, { size: 36, color: '#fff', weight: 800, font: TITLE, max: 460 });
+  for (let i = 0; i < 12; i++) { g.fillStyle = i % 2 ? '#D9B48E' : '#FFFFFF'; g.fillRect(110 + i * 41.6, 420, 42, 40); }
   fillRR(140, 480, 200, 260, 12, '#BFE3F2', '#8A5A4A', 4); fillRR(380, 480, 200, 200, 12, '#BFE3F2', '#8A5A4A', 4);
-  fillRR(160, 600, 160, 20, 6, '#E6D2B5'); sliceSide('saurieng', 175, 548, 60, 46, 3); sliceSide('dualuoi', 245, 548, 60, 46, 5); daisy(240, 520, 16, t * .5); daisy(300, 690, 12, -t * .4); mint(180, 690, 1.4, .3); text('Khai trương', 240, 720, { size: 18, color: '#C2416B', weight: 800 });
+  fillRR(160, 600, 160, 20, 6, '#E6D2B5'); sliceSide('saurieng', 175, 548, 60, 46, 3); sliceSide('dualuoi', 245, 548, 60, 46, 5); daisy(240, 520, 16, t * .5); daisy(300, 690, 12, -t * .4); mint(180, 690, 1.4, .3); text('Khai trương', 240, 720, { size: 18, color: '#7A4528', weight: 800 });
   ['xoai', 'oreo', 'gau'].forEach((fk, i) => portionTop(fk, 400 + (i % 3) * 60, 560, 56, 56, hsh(fk), t));
   person(CAST.mee.look, 220, 905, .64, 'happy', t); person(CAST.na.look, 360, 915, .64, 'happy', t); person(CAST.tu.look, 500, 905, .64, 'happy', t);
-  for (let i = 0; i < 14; i++) { const x = (i * 97 + t * 40) % W, y = (i * 53 + t * 120) % 800; g.fillStyle = ['#F2A7BA', '#F2B632', '#7CC35A', '#7EB6D9'][i % 4]; g.save(); g.translate(x, y); g.rotate(t * 3 + i); g.fillRect(-6, -3, 12, 6); g.restore(); }
-  fillRR(60, 1000, W - 120, 110, 26, 'rgba(255,255,255,.95)', '#F2A7BA', 3);
-  text('Hết cốt truyện · Cảm ơn bạn đã chơi!', W / 2, 1040, { size: 26, color: '#C2416B', weight: 800 });
+  for (let i = 0; i < 14; i++) { const x = (i * 97 + t * 40) % W, y = (i * 53 + t * 120) % 800; g.fillStyle = ['#D9B48E', '#F2B632', '#7CC35A', '#7EB6D9'][i % 4]; g.save(); g.translate(x, y); g.rotate(t * 3 + i); g.fillRect(-6, -3, 12, 6); g.restore(); }
+  fillRR(60, 1000, W - 120, 110, 26, 'rgba(255,255,255,.95)', '#D9B48E', 3);
+  text('Hết cốt truyện · Cảm ơn bạn đã chơi!', W / 2, 1040, { size: 26, color: '#7A4528', weight: 800 });
   text(`Ngày ${S.day} · tổng ${S.totalSold} hộp đã bán`, W / 2, 1078, { size: 20, color: '#5A3E2E', weight: 600 });
   button('freeplay', 'Tiếp tục bán tự do', W / 2 - 220, 1140, 440, 90, { t, pulse: true, size: 28 });
 }
 
 // ================================================================ QUÁN CỦA BẠN — hồ sơ, nhân vật, logo, màu xe
-const DEFAULT_LOOK = { gender: 'f', hairStyle: 'bob', hair: '#4A2E22', skin: '#F7D5BC', top: 'blouse', topColor: '#FFF6E8', apron: '#F49AB3', acc: ['daisyClip'] };
-const DEFAULT_PROFILE = { shop: 'Tiramisu Nhà Mee', name: 'Mee', logo: 'mascot', cart: 'hong', look: { ...DEFAULT_LOOK } };
+const DEFAULT_LOOK = { gender: 'f', hairStyle: 'bob', hair: '#4A2E22', skin: '#F7D5BC', top: 'blouse', topColor: '#FFF6E8', apron: '#D4A373', acc: ['daisyClip'] };
+const DEFAULT_PROFILE = { shop: 'Tiramisu Nhà Mee', name: 'Mee', logo: 'mascot', cart: 'socola', look: { ...DEFAULT_LOOK } };
 const OWNER_PRESETS = [
   { name: 'Mee', look: { ...DEFAULT_LOOK } },
   { name: 'Linh', look: { gender: 'f', hairStyle: 'long', hair: '#2B1B15', skin: '#FADFC9', top: 'tee', topColor: '#8FCBB5', apron: '#F2C14E', acc: ['earrings'] } },
   { name: 'Vy', look: { gender: 'f', hairStyle: 'bun', hair: '#6A3E2A', skin: '#EEC2A0', top: 'aobaba', topColor: '#D9C8F0', apron: '#E85D75', acc: ['pearlClip'] } },
-  { name: 'Thỏ', look: { gender: 'f', hairStyle: 'twin', hair: '#3E2A20', skin: '#F7D5BC', top: 'tee', topColor: '#F49AB3', apron: '#FFFFFF', acc: [] } },
+  { name: 'Thỏ', look: { gender: 'f', hairStyle: 'twin', hair: '#3E2A20', skin: '#F7D5BC', top: 'tee', topColor: '#D4A373', apron: '#FFFFFF', acc: [] } },
   { name: 'Bảo', look: { gender: 'm', hairStyle: 'short', hair: '#1E1612', skin: '#EBC2A0', top: 'shirt', topColor: '#F4F6FA', apron: '#5C8D6B', acc: [] } },
   { name: 'Tú', look: { gender: 'm', hairStyle: 'perm', hair: '#3E2A20', skin: '#E2AE88', top: 'tee', topColor: '#2E3B55', apron: '#B07A48', acc: ['glasses'] } },
 ];
@@ -1576,8 +1576,8 @@ const LOOK_OPTS = {
   hair: ['#1B1412', '#2B1B15', '#4A2E22', '#6A3E2A', '#8A5A3A', '#B07A48', '#C9A66B', '#DCD6CE'],
   skin: ['#FADFC9', '#F7D5BC', '#EEC2A0', '#E2AE88', '#D9A07A', '#C68A64'],
   top: [['blouse', 'Áo blouse'], ['tee', 'Áo thun'], ['shirt', 'Sơ mi'], ['aobaba', 'Bà ba'], ['offshoulder', 'Trễ vai'], ['jacket', 'Áo khoác']],
-  topColor: ['#FFF6E8', '#F4F6FA', '#F49AB3', '#E85D75', '#F2C14E', '#8FCBB5', '#7EB6D9', '#2E3B55', '#D9C8F0', '#5C8D6B'],
-  apron: ['', '#F49AB3', '#E85D75', '#FFFFFF', '#F2C14E', '#5C8D6B', '#7EB6D9', '#B07A48', '#3A2A2A'],
+  topColor: ['#FFF6E8', '#F4F6FA', '#D4A373', '#E85D75', '#F2C14E', '#8FCBB5', '#7EB6D9', '#2E3B55', '#D9C8F0', '#5C8D6B'],
+  apron: ['', '#D4A373', '#E85D75', '#FFFFFF', '#F2C14E', '#5C8D6B', '#7EB6D9', '#B07A48', '#3A2A2A'],
   acc: [['daisyClip', 'Kẹp hoa cúc'], ['pearlClip', 'Kẹp ngọc trai'], ['earrings', 'Khuyên tai'], ['glasses', 'Kính'], ['nonla', 'Nón lá'], ['scarf', 'Khăn rằn']],
 };
 /** Bộ thông số nhân vật nét D cho chủ quán từ lựa chọn của người chơi. */
@@ -1760,7 +1760,7 @@ function sliceArt() {
   ell(-6, top - 6, 7, 4.5, '#FFF8EC'); ell(-6, top - 8.5, 4.5, 3, '#FFFFFF');
   daisy(-4, top - 11, 7.5, .35); mint(9, top - 9, 1.15, .5);
 }
-function drawLogo(key, x, y, r, ring = '#C2416B') {
+function drawLogo(key, x, y, r, ring = '#7A4528') {
   if (BRAND[key]) { g.save(); g.translate(x, y); g.scale(r / 100, r / 100); BRAND[key].draw(); g.restore(); return; }
   const L = LOGOS[key] ?? LOGOS.slice;
   g.save(); g.translate(x, y);
@@ -1775,10 +1775,10 @@ function drawLogo(key, x, y, r, ring = '#C2416B') {
     ell(0, -20, 20, 5, '#6A3E22'); mint(8, -24, 1.1, .4);
   } else if (key === 'daisy') { daisy(0, 0, 26, .2); }
   else if (key === 'heart') {
-    g.beginPath(); g.moveTo(0, 24); g.bezierCurveTo(-34, 2, -24, -28, 0, -10); g.bezierCurveTo(24, -28, 34, 2, 0, 24); g.fillStyle = '#E8557A'; g.fill();
+    g.beginPath(); g.moveTo(0, 24); g.bezierCurveTo(-34, 2, -24, -28, 0, -10); g.bezierCurveTo(24, -28, 34, 2, 0, 24); g.fillStyle = '#A0603A'; g.fill();
     ell(-10, -8, 6, 4, 'rgba(255,255,255,.6)');
   } else if (key === 'cart') {
-    fillRR(-26, -10, 52, 26, 8, '#F2AFC2', '#C2416B', 2.5); fillRR(-22, -6, 44, 8, 3, '#FFF6E8');
+    fillRR(-26, -10, 52, 26, 8, '#DDBB95', '#7A4528', 2.5); fillRR(-22, -6, 44, 8, 3, '#FFF6E8');
     g.strokeStyle = '#8A99A6'; g.lineWidth = 3; g.beginPath(); g.moveTo(-24, -10); g.lineTo(-24, -26); g.lineTo(24, -26); g.lineTo(24, -10); g.stroke();
     ell(-14, 20, 6, 6, '#4A3A40'); ell(14, 20, 6, 6, '#4A3A40'); for (let i = 0; i < 4; i++) ell(-18 + i * 12, -22, 3, 3, '#FFE9A8');
   } else if (key === 'bean') {
@@ -1788,7 +1788,7 @@ function drawLogo(key, x, y, r, ring = '#C2416B') {
     for (const s of [-1, 1]) { g.beginPath(); g.moveTo(s * 22, -8); g.lineTo(s * 18, -30); g.lineTo(s * 4, -18); g.closePath(); g.fillStyle = '#F2A65A'; g.fill(); }
     ell(0, 2, 26, 22, '#F2A65A'); ell(0, 10, 14, 10, '#FFF1DE');
     for (let i = -1; i <= 1; i++) { g.fillStyle = '#D9823A'; g.fillRect(-4 + i * 7, -18, 3, 8); }
-    ell(-9, 0, 3, 3.5, '#3A2219'); ell(9, 0, 3, 3.5, '#3A2219'); ell(0, 7, 3, 2, '#E8557A');
+    ell(-9, 0, 3, 3.5, '#3A2219'); ell(9, 0, 3, 3.5, '#3A2219'); ell(0, 7, 3, 2, '#A0603A');
     g.strokeStyle = '#3A2219'; g.lineWidth = 1.5; for (const s of [-1, 1]) for (const d of [-3, 3]) { g.beginPath(); g.moveTo(s * 10, 9 + d * .4); g.lineTo(s * 26, 7 + d); g.stroke(); }
   } else if (key === 'bear') { bear(0, 2, 26); }
   else if (key === 'star') {
@@ -1810,7 +1810,7 @@ const CART_THEMES = {
   tim:    { name: 'Tím khoai', c: ['#E9DEF6', '#D3C2EE', '#BAA4E0'] },
   socola: { name: 'Sô-cô-la', c: ['#D6B49A', '#B88B6B', '#94684C'] },
 };
-const cartTheme = () => (CART_THEMES[S.profile?.cart] ?? CART_THEMES.hong).c;
+const cartTheme = () => (CART_THEMES[S.profile?.cart] ?? CART_THEMES.socola).c;
 function T(s) {
   const P = S.profile ?? DEFAULT_PROFILE, Ac = P.look.gender === 'm' ? 'Anh' : 'Chị', ac = Ac.toLowerCase();
   return String(s).replaceAll('{tiem}', shopTitle()).replaceAll('{Ac}', Ac).replaceAll('{ac}', ac).replaceAll('{shop}', P.shop).replaceAll('Tiệm Tiramisu Nhà Mee', shopTitle())
@@ -1848,7 +1848,7 @@ const STAFF = [
   { id: 'tai', name: 'Anh Tài', role: 'Phụ bếp', lv: 4, wage: 60000, desc: 'Ở bếp có nút "Nhờ Anh Tài làm hết": làm ngay mọi khay đủ nguyên liệu (vẫn tốn nguyên liệu).', up: 'Mỗi bậc: bánh đẹp hơn, mỗi hộp bán thêm 1.000đ',
     look: { id: 'st_tai', male: true, skin: '#D9A07A', hair: '#2A1C16', hairStyle: 'perm', eyes: '#2A1E18', top: { type: 'shirt', color: '#F4F6FA' }, apron: '#3A2A2A', legs: { type: 'pants', color: '#4A4038' }, shoes: '#2A2A30', acc: [], prop: 'none' } },
   { id: 'tho', name: 'Bé Thơ', role: 'Phụ xắn bánh', lv: 5, wage: 55000, desc: 'Lúc bán, bé tự xắn giùm phần bánh khách gọi (khoảng 1,1 giây một phần). Bạn vẫn xắn cùng được.', up: 'Mỗi bậc: nhanh thêm 15%',
-    look: { id: 'st_tho', skin: '#FADFC9', hair: '#3E2A20', hairStyle: 'twin', eyes: '#3A2A22', top: { type: 'tee', color: '#F2C14E' }, apron: '#F49AB3', legs: { type: 'skirt', color: '#7088AA' }, shoes: '#E85D75', acc: [], prop: 'none' } },
+    look: { id: 'st_tho', skin: '#FADFC9', hair: '#3E2A20', hairStyle: 'twin', eyes: '#3A2A22', top: { type: 'tee', color: '#F2C14E' }, apron: '#D4A373', legs: { type: 'skirt', color: '#7088AA' }, shoes: '#E85D75', acc: [], prop: 'none' } },
   { id: 'hong', name: 'Chị Hồng', role: 'Đóng gói & thu ngân', lv: 6, wage: 50000, desc: 'Đủ món là chị tự đóng hộp, bỏ túi, giao khách; khách vui bo thêm 10%.', up: 'Mỗi bậc: tip thêm 5%',
     look: { id: 'st_hong', skin: '#F7D5BC', hair: '#5A2A1A', hairStyle: 'bob', eyes: '#4A2A22', top: { type: 'blouse', color: '#E85D75' }, apron: '#FFFFFF', legs: { type: 'pants', color: '#3E4A5E' }, shoes: '#FFFFFF', acc: ['glasses'], prop: 'none' } },
   { id: 'vy', name: 'Chị Vy', role: 'Livestream bán hàng', lv: 9, wage: 90000, desc: 'Live TikTok ngay tại xe: thêm 25 giây bán mỗi ngày, khách tip ×1,3.', up: 'Mỗi bậc: thêm 8 giây bán',
@@ -1858,7 +1858,7 @@ STAFF.push({ id: 'hau', name: 'Bé Hậu', role: 'Pha chế', lv: 4, wage: 50000
   look: { id: 'st_hau', skin: '#F7D5BC', hair: '#3A2216', hairStyle: 'bun', eyes: '#3A2A22', top: { type: 'tee', color: '#C8E07A' }, apron: '#8A5A3A', legs: { type: 'pants', color: '#3E4A5E' }, shoes: '#FFFFFF', acc: ['earrings'], prop: 'coffee' } });
 STAFF.push(
   { id: 'bong', name: 'Bé Bông', role: 'Múc topping', lv: 3, wage: 45000, desc: 'Đứng cạnh khay topping, khách gọi topping gì là bé múc giùm vào ly hoặc rắc lên hộp bánh (khoảng nửa giây một lần).', up: 'Mỗi bậc: nhanh thêm 15%',
-    look: { id: 'st_bong', skin: '#FADFC9', hair: '#5A3A28', hairStyle: 'bun', eyes: '#3A2A22', top: { type: 'tee', color: '#9FD0E8' }, apron: '#F4A9BE', legs: { type: 'skirt', color: '#F2D06B' }, shoes: '#FFFFFF', acc: ['pearlClip'], prop: 'none' } },
+    look: { id: 'st_bong', skin: '#FADFC9', hair: '#5A3A28', hairStyle: 'bun', eyes: '#3A2A22', top: { type: 'tee', color: '#9FD0E8' }, apron: '#D9B48E', legs: { type: 'skirt', color: '#F2D06B' }, shoes: '#FFFFFF', acc: ['pearlClip'], prop: 'none' } },
   { id: 'quan', name: 'Anh Quân', role: 'Barista làm từ A tới Z', lv: 8, wage: 220000, desc: 'Tự làm trọn đơn cho khách đang chọn: xắn bánh, topping, đóng hộp, lấy ly, rót, đá, dập nắp, ống hút và giao khách. Nhanh gấp 3 nhân viên thường. Bạn chỉ cần chạm chọn khách.', up: 'Mỗi bậc: nhanh thêm 15%',
     look: { id: 'st_quan', male: true, skin: '#E2AE88', hair: '#1E1612', hairStyle: 'short', eyes: '#2A1E18', top: { type: 'shirt', color: '#2E3B55' }, apron: '#6B3F25', legs: { type: 'pants', color: '#2E2A2E' }, shoes: '#2A2A30', acc: [], prop: 'coffee' } },
 );
@@ -2070,7 +2070,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.0.1';
+const GAME_VER = '1.0.2';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2164,7 +2164,7 @@ Object.assign(FLAVORS.oreo, { price: 36000 }); Object.assign(FLAVORS.gau, { pric
 Object.assign(FLAVORS, {
   cacao:    { name: 'Cacao cổ điển', price: 32000, cream: '#FFF6E4', base: '#6B3F25', kind: 'cocoa', cols: ['#5A3420', '#7A4A2C'], deco: 'daisy', icon: '#6B3F25', piece: 'bean' },
   matcha:   { name: 'Matcha', price: 38000, cream: '#EEF5DD', base: '#9CC46A', kind: 'matcha', cols: ['#8DBB5A', '#6E9E42'], deco: 'rosette', icon: '#8DBB5A', piece: 'rosette' },
-  dau:      { name: 'Dâu tây', price: 42000, cream: '#FFF1F1', base: '#FFE6EA', kind: 'piece', cols: ['#E8334A', '#C9202F'], deco: 'mint', icon: '#E8334A', piece: 'dau' },
+  dau:      { name: 'Dâu tây', price: 42000, cream: '#FFF1F1', base: '#F5E8D8', kind: 'piece', cols: ['#E8334A', '#C9202F'], deco: 'mint', icon: '#E8334A', piece: 'dau' },
   dua:      { name: 'Cốt dừa', price: 38000, cream: '#FFFDF6', base: '#F7F1E4', kind: 'piece', cols: ['#FFFFFF', '#E8D8B8'], deco: 'mint', icon: '#EFE6D2', piece: 'dua' },
   chanhday: { name: 'Chanh dây', price: 37000, cream: '#FFF3C6', base: '#FFE08A', kind: 'piece', cols: ['#F6B21E', '#E08A10'], deco: 'mint', icon: '#F6B21E', piece: 'chanhday' },
 });
@@ -2335,7 +2335,7 @@ function cakeTop(fk, x, y, r, t = 0) {
 function cupIcon(dk, x, y, s) {
   const D = DRINKS[dk];
   g.save(); g.translate(x, y); g.scale(s / 40, s / 40);
-  icLine([[4, -22], [10, -32]], '#E8557A', 3);
+  icLine([[4, -22], [10, -32]], '#A0603A', 3);
   g.beginPath(); g.moveTo(-13, -16); g.lineTo(13, -16); g.lineTo(10, 18); g.lineTo(-10, 18); g.closePath();
   g.save(); g.clip(); g.fillStyle = D.color; g.fillRect(-14, -10, 28, 30);
   if (dk === 'tra_sua') for (let i = 0; i < 6; i++) ell(-6 + (i % 3) * 6, 13 - Math.floor(i / 3) * 4, 2.4, 2.4, '#2A1A14');
@@ -2349,7 +2349,7 @@ function cupIcon(dk, x, y, s) {
 /** Biểu tượng nguyên liệu trên quầy pha chế. */
 function barIcon(k, x, y, s) {
   if (k === 'da') { g.save(); g.translate(x, y); for (const [a, b] of [[-9, 4], [8, 6], [0, -8]]) fillRR(a - 9, b - 9, 18, 18, 4, 'rgba(210,235,250,.95)', '#9CC8E2', 1.5); g.restore(); return; }
-  if (k === 'khuay') { g.save(); g.translate(x, y); g.rotate(.5); fillRR(-2.5, -24, 5, 40, 2.5, '#C9D0D6', '#8A98A6', 1); ell(0, 16, 6, 4, '#C9D0D6', '#8A98A6', 1); g.restore(); icStroke('#E8557A', 2.4); g.beginPath(); g.arc(x, y + 6, 14, .4, 2.6); g.stroke(); return; }
+  if (k === 'khuay') { g.save(); g.translate(x, y); g.rotate(.5); fillRR(-2.5, -24, 5, 40, 2.5, '#C9D0D6', '#8A98A6', 1); ell(0, 16, 6, 4, '#C9D0D6', '#8A98A6', 1); g.restore(); icStroke('#A0603A', 2.4); g.beginPath(); g.arc(x, y + 6, 14, .4, 2.6); g.stroke(); return; }
   if (k === 'lac') { g.save(); g.translate(x, y); g.rotate(-.25); fillRR(-11, -16, 22, 34, 6, lg(-11, 0, 11, 0, ['#AEB7BE', '#EEF2F4', '#AEB7BE']), '#6E7881', 1.5); fillRR(-8, -24, 16, 9, 3, '#8A98A6'); g.restore(); icStroke('#F2B632', 2.2); for (const sx of [-1, 1]) { g.beginPath(); g.moveTo(x + sx * 18, y - 8); g.lineTo(x + sx * 22, y - 2); g.stroke(); } return; }
   itemIcon(k, x, y, s);
 }
@@ -2368,13 +2368,13 @@ function itemIcon(k, x, y, s = 1) {
   else if (k === 'bot_cacao') pack('#8A5A3A', '#6B3F25', 'CACAO');
   else if (k === 'bot_matcha') pack('#A9CF78', '#6E9E42', 'MATCHA');
   else if (k === 'sua_tuoi') { fillRR(-18, -22, 36, 46, 4, '#FFFFFF', '#9AA4AE', 2); g.fillStyle = '#7EB6D9'; g.beginPath(); g.moveTo(-18, -22); g.lineTo(0, -34); g.lineTo(18, -22); g.fill(); fillRR(-18, 4, 36, 12, 0, '#7EB6D9'); text('SỮA', 0, -8, { size: 11, color: '#2E6FB5', weight: 800 }); }
-  else if (k === 'sua_dac') { fillRR(-20, -18, 40, 38, 6, lg(-20, 0, 20, 0, ['#2E6FB5', '#1E4E8A'])); ell(0, -18, 20, 5, '#C9D0D6'); fillRR(-14, -6, 28, 14, 3, '#FFFFFF'); text('ÔNG THỌ', 0, 1, { size: 7, color: '#C2416B', weight: 800 }); }
+  else if (k === 'sua_dac') { fillRR(-20, -18, 40, 38, 6, lg(-20, 0, 20, 0, ['#2E6FB5', '#1E4E8A'])); ell(0, -18, 20, 5, '#C9D0D6'); fillRR(-14, -6, 28, 14, 3, '#FFFFFF'); text('ÔNG THỌ', 0, 1, { size: 7, color: '#7A4528', weight: 800 }); }
   else if (k === 'tra_den') pack('#8A4A2A', '#5A2A18', 'TRÀ ĐEN');
   else if (k === 'tra_lai') pack('#BFE3B0', '#5DA35A', 'TRÀ LÀI');
   else if (k === 'tran_chau') { fillRR(-24, -16, 48, 36, 8, 'rgba(240,240,240,.9)', '#C9D0D6', 2); for (let i = 0; i < 12; i++) ell(-15 + (i % 4) * 10, -6 + Math.floor(i / 4) * 9, 4.4, 4.4, '#2A1A14'); }
   else if (k === 'trai_cay') { ell(-12, 4, 14, 14, '#FF9C0A', '#FFFFFF', 2); for (let i = 0; i < 6; i++) { g.save(); g.translate(-12, 4); g.rotate(i * Math.PI / 3); icLine([[0, 0], [0, -11]], 'rgba(255,255,255,.7)', 1); g.restore(); } strawberry(10, -2, 20, .3); ell(16, 12, 7, 7, '#E8C83A'); }
-  else if (k === 'ly') { for (let i = 0; i < 3; i++) { g.save(); g.translate(-14 + i * 14, -i * 3); g.beginPath(); g.moveTo(-9, -16); g.lineTo(9, -16); g.lineTo(7, 18); g.lineTo(-7, 18); g.closePath(); g.fillStyle = 'rgba(235,242,246,.9)'; g.fill(); g.strokeStyle = '#9AA4AE'; g.lineWidth = 1.5; g.stroke(); g.restore(); } icLine([[18, -20], [24, -32]], '#E8557A', 3); }
-  else if (k === 'hop_kem') { fillRR(-28, -14, 56, 34, 4, 'rgba(240,248,252,.9)', '#9AA4AE', 2); fillRR(-28, -18, 56, 8, 3, '#F7A9BE'); g.fillStyle = '#E8557A'; g.fillRect(-3, -18, 6, 38); ell(-6, -20, 6, 4, '#E8557A'); ell(6, -20, 6, 4, '#E8557A'); }
+  else if (k === 'ly') { for (let i = 0; i < 3; i++) { g.save(); g.translate(-14 + i * 14, -i * 3); g.beginPath(); g.moveTo(-9, -16); g.lineTo(9, -16); g.lineTo(7, 18); g.lineTo(-7, 18); g.closePath(); g.fillStyle = 'rgba(235,242,246,.9)'; g.fill(); g.strokeStyle = '#9AA4AE'; g.lineWidth = 1.5; g.stroke(); g.restore(); } icLine([[18, -20], [24, -32]], '#A0603A', 3); }
+  else if (k === 'hop_kem') { fillRR(-28, -14, 56, 34, 4, 'rgba(240,248,252,.9)', '#9AA4AE', 2); fillRR(-28, -18, 56, 8, 3, '#E3C29E'); g.fillStyle = '#A0603A'; g.fillRect(-3, -18, 6, 38); ell(-6, -20, 6, 4, '#A0603A'); ell(6, -20, 6, 4, '#A0603A'); }
   g.restore();
 }
 const MK_TABS = [
@@ -2400,7 +2400,7 @@ function drawMarket(t) {
   S.mkTab ??= 'banh';
   MK_TABS.forEach(([id, name, list], i) => {
     const tw2 = (W - 56 - (MK_TABS.length - 1) * 8) / MK_TABS.length, x = 28 + i * (tw2 + 8), on = S.mkTab === id, n = list.reduce((s, k) => s + (S.cart[k] ?? 0), 0);
-    fillRR(x, 386, tw2, 52, 26, on ? '#C2416B' : '#FFFFFF', on ? null : '#E3CDB6', 2);
+    fillRR(x, 386, tw2, 52, 26, on ? '#7A4528' : '#FFFFFF', on ? null : '#E3CDB6', 2);
     text(name, x + tw2 / 2, 412, { size: 17, max: tw2 - 10, color: on ? '#fff' : '#5A3E2E', weight: 800 });
     if (n) { ell(x + tw2 - 10, 390, 13, 13, '#4E9A3C', '#fff', 2); text(String(n), x + tw2 - 10, 391, { size: 13, color: '#fff', weight: 800 }); }
     buttons.push({ id: 'mktab:' + id, x, y: 386, w: tw2, h: 52 });
@@ -2414,11 +2414,11 @@ function drawMarket(t) {
     text(`${Math.round(mktPrice(k) / 1000)}k/${I.unit}`, x + 90, y + 50, { size: 13, color: '#8A5A4A', weight: 700, align: 'left', max: 116 });
     text(unitsTxt(k), x + 90, y + 72, { size: 13, color: '#8A6A5A', weight: 600, align: 'left' });
     if (SHELF[k] && !locked) { fillRR(x + 8, y + 78, 74, 20, 10, SHELF[k] <= 2 ? '#FFE3DC' : '#F1F6E8'); text(`HSD ${SHELF[k]} ngày`, x + 45, y + 88, { size: 11, color: SHELF[k] <= 2 ? '#A8402A' : '#4E7A2E', weight: 800 }); }
-    if (todayEv().id === 'sale' && todayEv().k === k) { fillRR(x + 140, y - 8, 66, 24, 12, '#E8557A'); text('−30%', x + 173, y + 4, { size: 13, color: '#fff', weight: 800 }); }
+    if (todayEv().id === 'sale' && todayEv().k === k) { fillRR(x + 140, y - 8, 66, 24, 12, '#A0603A'); text('−30%', x + 173, y + 4, { size: 13, color: '#fff', weight: 800 }); }
     if (locked) { text(`[[lock]] ${itemLockText(k)}`, x + 106, y + 118, { size: 15, color: '#8A6A5A', weight: 700 }); return; }
     button(`dec:${k}`, '−', x + 12, y + 94, 52, 42, { t, size: 26, color: '#B07A48', disabled: !q });
     text(String(q), x + 106, y + 115, { size: 26, color: '#3A2219', weight: 800 });
-    button(`inc:${k}`, '+', x + 148, y + 94, 52, 42, { t, size: 26, color: '#E8557A', disabled: S.money < cartTotal() + I.price });
+    button(`inc:${k}`, '+', x + 148, y + 94, 52, 42, { t, size: 26, color: '#A0603A', disabled: S.money < cartTotal() + I.price });
   });
   const tot = cartTotal();
   text(`Giỏ hàng: ${vnd(tot)}`, 40, 1100, { size: 26, color: '#3A2219', weight: 800, align: 'left' });
@@ -2435,7 +2435,7 @@ function drawPrepMenu(t) {
   S.pmTab ??= 'khay'; S.pmPage ??= 0;
   [['khay', 'Khay tiramisu · 6 hộp'], ['kem', cakeUnlocked() ? 'Bánh kem nguyên ổ' : `[[lock]] Bánh kem · cấp ${CAKE_LV}`]].forEach(([id, name], i) => {
     const x = 40 + i * 325, on = S.pmTab === id;
-    fillRR(x, 166, 315, 52, 26, on ? '#C2416B' : '#FFFFFF', on ? null : '#E3CDB6', 2);
+    fillRR(x, 166, 315, 52, 26, on ? '#7A4528' : '#FFFFFF', on ? null : '#E3CDB6', 2);
     text(name, x + 157, 192, { size: 20, color: on ? '#fff' : '#5A3E2E', weight: 800 });
     if (id === 'khay' || cakeUnlocked()) buttons.push({ id: 'pmtab:' + id, x, y: 166, w: 315, h: 52 });
   });
@@ -2445,7 +2445,7 @@ function drawPrepMenu(t) {
   all.slice(S.pmPage * 9, S.pmPage * 9 + 9).forEach((fk, i) => {
     const x = 30 + (i % 3) * 224, y = 230 + Math.floor(i / 3) * 248, F = FLAVORS[fk], locked = !cake && !allTrayFlavors().includes(fk);
     const ready = !cake && S.trays[fk] != null, list = cake ? cakeRecipe(fk) : recipeOf(fk), ok = canMakeList(list);
-    fillRR(x, y, 212, 242, 22, locked ? '#F1E9E0' : '#FFFFFF', ready ? '#4E9A3C' : ok && !locked ? '#F2A7BA' : '#E3CDB6', 3);
+    fillRR(x, y, 212, 242, 22, locked ? '#F1E9E0' : '#FFFFFF', ready ? '#4E9A3C' : ok && !locked ? '#D9B48E' : '#E3CDB6', 3);
     g.globalAlpha = locked ? .35 : 1;
     if (cake) { fillRR(x + 14, y + 12, 184, 104, 12, '#F7EDE4'); cakeTop(fk, x + 106, y + 64, 46, t); }
     else { fillRR(x + 14, y + 14, 184, 98, 12, '#C9D0D6'); for (let p = 0; p < 2; p++) portionTop(fk, x + 17 + p * 90, y + 17, 88, 92, hsh(fk + p), t); }
@@ -2456,14 +2456,14 @@ function drawPrepMenu(t) {
     if (locked) { text(`[[lock]] ${flavorLockText(fk)}`, x + 106, y + 208, { size: 16, color: '#8A6A5A', weight: 800 }); return; }
     if (cake) { const have = (S.cakes || []).filter((c) => c.fk === fk).length; if (have) { fillRR(x + 118, y + 18, 76, 28, 14, '#4E9A3C', '#FFFFFF', 2); text(`Có ${have} ổ`, x + 156, y + 33, { size: 15, color: '#fff', weight: 800 }); } }
     if (!cake && planOf(fk)) { const okP = traysOf(fk) >= planOf(fk); fillRR(x + 8, y + 6, 118, 26, 13, okP ? '#4E9A3C' : '#F2B632'); text(`Gợi ý ${planOf(fk)} khay${okP ? ' ✓' : ''}`, x + 67, y + 19, { size: 13, color: '#fff', weight: 800 }); }
-    if (ready) { const old = S.kept?.includes(fk) && traysOf(fk) <= 1; fillRR(x + 16, y + 176, 180, 28, 14, old ? '#DCEBF5' : '#DDEFD3'); text(old ? `[[ice]] Còn ${S.trays[fk]} phần hôm qua` : `✓ ${traysOf(fk)} khay · ${S.trays[fk]} phần`, x + 106, y + 190, { size: 14, color: old ? '#2E5A7A' : '#3E7A2E', weight: 800, max: 172 }); if (ok && traysOf(fk) < 3) { fillRR(x + 36, y + 208, 140, 34, 17, '#E8557A'); text('+ Làm thêm khay', x + 106, y + 225, { size: 15, color: '#fff', weight: 800 }); buttons.push({ id: 'make:' + fk, x, y, w: 212, h: 242 }); } }
+    if (ready) { const old = S.kept?.includes(fk) && traysOf(fk) <= 1; fillRR(x + 16, y + 176, 180, 28, 14, old ? '#DCEBF5' : '#DDEFD3'); text(old ? `[[ice]] Còn ${S.trays[fk]} phần hôm qua` : `✓ ${traysOf(fk)} khay · ${S.trays[fk]} phần`, x + 106, y + 190, { size: 14, color: old ? '#2E5A7A' : '#3E7A2E', weight: 800, max: 172 }); if (ok && traysOf(fk) < 3) { fillRR(x + 36, y + 208, 140, 34, 17, '#A0603A'); text('+ Làm thêm khay', x + 106, y + 225, { size: 15, color: '#fff', weight: 800 }); buttons.push({ id: 'make:' + fk, x, y, w: 212, h: 242 }); } }
     else if (!ok) {
       const lines = wrap('Thiếu: ' + missingOf(list).join(', '), 176, 15, 700), show = lines.slice(0, 3);
       if (lines.length > 3) show[2] = show[2].replace(/,?\s*\S*$/, '…');
       fillRR(x + 10, y + 176, 192, 66, 12, '#FFEDE8', '#F2B2A4', 2);
       show.forEach((l, j) => text(l, x + 106, y + 192 + j * 18 - (show.length - 1) * 2 + (3 - show.length) * 9, { size: 15, color: '#8E2414', weight: 700, max: 184 }));
     }
-    else { fillRR(x + 26, y + 190, 160, 40, 20, cake ? '#8A5A9A' : '#E8557A'); text(cake ? 'Lấy 1 ổ bánh' : 'Làm khay', x + 106, y + 210, { size: 17, color: '#fff', weight: 800 }); buttons.push({ id: (cake ? 'makecake:' : 'make:') + fk, x, y, w: 212, h: 242 }); }
+    else { fillRR(x + 26, y + 190, 160, 40, 20, cake ? '#8A5A9A' : '#A0603A'); text(cake ? 'Lấy 1 ổ bánh' : 'Làm khay', x + 106, y + 210, { size: 17, color: '#fff', weight: 800 }); buttons.push({ id: (cake ? 'makecake:' : 'make:') + fk, x, y, w: 212, h: 242 }); }
   });
   if (pages > 1) {
     button('pmprev', '◀', 200, 978, 70, 46, { t, size: 22, color: '#B07A48', disabled: S.pmPage === 0 });
@@ -2609,8 +2609,8 @@ function drawPrep(t, dt) {
   g.fillStyle = lg(0, 300, 0, H, ['#E3B784', '#C9935F', '#B07A48']); g.fillRect(0, 300, W, H - 300);
   g.strokeStyle = 'rgba(110,65,30,.15)'; g.lineWidth = 2; for (let i = 0; i < 18; i++) { const y = 320 + i * 52; g.beginPath(); g.moveTo(0, y); g.bezierCurveTo(240, y + 8, 480, y - 8, W, y); g.stroke(); }
   // tiêu đề bước
-  fillRR(30, 196, W - 60, 120, 26, '#FFFFFF', '#F2A7BA', 4);
-  text(cake ? `Bánh kem ${F.name}` : `Làm khay ${F.name}`, W / 2, 230, { size: 30, color: '#C2416B', weight: 800, font: TITLE, max: W - 100 });
+  fillRR(30, 196, W - 60, 120, 26, '#FFFFFF', '#D9B48E', 4);
+  text(cake ? `Bánh kem ${F.name}` : `Làm khay ${F.name}`, W / 2, 230, { size: 30, color: '#7A4528', weight: 800, font: TITLE, max: W - 100 });
   text(p.done ? (cake ? 'Xong! Cất bánh vào tủ mát' : 'Xong! Cất khay vào thùng giữ lạnh') : `Bước ${p.step + 1}/${steps.length} · ${st.name}`, W / 2, 268, { size: 23, color: '#3A2219', weight: 800 });
   text(p.done ? 'Bánh để lạnh sẽ ngon hơn khi ra phố bán.' : st.id === 'topping' ? toppingHint(p.fk) : st.hint, W / 2, 298, { size: 17, color: '#7A5A48', weight: 600, max: W - 90 });
   const B = workBox(p);
@@ -2635,7 +2635,7 @@ function drawPrep(t, dt) {
   if (passed(p, 'topping')) g.drawImage(patF, B.x, B.y, B.w, B.h);
   else if (p.tops.length) { const pat = patF; g.save(); g.beginPath(); for (const [x, y] of p.tops) { g.moveTo(x + 78, y); g.arc(x, y, 78, 0, TAU); } g.clip(); g.drawImage(pat, B.x, B.y, B.w, B.h); g.restore(); }
   p.decos.forEach((d) => drawDeco(d, F, p.fk));
-  if (p.plaque) { g.save(); g.translate(p.plaque[0], p.plaque[1]); g.rotate(-.12); fillRR(-82, -24, 164, 48, 10, '#FFF8EC', '#C9A46B', 2); text('Happy Birthday', 0, 1, { size: 21, color: '#8A3B55', weight: 800, font: TITLE }); g.restore(); }
+  if (p.plaque) { g.save(); g.translate(p.plaque[0], p.plaque[1]); g.rotate(-.12); fillRR(-82, -24, 164, 48, 10, '#FFF8EC', '#C9A46B', 2); text('Happy Birthday', 0, 1, { size: 21, color: '#6E3E22', weight: 800, font: TITLE }); g.restore(); }
   g.restore();
   for (const a of p.pipes) rosette(CK.x + Math.cos(a) * (CK.r - 14), CK.y + Math.sin(a) * (CK.r - 14), 15);
   // kem dính viền khay (sau lớp kem 2, trước khi lau)
@@ -2662,13 +2662,13 @@ function drawPrep(t, dt) {
     if (st.id === 'pipe') { const a = t * 1.2; hx = CK.x + Math.cos(a) * (CK.r - 14); hy = CK.y + Math.sin(a) * (CK.r - 14); }
     pointer(hx, hy, swipe ? 1 : (k < .4 ? 1 : 0));
     fillRR(70, 832, 580, 28, 14, '#FFF7EE', '#C9935F', 3);
-    fillRR(73, 835, 574 * clamp(prepProgress(p)), 22, 11, lg(0, 0, 580, 0, ['#F2A7BA', '#E8557A']));
+    fillRR(73, 835, 574 * clamp(prepProgress(p)), 22, 11, lg(0, 0, 580, 0, ['#D9B48E', '#A0603A']));
     text(`${Math.round(clamp(prepProgress(p)) * 100)}%`, W / 2, 847, { size: 18, color: '#3A2219', weight: 800 });
   }
   // dải các bước
   const n = steps.length, sx = 70, sw = 580 / (n - 1);
   g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 4; g.beginPath(); g.moveTo(sx, 900); g.lineTo(sx + 580, 900); g.stroke();
-  steps.forEach((s2, i) => { const x = sx + i * sw, done = i < p.step || p.done, on = i === p.step && !p.done; ell(x, 900, on ? 19 : 16, on ? 19 : 16, done ? '#7CC35A' : on ? '#FFF3C4' : '#FFF7EE', done ? '#3E7A2E' : on ? '#F2B632' : '#C9A88A', 3); text(done ? '✓' : String(i + 1), x, 901, { size: 16, color: done ? '#fff' : '#8A3B55', weight: 800 }); });
+  steps.forEach((s2, i) => { const x = sx + i * sw, done = i < p.step || p.done, on = i === p.step && !p.done; ell(x, 900, on ? 19 : 16, on ? 19 : 16, done ? '#7CC35A' : on ? '#FFF3C4' : '#FFF7EE', done ? '#3E7A2E' : on ? '#F2B632' : '#C9A88A', 3); text(done ? '✓' : String(i + 1), x, 901, { size: 16, color: done ? '#fff' : '#6E3E22', weight: 800 }); });
   // thanh dụng cụ trang trí
   if (st.id === 'deco' && !p.done) {
     DECO_TOOLS.forEach(([id, name], i) => {
@@ -2682,7 +2682,7 @@ function drawPrep(t, dt) {
   }
   if (p.done) button('store', cake ? 'Cất bánh vào tủ ✓' : 'Cất vào thùng ✓', 160, 1110, 400, 96, { t, pulse: true, size: 30, color: '#3E9A5A' });
   else button('autoPrep', 'Làm nhanh (demo)', 220, 1180, 280, 64, { t, size: 21, color: '#B07A48' });
-  if (p.flash > 0) { p.flash = Math.max(0, p.flash - dt * 1.5); text('Tuyệt!', W / 2, 600, { size: 80 * (1 + (1 - p.flash) * .3), color: `rgba(232,85,122,${p.flash})`, weight: 800, font: TITLE, outline: `rgba(255,255,255,${p.flash})`, ow: 10 }); }
+  if (p.flash > 0) { p.flash = Math.max(0, p.flash - dt * 1.5); text('Tuyệt!', W / 2, 600, { size: 80 * (1 + (1 - p.flash) * .3), color: `rgba(160,96,58,${p.flash})`, weight: 800, font: TITLE, outline: `rgba(255,255,255,${p.flash})`, ow: 10 }); }
 }
 
 // ================================================================ BÁN HÀNG MỞ RỘNG: khách gọi nước, bánh kem; quầy pha chế bên hông
@@ -2728,7 +2728,7 @@ function registerRD() {
   for (const k of Object.keys(FLAVORS)) if (k.startsWith('rd')) delete FLAVORS[k];
   for (const r of S.rd || []) {
     const cr = RD_CREAMS.find((c) => c[0] === r.cream)?.[2] ?? '#FFF6E4';
-    FLAVORS['rd' + r.id] = { name: r.name, price: r.price, cream: cr, base: cr, kind: 'mix', mix: { tops: r.tops, dust: r.dust }, rd: r, deco: 'daisy', icon: '#E8557A' };
+    FLAVORS['rd' + r.id] = { name: r.name, price: r.price, cream: cr, base: cr, kind: 'mix', mix: { tops: r.tops, dust: r.dust }, rd: r, deco: 'daisy', icon: '#A0603A' };
     delete patCache['rd' + r.id];
   }
 }
@@ -3082,7 +3082,7 @@ function cupStack(size, x, y, w, h) {
   const k = Math.min(9, Math.max(1, Math.ceil(n / 3)));
   cupPath(base); g.fillStyle = lg(cx - cw / 2, 0, cx + cw / 2, 0, ['rgba(210,228,238,.85)', 'rgba(250,253,255,.7)', 'rgba(200,220,232,.85)']); g.fill(); g.strokeStyle = 'rgba(120,145,160,.9)'; g.lineWidth = 1.5; g.stroke();
   g.save(); cupPath(base); g.clip(); g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 1; for (let i = 1; i < 7; i++) { const fx = cx - cw / 2 + i * cw / 7; g.beginPath(); g.moveTo(fx, base - ch); g.lineTo(fx + (cx - fx) * .12, base); g.stroke(); }
-  fillRR(cx - cw / 2, base - ch * .55, cw, 12, 0, 'rgba(244,154,179,.55)'); g.restore();
+  fillRR(cx - cw / 2, base - ch * .55, cw, 12, 0, 'rgba(212,163,115,.55)'); g.restore();
   text(size, cx, base - ch * .28, { size: big ? 24 : 20, color: '#3A2219', weight: 800, font: TITLE });
   for (let i = 0; i < k; i++) { const ry = base - ch - i * 8; ell(cx, ry, cw / 2 + 1, 4, 'rgba(245,250,253,.9)', 'rgba(120,145,160,.9)', 1.3); }
   fillRR(cx - cw / 2 - 8, base, cw + 16, 10, 4, lg(0, base, 0, base + 10, ['#C9935F', '#8A5A34']));
@@ -3096,7 +3096,7 @@ function sealer(x, y, w, h, t) {
   fillRR(x + 4, y + h - 24, w - 8, 24, 8, lg(0, y + h - 24, 0, y + h, ['#FFFFFF', '#D3D9DE']), '#9AA4AE', 1.5);
   fillRR(x + 12, y + 30, w - 24, h - 52, 14, lg(x + 12, 0, x + w - 12, 0, ['#E3E8EC', '#FFFFFF', '#C3CBD2']), '#9AA4AE', 1.5);
   // cuộn màng in hoa văn
-  fillRR(x + 16, y + 4, w - 32, 30, 15, lg(0, y + 4, 0, y + 34, ['#FFE1EA', '#F49AB3', '#C9607E']), '#A8405E', 1.5);
+  fillRR(x + 16, y + 4, w - 32, 30, 15, lg(0, y + 4, 0, y + 34, ['#F5E6D3', '#D4A373', '#8A5A34']), '#A8405E', 1.5);
   for (let i = 0; i < 5; i++) { heartPath(x + 30 + i * (w - 60) / 4, y + 18, 3.6); g.fillStyle = 'rgba(255,255,255,.75)'; g.fill(); }
   ell(x + 16, y + 19, 5, 13, '#8A949C', '#6E7881', 1); ell(x + w - 16, y + 19, 5, 13, '#8A949C', '#6E7881', 1);
   // đầu ép nhiệt
@@ -3138,19 +3138,19 @@ function cheesePiping(x, y, r) {
 function utilArt(kind, cx, cy) {
   if (kind === 'box') {
     for (let i = 0; i < 4; i++) { const yy = cy + 14 - i * 9; fillRR(cx - 26, yy - 8, 52, 14, 5, lg(0, yy - 8, 0, yy + 6, ['#FAF3E4', '#E6D6B6']), '#C9B48E', 1.2); g.strokeStyle = 'rgba(190,170,130,.6)'; g.lineWidth = 1; g.beginPath(); g.moveTo(cx - 22, yy - 1); g.lineTo(cx + 22, yy - 1); g.stroke(); }
-    heartPath(cx, cy - 15, 4); g.fillStyle = '#E8557A'; g.fill();
+    heartPath(cx, cy - 15, 4); g.fillStyle = '#A0603A'; g.fill();
   } else if (kind === 'cake') {
     fillRR(cx - 24, cy - 26, 48, 52, 6, lg(cx - 24, 0, cx + 24, 0, ['#C9D0D6', '#F4F7F9', '#AEB7BE']), '#6E7881', 1.5);
     fillRR(cx - 19, cy - 21, 38, 40, 4, 'rgba(200,232,248,.85)');
     g.fillStyle = '#E3E8EC'; g.fillRect(cx - 19, cy - 2, 38, 2.5); g.fillRect(cx - 19, cy + 12, 38, 2.5);
-    fillRR(cx - 12, cy - 13, 24, 10, 3, '#C27A43'); fillRR(cx - 12, cy - 14, 24, 4, 2, '#FFF4DF'); ell(cx - 4, cy - 15, 2.6, 2.6, '#E8557A');
+    fillRR(cx - 12, cy - 13, 24, 10, 3, '#C27A43'); fillRR(cx - 12, cy - 14, 24, 4, 2, '#FFF4DF'); ell(cx - 4, cy - 15, 2.6, 2.6, '#A0603A');
     fillRR(cx - 10, cy + 3, 20, 9, 3, '#6B3F25'); fillRR(cx - 10, cy + 2, 20, 3, 2, '#FFF4DF');
     g.fillStyle = 'rgba(255,255,255,.55)'; g.fillRect(cx - 16, cy - 19, 3, 36);
     fillRR(cx + 15, cy - 10, 3, 18, 1.5, '#8A949C'); ell(cx + 20, cy - 22, 3, 3, '#7CC35A');
   } else {
     for (let i = 0; i < 3; i++) { const ox = (i - 1) * 6, oy = -i * 4; fillRR(cx - 22 + ox, cy - 14 + oy, 40, 34, 3, lg(cx - 22, 0, cx + 18, 0, ['#E9D2A6', '#D6B67E']), '#B8946A', 1); }
     g.strokeStyle = '#A8845A'; g.lineWidth = 2.5; g.beginPath(); g.arc(cx + 4, cy - 22, 8, Math.PI, 0); g.stroke();
-    fillRR(cx - 6, cy - 8, 22, 18, 3, '#FFFFFF'); heartPath(cx + 5, cy, 4); g.fillStyle = '#E8557A'; g.fill();
+    fillRR(cx - 6, cy - 8, 22, 18, 3, '#FFFFFF'); heartPath(cx + 5, cy, 4); g.fillStyle = '#A0603A'; g.fill();
   }
 }
 function utilItem(id, label, n, x, y, w, h, art, dim = false) {
@@ -3167,7 +3167,7 @@ function miniBox(b, x, y, w, h, t, sel) {
   fillRR(x, y + 14, w, h - 14, 14, lg(0, y, 0, y + h, [c1, c2]), '#CDBB98', 2);
   if (!b.closed) {
     b.portions.slice(0, 3).forEach((fk, i) => sliceSide(fk, x + 10 + i * (w - 20) / 3, y + 42, (w - 20) / 3 - 4, 40, hsh(fk + i)));
-    if (b.portions.length > 3) { fillRR(x + w - 40, y + 18, 36, 22, 11, '#C2416B'); text(`+${b.portions.length - 3}`, x + w - 22, y + 29, { size: 13, color: '#fff', weight: 800 }); }
+    if (b.portions.length > 3) { fillRR(x + w - 40, y + 18, 36, 22, 11, '#7A4528'); text(`+${b.portions.length - 3}`, x + w - 22, y + 29, { size: 13, color: '#fff', weight: 800 }); }
     const R = rand(7);
     if (b.extras.includes('kem_cheese')) for (let i = 0; i < 3; i++) rosette(x + 26 + i * (w - 52) / 2, y + 40, 9);
     if (b.extras.includes('bot_cacao')) { g.fillStyle = 'rgba(90,52,32,.85)'; for (let i = 0; i < 70; i++) g.fillRect(x + 12 + R() * (w - 24), y + 34 + R() * 16, 2, 2); }
@@ -3178,7 +3178,7 @@ function miniBox(b, x, y, w, h, t, sel) {
   } else {
     const k = S.anim?.kind === 'close' ? ease(S.anim.t / .6) : 1;
     g.save(); g.translate(x, y + 14); g.scale(1, lerp(-.3, 1, k)); fillRR(0, 0, w, h - 14, 14, lg(0, 0, 0, h, ['#FAF2E2', c2]), '#CDBB98', 2); g.restore();
-    if (k > .9) { drawLogo(S.profile?.logo ?? 'mascot', x + w / 2, y + h / 2 + 6, 22, '#F2A7BA'); fillRR(x + w - 34, y + 20, 26, 26, 13, '#4E9A3C'); text('✓', x + w - 21, y + 33, { size: 16, color: '#fff', weight: 800 }); }
+    if (k > .9) { drawLogo(S.profile?.logo ?? 'mascot', x + w / 2, y + h / 2 + 6, 22, '#D9B48E'); fillRR(x + w - 34, y + 20, 26, 26, 13, '#4E9A3C'); text('✓', x + w - 21, y + 33, { size: 16, color: '#fff', weight: 800 }); }
   }
 }
 function drawStreet(t, dt) {
@@ -3208,8 +3208,8 @@ function drawStreet(t, dt) {
   drawQueue(t);
   // ---- mái che + bảng tên trên quầy
   g.fillStyle = lg(0, 412, 0, H, ['#F6E6D2', '#EBD3B6']); g.fillRect(0, 412, W, H - 412);
-  for (let x = 0; x < W; x += 40) { g.fillStyle = (x / 40) % 2 ? '#FFFFFF' : '#F49AB3'; g.fillRect(x, 398, 40, 22); g.beginPath(); g.arc(x + 20, 420, 20, 0, Math.PI); g.fill(); }
-  g.save(); g.translate(W / 2, 404); fillRR(-150, -24, 300, 40, 14, '#FFF7EE', S.tools?.led ? '#F2B632' : '#E897AE', 3); drawLogo(S.profile?.logo ?? 'mascot', -126, -4, 16); text(S.profile?.shop ?? 'Tiramisu Xe Đẩy', 12, -4, { size: 18, color: '#C2416B', weight: 800, font: TITLE, max: 240 }); g.restore();
+  for (let x = 0; x < W; x += 40) { g.fillStyle = (x / 40) % 2 ? '#FFFFFF' : '#D4A373'; g.fillRect(x, 398, 40, 22); g.beginPath(); g.arc(x + 20, 420, 20, 0, Math.PI); g.fill(); }
+  g.save(); g.translate(W / 2, 404); fillRR(-150, -24, 300, 40, 14, '#FFF7EE', S.tools?.led ? '#F2B632' : '#C9A27A', 3); drawLogo(S.profile?.logo ?? 'mascot', -126, -4, 16); text(S.profile?.shop ?? 'Tiramisu Xe Đẩy', 12, -4, { size: 18, color: '#7A4528', weight: 800, font: TITLE, max: 240 }); g.restore();
   // ---- kệ trên: ly, bình nước, máy dập nắp
   fillRR(6, 436, W - 12, 180, 16, 'rgba(255,255,255,.35)');
   g.fillStyle = '#C9935F'; g.fillRect(6, 604, W - 12, 10);
@@ -3220,10 +3220,10 @@ function drawStreet(t, dt) {
   const MT = CT.mat;
   fillRR(MT.x, MT.y, MT.w, MT.h, 18, '#FBEFE3', '#C9935F', 3);
   g.save(); rr(MT.x + 8, MT.y + 8, MT.w - 16, MT.h - 16, 12); g.clip(); g.fillStyle = '#FFF6EC'; g.fillRect(MT.x, MT.y, MT.w, MT.h);
-  g.fillStyle = 'rgba(244,154,179,.22)'; for (let x = MT.x; x < MT.x + MT.w; x += 28) g.fillRect(x, MT.y, 14, MT.h); for (let y = MT.y; y < MT.y + MT.h; y += 28) g.fillRect(MT.x, y, MT.w, 14);
+  g.fillStyle = 'rgba(212,163,115,.22)'; for (let x = MT.x; x < MT.x + MT.w; x += 28) g.fillRect(x, MT.y, 14, MT.h); for (let y = MT.y; y < MT.y + MT.h; y += 28) g.fillRect(MT.x, y, MT.w, 14);
   g.restore();
   g.strokeStyle = 'rgba(201,147,95,.6)'; g.setLineDash([6, 5]); g.lineWidth = 2; rr(MT.x + 10, MT.y + 10, MT.w - 20, MT.h - 20, 12); g.stroke(); g.setLineDash([]);
-  fillRR(MT.x + 14, MT.y - 12, 118, 26, 13, '#C2416B'); text('Thảm làm đơn', MT.x + 73, MT.y + 1, { size: 14, color: '#fff', weight: 800 });
+  fillRR(MT.x + 14, MT.y - 12, 118, 26, 13, '#7A4528'); text('Thảm làm đơn', MT.x + 73, MT.y + 1, { size: 14, color: '#fff', weight: 800 });
   const box = matBox(), cups = S.mat.filter((x) => x.type === 'cup'), cake = S.mat.find((x) => x.type === 'cake');
   if (box) { const i = S.mat.indexOf(box); miniBox(box, MT.x + 18, MT.y + 34, 170, 130, t, S.sel === i); reg('mat:box', MT.x + 12, MT.y + 28, 182, 144); buttons.push({ id: 'cs:mat:' + i, x: MT.x + 12, y: MT.y + 28, w: 182, h: 144 }); }
   if (cake) cakeTop(cake.fk, MT.x + 100, MT.y + (box ? 210 : 110), box ? 40 : 70, t);
@@ -3269,7 +3269,7 @@ function drawStreet(t, dt) {
   else if (act) { text('Việc tiếp theo', 32, BY + 26, { size: 13, color: '#8A6A5A', weight: 700, align: 'left' }); wrap(act[1], 400, 19, 800).slice(0, 2).forEach((l, i) => text(l, 32, BY + 52 + i * 24, { size: 19, color: '#3A2219', weight: 800, align: 'left' })); }
   else text(cc ? '' : S.dayLeft > 0 ? 'Đang chờ khách tới…' : 'Hết giờ bán', 232, BY + 48, { size: 17, color: '#8A6A5A', weight: 700 });
   if (cant) button('refuse', 'Xin lỗi, hết món', 462, BY, 246, 96, { t, pulse: true, size: 22, color: '#8A5A3A' });
-  else button('cs:give', 'Giao khách', 462, BY, 246, 96, { t, pulse: S.phase === 'ready', size: 26, color: '#E8557A', icon: '[[bag]]', disabled: S.phase !== 'ready' || !!S.anim });
+  else button('cs:give', 'Giao khách', 462, BY, 246, 96, { t, pulse: S.phase === 'ready', size: 26, color: '#A0603A', icon: '[[bag]]', disabled: S.phase !== 'ready' || !!S.anim });
   if (S.phase === 'ready') R_.give = { x: 462, y: BY, w: 246, h: 96 };
   // ---- tô sáng chỗ cần chạm
   if (act && !cant && R_[act[0]] && guideGlow()) { const r = R_[act[0]], p = .55 + .45 * Math.sin(t * 6); g.strokeStyle = `rgba(242,182,50,${p})`; g.lineWidth = 6; rr(r.x - 4, r.y - 4, r.w + 8, r.h + 8, 14); g.stroke(); }
@@ -3279,7 +3279,7 @@ function drawStreet(t, dt) {
 
 // ================================================================ KINH DOANH QUÁN: sao đánh giá, kho hạn dùng, sự kiện, MXH, ngân hàng, chi nhánh, nâng cấp, thống kê
 Object.assign(ICONS, {
-  bank() { g.beginPath(); g.moveTo(-18, -6); g.lineTo(0, -18); g.lineTo(18, -6); g.closePath(); g.fillStyle = IK.pink; g.fill(); fillRR(-16, -6, 32, 4, 1, '#C2416B'); for (let i = 0; i < 4; i++) fillRR(-13 + i * 8, -1, 5, 13, 1, IK.cream, '#B07A48', 1.2); fillRR(-18, 12, 36, 5, 1.5, '#B07A48'); ell(0, -10, 2.4, 2.4, '#fff'); },
+  bank() { g.beginPath(); g.moveTo(-18, -6); g.lineTo(0, -18); g.lineTo(18, -6); g.closePath(); g.fillStyle = IK.pink; g.fill(); fillRR(-16, -6, 32, 4, 1, '#7A4528'); for (let i = 0; i < 4; i++) fillRR(-13 + i * 8, -1, 5, 13, 1, IK.cream, '#B07A48', 1.2); fillRR(-18, 12, 36, 5, 1.5, '#B07A48'); ell(0, -10, 2.4, 2.4, '#fff'); },
   chart() { fillRR(-17, -17, 34, 34, 5, '#fff', '#C9B49A', 2); [[-11, 8], [-3, 14], [5, 6], [12, 18]].forEach(([x, h], i) => fillRR(x - 3, 12 - h, 6, h, 1.5, i === 3 ? IK.pink : '#7EB6D9')); icLine([[-12, -2], [-4, -6], [4, 0], [13, -10]], '#3E9A5A', 2.4); },
   trash() { fillRR(-14, -10, 28, 26, 4, lg(-14, 0, 14, 0, ['#9AA4AE', '#F4F7F9', '#8A949C']), '#6E7881', 1.8); fillRR(-17, -15, 34, 6, 3, '#7A858E'); fillRR(-5, -19, 10, 5, 2, '#7A858E'); for (let i = -1; i <= 1; i++) icLine([[i * 7, -5], [i * 7, 11]], '#6E7881', 2); },
   scooter() { ell(-11, 10, 6, 6, '#3A2A2A'); ell(12, 10, 6, 6, '#3A2A2A'); ell(-11, 10, 2.5, 2.5, '#C9D0D6'); ell(12, 10, 2.5, 2.5, '#C9D0D6'); g.beginPath(); g.moveTo(-14, 6); g.lineTo(-4, -2); g.lineTo(8, -2); g.lineTo(14, 6); g.closePath(); g.fillStyle = IK.pink; g.fill(); icLine([[8, -2], [11, -14]], '#3A2A2A', 3); fillRR(-12, -14, 13, 11, 2, '#F2B632', '#B07A48', 1.4); },
@@ -3462,7 +3462,7 @@ const FRAN_FEE = 30e6;
 const franOk = () => shopRating() >= 4.5 && followers() >= 30000 && Object.keys(S.branches || {}).length >= 2;
 
 // ---- đơn online
-const APPS = [['MeeFood', '#E8557A'], ['Giao Liền', '#3E9A5A'], ['Ship Vèo', '#F2A54A']];
+const APPS = [['MeeFood', '#A0603A'], ['Giao Liền', '#3E9A5A'], ['Ship Vèo', '#F2A54A']];
 const onlineApps = () => APPS.slice(0, Math.min(APPS.length, S.tools?.tablet || 0));
 const ONLINE_LV = 5, TABLET_PRICE = 1200000;
 
@@ -3548,9 +3548,9 @@ function drawDayStart(t) {
   street(t, sellLoc());
   g.fillStyle = 'rgba(255,245,240,.45)'; g.fillRect(0, 0, W, H);
   hud(t);
-  fillRR(30, 162, W - 60, 1104, 34, '#FFF9F1', '#F2A7BA', 5);
+  fillRR(30, 162, W - 60, 1104, 34, '#FFF9F1', '#D9B48E', 5);
   const c = CHAPTERS[Math.min(S.chapter, CHAPTERS.length - 1)];
-  text(`Ngày ${S.day}`, 70, 208, { size: 44, color: '#C2416B', weight: 800, font: TITLE, align: 'left' });
+  text(`Ngày ${S.day}`, 70, 208, { size: 44, color: '#7A4528', weight: 800, font: TITLE, align: 'left' });
   text(`Thứ ${['Hai', 'Ba', 'Tư', 'Năm', 'Sáu', 'Bảy', 'CN'][weekDay() - 1]} · chuẩn bị mở xe`, 72, 244, { size: 17, color: '#8A6A5A', weight: 700, align: 'left' });
   text(S.ended ? `Bán tự do · ${LOCS[sellLoc()].name}` : `Chương ${S.chapter + 1}: ${c.title}`, W - 70, 200, { size: 18, color: '#3A2219', weight: 800, align: 'right', max: 330 });
   text(S.ended ? '' : LOCS[sellLoc()].name, W - 70, 228, { size: 16, color: '#8A6A5A', weight: 700, align: 'right', max: 330 });
@@ -3595,8 +3595,8 @@ function drawSummary(t) {
   street(t, sellLoc());
   g.fillStyle = 'rgba(30,18,14,.55)'; g.fillRect(0, 0, W, H);
   const s = S.summary, T0 = S.today;
-  fillRR(34, 50, W - 68, 1200, 34, '#FFF9F1', '#F2A7BA', 6);
-  text(`Hết ngày ${S.day}`, W / 2, 104, { size: 42, color: '#C2416B', weight: 800, font: TITLE });
+  fillRR(34, 50, W - 68, 1200, 34, '#FFF9F1', '#D9B48E', 6);
+  text(`Hết ngày ${S.day}`, W / 2, 104, { size: 42, color: '#7A4528', weight: 800, font: TITLE });
   const avg = T0.rvN ? T0.rvSum / T0.rvN : 0;
   [[String(T0.served || 0), 'khách vui'], [String(T0.angry || 0), 'khách bỏ về'], [avg ? fmtStar(avg) + '★' : '—', 'sao hôm nay'], [fmtStar(shopRating()) + '★', 'sao của quán']].forEach(([a, b], i) => {
     const x = 60 + i * 152; fillRR(x, 136, 140, 74, 16, '#FFFFFF', '#EBD9C8', 2); text(a, x + 70, 164, { size: 25, color: i === 1 && T0.angry ? '#B5302A' : '#3A2219', weight: 800 }); text(b, x + 70, 194, { size: 13, color: '#8A6A5A', weight: 700 });
@@ -3635,7 +3635,7 @@ function drawSummary(t) {
   y += Math.min(5, info.length) * 28 + 6;
   // bán chạy
   const best = Object.entries(T0.flavorSold || {}).sort((a, b) => b[1] - a[1]).slice(0, 3);
-  if (best.length) { text('[[fire]] Bán chạy:', 70, y + 6, { size: 17, color: '#C2416B', weight: 800, align: 'left' }); let bx = 210; best.forEach(([f, n], i) => { const lab = `${i + 1}. ${FLAVORS[f].name} (${n})`; g.font = `800 15px ${FONT}`; const w = g.measureText(lab).width + 24; fillRR(bx, y - 9, w, 30, 15, ['#FFE3A0', '#EDEDED', '#F2D2B6'][i]); text(lab, bx + w / 2, y + 6, { size: 15, color: '#3A2219', weight: 800 }); bx += w + 8; }); y += 40; }
+  if (best.length) { text('[[fire]] Bán chạy:', 70, y + 6, { size: 17, color: '#7A4528', weight: 800, align: 'left' }); let bx = 210; best.forEach(([f, n], i) => { const lab = `${i + 1}. ${FLAVORS[f].name} (${n})`; g.font = `800 15px ${FONT}`; const w = g.measureText(lab).width + 24; fillRR(bx, y - 9, w, 30, 15, ['#FFE3A0', '#EDEDED', '#F2D2B6'][i]); text(lab, bx + w / 2, y + 6, { size: 15, color: '#3A2219', weight: 800 }); bx += w + 8; }); y += 40; }
   // nhiệm vụ
   S.daily.forEach((q, i) => { const ok = q.claimed; text(`${ok ? '✓' : '✗'} ${q.label}`, 70, y + i * 28, { size: 16, color: ok ? '#3E7A2E' : '#A08B7A', weight: 700, align: 'left', max: 450 }); text(ok ? `+${vnd(q.reward)}` : '—', W - 70, y + i * 28, { size: 16, color: ok ? '#8A5A2A' : '#A08B7A', weight: 800, align: 'right' }); });
   y += S.daily.length * 28 + 8;
@@ -3643,13 +3643,13 @@ function drawSummary(t) {
   const p = chapterProg(), cy = Math.max(y, 860);
   fillRR(60, cy, W - 120, 120, 20, s.chapterDone ? '#FFF3C4' : '#FFFFFF', s.chapterDone ? '#F2B632' : '#E3CDB6', 2.5);
   if (s.chapterDone) {
-    text('[[party]] Hoàn thành chương!', W / 2, cy + 34, { size: 25, color: '#C2416B', weight: 800 });
+    text('[[party]] Hoàn thành chương!', W / 2, cy + 34, { size: 25, color: '#7A4528', weight: 800 });
     const un = UNLOCK[S.chapter] ?? [];
     text(s.ending ? 'Đủ tiền mở tiệm rồi!' : `“${s.chapterTitle}” · Mở khoá: ${[...un.map((f) => 'vị ' + FLAVORS[f].name)].join(', ') || 'chương mới'}`, W / 2, cy + 76, { size: 16, color: '#5A3E2E', weight: 700, max: W - 160 });
   } else if (!S.ended) {
     const ch = CHAPTERS[S.chapter];
     text(`Chương ${S.chapter + 1}: ${ch.title}`, W / 2, cy + 30, { size: 20, color: '#3A2219', weight: 800 });
-    fillRR(100, cy + 56, W - 200, 22, 11, '#F1E6DA'); fillRR(100, cy + 56, (W - 200) * p.k, 22, 11, lg(0, 0, W, 0, ['#F2A7BA', '#E8557A']));
+    fillRR(100, cy + 56, W - 200, 22, 11, '#F1E6DA'); fillRR(100, cy + 56, (W - 200) * p.k, 22, 11, lg(0, 0, W, 0, ['#D9B48E', '#A0603A']));
     text(p.n > 100 ? `${vnd(Math.min(p.v, p.n))} / ${vnd(p.n)}` : `${Math.min(p.v, p.n)} / ${p.n}`, W / 2, cy + 67, { size: 14, color: '#3A2219', weight: 800 });
     text(ch.desc, W / 2, cy + 100, { size: 14, color: '#6A4A3A', weight: 600, max: W - 160 });
   } else text(`[[trophy]] ${S.totalSold} hộp đã bán · tổng doanh thu ${vnd(S.stats?.earned || 0)}`, W / 2, cy + 60, { size: 18, color: '#3A2219', weight: 800 });
@@ -3792,7 +3792,7 @@ function spawnGuest() {
     const kcn = S.branches?.kcn ? .25 : 0, p = Math.min(.5, .12 * apps.length * (1 + upFx('onl') + kcn + (ev === 'rain' ? .8 : 0)));
     if (Math.random() < p) { const [app, col] = apps[Math.floor(Math.random() * apps.length)]; c.online = app; c.appCol = col; c.look = shipperLook(c.seed, col); c.name = `Đơn ${app}`; c.line = 'Shipper tới lấy đơn nè!'; c.patienceMul = (c.patienceMul ?? 1) * 1.5; c.pay = 'app'; }
   }
-  if (!c.online && ev === 'critic' && !S.criticDone && (S.today.served || 0) >= 3) { S.criticDone = S.day; c.critic = true; c.name = 'Reviewer Ẩm Thực'; c.line = 'Mình review đồ ăn, làm thật chuẩn nha!'; c.look = { ...c.look, acc: ['glasses'], prop: 'phone' }; msg('[[camera]] Reviewer ẩm thực đang xếp hàng!', '#C2416B'); }
+  if (!c.online && ev === 'critic' && !S.criticDone && (S.today.served || 0) >= 3) { S.criticDone = S.day; c.critic = true; c.name = 'Reviewer Ẩm Thực'; c.line = 'Mình review đồ ăn, làm thật chuẩn nha!'; c.look = { ...c.look, acc: ['glasses'], prop: 'phone' }; msg('[[camera]] Reviewer ẩm thực đang xếp hàng!', '#7A4528'); }
   if (ev === 'hot') for (const d of c.drinks) if (d.ice && Math.random() < .5) d.ice = 3;
   c.qp = 1;
   return c;
@@ -3984,11 +3984,11 @@ function miniCup(u, x, y, sc, t, sel) {
   path(); g.strokeStyle = 'rgba(120,145,160,.95)'; g.lineWidth = 2; g.stroke();
   ell(x, top, wT / 2 + 1, 3.5 * sc, null, 'rgba(120,145,160,.95)', 2);
   if (u.sealed) {
-    ell(x, top, wT / 2 + 2, 4.5 * sc, lg(x - wT / 2, 0, x + wT / 2, 0, ['#F7A9BE', '#FFE1EA', '#F49AB3']), '#C9607E', 1.5);
+    ell(x, top, wT / 2 + 2, 4.5 * sc, lg(x - wT / 2, 0, x + wT / 2, 0, ['#E3C29E', '#F5E6D3', '#D4A373']), '#8A5A34', 1.5);
     for (let i = -2; i <= 2; i++) { heartPath(x + i * 10 * sc, top, 2.2 * sc); g.fillStyle = 'rgba(255,255,255,.85)'; g.fill(); }
-    fillRR(x - 16 * sc, top + 10 * sc, 32 * sc, 24 * sc, 6 * sc, 'rgba(255,255,255,.9)'); drawLogo(S.profile?.logo ?? 'mascot', x, top + 22 * sc, 10 * sc, '#F2A7BA');
+    fillRR(x - 16 * sc, top + 10 * sc, 32 * sc, 24 * sc, 6 * sc, 'rgba(255,255,255,.9)'); drawLogo(S.profile?.logo ?? 'mascot', x, top + 22 * sc, 10 * sc, '#D9B48E');
   }
-  if (u.straw) { const sx = x + 8 * sc, sy = top - 2; g.save(); g.translate(sx, sy); g.rotate(.25); fillRR(-3.5 * sc, -42 * sc, 7 * sc, 46 * sc, 3 * sc, lg(-4, 0, 4, 0, ['#F27C98', '#C2416B'])); g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 4; i++) g.fillRect(-3.5 * sc, -38 * sc + i * 10 * sc, 7 * sc, 3 * sc); g.restore(); }
+  if (u.straw) { const sx = x + 8 * sc, sy = top - 2; g.save(); g.translate(sx, sy); g.rotate(.25); fillRR(-3.5 * sc, -42 * sc, 7 * sc, 46 * sc, 3 * sc, lg(-4, 0, 4, 0, ['#B8784A', '#7A4528'])); g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 4; i++) g.fillRect(-3.5 * sc, -38 * sc + i * 10 * sc, 7 * sc, 3 * sc); g.restore(); }
   if (u.spoil) { fillRR(x - 30, top + h * .35, 60, 24, 12, '#E8553F'); text('Hỏng', x, top + h * .35 + 12, { size: 13, color: '#fff', weight: 800 }); }
   const lab = u.size + (u.ice && u.ice !== true && S.cust?.drinks?.[u.di]?.ice ? ` · đá ${u.ice}` : '');
   g.font = `800 12px ${FONT}`; const lw = Math.max(26, g.measureText(lab).width + 14);
@@ -4062,7 +4062,7 @@ function pullCustomer() {
   const want = sp && !S.specialDone && !S.flags[sp + 'Ok'] && S.today.served >= (sp === 'na' ? 1 : 2) && !busy.some((x) => x.special === sp);
   const enough = sp === 'na' ? Object.values(S.trays).reduce((a, b) => a + b, 0) >= 6 : true;
   let spc = want && enough ? newCustomer(sp) : null;
-  if (spc) msg(sp === 'mai' ? '[[phone]] Chị Mai TikToker tới rồi!' : '[[cake]] Bé Na tới lấy đơn sinh nhật!', '#C2416B');
+  if (spc) msg(sp === 'mai' ? '[[phone]] Chị Mai TikToker tới rồi!' : '[[cake]] Bé Na tới lấy đơn sinh nhật!', '#7A4528');
   if (!spc && S.cakes?.length && Math.random() < .2 && !busy.some((x) => x.cake)) { spc = newCustomer('cake'); if (spc) msg('[[cake]] Có khách đặt bánh kem!', '#8A5A9A'); }
   const c = spc ?? S.queue.shift() ?? null;
   if (c && !c.special && !fulfillable(c)) for (let i = 0; i < 4; i++) { const n2 = newCustomer(); if (n2 && fulfillable(n2)) { Object.assign(c, { order: n2.order, extras: n2.extras, drinks: n2.drinks, line: c.online ? c.line : n2.line, got: [] }); break; } }
@@ -4126,11 +4126,11 @@ function slotBubbleH(c, w) { const n = slotCells(c).length, per = Math.max(2, Ma
 function slotBubble(c, x, y, w, t, focus) {
   const cells = slotCells(c), per = Math.max(2, Math.floor((w - 16) / 70)), rows = Math.ceil(cells.length / per);
   const cs = Math.min(72, Math.floor((w - 16) / Math.min(per, cells.length || 1)) - 6, rows > 1 ? 54 : 72);
-  const bh = 30 + rows * (cs + 22) + 18, by = y, col = c.special || c.critic ? '#C2416B' : c.online ? c.appCol : focus ? '#E8A21A' : '#3A2219';
+  const bh = 30 + rows * (cs + 22) + 18, by = y, col = c.special || c.critic ? '#7A4528' : c.online ? c.appCol : focus ? '#E8A21A' : '#3A2219';
   fillRR(x, by, w, bh, 18, '#FFFFFF', col, focus ? 4 : 2.5);
   g.fillStyle = '#FFFFFF'; g.beginPath(); g.moveTo(x + w / 2 - 14, by + bh - 2); g.lineTo(x + w / 2, by + bh + 16); g.lineTo(x + w / 2 + 14, by + bh - 2); g.fill();
   g.strokeStyle = col; g.lineWidth = focus ? 4 : 2.5; g.beginPath(); g.moveTo(x + w / 2 - 14, by + bh); g.lineTo(x + w / 2, by + bh + 16); g.lineTo(x + w / 2 + 14, by + bh); g.stroke();
-  if (c.name) { g.font = `800 14px ${FONT}`; const nw = Math.min(w - 10, g.measureText(c.name).width + 20); fillRR(x + 8, by - 13, nw, 24, 12, c.online ? c.appCol : '#C2416B'); text(c.name, x + 8 + nw / 2, by - 1, { size: 14, color: '#fff', weight: 800, max: nw - 10 }); }
+  if (c.name) { g.font = `800 14px ${FONT}`; const nw = Math.min(w - 10, g.measureText(c.name).width + 20); fillRR(x + 8, by - 13, nw, 24, 12, c.online ? c.appCol : '#7A4528'); text(c.name, x + 8 + nw / 2, by - 1, { size: 14, color: '#fff', weight: 800, max: nw - 10 }); }
   text(c.line, x + w / 2, by + 20, { size: 14, color: '#5A3E2E', weight: 700, max: w - 18 });
   const rowW = Math.min(per, cells.length) * (cs + 6) - 6;
   cells.forEach((cl, i) => {
@@ -4141,10 +4141,10 @@ function slotBubble(c, x, y, w, t, focus) {
     else if (cl.type === 'd') miniCup({ size: cl.d.size, base: cl.k, ice: true, tops: cl.d.tops, sealed: true, straw: true }, ix + cs / 2, iy + cs - 12, cs / 140, t, false);
     else if (cl.type === 'x') { g.save(); g.beginPath(); g.arc(ix + cs / 2, iy + cs / 2 - 2, cs * .36, 0, TAU); g.clip(); binArt(cl.k, ix + cs * .14, iy + cs * .12, cs * .72, cs * .72); g.restore(); }
     else cakeTop(cl.k, ix + cs / 2, iy + cs / 2 - 2, cs * .38, t);
-    fillRR(ix + cs - 28, iy - 7, 30, 20, 10, cl.ok ? '#4E9A3C' : '#E8557A'); text(cl.ok ? '✓' : `×${cl.n}`, ix + cs - 13, iy + 3, { size: 12, color: '#fff', weight: 800 });
+    fillRR(ix + cs - 28, iy - 7, 30, 20, 10, cl.ok ? '#4E9A3C' : '#A0603A'); text(cl.ok ? '✓' : `×${cl.n}`, ix + cs - 13, iy + 3, { size: 12, color: '#fff', weight: 800 });
     const sub = cl.type === 'd' && (cl.d.ice || cl.d.tops.length) ? [cl.d.ice ? ICE_NAME[cl.d.ice] : '', ...cl.d.tops.map((k) => '+' + BIN_NAME[k].toLowerCase())].filter(Boolean).join(' ') : '';
     text(cl.name, ix + cs / 2, iy + cs + 4, { size: 11, color: '#3A2219', weight: 800, max: cs + 4 });
-    if (sub) text(sub, ix + cs / 2, iy + cs + 16, { size: 10, color: '#8A3B55', weight: 800, max: cs + 4 });
+    if (sub) text(sub, ix + cs / 2, iy + cs + 16, { size: 10, color: '#6E3E22', weight: 800, max: cs + 4 });
   });
   void rowW;
   fillRR(x + 12, by + bh - 12, w - 24, 6, 3, '#F1E6DA'); fillRR(x + 12, by + bh - 12, (w - 24) * c.patience, 6, 3, c.patience > .4 ? '#7CC35A' : '#E8762C');
@@ -4179,7 +4179,7 @@ function drawQueue(t) {
     g.strokeStyle = '#EDE3D8'; g.lineWidth = 4; g.beginPath(); g.arc(x0, y, 20, 0, TAU); g.stroke();
     g.strokeStyle = q.qp > .5 ? '#7CC35A' : q.qp > .25 ? '#F2B632' : '#E8553F'; g.beginPath(); g.arc(x0, y, 20, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(q.qp)); g.stroke();
     if (q.online) { ell(x0 + 14, y + 14, 8, 8, q.appCol, '#fff', 1.5); }
-    if (q.critic) { ell(x0 + 14, y - 14, 8, 8, '#C2416B', '#fff', 1.5); text('★', x0 + 14, y - 13, { size: 10, color: '#fff', weight: 800 }); }
+    if (q.critic) { ell(x0 + 14, y - 14, 8, 8, '#7A4528', '#fff', 1.5); text('★', x0 + 14, y - 13, { size: 10, color: '#fff', weight: 800 }); }
   });
   if (S.bg?.length) { fillRR(10, y + 28, 150, 26, 13, 'rgba(46,106,154,.92)'); text(`[[scooter]] Khoa làm ${S.bg.length} đơn`, 85, y + 41, { size: 12, color: '#fff', weight: 800 }); }
 }
@@ -4187,7 +4187,7 @@ function staffChips(t) {
   const list = hired(); if (!list.length) return;
   list.forEach((x, i) => {
     const cx = W - 32 - i * 48, cy = 98, act = S.helper === x.id && S.helperT > 0;
-    ell(cx, cy, 21, 21, act ? '#FFF3C4' : 'rgba(255,255,255,.92)', act ? '#F2B632' : '#F2A7BA', act ? 3.5 : 2);
+    ell(cx, cy, 21, 21, act ? '#FFF3C4' : 'rgba(255,255,255,.92)', act ? '#F2B632' : '#D9B48E', act ? 3.5 : 2);
     g.save(); g.beginPath(); g.arc(cx, cy, 19, 0, TAU); g.clip(); person(x.look, cx, cy + 19, .27, act ? 'happy' : 'wait', t + i); g.restore();
     if (act) text(x.name.split(' ').pop(), cx, cy + 30, { size: 12, color: '#3A2219', weight: 800, outline: '#fff', ow: 4 });
   });
@@ -4197,8 +4197,8 @@ function staffChips(t) {
 function hudButtons(t, street) {
   if (S.scene === 'title') return;
   const x0 = 262;
-  ell(x0 + 27, 41, 25, 25, 'rgba(255,255,255,.94)', '#F2A7BA', 3); drawIcon('gear', x0 + 27, 41, 30); buttons.push({ id: 'settings', x: x0, y: 14, w: 54, h: 54 });
-  if (street) { const x1 = x0 + 60; ell(x1 + 27, 41, 25, 25, '#C2416B', '#fff', 3); fillRR(x1 + 18, 29, 7, 24, 3, '#fff'); fillRR(x1 + 29, 29, 7, 24, 3, '#fff'); buttons.push({ id: 'pause', x: x1, y: 14, w: 54, h: 54 }); }
+  ell(x0 + 27, 41, 25, 25, 'rgba(255,255,255,.94)', '#D9B48E', 3); drawIcon('gear', x0 + 27, 41, 30); buttons.push({ id: 'settings', x: x0, y: 14, w: 54, h: 54 });
+  if (street) { const x1 = x0 + 60; ell(x1 + 27, 41, 25, 25, '#7A4528', '#fff', 3); fillRR(x1 + 18, 29, 7, 24, 3, '#fff'); fillRR(x1 + 29, 29, 7, 24, 3, '#fff'); buttons.push({ id: 'pause', x: x1, y: 14, w: 54, h: 54 }); }
 }
 function closeShopNow() {
   S.dayLeft = 0; S.queue = []; S.pouring = null; S.anim = null;
@@ -4315,7 +4315,7 @@ function paperMenu(x, y, w, h, t) {
   ell(x + w / 2, y + h + 4, w * .46, 8, 'rgba(0,0,0,.12)');
   fillRR(x, y, w, h, 16, lg(0, y, 0, y + h, ['#FFFDF8', '#FBF1E2']), '#E3C9A8', 2.5);
   // dải ruy băng hồng + răng cưa
-  g.save(); rr(x, y, w, 50, 16); g.clip(); g.fillStyle = '#F49AB3'; g.fillRect(x, y, w, 50); g.restore();
+  g.save(); rr(x, y, w, 50, 16); g.clip(); g.fillStyle = '#D4A373'; g.fillRect(x, y, w, 50); g.restore();
   g.fillStyle = '#FFFDF8'; for (let i = 0; i < w; i += 16) { g.beginPath(); g.arc(x + i + 8, y + 50, 8, Math.PI, 0); g.fill(); }
   text('Thực đơn', x + 26, y + 26, { size: 28, color: '#fff', weight: 800, font: TITLE, align: 'left' });
   drawLogo(S.profile?.logo ?? 'mascot', x + w - 36, y + 26, 20, '#fff');
@@ -4331,7 +4331,7 @@ function paperMenu(x, y, w, h, t) {
     else { g.save(); rr(ix + 2, iy + 2, s + 8, th - 4, 10); g.clip(); miniCup({ size: 'M', base: it.k, ice: true, tops: it.k === 'tra_sua' ? ['tran_chau'] : [], sealed: true, straw: true }, ix + 6 + s / 2, iy + th - 4, s / 100, t, false); g.restore(); }
     const tx = ix + s + 12, mw = tw - s - 16;
     text(it.n, tx, iy + th / 2 - 11, { size: 17, color: '#3A2219', weight: 800, align: 'left', max: mw });
-    fillRR(tx, iy + th - 28, 54, 22, 11, it.t === 'd' ? '#7EB6D9' : '#E8557A'); text(`${Math.round(it.p / 1000)}k`, tx + 27, iy + th - 17, { size: 15, color: '#fff', weight: 800 });
+    fillRR(tx, iy + th - 28, 54, 22, 11, it.t === 'd' ? '#7EB6D9' : '#A0603A'); text(`${Math.round(it.p / 1000)}k`, tx + 27, iy + th - 17, { size: 15, color: '#fff', weight: 800 });
   });
   text(`Size L +${SIZE_L / 1000}k  ·  Topping ly +${TOP_PRICE / 1000}k  ·  Thêm vào hộp +${EXTRA_PRICE / 1000}k`, x + w / 2, y + h - 16, { size: 15, color: '#8A6A5A', weight: 700, max: w - 30 });
 }
@@ -4460,7 +4460,7 @@ function drawTiers(keys, want, t) {
   const bw = (TR.w - 6 * (L.tiers - 1)) / L.tiers;
   for (let j = 0; j < L.tiers; j++) {
     const x = TR.x + j * (bw + 6), on = j === S.tier, fl = keys.slice(j * TIER_N, j * TIER_N + TIER_N), hot = fl.some((f) => want.includes(f));
-    fillRR(x, TR.y - 4, bw, 28, 14, on ? '#C2416B' : 'rgba(255,255,255,.92)', on ? null : '#E3CDB6', 2);
+    fillRR(x, TR.y - 4, bw, 28, 14, on ? '#7A4528' : 'rgba(255,255,255,.92)', on ? null : '#E3CDB6', 2);
     text(`Tầng ${j + 1}`, x + bw / 2 - (fl.length ? 10 : 0), TR.y + 10, { size: 14, color: on ? '#fff' : '#5A3E2E', weight: 800 });
     fl.forEach((f, k) => ell(x + bw / 2 + 24 + k * 7, TR.y + 10, 3, 3, FLAVORS[f]?.color || '#C9935F'));
     if (hot && !on) { ell(x + bw - 10, TR.y - 2, 8, 8, '#E8553F', '#fff', 2); text('!', x + bw - 10, TR.y - 1, { size: 11, color: '#fff', weight: 800 }); }
@@ -4499,7 +4499,7 @@ const BIN_TABS = [
   ['ly', 'Ly', '[[ly]]', ['da', 'tran_chau', 'tran_chau_trang', 'thach', 'thach_dua', 'pudding', 'kem_cheese', 'ong_hut']],
   ['banh', 'Bánh', '[[cake]]', ['kem_cheese', 'bot_cacao', 'oreo_vun', 'sot_caramel', 'hanh_nhan', 'choco_chip', 'thia']],
 ];
-const BOWL_RIM = { ly: '#9FD0E8', banh: '#F4A9BE' };
+const BOWL_RIM = { ly: '#9FD0E8', banh: '#D9B48E' };
 
 // ---- mặt dễ thương
 function kawaii(x, y, s = 1, col = '#3A2219') {
@@ -4550,14 +4550,14 @@ function binArt(k, x, y, w, h) {
   } else if (k === 'kem_cheese') {
     bg('#FFFBF0', '#FBEFD2');
     for (let i = 0; i < 6; i++) { const px = x + 16 + (i % 3) * (w - 32) / 2, py = y + 16 + Math.floor(i / 3) * (h - 30); for (let j = 3; j >= 0; j--) { const r = 11 * (1 - j * .2); ell(px, py - (3 - j) * 2.6, r, r * .82, j % 2 ? '#FFFFFF' : '#FFF4D8', 'rgba(220,190,130,.6)', .8); } ell(px - 1, py - 11, 2.2, 3.2, '#FFFFFF'); }
-    for (let i = 0; i < 14; i++) { g.save(); g.translate(x + R() * w, y + R() * h); g.rotate(R() * 3); fillRR(-2.5, -.8, 5, 1.6, .8, ['#F49AB3', '#9FD0E8', '#F2D06B', '#9CC46A'][i % 4]); g.restore(); }
+    for (let i = 0; i < 14; i++) { g.save(); g.translate(x + R() * w, y + R() * h); g.rotate(R() * 3); fillRR(-2.5, -.8, 5, 1.6, .8, ['#D4A373', '#9FD0E8', '#F2D06B', '#9CC46A'][i % 4]); g.restore(); }
   } else if (k === 'bot_cacao') {
     bg('#8A5A3A', '#6A3F25');
     g.fillStyle = rg(cx, cy + 4, 4, w * .5, ['#A87048', '#7A4A2C', '#5E3620']); g.beginPath(); g.ellipse(cx - 6, cy + 6, w * .4, h * .42, 0, 0, TAU); g.fill();
     for (let i = 0; i < 420; i++) { g.fillStyle = R() < .5 ? 'rgba(200,140,95,.5)' : 'rgba(60,30,15,.45)'; g.fillRect(x + R() * w, y + R() * h, 1.4, 1.4); }
     g.save(); g.translate(cx - 8, cy + 2); heartPath(0, -6, 12); g.fillStyle = 'rgba(255,230,210,.35)'; g.fill(); g.restore();
     const sx = x + w - 26, sy = y + 20; ell(sx, sy, 15, 15, 'rgba(255,255,255,.25)', '#E8C9A8', 2.4); g.save(); g.beginPath(); g.arc(sx, sy, 13, 0, TAU); g.clip(); g.strokeStyle = 'rgba(255,240,225,.6)'; g.lineWidth = .8; for (let i = -14; i < 14; i += 3) { g.beginPath(); g.moveTo(sx + i, sy - 14); g.lineTo(sx + i, sy + 14); g.stroke(); g.beginPath(); g.moveTo(sx - 14, sy + i); g.lineTo(sx + 14, sy + i); g.stroke(); } g.restore();
-    fillRR(sx + 12, sy + 6, 18, 5, 2.5, '#F4A9BE');
+    fillRR(sx + 12, sy + 6, 18, 5, 2.5, '#D9B48E');
   } else if (k === 'oreo_vun') {
     bg('#4A403C', '#2E2624');
     for (let i = 0; i < 90; i++) blob(x + R() * w, y + R() * h, 1.5 + R() * 3.2, R() < .2 ? '#FFF6EC' : R() < .5 ? '#2A2220' : '#3E3432', i, false);
@@ -4566,7 +4566,7 @@ function binArt(k, x, y, w, h) {
     bg('#FFF1DC', '#F6DDB8');
     g.fillStyle = lg(0, y + h * .3, 0, y + h, ['#E2A04A', '#B86A1E']); g.beginPath(); g.ellipse(cx - 10, cy + 8, w * .34, h * .28, 0, 0, TAU); g.fill(); ell(cx - 22, cy + 2, 8, 3, 'rgba(255,240,200,.6)');
     g.strokeStyle = '#C47A28'; g.lineWidth = 3; g.lineCap = 'round'; g.beginPath(); for (let i = 0; i < 6; i++) g[i ? 'lineTo' : 'moveTo'](x + 14 + i * 12, y + 10 + (i % 2) * 8); g.stroke();
-    const bx = x + w - 26, by = y + h * .55; fillRR(bx - 10, by - 18, 20, 34, 6, lg(bx - 10, 0, bx + 10, 0, ['#E9A850', '#C47A28']), '#9A5A1A', 1); g.beginPath(); g.moveTo(bx - 4, by - 18); g.lineTo(bx, by - 28); g.lineTo(bx + 4, by - 18); g.closePath(); g.fillStyle = '#F4A9BE'; g.fill(); fillRR(bx - 8, by - 6, 16, 10, 3, '#FFF6EC'); kawaii(bx, by - 2, .45, '#6A3A12');
+    const bx = x + w - 26, by = y + h * .55; fillRR(bx - 10, by - 18, 20, 34, 6, lg(bx - 10, 0, bx + 10, 0, ['#E9A850', '#C47A28']), '#9A5A1A', 1); g.beginPath(); g.moveTo(bx - 4, by - 18); g.lineTo(bx, by - 28); g.lineTo(bx + 4, by - 18); g.closePath(); g.fillStyle = '#D9B48E'; g.fill(); fillRR(bx - 8, by - 6, 16, 10, 3, '#FFF6EC'); kawaii(bx, by - 2, .45, '#6A3A12');
   } else if (k === 'hanh_nhan') {
     bg('#FFF4E4', '#F2DDBF');
     scat(26, (a, b, r) => { g.save(); g.translate(a, b); g.rotate(r * 6); g.beginPath(); g.ellipse(0, 0, 7.5, 4, 0, 0, TAU); g.fillStyle = lg(-7, 0, 7, 0, ['#F7E2C0', '#E8C08A']); g.fill(); g.strokeStyle = '#C8925A'; g.lineWidth = .9; g.stroke(); g.strokeStyle = 'rgba(200,146,90,.5)'; g.beginPath(); g.moveTo(-5, 0); g.lineTo(5, 0); g.stroke(); g.restore(); });
@@ -4581,8 +4581,8 @@ function binArt(k, x, y, w, h) {
       const hx = cx + ox * w, hy = y + h - 2, hh = 26;
       for (let i = 0; i < 5; i++) {
         g.save(); g.translate(hx - 8 + i * 4, hy - hh + 3); g.rotate((i - 2) * .17);
-        if (k === 'thia') { fillRR(-1.8, -22, 3.6, 24, 1.8, ['#FFFFFF', '#FFE3EA', '#E3F3FA', '#FFF6D6', '#E8F6E2'][i], 'rgba(200,170,160,.7)', .6); ell(0, -25, 4.8, 6.5, ['#FFFFFF', '#FFE3EA', '#E3F3FA', '#FFF6D6', '#E8F6E2'][i], 'rgba(200,170,160,.7)', .7); }
-        else { const col = ['#F49AB3', '#9FD0E8', '#F2D06B', '#9CC46A', '#C9A2E0'][i]; fillRR(-2.6, -30, 5.2, 32, 2.6, col); g.fillStyle = 'rgba(255,255,255,.65)'; for (let s2 = 0; s2 < 4; s2++) g.fillRect(-2.6, -27 + s2 * 7, 5.2, 2); }
+        if (k === 'thia') { fillRR(-1.8, -22, 3.6, 24, 1.8, ['#FFFFFF', '#F3E3CF', '#E3F3FA', '#FFF6D6', '#E8F6E2'][i], 'rgba(200,170,160,.7)', .6); ell(0, -25, 4.8, 6.5, ['#FFFFFF', '#F3E3CF', '#E3F3FA', '#FFF6D6', '#E8F6E2'][i], 'rgba(200,170,160,.7)', .7); }
+        else { const col = ['#D4A373', '#9FD0E8', '#F2D06B', '#9CC46A', '#C9A2E0'][i]; fillRR(-2.6, -30, 5.2, 32, 2.6, col); g.fillStyle = 'rgba(255,255,255,.65)'; for (let s2 = 0; s2 < 4; s2++) g.fillRect(-2.6, -27 + s2 * 7, 5.2, 2); }
         g.restore();
       }
       fillRR(hx - 15, hy - hh, 30, hh, 8, ox < 0 ? '#FFD6E2' : '#D6EEF8', '#C9A2A2', 1);
