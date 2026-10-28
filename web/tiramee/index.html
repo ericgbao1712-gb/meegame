@@ -2562,7 +2562,7 @@ function createCodeNews(o) {
         return `<div class="mcn-it"><div class="mcn-top"><span class="mcn-code">${esc(c.code)}</span><button type="button" class="mcn-b" data-copy="${i}">Chép</button>
           ${c.redeemed ? '<span class="mcn-done">✓ Đã nhận</span>' : `<button type="button" class="mcn-b go" data-use="${i}">Nhập mã</button>`}</div>
           <div class="mcn-inf">${gifts ? `<b>${gifts}</b>` : ''}<span class="mcn-m">${c.expiresAt ? 'Hạn đến ' + date(c.expiresAt) : 'Không giới hạn thời gian'}</span>${c.left != null ? `<span class="mcn-m">Còn ${c.left} lượt</span>` : ''}</div>
-          ${c.note ? `<div class="mcn-m" style="font-size:12px;margin-top:4px">${esc(c.note)}</div>` : ''}</div>`;
+          ${c.forMe ? '<div style="font-size:12px;margin-top:4px;color:#b5452e;font-weight:700">🎀 Quà riêng cho bạn</div>' : ''}${c.note ? `<div class="mcn-m" style="font-size:12px;margin-top:4px">${esc(c.note)}</div>` : ''}</div>`;
       }).join('')}
       <div class="mcn-how"><b>Cách nhập mã</b><ol>${o.steps.map((s) => `<li>${s}</li>`).join('')}</ol></div>
       <button type="button" class="mcn-b big">Đã hiểu</button></div>`;

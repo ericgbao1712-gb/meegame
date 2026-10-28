@@ -302,7 +302,10 @@
                   <label class="field">Số người được nhận<input id="gc-max" type="number" min="1" step="1" inputmode="numeric" placeholder="Không giới hạn"><small>Để trống = ai nhập cũng nhận.</small></label>
                   <label class="field">Hết hạn sau ngày<input id="gc-exp" type="date"><small>Để trống = không hết hạn.</small></label>
                 </div>
-                <label class="field">Ghi chú<input id="gc-note" maxlength="120" placeholder="Quà livestream 21/10"></label>
+                <div class="two">
+                  <label class="field">Chỉ cho Gmail (mã riêng)<input id="gc-email" type="email" maxlength="120" placeholder="ban@gmail.com" autocomplete="off" spellcheck="false"><small>Để trống = mã chung. Điền Gmail = chỉ tài khoản đó nhập được, người khác không thấy mã trong game.</small></label>
+                  <label class="field">Ghi chú<input id="gc-note" maxlength="120" placeholder="Quà livestream 21/10"></label>
+                </div>
                 <p class="msg error" id="gc-error" role="alert" hidden></p>
                 <button class="btn primary" type="submit" id="gc-save">Tạo mã</button>
               </form>
@@ -596,7 +599,7 @@
               h('button', { class: 'btn sm', type: 'button', text: 'Ai đã nhận', onclick: () => toggleWho(c.code, who) }),
               h('button', { class: 'btn sm', type: 'button', text: c.disabled ? 'Mở lại' : 'Khoá', onclick: async () => { const { error } = await call('POST', 'admin/codes/' + encodeURIComponent(c.code), { disabled: !c.disabled }); if (error) return toast(error.message); toast(c.disabled ? 'Đã mở lại ' + c.code : 'Đã khoá ' + c.code); loadCodes(); } }),
               h('button', { class: 'btn sm danger', type: 'button', text: 'Xoá', onclick: async () => { if (!(await ask({ title: 'Xoá mã ' + c.code + '?', text: 'Người đã nhận quà vẫn giữ quà. Mã sẽ không nhập được nữa.', ok: 'Xoá mã' }))) return; const { error } = await call('POST', 'admin/codes/' + encodeURIComponent(c.code), { delete: true }); if (error) return toast(error.message); toast('Đã xoá ' + c.code); loadCodes(); } }))),
-            h('div', { class: 'acts meta num', style: 'margin:0' }, h('span', { class: 'tag ' + state[0], text: state[1] }), h('span', { text: 'Quà: ' + (gift || '—') }), h('span', { text: GC_GAME[c.game] || c.game }),
+            h('div', { class: 'acts meta num', style: 'margin:0' }, h('span', { class: 'tag ' + state[0], text: state[1] }), h('span', { text: 'Quà: ' + (gift || '—') }), h('span', { text: GC_GAME[c.game] || c.game }), c.forEmail ? h('span', { class: 'tag amber', text: 'Riêng: ' + c.forEmail }) : null,
               h('span', { text: 'Đã dùng ' + fmt(c.uses) + (c.maxUses != null ? ' / ' + fmt(c.maxUses) : '') }), c.expiresAt ? h('span', { text: 'Hạn ' + new Date(c.expiresAt).toLocaleDateString('vi-VN') }) : null, c.note ? h('span', { text: c.note }) : null),
             who);
           box.append(row);
@@ -623,11 +626,11 @@
         if (!(m > 0 || xp > 0)) { err.textContent = 'Điền tiền tặng hoặc XP tặng.'; err.hidden = false; return; }
         const exp = $('gc-exp').value ? new Date($('gc-exp').value + 'T23:59:59').getTime() : null;
         $('gc-save').disabled = true;
-        const { error } = await call('POST', 'admin/codes', { code, game: $('gc-game').value, money: m, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim() });
+        const { error } = await call('POST', 'admin/codes', { code, game: $('gc-game').value, money: m, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim(), forEmail: $('gc-email').value.trim() || null });
         $('gc-save').disabled = false;
         if (error) { err.textContent = error.message; err.hidden = false; return; }
         toast('Đã tạo mã ' + code);
-        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note'].forEach((id) => { $(id).value = ''; });
+        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note', 'gc-email'].forEach((id) => { $(id).value = ''; });
         $('gc-money-hint').textContent = '500 = 500.000đ trong game.';
         loadCodes();
       });

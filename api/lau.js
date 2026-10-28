@@ -49,7 +49,7 @@ const num = (v, d = 0) => (Number.isFinite(Number(v)) ? Number(v) : d);
 const cleanCode = (c) => String(c || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
 const CODE_MAX = 1e15;   // chủ game 21/10: không giới hạn tiền / XP của mã (chỉ chặn số vô nghĩa vượt khả năng lưu)
 const codeRow = (r) => ({ code: r.code, game: r.game, money: num(r.money), xp: num(r.xp), maxUses: r.max_uses == null ? null : num(r.max_uses),
-  uses: num(r.uses), expiresAt: r.expires_at == null ? null : num(r.expires_at), disabled: !!num(r.disabled), note: r.note || '', createdAt: num(r.created_at) });
+  uses: num(r.uses), expiresAt: r.expires_at == null ? null : num(r.expires_at), disabled: !!num(r.disabled), note: r.note || '', createdAt: num(r.created_at), forEmail: r.for_email || null });
 const cleanName = (s, def = 'Quán Lẩu') => String(s || '').replace(/[\u0000-\u001f<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 24) || def;
 
 /** Pulls the leaderboard columns out of a save; null when it is not a playable save (same shape for every game). */
@@ -207,12 +207,14 @@ export default async function handler(req, res) {
       const rs = await db.execute({ sql: `SELECT * FROM gift_codes WHERE disabled = 0 AND (game = '*' OR game = ?) AND (expires_at IS NULL OR expires_at > ?)
               AND (max_uses IS NULL OR uses < max_uses) ORDER BY created_at DESC LIMIT 30`, args: [GAME, now] });
       const pid = sessionPlayerId(req);
-      let mine = new Set();
+      let mine = new Set(), myEmail = '';
       if (pid) {
+        const pe = await db.execute({ sql: 'SELECT email FROM players WHERE id = ?', args: [pid] });
+        myEmail = String(pe.rows[0]?.email || '').toLowerCase();
         const r2 = await db.execute({ sql: 'SELECT code FROM gift_redemptions WHERE player_id = ? AND game = ?', args: [pid, GAME] });
         mine = new Set(r2.rows.map((r) => r.code));
       }
-      const codes = rs.rows.map((r) => ({ code: r.code, money: num(r.money), xp: num(r.xp), note: r.note || '',
+      const codes = rs.rows.filter((r) => !r.for_email || (myEmail && r.for_email === myEmail)).map((r) => ({ code: r.code, forMe: !!r.for_email, money: num(r.money), xp: num(r.xp), note: r.note || '',
         expiresAt: r.expires_at == null ? null : num(r.expires_at), left: r.max_uses == null ? null : Math.max(0, num(r.max_uses) - num(r.uses)),
         createdAt: num(r.created_at), redeemed: mine.has(r.code) }));
       return send(res, 200, { codes });
@@ -236,11 +238,13 @@ export default async function handler(req, res) {
         if (!Number.isFinite(money) || !Number.isFinite(xp) || money > CODE_MAX || xp > CODE_MAX) return err(res, 400, 'invalid', 'Số tiền / XP không hợp lệ.', {}, 'money');
         const maxUses = b.maxUses == null || b.maxUses === '' ? null : Math.max(1, Math.floor(num(b.maxUses, 1)));
         const expiresAt = b.expiresAt ? Math.floor(num(b.expiresAt)) || null : null;
+        const forEmail = String(b.forEmail || '').trim().toLowerCase() || null;   // v1.28 mã riêng: chỉ Gmail này nhập được
+        if (forEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(forEmail)) return err(res, 400, 'invalid', 'Gmail không hợp lệ.', {}, 'forEmail');
         const dup = await db.execute({ sql: 'SELECT code FROM gift_codes WHERE code = ?', args: [code] });
         if (dup.rows.length) return err(res, 409, 'exists', 'Mã này đã có rồi.', {}, 'code');
         await db.execute({
-          sql: 'INSERT INTO gift_codes (code, game, money, xp, max_uses, uses, expires_at, disabled, note, created_at) VALUES (?, ?, ?, ?, ?, 0, ?, 0, ?, ?)',
-          args: [code, game, money, xp, maxUses, expiresAt, String(b.note || '').slice(0, 120) || null, Date.now()],
+          sql: 'INSERT INTO gift_codes (code, game, money, xp, max_uses, uses, expires_at, disabled, note, created_at, for_email) VALUES (?, ?, ?, ?, ?, 0, ?, 0, ?, ?, ?)',
+          args: [code, game, money, xp, maxUses, expiresAt, String(b.note || '').slice(0, 120) || null, Date.now(), forEmail],
         });
         const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
         return send(res, 200, { code: codeRow(rs.rows[0]) });
@@ -410,6 +414,7 @@ export default async function handler(req, res) {
       const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
       const c = rs.rows[0];
       if (!c || num(c.disabled) || (c.game !== '*' && c.game !== GAME)) return fail(404, 'not_found', 'Mã không đúng hoặc không dùng được cho game này.');
+      if (c.for_email && c.for_email !== String(p.email || '').toLowerCase()) return fail(403, 'not_yours', 'Mã này là quà riêng cho một tài khoản khác nha.');   // v1.28
       const had = await db.execute({ sql: 'SELECT 1 FROM gift_redemptions WHERE code = ? AND player_id = ? AND game = ?', args: [code, pid, GAME] });
       if (had.rows.length) return err(res, 409, 'redeemed', 'Bạn đã nhận quà của mã này rồi nha.');
       if (c.expires_at != null && num(c.expires_at) < now) return fail(410, 'expired', 'Mã này hết hạn rồi.');

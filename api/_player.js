@@ -71,6 +71,7 @@ export function ensureSchema(db) {
       // v1.18 thẻ thành tích (Hộp mù Lẩu Ơi) hiện trên bảng xếp hạng — thêm cột cho bảng cũ (lỗi "duplicate column" = có rồi)
       try { await db.execute('ALTER TABLE game_saves ADD COLUMN badge TEXT'); } catch (e) { /* có rồi */ }
       try { await db.execute('ALTER TABLE players ADD COLUMN admin_pic TEXT'); } catch (e) { /* có rồi */ }   // v1.25b ảnh avatar riêng của admin
+      try { await db.execute('ALTER TABLE gift_codes ADD COLUMN for_email TEXT'); } catch (e) { /* có rồi */ }   // v1.28 mã riêng cho 1 Gmail
       await db.execute(`CREATE TABLE IF NOT EXISTS gift_redemptions (
         code        TEXT NOT NULL,
         player_id   INTEGER NOT NULL,

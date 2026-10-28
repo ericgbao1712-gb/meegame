@@ -1028,7 +1028,10 @@
                   placeholder="Không giới hạn"><small>Tổng số người được nhận. Để trống = không giới hạn.</small></label>
               <label class="field"><span>Hết hạn sau ngày</span><input id="gc-exp" type="date"><small>Để trống = không hết hạn.</small></label>
             </div>
-            <label class="field"><span>Ghi chú</span><input id="gc-note" maxlength="120" placeholder="Ví dụ: quà livestream 21/10"></label>
+            <div class="two">
+              <label class="field"><span>Chỉ cho Gmail (mã riêng)</span><input id="gc-email" type="email" maxlength="120" placeholder="ban@gmail.com" autocomplete="off" spellcheck="false"><small>Để trống = mã chung. Điền Gmail = chỉ tài khoản đó nhập được, người khác không thấy mã trong game.</small></label>
+              <label class="field"><span>Ghi chú</span><input id="gc-note" maxlength="120" placeholder="Ví dụ: quà livestream 21/10"></label>
+            </div>
             <p class="msg error" id="gc-error" role="alert" hidden></p>
             <div class="actions">
               <button class="btn primary" type="submit" id="gc-save"><svg class="icon">
@@ -1223,6 +1226,7 @@
               h('span', { class: 'mark', text: state }),
               h('span', { text: 'Quà: ' + (gift || '—') }),
               h('span', { text: GC_GAME[c.game] || c.game }),
+              c.forEmail ? h('span', { text: 'Riêng: ' + c.forEmail }) : null,
               h('span', { class: 'num', text: 'Đã dùng ' + fmt(c.uses) + (c.maxUses != null ? ' / ' + fmt(c.maxUses) : '') }),
               c.expiresAt ? h('span', { text: 'Hạn ' + new Date(c.expiresAt).toLocaleDateString('vi-VN') }) : null,
               c.note ? h('span', { text: c.note }) : null)));
@@ -1238,11 +1242,11 @@
         if (!(money > 0 || xp > 0)) { err.textContent = 'Điền tiền tặng hoặc XP tặng.'; err.hidden = false; $('gc-money').focus(); return; }
         const exp = $('gc-exp').value ? new Date($('gc-exp').value + 'T23:59:59').getTime() : null;
         $('gc-save').disabled = true;
-        const { error } = await call('POST', '/api/lau?r=admin/codes', { code, game: $('gc-game').value, money, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim() });
+        const { error } = await call('POST', '/api/lau?r=admin/codes', { code, game: $('gc-game').value, money, xp, maxUses: $('gc-max').value || null, expiresAt: exp, note: $('gc-note').value.trim(), forEmail: $('gc-email').value.trim() || null });
         $('gc-save').disabled = false;
         if (error) { err.textContent = error.message; err.hidden = false; return; }
         toast('Đã tạo mã ' + code);
-        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note'].forEach(id => { $(id).value = ''; });
+        ['gc-code', 'gc-money', 'gc-xp', 'gc-max', 'gc-exp', 'gc-note', 'gc-email'].forEach(id => { $(id).value = ''; });
         $('gc-money-hint').textContent = 'Ví dụ 500 = 500.000đ trong game.';
         loadCodes();
       });

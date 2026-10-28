@@ -608,6 +608,7 @@ function openCodeNews(list) {
           div('cn-info', gifts ? h('b', null, gifts) : null,
             span('muted sm', c.expiresAt ? 'Hạn đến ' + fmtDate(c.expiresAt) : 'Không giới hạn thời gian'),
             c.left != null ? span('muted sm', 'Còn ' + c.left + ' lượt') : null),
+          c.forMe ? span('chip jade', '🎀 Quà riêng cho bạn') : null,
           c.note ? span('muted sm cn-note', c.note) : null);
       })),
       div('card cn-how', ico('ui_info', 32), div('grow',
