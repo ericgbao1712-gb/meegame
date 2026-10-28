@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Tiramisu Xe Đẩy</title>
 <meta name="theme-color" content="#FFE6DC">
 <link rel="icon" type="image/png" href="/tiranho/favicon.png">
@@ -19,6 +19,10 @@
   @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #1E1310; } }
   :root[data-theme="dark"] { --bg: #1E1310; }
   html, body { margin: 0; height: 100%; background: var(--bg); overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+  #ov, #ov * { touch-action: pan-x pan-y; }
+  #ov button, #dock button, #titleAcct button { touch-action: manipulation; }
+  #ov input, #ov textarea, #ov select { font-size: max(16px, 1em) !important; }
   body { display: flex; align-items: center; justify-content: center; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
   #wrap { position: relative; height: 100dvh; aspect-ratio: 9 / 16; max-width: 100vw; }
   #cv { width: 100%; height: 100%; display: block; border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
@@ -2090,7 +2094,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.2.0';
+const GAME_VER = '1.2.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5004,6 +5008,11 @@ renderSettings = function (body) {
   b.insertAdjacentHTML('afterend', `<small class="syncst">${NET.dirty ? 'Có thay đổi, đang chờ đồng bộ…' : t ? `Tự động đồng bộ · lần cuối ${t}` : 'Tự động đồng bộ khi bạn chơi'}</small>`);
 };
 
+// ---- chặn điện thoại tự phóng to: chụm 2 ngón, chạm đúp, và lúc gõ chữ
+for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEventListener(ev, (e) => e.preventDefault(), { passive: false });
+document.addEventListener('touchmove', (e) => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
+document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
+addEventListener('focusout', (e) => { if (e.target.matches?.('input, textarea')) setTimeout(() => { if (!document.activeElement?.matches?.('input, textarea')) { window.scrollTo(0, 0); resize(); } }, 60); });
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
 function frame(now) {
