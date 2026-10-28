@@ -252,6 +252,11 @@
   #ovTabs button { font-weight: 400; font-size: .9em; }
   #titleAcct { position: absolute; left: 8%; right: 8%; top: 68%; height: 6%; z-index: 4; display: flex; justify-content: center; align-items: stretch; }
   #titleAcct[hidden] { display: none; }
+  #ov .gate .gsi { min-height: 48px; display: flex; justify-content: center; align-items: center; margin: .4em 0 .8em; }
+  #ov .gperks { list-style: none; padding: 0; margin: .4em 0 .8em; text-align: left; display: inline-block; color: #5A3E2E; line-height: 1.8; }
+  #ov .gwarn { background: #FFF1DC; border: 1.5px solid #E0A93A; border-radius: 3cqw; padding: .6em .8em; font-size: .92em; }
+  #ov .linkbtn { display: block; margin: .3em auto 0; border: 0; background: none; color: #8A6A5A; text-decoration: underline; font: 600 .85em 'Be Vietnam Pro', sans-serif; cursor: pointer; }
+  #ov .linkbtn[hidden] { display: none; }
   #titleInstall { position: absolute; right: 4%; top: 2.2%; height: 4.4%; z-index: 4; display: flex; align-items: center; gap: 1.5cqw; padding: 0 4cqw; border: 2px solid #D9B48E; border-radius: 99px; background: rgba(255,251,244,.95); color: #6E3E22; font: 800 3.4cqw 'Be Vietnam Pro', sans-serif; box-shadow: 0 4px 12px rgba(90,50,30,.15); cursor: pointer; touch-action: manipulation; white-space: nowrap; }
   #titleInstall[hidden] { display: none; }
   #titleInstall .icn { width: 5cqw; height: 5cqw; }
@@ -2100,7 +2105,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.2.2';
+const GAME_VER = '1.2.3';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5068,6 +5073,33 @@ renderSettings = function (body) {
   const list = body.querySelector('.slist'); if (!list) return;
   $('sWipe').insertAdjacentHTML('beforebegin', setRow('[[install]]', 'Cài game vào máy', IS_IOS ? 'Xem cách cài' : 'Cài ngay', 'sInstall'));
   hydrateIcons(list); $('sInstall').onclick = () => { closeOv(); doInstall(); };
+};
+
+// ================================================================ v16: chơi xong ngày 2 → yêu cầu đăng nhập Google để giữ tiến trình
+const LOGIN_GATE_DAY = 3;   // S.day >= 3 nghĩa là đã chơi xong ngày 2
+NET.authDone = !NET.server;
+(async () => { if (!NET.server) return; const me = await meeApi('GET', 'auth/me'); if (me.status === 200 && me.json?.player) NET.player ??= me.json.player; NET.authDone = me.status !== 0; })();
+const gateOn = () => CLOUD_READY && NET.server && NET.authDone && !NET.player && !NET.gateSkip && S.scene === 'daystart' && S.day >= LOGIN_GATE_DAY && !S.dialog && !S.quests;
+const _rov16 = renderOv0;
+renderOv0 = function () {
+  if (OV.view !== 'login') return _rov16();
+  const body = $('ovBody'); $('ovTabs').innerHTML = ''; $('ovFoot').innerHTML = ''; $('ovTabBar').hidden = true; $('ovClose').hidden = true; $('ovTitle').textContent = 'Lưu tiến trình';
+  body.innerHTML = `<div class="pz gate"><div class="pzic">[[heart]]</div><h3>Đăng nhập để chơi tiếp</h3>
+    <p>Bạn đã bán xong <b>${S.day - 1} ngày</b> với <b>${vnd(S.money)}</b>! Đăng nhập Gmail để tiến trình được lưu lên tài khoản: đổi máy, xoá trình duyệt hay cài lại game cũng <b>không bị mất dữ liệu</b>, và được lên bảng xếp hạng.</p>
+    ${INAPP ? `<p class="gwarn">Bạn đang mở game trong Facebook / Zalo / TikTok, Google không cho đăng nhập ở đây. Bấm <b>⋮</b> hoặc <b>…</b> → <b>Mở bằng trình duyệt</b> rồi đăng nhập. Tiến trình hiện tại vẫn nằm trong máy này, nên mở bằng trình duyệt <b>trên cùng điện thoại</b>.</p><button class="btn ghost wide" id="gCopy">Chép link game</button>` : '<div data-gsi class="gsi">Đang tải nút Google…</div>'}
+    <ul class="gperks"><li>[[clip]] Tự động lưu liên tục khi chơi</li><li>[[phone]] Chơi tiếp trên máy khác</li><li>[[trophy]] Đua bảng xếp hạng MeeGame</li></ul>
+    <button class="linkbtn" id="gLater" ${OV.allowSkip || INAPP ? '' : 'hidden'}>Tạm chơi tiếp, chưa đăng nhập (có thể mất dữ liệu)</button></div>`;
+  if (!INAPP) mountGoogle(body);
+  if ($('gCopy')) $('gCopy').onclick = async () => { const link = location.origin + '/tiranho'; try { await navigator.clipboard.writeText(link); toast('Đã chép link'); } catch { toast(esc(link), 4000); } };
+  $('gLater').onclick = () => { NET.gateSkip = true; closeOv(); toast('Nhớ đăng nhập trong Cài đặt để không mất dữ liệu nha', 3000); };
+  // nút Google không tải được (mất mạng, chặn) → cho tạm chơi tiếp
+  clearTimeout(OV.gT); OV.gT = setTimeout(() => { if (OV.view === 'login' && !document.querySelector('#ovBody [data-gsi] iframe, #ovBody [data-gsi] div[role=button]')) { OV.allowSkip = true; const b = $('gLater'); if (b) b.hidden = false; } }, 8000);
+};
+const _dock16 = dockSync;
+dockSync = function () {
+  _dock16();
+  if (!OV.open && gateOn()) { openOv('login', { allowSkip: false }); $('ov').classList.add('small'); }
+  else if (OV.open && OV.view === 'login' && NET.player) { closeOv(); toast('Đã bật lưu tiến trình lên tài khoản Google ✓', 2600); NET.dirty = true; syncCloud?.(); }
 };
 
 // ================================================================ vòng lặp & điều khiển
