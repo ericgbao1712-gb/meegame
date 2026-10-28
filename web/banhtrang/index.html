@@ -3024,15 +3024,15 @@ function serve(){
 }
 /* Đoàn kiểm tra vệ sinh an toàn thực phẩm: ghé ngẫu nhiên giữa ca bán */
 /* Thuế thu nhập lũy tiến từng phần, 5 bậc theo tháng; quy ra tuần = ngưỡng tháng × 7/30 */
-const TAX_BR=[[10e6,.05],[30e6,.10],[60e6,.20],[100e6,.30],[Infinity,.35]];
+const TAX_BR=[[11e6,0],[30e6,.05],[60e6,.10],[100e6,.15],[Infinity,.20]];   // miễn thuế phần lời dưới 11 triệu/tháng (~2,57tr/tuần), rồi 5% → 20% (cũ 5% → 35%, không miễn)
 const WEEK=7/30;
 function weekTax(inc){
   let prev=0,tax=0;const rows=[];inc=Math.max(0,inc);
   TAX_BR.forEach(([cap,r],i)=>{const hi=cap*WEEK,part=Math.max(0,Math.min(inc,hi)-prev);if(part>0){const t=Math.round(part*r/1000)*1000;tax+=t;rows.push({i:i+1,r,part,t})}prev=hi});
   return {tax,rows};
 }
-function taxRowsText(rows){return rows.map(x=>`Bậc ${x.i} (${Math.round(x.r*100)}%): ${fmtK(Math.round(x.part/1000)*1000)} → ${fmtK(Math.round(x.t/1000)*1000)}`).join('\n')}
-function taxBracketsText(){return TAX_BR.map(([cap,r],i)=>{const lo=i?TAX_BR[i-1][0]*WEEK:0;return `Bậc ${i+1}: ${cap===Infinity?'trên '+fmtK(Math.round(lo/1000)*1000):(i?fmtK(Math.round(lo/1000)*1000)+' – ':'đến ')+fmtK(Math.round(cap*WEEK/1000)*1000)} · ${Math.round(r*100)}%`}).join('; ')}
+function taxRowsText(rows){return rows.map(x=>`Bậc ${x.i} (${x.r?Math.round(x.r*100)+'%':'miễn thuế'}): ${fmtK(Math.round(x.part/1000)*1000)} → ${fmtK(Math.round(x.t/1000)*1000)}`).join('\n')}
+function taxBracketsText(){return TAX_BR.map(([cap,r],i)=>{const lo=i?TAX_BR[i-1][0]*WEEK:0;return `Bậc ${i+1}: ${cap===Infinity?'trên '+fmtK(Math.round(lo/1000)*1000):(i?fmtK(Math.round(lo/1000)*1000)+' – ':'đến ')+fmtK(Math.round(cap*WEEK/1000)*1000)} · ${r?Math.round(r*100)+'%':'miễn thuế'}`}).join('; ')}
 function hygieneChecks(){
   const w=Object.values(G.wilt||{}).some(Boolean);
   return [
@@ -3495,7 +3495,7 @@ function endService(){
       {bg:'@loc',chars:[['thue',36,'happy'],['ut',92,'neutral']],cap:`Tối ngày ${day} · dọn gánh`,who:null,text:'Lúc {name} đang lau gánh, một chị áo xanh đeo thẻ ngành dừng xe ghé lại.'},
       {who:'thue',mood:'happy',text:'Chào em, chị là Hằng bên đội thuế phường. Tuần này buôn bán sao rồi em?'},
       {who:'ut',mood:good?'happy':'neutral',text:good?`Dạ cũng đắt chị, bảy ngày thu được ${fmtK(base)} lận.`:`Dạ lai rai thôi chị, bảy ngày được ${fmtK(base)}.`},
-      {who:'thue',text:inc>0?`Thuế tính trên tiền lời, lũy tiến 5 bậc từ 5% tới 35%. Ngưỡng tính theo tháng, chị chia ra từng tuần cho em đỡ nặng. Tuần này em lời ${fmtK(Math.round(inc/1000)*1000)}, thuế ${fmtK(tax)}.`:'Tuần này em chưa có lời thì chưa phải nộp đồng nào. Ráng lên nghen!'},
+      {who:'thue',text:inc>0?`Thuế tính trên tiền lời: phần lời dưới ${fmtK(Math.round(TAX_BR[0][0]*WEEK/1000)*1000)} một tuần được miễn, phần trên mới tính lũy tiến từ 5% tới 20%. Tuần này em lời ${fmtK(Math.round(inc/1000)*1000)}, thuế ${fmtK(tax)}.`:'Tuần này em chưa có lời thì chưa phải nộp đồng nào. Ráng lên nghen!'},
       {who:'thue',mood:'happy',text:pick(['Nộp đủ là có biên lai, sau này mở rộng hay vay vốn cũng dễ nghen.','Bán đàng hoàng thì chị em mình gặp nhau vui vẻ thôi.','Bánh tráng em thơm ghê, bữa nào chị ghé mua ủng hộ!'])},
     ];
     setTimeout(()=>playStory(talk,()=>{show('summary');if(tax<=0){openCard({img:CAST.thue.url.neutral,tag:'THUẾ',title:'Tuần này chưa phải nộp',text:`Doanh thu 7 ngày: ${fmtK(base)}\nTiền lời: ${fmtK(Math.round(inc/1000)*1000)}\nChưa có lời nên chưa tính thuế.`,choices:[{t:'Dạ, cảm ơn chị',s:'',fx:()=>''}]});return}
