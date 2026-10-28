@@ -252,6 +252,12 @@
   #ovTabs button { font-weight: 400; font-size: .9em; }
   #titleAcct { position: absolute; left: 8%; right: 8%; top: 68%; height: 6%; z-index: 4; display: flex; justify-content: center; align-items: stretch; }
   #titleAcct[hidden] { display: none; }
+  #titleInstall { position: absolute; right: 4%; top: 2.2%; height: 4.4%; z-index: 4; display: flex; align-items: center; gap: 1.5cqw; padding: 0 4cqw; border: 2px solid #D9B48E; border-radius: 99px; background: rgba(255,251,244,.95); color: #6E3E22; font: 800 3.4cqw 'Be Vietnam Pro', sans-serif; box-shadow: 0 4px 12px rgba(90,50,30,.15); cursor: pointer; touch-action: manipulation; white-space: nowrap; }
+  #titleInstall[hidden] { display: none; }
+  #titleInstall .icn { width: 5cqw; height: 5cqw; }
+  #ov .ihelp { margin: .2em 0 1em; padding-left: 1.4em; line-height: 1.55; color: #3A2219; }
+  #ov .ihelp li { margin-bottom: .45em; }
+  #ov .btn.wide { display: block; width: 100%; margin: .5em 0; }
   #titleAcct .ta-out, #titleAcct .ta-in { background: rgba(255,251,244,.95); border: 2px solid #D9B48E; border-radius: 4cqw; padding: 1cqw 2.5cqw; box-shadow: 0 4px 14px rgba(90,50,30,.15); font: 600 3.2cqw/1.3 'Be Vietnam Pro', sans-serif; color: #5A3E2E; }
   #titleAcct .ta-out { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
   #titleAcct .gsi { min-height: 40px; max-width: 100%; text-align: center; font-size: .9em; display: flex; align-items: center; justify-content: center; }
@@ -2094,7 +2100,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.2.1';
+const GAME_VER = '1.2.2';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5013,6 +5019,57 @@ for (const ev of ['gesturestart', 'gesturechange', 'gestureend']) document.addEv
 document.addEventListener('touchmove', (e) => { if (e.touches.length > 1 || (e.scale && e.scale !== 1)) e.preventDefault(); }, { passive: false });
 document.addEventListener('dblclick', (e) => e.preventDefault(), { passive: false });
 addEventListener('focusout', (e) => { if (e.target.matches?.('input, textarea')) setTimeout(() => { if (!document.activeElement?.matches?.('input, textarea')) { window.scrollTo(0, 0); resize(); } }, 60); });
+// ================================================================ v15: cài game lên điện thoại (Android / iPhone) dễ tìm, có hướng dẫn khi trình duyệt không tự hỏi
+const UA = navigator.userAgent || '';
+const INAPP = /FBAN|FBAV|FB_IAB|Instagram|Zalo|Line\/|TikTok|musical_ly|MicroMessenger|Messenger/i.test(UA);
+const IS_IOS = /iPhone|iPad|iPod/i.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const IS_ANDROID = /Android/i.test(UA);
+const isStandalone = () => matchMedia('(display-mode: standalone)').matches || matchMedia('(display-mode: fullscreen)').matches || navigator.standalone === true;
+let installedNow = false;
+addEventListener('appinstalled', () => { installedNow = true; installEvt = null; toast('Đã cài game vào máy! Mở từ biểu tượng Tiramisu ngoài màn hình chính', 3200); });
+async function doInstall() {
+  if (installEvt) {
+    const ev = installEvt; installEvt = null;
+    try { ev.prompt(); const r = await ev.userChoice; if (r?.outcome !== 'accepted') { toast('Bạn có thể cài lại bất cứ lúc nào trong Cài đặt'); } } catch { openOv('install'); $('ov').classList.add('small'); }
+    return;
+  }
+  openOv('install'); $('ov').classList.add('small');
+}
+function installHelp() {
+  const link = location.href.split('#')[0];
+  if (INAPP) return `<p>Bạn đang mở game bên trong ứng dụng khác (Facebook, Zalo, TikTok…), ở đây không cài được.</p><ol class="ihelp"><li>Bấm nút <b>⋮</b> hoặc <b>…</b> ở góc trên.</li><li>Chọn <b>Mở bằng trình duyệt</b> (Chrome / Safari).</li><li>Mở lại game rồi bấm <b>Cài game vào máy</b>.</li></ol><button class="btn ghost wide" id="iCopy">Chép link game</button>`;
+  if (IS_IOS) return `<ol class="ihelp"><li>Mở game bằng <b>Safari</b>.</li><li>Bấm nút <b>Chia sẻ</b> (ô vuông có mũi tên lên) ở thanh dưới.</li><li>Kéo xuống chọn <b>Thêm vào MH chính</b> rồi bấm <b>Thêm</b>.</li></ol>`;
+  if (IS_ANDROID) return `<ol class="ihelp"><li>Mở game bằng <b>Chrome</b> (hoặc Samsung Internet).</li><li>Bấm nút <b>⋮</b> ở góc trên bên phải.</li><li>Chọn <b>Cài đặt ứng dụng</b> hoặc <b>Thêm vào màn hình chính</b> → <b>Cài đặt</b>.</li></ol><p class="note">Nếu trước đây đã cài bản "Tira Nhỏ" / "Tira Xe Đẩy", hãy gỡ biểu tượng cũ rồi cài lại. Không thấy mục cài? Tải lại trang một lần rồi thử lại.</p><button class="btn ghost wide" id="iCopy">Chép link game</button>`;
+  return `<ol class="ihelp"><li>Mở game bằng Chrome hoặc Edge.</li><li>Bấm biểu tượng <b>cài đặt</b> ở cuối thanh địa chỉ (hoặc menu ⋮ → <b>Cài đặt Tiramisu</b>).</li></ol>`;
+}
+const _rov15 = renderOv0;
+renderOv0 = function () {
+  if (OV.view !== 'install') return _rov15();
+  const body = $('ovBody'); $('ovTabs').innerHTML = ''; $('ovFoot').innerHTML = ''; $('ovTabBar').hidden = true; $('ovClose').hidden = false; $('ovTitle').textContent = 'Cài game vào máy';
+  body.innerHTML = isStandalone() ? '<div class="pz"><div class="pzic">[[install]]</div><h3>Đã cài rồi!</h3><p>Bạn đang chơi bằng ứng dụng đã cài.</p></div>'
+    : `<div class="pz"><div class="pzic">[[install]]</div><h3>Chơi như ứng dụng</h3><p>Biểu tượng nằm ngoài màn hình chính, mở toàn màn hình, không thanh địa chỉ.</p></div>${installHelp()}<button class="btn go wide" id="iOk">Đã hiểu</button>`;
+  if ($('iOk')) $('iOk').onclick = () => closeOv();
+  if ($('iCopy')) $('iCopy').onclick = async () => { const link = location.origin + '/tiranho'; try { await navigator.clipboard.writeText(link); toast('Đã chép link: ' + esc(link)); } catch { toast(esc(link), 4000); } };
+};
+// nút cài trên màn hình tiêu đề
+{ const b = document.createElement('button'); b.id = 'titleInstall'; b.hidden = true; b.innerHTML = '[[install]] Cài game vào máy'; $('wrap').appendChild(b); hydrateIcons(b);
+  b.addEventListener('click', (e) => { e.stopPropagation(); doInstall(); }); ['pointerdown', 'pointerup'].forEach((ev) => b.addEventListener(ev, (e) => e.stopPropagation())); }
+const _tas15 = titleAcctSync;
+titleAcctSync = function () {
+  _tas15();
+  const show = S.scene === 'title' && !OV.open && !isStandalone() && !installedNow && (IS_ANDROID || IS_IOS || !!installEvt);
+  const b = $('titleInstall'); if (b.hidden === !show) return; b.hidden = !show;
+};
+// trong Cài đặt: luôn có mục cài khi chưa cài
+const _rset15 = renderSettings;
+renderSettings = function (body) {
+  _rset15(body);
+  if (isStandalone() || $('sInstall')) { if ($('sInstall')) $('sInstall').onclick = () => { closeOv(); doInstall(); }; return; }
+  const list = body.querySelector('.slist'); if (!list) return;
+  $('sWipe').insertAdjacentHTML('beforebegin', setRow('[[install]]', 'Cài game vào máy', IS_IOS ? 'Xem cách cài' : 'Cài ngay', 'sInstall'));
+  hydrateIcons(list); $('sInstall').onclick = () => { closeOv(); doInstall(); };
+};
+
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
 function frame(now) {
