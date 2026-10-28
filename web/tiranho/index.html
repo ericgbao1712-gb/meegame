@@ -252,6 +252,11 @@
   #ovTabs button { font-weight: 400; font-size: .9em; }
   #titleAcct { position: absolute; left: 8%; right: 8%; top: 68%; height: 6%; z-index: 4; display: flex; justify-content: center; align-items: stretch; }
   #titleAcct[hidden] { display: none; }
+  #ov .mnsec { display: flex; align-items: baseline; gap: 8px; margin: 1em 0 .4em; padding-bottom: .25em; border-bottom: 2px dashed #E3CDB6; }
+  #ov .mnsec b { font: 800 1.25em 'Baloo 2', sans-serif; color: #7A4528; }
+  #ov .mnsec small { color: #8A6A5A; font-size: .85em; }
+  #ov .card.mn.lock canvas { filter: grayscale(.7) opacity(.6); }
+  #ov .mnok { color: #3E7A2E; font-weight: 700; }
   #ov .gate .gsi { min-height: 48px; display: flex; justify-content: center; align-items: center; margin: .4em 0 .8em; }
   #ov .gperks { list-style: none; padding: 0; margin: .4em 0 .8em; text-align: left; display: inline-block; color: #5A3E2E; line-height: 1.8; }
   #ov .gwarn { background: #FFF1DC; border: 1.5px solid #E0A93A; border-radius: 3cqw; padding: .6em .8em; font-size: .92em; }
@@ -1218,7 +1223,7 @@ const INGR = {
   bag:      { name: 'Túi giấy', unit: 'xấp 10', price: 8000, per: 10 },
 };
 const BASE_RECIPE = ['lady', 'masc', 'cream', 'coffee'];
-const recipeOf = (fk) => (FLAVORS[fk]?.rd ? rdRecipe(FLAVORS[fk].rd) : [...BASE_RECIPE, ...(FLAVOR_RECIPE[fk] ?? [fk])]);
+const recipeOf = (fk) => (FLAVORS[fk]?.mochi ? [...FLAVORS[fk].mochi.recipe] : FLAVORS[fk]?.rd ? rdRecipe(FLAVORS[fk].rd) : [...BASE_RECIPE, ...(FLAVOR_RECIPE[fk] ?? [fk])]);
 const trayCost = (fk) => recipeOf(fk).reduce((s, k) => s + INGR[k].price / INGR[k].per, 0);
 
 const CAST = {
@@ -1956,7 +1961,7 @@ function renderOv0() {
   if (v === 'pause') { $('ovTitle').textContent = ''; return renderPause(body, foot); }
   if (v === 'rank') { $('ovTitle').textContent = 'Bảng xếp hạng'; return renderRank(body); }
   $('ovTitle').textContent = 'Quản lý quán';
-  const T2 = [['kho', '[[box]] Kho'], ['staff', '[[chef]] Nhân viên'], ['upg', '[[up]] Nâng cấp'], ['tools', '[[toolbox]] Đồ nghề'], ['mxh', '[[phone]] Mạng XH'], ['rv', '[[star]] Đánh giá'], ['bank', '[[bank]] Ngân hàng'], ['cn', '[[map]] Chi nhánh'], ['recipe', '[[ledger]] Công thức'], ['price', '[[tag]] Bảng giá'], ['rd', '[[sparkle]] Sáng chế'], ['rank', '[[trophy]] Xếp hạng'], ['shop', '[[shop]] Quán']];
+  const T2 = [['kho', '[[box]] Kho'], ['staff', '[[chef]] Nhân viên'], ['upg', '[[up]] Nâng cấp'], ['tools', '[[toolbox]] Đồ nghề'], ['mxh', '[[phone]] Mạng XH'], ['rv', '[[star]] Đánh giá'], ['bank', '[[bank]] Ngân hàng'], ['cn', '[[map]] Chi nhánh'], ['menu', '[[cake]] Thực đơn'], ['recipe', '[[ledger]] Công thức'], ['price', '[[tag]] Bảng giá'], ['rd', '[[sparkle]] Sáng chế'], ['rank', '[[trophy]] Xếp hạng'], ['shop', '[[shop]] Quán']];
   const keepX = tabs.scrollLeft; tabs.innerHTML = T2.map(([k, n]) => `<button data-tab="${k}" aria-pressed="${OV.tab === k}">${n}</button>`).join(''); tabs.scrollLeft = keepX; requestAnimationFrame(() => { tabs.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); tabBarSync(); });
   const lv = levelOf();
   const head = `<div class="lvbar"><div><b>Cấp ${lv.l}</b> · ${esc(lvTitle(lv.l))}<small>${lv.cur}/${lv.need} kinh nghiệm</small></div><i><s style="width:${Math.min(100, Math.round(lv.cur / lv.need * 100))}%"></s></i><em>[[coin]] ${vnd(S.money)}</em></div>`;
@@ -2105,7 +2110,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.2.3';
+const GAME_VER = '1.3.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2468,14 +2473,15 @@ function drawPrepMenu(t) {
   g.fillStyle = lg(0, 0, 0, H, ['#FFF3E6', '#F3D9C0']); g.fillRect(0, 0, W, H);
   hud(t);
   S.pmTab ??= 'khay'; S.pmPage ??= 0;
-  [['khay', 'Khay tiramisu · 6 hộp'], ['kem', cakeUnlocked() ? 'Bánh kem nguyên ổ' : `[[lock]] Bánh kem · cấp ${CAKE_LV}`]].forEach(([id, name], i) => {
-    const x = 40 + i * 325, on = S.pmTab === id;
-    fillRR(x, 166, 315, 52, 26, on ? '#7A4528' : '#FFFFFF', on ? null : '#E3CDB6', 2);
-    text(name, x + 157, 192, { size: 20, color: on ? '#fff' : '#5A3E2E', weight: 800 });
-    if (id === 'khay' || cakeUnlocked()) buttons.push({ id: 'pmtab:' + id, x, y: 166, w: 315, h: 52 });
+  [['khay', 'Tiramisu · 6 hộp', true], ['mochi', mochiOn() ? 'Mochi · 6 viên' : `[[lock]] Mochi · cấp ${MOCHI_LV}`, mochiOn()], ['kem', cakeUnlocked() ? 'Bánh kem' : `[[lock]] Bánh kem · cấp ${CAKE_LV}`, cakeUnlocked()]].forEach(([id, name, ok], i) => {
+    const x = 30 + i * 224, on = S.pmTab === id;
+    fillRR(x, 166, 212, 52, 26, on ? '#7A4528' : '#FFFFFF', on ? null : '#E3CDB6', 2);
+    text(name, x + 106, 192, { size: 18, color: on ? '#fff' : '#5A3E2E', weight: 800, max: 196 });
+    if (ok) buttons.push({ id: 'pmtab:' + id, x, y: 166, w: 212, h: 52 });
   });
-  const cake = S.pmTab === 'kem';
-  const all = cake ? allTrayFlavors().filter((f) => !FLAVORS[f].rd) : [...allTrayFlavors(), ...BASE_FLAVORS.filter((f) => !S.unlocked.includes(f))];
+  const cake = S.pmTab === 'kem', moTab = S.pmTab === 'mochi';
+  const inTab = (f) => (moTab ? !!FLAVORS[f].mochi : !FLAVORS[f].mochi);
+  const all = cake ? allTrayFlavors().filter((f) => !FLAVORS[f].rd && !FLAVORS[f].mochi) : [...allTrayFlavors(), ...BASE_FLAVORS.filter((f) => !S.unlocked.includes(f))].filter(inTab);
   const pages = Math.max(1, Math.ceil(all.length / 9)); S.pmPage = Math.min(S.pmPage, pages - 1);
   all.slice(S.pmPage * 9, S.pmPage * 9 + 9).forEach((fk, i) => {
     const x = 30 + (i % 3) * 224, y = 230 + Math.floor(i / 3) * 248, F = FLAVORS[fk], locked = !cake && !allTrayFlavors().includes(fk);
@@ -2539,7 +2545,7 @@ const STEPS_CAKE = [
   { id: 'plaque', name: 'Cắm bảng chữ', hint: 'Chạm lên bánh để cắm bảng chữ "Happy Birthday"', need: 1 },
 ];
 const DECO_TOOLS = [['daisy', 'Hoa cúc'], ['mint', 'Lá bạc hà'], ['fruit', 'Trái cây'], ['choco', 'Que socola'], ['cream', 'Bông kem']];
-const stepsOf = (p) => (p.kind === 'cake' ? STEPS_CAKE : STEPS_TRAY);
+const stepsOf = (p) => (p.kind === 'cake' ? STEPS_CAKE : FLAVORS[p.fk]?.mochi ? STEPS_MOCHI : STEPS_TRAY);
 const toppingHint = (fk) => (FLAVORS[fk].kind === 'cocoa' ? 'Vuốt hoặc chạm để rây bột cacao phủ kín mặt bánh' : FLAVORS[fk].kind === 'matcha' ? 'Vuốt hoặc chạm để rây bột matcha phủ kín mặt bánh' : 'Chạm khắp mặt bánh để rải topping cho kín');
 function fruitOf(fk) { const F = FLAVORS[fk]; if (F.piece && F.piece !== 'bean' && F.piece !== 'rosette') return F.piece; if (F.mix) return F.mix.tops[0] ?? 'dau'; return FRUITS.includes(fk) || fk === 'gau' ? fk : 'dau'; }
 function startPrep(fk, kind = 'tray') {
@@ -3222,7 +3228,7 @@ function drawStreet(t, dt) {
   opsTick(dt);
   S.helperT = Math.max(0, (S.helperT || 0) - dt);
   slotTick(dt);
-  const total = Object.values(S.trays).reduce((a, b) => a + b, 0) + (S.cakes?.length || 0) + (drinksAvailable().length ? 1 : 0);
+  const total = Object.values(S.trays).reduce((a, b) => a + b, 0) + (S.cakes?.length || 0) + (drinksAvailable().length ? 1 : 0) + (S.bake || S.moTrip ? 1 : 0);
   if (((!slotsBusy() && (S.dayLeft <= 0 || !total) && !S.bg?.length) || (S.cust && !total && S.phase === 'order' && !S.anim && !S.cust.got.length && !S.mat.length)) && S.phase !== 'end' && !S.dialog) { S.cust = null; S.phase = 'end'; endDay(); }
   staffWork(dt, MM);
   if (S.anim) {
@@ -3665,7 +3671,7 @@ function drawSummary(t) {
   if (T0.partyOk === false) info.push('[[gift]] Đơn tiệc giao thiếu: phạt 100.000đ và bị chấm 1★');
   if (T0.checkOk < 0) info.push(`[[clip]] Đoàn kiểm tra phạt ${vnd(-T0.checkOk)}`);
   if (T0.michelin) info.push('[[trophy]] Đạt Cúp Vàng Ẩm Thực (50 đánh giá 5★): thưởng 1.000.000đ!');
-  info.push(`[[box]] Bánh thừa: ${s.kept ? `${s.left} phần bỏ · ${s.kept} phần giữ lạnh` : `${s.left} phần phải bỏ`}${s.cakeLeft ? ` · ${s.cakeLeft} bánh kem` : ''}`);
+  info.push(`[[box]] Bánh thừa: ${s.kept ? `${s.left} phần bỏ · ${s.kept} phần ${s.frozen ? 'cất tủ đông' : 'giữ lạnh'}` : `${s.left} phần phải bỏ`}${s.cakeLeft ? ` · ${s.cakeLeft} bánh kem` : ''}`);
   info.slice(0, 5).forEach((l, i) => text(l, 70, y + i * 28, { size: 15, color: '#6A4A3A', weight: 700, align: 'left', max: W - 140 }));
   y += Math.min(5, info.length) * 28 + 6;
   // bán chạy
@@ -5101,6 +5107,302 @@ dockSync = function () {
   if (!OV.open && gateOn()) { openOv('login', { allowSkip: false }); $('ov').classList.add('small'); }
   else if (OV.open && OV.view === 'login' && NET.player) { closeOv(); toast('Đã bật lưu tiến trình lên tài khoản Google ✓', 2600); NET.dirty = true; syncCloud?.(); }
 };
+
+// ================================================================ v18: Chị Mơ tự đi chợ khi hết đồ · Chị Ngọc thợ làm bánh · Tủ đông 3 ngày · Khay mochi
+// ---------------------------------------------------------------- MOCHI: dữ liệu
+const MOCHI_LV = 4;
+Object.assign(INGR, {
+  bot_nep: { name: 'Bột nếp & đường', unit: 'gói (1 khay)', price: 28000, per: 1, lv: MOCHI_LV },
+  kiwi:    { name: 'Kiwi', unit: 'hộp', price: 38000, per: 1, flavor: 'mochi_kiwi' },
+  cam:     { name: 'Quýt ngọt', unit: 'ký', price: 30000, per: 1, flavor: 'mochi_cam' },
+});
+for (const k of ['bot_nep', 'kiwi', 'cam']) S.inv[k] ??= 0;
+Object.assign(SHELF, { bot_nep: 30, kiwi: 3, cam: 4 });
+MK_TABS.find((x) => x[0] === 'banh')[2].push('bot_nep');
+MK_TABS.find((x) => x[0] === 'top')[2].push('kiwi', 'cam');
+const MOCHI = {
+  mochi_dau:  { name: 'Mochi dâu', price: 32000, skin: '#FFFFFF', fill: 'dau', lv: 4, recipe: ['bot_nep', 'cream', 'dau'] },
+  mochi_xoai: { name: 'Mochi xoài', price: 30000, skin: '#FFFDF4', fill: 'xoai', lv: 5, recipe: ['bot_nep', 'cream', 'xoai'] },
+  mochi_cam:  { name: 'Mochi quýt', price: 30000, skin: '#FFFFFF', fill: 'cam', lv: 6, recipe: ['bot_nep', 'cream', 'cam'] },
+  mochi_kiwi: { name: 'Mochi kiwi', price: 32000, skin: '#FFFFFF', fill: 'kiwi', lv: 7, recipe: ['bot_nep', 'cream', 'kiwi'] },
+  mochi_hong: { name: 'Mochi dâu hồng', price: 35000, skin: '#F8C6CF', fill: 'dau', lv: 8, leaf: true, recipe: ['bot_nep', 'cream', 'dau', 'dau'] },
+  mochi_kem:  { name: 'Mochi kem trái cây', price: 38000, skin: '#EFE8F7', fill: 'mix', lv: 9, recipe: ['bot_nep', 'cream', 'dau', 'xoai', 'kiwi'] },
+};
+const MOCHI_KEYS = Object.keys(MOCHI);
+const FILL_COL = { dau: '#E8334A', xoai: '#FFB21A', cam: '#F59A1E', kiwi: '#8DBB3F', mix: '#E8334A' };
+for (const [k, m] of Object.entries(MOCHI)) {
+  FLAVORS[k] = { name: m.name, price: m.price, cream: '#FFFFFF', base: m.skin, kind: 'mochi', mochi: m, cols: [m.skin, '#FFFFFF'], deco: 'mint', icon: FILL_COL[m.fill], piece: m.fill === 'dau' || m.fill === 'mix' ? 'dau' : 'chanhday' };
+  BASE_FLAVORS.push(k); (LV_FLAVORS[m.lv] ??= []).push(k);
+}
+const mochiOn = () => level() >= MOCHI_LV;
+const isMochi = (fk) => !!FLAVORS[fk]?.mochi;
+
+// ---------------------------------------------------------------- MOCHI: hình vẽ
+function fruitCut(kind, x, y, r) {
+  if (kind === 'dau') {
+    g.beginPath(); g.moveTo(x, y + r * .72); g.bezierCurveTo(x - r * .9, y + r * .1, x - r * .55, y - r * .62, x, y - r * .5); g.bezierCurveTo(x + r * .55, y - r * .62, x + r * .9, y + r * .1, x, y + r * .72); g.closePath();
+    g.fillStyle = lg(0, y - r * .6, 0, y + r * .7, ['#F0485A', '#C9202F']); g.fill();
+    g.beginPath(); g.moveTo(x, y + r * .48); g.bezierCurveTo(x - r * .5, y + r * .05, x - r * .3, y - r * .38, x, y - r * .28); g.bezierCurveTo(x + r * .3, y - r * .38, x + r * .5, y + r * .05, x, y + r * .48); g.closePath(); g.fillStyle = '#FFC9D0'; g.fill();
+    ell(x, y + r * .02, r * .1, r * .3, '#FFFFFF');
+    for (let i = 0; i < 7; i++) { const a = -2.4 + i * .8; ell(x + Math.cos(a) * r * .55, y + .1 * r + Math.sin(a) * r * .45, 1.1, 1.6, '#FFE7A0'); }
+  } else if (kind === 'xoai') {
+    fillRR(x - r * .5, y - r * .45, r, r * .9, r * .28, lg(x - r * .5, y - r * .45, x + r * .5, y + r * .45, ['#FFD066', '#FF9C0A']));
+    ell(x - r * .18, y - r * .2, r * .16, r * .09, 'rgba(255,255,255,.55)');
+  } else if (kind === 'kiwi') {
+    ell(x, y, r * .62, r * .6, '#6E9A2E'); ell(x, y, r * .54, r * .52, '#9CCB4C'); ell(x, y, r * .18, r * .16, '#F2F5D8');
+    for (let i = 0; i < 12; i++) { const a = i / 12 * TAU; ell(x + Math.cos(a) * r * .3, y + Math.sin(a) * r * .28, 1.2, 2, '#1F1A10'); }
+  } else if (kind === 'cam') {
+    ell(x, y, r * .62, r * .6, '#F08A12'); ell(x, y, r * .55, r * .53, '#FFB03A');
+    g.strokeStyle = 'rgba(255,240,210,.95)'; g.lineWidth = 1.2; for (let i = 0; i < 9; i++) { const a = i / 9 * TAU; g.beginPath(); g.moveTo(x, y); g.lineTo(x + Math.cos(a) * r * .53, y + Math.sin(a) * r * .51); g.stroke(); }
+    ell(x, y, r * .08, r * .08, '#FFF3D6');
+  } else {
+    fruitCut('dau', x - r * .3, y - r * .05, r * .6); fruitCut('kiwi', x + r * .32, y - r * .15, r * .55); fruitCut('xoai', x + r * .05, y + r * .3, r * .5);
+  }
+}
+function mochiBall(x, y, r, fk, cut = false, seed = 1) {
+  const m = FLAVORS[fk].mochi, sk = m.skin;
+  ell(x, y + r * .74, r * .92, r * .2, 'rgba(60,30,20,.14)');
+  if (!cut) {
+    ell(x, y, r, r * .86, rg(x - r * .3, y - r * .35, r * .1, r * 1.15, ['#FFFFFF', sk, shade(sk, .9)]), 'rgba(170,140,130,.55)', 1.2);
+    const R = rand(seed); for (let i = 0; i < 14; i++) { const a = R() * TAU, d = Math.sqrt(R()) * r * .8; ell(x + Math.cos(a) * d, y + Math.sin(a) * d * .8, .9 + R(), .9 + R(), 'rgba(255,255,255,.85)'); }
+    ell(x - r * .34, y - r * .38, r * .26, r * .14, 'rgba(255,255,255,.85)');
+    if (m.leaf) { for (let i = 0; i < 4; i++) { const a = -Math.PI / 2 + (i - 1.5) * .55; g.save(); g.translate(x + Math.cos(a) * r * .2, y - r * .78); g.rotate(a + Math.PI / 2); ell(0, -r * .1, r * .1, r * .22, '#6FB24A'); g.restore(); } for (let i = 0; i < 8; i++) { const R2 = rand(seed + i); ell(x + (R2() - .5) * r * 1.2, y + (R2() - .2) * r * .9, 1, 1.5, '#FFF3B0'); } }
+    else { const nn = parseInt(FILL_COL[m.fill].slice(1), 16), c = [nn >> 16, (nn >> 8) & 255, nn & 255].join(','), gr = g.createRadialGradient(x + r * .05, y + r * .28, 0, x + r * .05, y + r * .28, r * .62); gr.addColorStop(0, `rgba(${c},.2)`); gr.addColorStop(1, `rgba(${c},0)`); g.fillStyle = gr; g.beginPath(); g.ellipse(x, y, r * .95, r * .82, 0, 0, TAU); g.fill(); }
+  } else {
+    ell(x, y, r, r * .86, sk, 'rgba(170,140,130,.55)', 1.2);
+    ell(x, y + r * .02, r * .82, r * .69, '#FFFDF6');
+    fruitCut(m.fill, x, y + r * .04, r * .95);
+  }
+}
+const _ptop18 = portionTop;
+portionTop = function (fk, x, y, w, h, seed, t = 0, fill = 1) {
+  if (!isMochi(fk)) return _ptop18(fk, x, y, w, h, seed, t, fill);
+  const r = Math.min(w, h) * .36, cx = x + w / 2, cy = y + h / 2 - r * .05;
+  fillRR(x, y, w, h, 8, '#FFF7EC');
+  ell(cx, cy + r * .45, r * 1.12, r * .5, '#EBCDB0', 'rgba(160,120,90,.6)', 1);
+  g.strokeStyle = 'rgba(160,120,90,.45)'; g.lineWidth = 1; for (let i = -4; i <= 4; i++) { g.beginPath(); g.moveTo(cx + i * r * .24, cy + r * .1); g.lineTo(cx + i * r * .27, cy + r * .9); g.stroke(); }
+  mochiBall(cx, cy, r, fk, seed % 3 === 0, seed);
+};
+const _slice18 = sliceSide;
+sliceSide = function (fk, x, y, w, h, seed = 1) {
+  if (!isMochi(fk)) return _slice18(fk, x, y, w, h, seed);
+  const r = Math.min(w * .48, h * .5); mochiBall(x + w / 2, y + h - r * .9, r, fk, seed % 2 === 0, seed);
+};
+const MPAT = {};
+const _tpat18 = trayPattern;
+trayPattern = function (fk) {
+  if (!isMochi(fk)) return _tpat18(fk);
+  if (MPAT[fk]) return MPAT[fk];
+  const c = document.createElement('canvas'); c.width = PT.w * 2; c.height = PT.h * 2; const ctx = c.getContext('2d'); ctx.scale(2, 2);
+  withCtx(ctx, () => { g.fillStyle = '#F7EDE0'; g.fillRect(0, 0, PT.w, PT.h); for (let i = 0; i < 6; i++) portionTop(fk, (i % 3) * PT.w / 3 + 6, Math.floor(i / 3) * PT.h / 2 + 6, PT.w / 3 - 12, PT.h / 2 - 12, hsh(fk + i)); });
+  return (MPAT[fk] = c);
+};
+const _icon18 = itemIcon;
+itemIcon = function (k, x, y, s = 1) {
+  if (!['bot_nep', 'kiwi', 'cam'].includes(k)) return _icon18(k, x, y, s);
+  g.save(); g.translate(x, y); g.scale(s, s); ell(0, 24, 32, 8, 'rgba(0,0,0,.1)');
+  if (k === 'bot_nep') { fillRR(-22, -26, 44, 52, 8, lg(-22, 0, 22, 0, ['#FFFFFF', '#EDE6DA']), '#C9B8A0', 2); fillRR(-22, -26, 44, 10, 5, '#F8C6CF'); fillRR(-15, -6, 30, 18, 4, '#FFF3E6'); text('NẾP', 0, 3, { size: 11, color: '#A0603A', weight: 800 }); }
+  else if (k === 'kiwi') { ell(-10, 6, 18, 16, '#8A6A3A', '#5A4220', 1.5); ell(12, 2, 17, 17, '#6E9A2E'); ell(12, 2, 14, 14, '#9CCB4C'); ell(12, 2, 4, 4, '#F2F5D8'); for (let i = 0; i < 10; i++) { const a = i / 10 * TAU; ell(12 + Math.cos(a) * 8, 2 + Math.sin(a) * 8, 1, 1.6, '#1F1A10'); } }
+  else { for (const [ox, oy, rr2] of [[-12, 8, 15], [12, 6, 15], [0, -10, 14]]) { ell(ox, oy, rr2, rr2 * .92, rg(ox - 5, oy - 5, 2, rr2, ['#FFC060', '#F08A12', '#D9700A']), '#C2600A', 1); ell(ox - 4, oy - 5, 3, 2, 'rgba(255,255,255,.6)'); } ell(0, -22, 5, 3, '#5E9A4E'); }
+  g.restore();
+};
+
+// ---------------------------------------------------------------- MOCHI: các bước làm khay (5 bước)
+const STEPS_MOCHI = [
+  { id: 'dip', name: 'Nhồi bột nếp', hint: 'Chạm vào thau bột để nhồi bột nếp thật dẻo (6 lần)', need: 6 },
+  { id: 'layer1', name: 'Cán vỏ bánh', hint: 'Chạm vào khay để đặt 6 miếng vỏ bánh tròn', need: 6 },
+  { id: 'topping', name: 'Đặt nhân', hint: 'Chạm lên từng miếng vỏ để đặt kem tươi và trái cây', need: 6 },
+  { id: 'layer2', name: 'Gói bánh', hint: 'Chạm để gói kín từng viên mochi', need: 6 },
+  { id: 'cream1', name: 'Rắc bột áo', hint: 'Vuốt khắp khay để rắc bột áo cho bánh không dính', need: .8 },
+];
+const MCELL = (i) => ({ x: PT.x + (i % 3 + .5) * PT.w / 3, y: PT.y + (Math.floor(i / 3) + .5) * PT.h / 2 });
+function drawPrepMochi(t, dt) {
+  const p = S.prep, F = FLAVORS[p.fk], steps = stepsOf(p), st = steps[Math.min(p.step, steps.length - 1)], fill = F.mochi.fill;
+  g.fillStyle = lg(0, 0, 0, 300, ['#FFF3E6', '#F7E6D3']); g.fillRect(0, 0, W, 320);
+  g.strokeStyle = 'rgba(200,170,140,.35)'; g.lineWidth = 1.5; for (let y = 0; y < 320; y += 40) { g.beginPath(); g.moveTo(0, y); g.lineTo(W, y); g.stroke(); }
+  fillRR(470, 30, 200, 150, 12, '#BFE3F2', '#FFFFFF', 8);
+  g.fillStyle = lg(0, 300, 0, H, ['#E3B784', '#C9935F', '#B07A48']); g.fillRect(0, 300, W, H - 300);
+  fillRR(30, 196, W - 60, 120, 26, '#FFFFFF', '#D9B48E', 4);
+  text(`Làm khay ${F.name}`, W / 2, 230, { size: 30, color: '#7A4528', weight: 800, font: TITLE, max: W - 100 });
+  text(p.done ? 'Xong! Cất khay mochi vào tủ mát' : `Bước ${p.step + 1}/${steps.length} · ${st.name}`, W / 2, 268, { size: 23, color: '#3A2219', weight: 800 });
+  if (!p.done) fillRR(44, 282, W - 88, 30, 15, '#FFF3C4', '#E0A93A', 1.5);
+  text(p.done ? 'Mochi để được 2 ngày nếu cất tủ đông.' : st.hint, W / 2, 298, { size: 17, color: p.done ? '#7A5A48' : '#5A3418', weight: 800, max: W - 110 });
+  // khay
+  ell(PT.x + PT.w / 2, PT.y + PT.h + 18, PT.w * .52, 22, 'rgba(0,0,0,.2)');
+  fillRR(PT.x - 10, PT.y - 10, PT.w + 20, PT.h + 20, 18, lg(PT.x, 0, PT.x + PT.w, 0, ['#9AA4AE', '#EEF2F4', '#AEB7BE']), '#6E7881', 3);
+  fillRR(PT.x, PT.y, PT.w, PT.h, 12, '#F3E8DA');
+  const R = PT.h / 2 * .3;
+  for (let i = 0; i < 6; i++) {
+    const c = MCELL(i), wrapped = i < p.l2 || p.done, hasFill = i < p.tops.length, skin = i < p.l1;
+    ell(c.x, c.y + R * .5, R * 1.25, R * .55, '#EBCDB0', 'rgba(160,120,90,.5)', 1);
+    if (wrapped) mochiBall(c.x, c.y, R, p.fk, false, hsh(p.fk + i));
+    else if (skin) {
+      ell(c.x, c.y + R * .1, R * 1.2, R * .95, F.mochi.skin, 'rgba(170,140,130,.6)', 1.2);
+      if (hasFill) { ell(c.x, c.y, R * .62, R * .5, '#FFFDF6', 'rgba(200,180,160,.6)', 1); fruitCut(fill, c.x, c.y - R * .05, R * .75); }
+    } else ell(c.x, c.y + R * .1, R * .9, R * .5, 'rgba(255,255,255,.25)');
+  }
+  // bột áo đã rắc
+  if (p.c1 && stepIdx(p, 'cream1') >= 0 && (p.step >= stepIdx(p, 'cream1') || p.done)) { const B = PT, Rr = rand(9); for (let gy = 0; gy < 10; gy++) for (let gx = 0; gx < 12; gx++) if (p.c1[gy * 12 + gx] || p.done) for (let k = 0; k < 6; k++) ell(B.x + (gx + Rr()) * B.w / 12, B.y + (gy + Rr()) * B.h / 10, 1.2, 1.2, 'rgba(255,255,255,.9)'); }
+  // thau bột nếp
+  if (st.id === 'dip' && !p.done) {
+    g.fillStyle = 'rgba(255,248,238,.55)'; g.fillRect(PT.x, PT.y, PT.w, PT.h);
+    ell(BOWL.x, BOWL.y + 20, BOWL.r, BOWL.r * .7, '#FFFFFF', '#C9B8A0', 4); ell(BOWL.x, BOWL.y, BOWL.r * .86, BOWL.r * .5, lg(0, BOWL.y - 60, 0, BOWL.y + 60, ['#EDE4D6', '#D9CCB8']));
+    const k = clamp(p.dip / st.need), squash = 1 + Math.sin(t * 8) * .03;
+    ell(BOWL.x, BOWL.y - 6, BOWL.r * (.45 + k * .12) * squash, BOWL.r * (.3 + k * .05) / squash, rg(BOWL.x - 30, BOWL.y - 30, 4, 90, ['#FFFFFF', F.mochi.skin, shade(F.mochi.skin, .9)]), 'rgba(170,140,130,.5)', 1.5);
+    text(`Đã nhồi ${p.dip}/${st.need} lần`, BOWL.x, BOWL.y + BOWL.r * .7 + 34, { size: 19, color: '#3A2219', weight: 800, outline: '#fff', ow: 5 });
+  }
+  if (!p.done) {
+    const k = (t % 1.6) / 1.6, swipe = st.id === 'cream1';
+    let i = st.id === 'layer1' ? p.l1 : st.id === 'topping' ? p.tops.length : st.id === 'layer2' ? p.l2 : 0; i = Math.min(5, i);
+    let hx = MCELL(i).x, hy = MCELL(i).y;
+    if (swipe) { hx = PT.x + 60 + k * (PT.w - 120); hy = PT.y + PT.h * (.5 + Math.sin(k * 9) * .25); }
+    if (st.id === 'dip') { hx = BOWL.x + 20; hy = BOWL.y; }
+    pointer(hx, hy, swipe ? 1 : (k < .4 ? 1 : 0));
+    fillRR(70, 832, 580, 28, 14, '#FFF7EE', '#C9935F', 3);
+    fillRR(73, 835, 574 * clamp(prepProgress(p)), 22, 11, lg(0, 0, 580, 0, ['#D9B48E', '#A0603A']));
+    text(`${Math.round(clamp(prepProgress(p)) * 100)}%`, W / 2, 847, { size: 18, color: '#3A2219', weight: 800 });
+  }
+  const n = steps.length, sx = 70, sw = 580 / (n - 1);
+  g.strokeStyle = 'rgba(255,255,255,.6)'; g.lineWidth = 4; g.beginPath(); g.moveTo(sx, 900); g.lineTo(sx + 580, 900); g.stroke();
+  steps.forEach((s2, j) => { const x = sx + j * sw, done = j < p.step || p.done, on = j === p.step && !p.done; ell(x, 900, on ? 19 : 16, on ? 19 : 16, done ? '#7CC35A' : on ? '#FFF3C4' : '#FFF7EE', done ? '#3E7A2E' : on ? '#F2B632' : '#C9A88A', 3); text(done ? '✓' : String(j + 1), x, 901, { size: 16, color: done ? '#fff' : '#6E3E22', weight: 800 }); });
+  if (p.done) button('store', 'Cất vào tủ mát ✓', 160, 1110, 400, 96, { t, pulse: true, size: 30, color: '#3E9A5A' });
+  else button('autoPrep', 'Làm nhanh (demo)', 220, 1180, 280, 64, { t, size: 21, color: '#B07A48' });
+  if (p.flash > 0) { p.flash = Math.max(0, p.flash - dt * 1.5); text('Tuyệt!', W / 2, 600, { size: 80 * (1 + (1 - p.flash) * .3), color: `rgba(160,96,58,${p.flash})`, weight: 800, font: TITLE, outline: `rgba(255,255,255,${p.flash})`, ow: 10 }); }
+}
+const _drawPrep18 = drawPrep;
+drawPrep = function (t, dt) { if (S.prep && isMochi(S.prep.fk) && S.prep.kind !== 'cake') return drawPrepMochi(t, dt); return _drawPrep18(t, dt); };
+
+// ---------------------------------------------------------------- theo dõi khay làm trong ngày (để tính hạn tủ đông)
+const addMade = (fk, n) => { if (!S.today || !n) return; S.today.madeFk ??= {}; S.today.madeFk[fk] = (S.today.madeFk[fk] || 0) + n; };
+const _store18 = storePrep;
+storePrep = function () { const p = S.prep, before = p && p.kind !== 'cake' ? S.trays[p.fk] ?? 0 : 0; const fk = p?.fk, cake = p?.kind === 'cake'; _store18(); if (!cake && fk) addMade(fk, (S.trays[fk] ?? 0) - before); };
+const _tai18 = taiMakeAll;
+taiMakeAll = function () { const b = { ...S.trays }; _tai18(); for (const fk of Object.keys(S.trays)) addMade(fk, (S.trays[fk] ?? 0) - (b[fk] ?? 0)); };
+
+// ---------------------------------------------------------------- TỦ ĐÔNG: giữ bánh dư tối đa 3 ngày (mochi 2 ngày)
+TOOLS.push({ id: 'tudong', ic: '[[ice]]', name: 'Tủ đông', desc: 'Bánh còn dư cuối ngày cất tủ đông, bán tiếp được tối đa 3 ngày (mochi 2 ngày). Bán phần cũ trước.', price: 1800000, lv: 5 });
+if (!PERSIST.includes('frz')) PERSIST.push('frz');
+const maxAge = (fk) => (isMochi(fk) ? 2 : 3);
+const _endDay18 = endDay;
+endDay = function () {
+  S.bake = null; S.moTrip = null;
+  const frz = S.frz || {}, made = S.today?.madeFk || {}, trays = { ...S.trays };
+  _endDay18();
+  const sm = S.summary;
+  if (S.tools?.tudong) {
+    const keep = {}, next = {}; let kept = 0, lost = 0;
+    for (const [fk, R0] of Object.entries(trays)) {
+      if (!(R0 > 0)) continue;
+      const lots = [...(frz[fk] || []).map((l) => ({ ...l }))]; if (made[fk]) lots.push({ n: made[fk], day: S.day });
+      const sum = lots.reduce((a, l) => a + l.n, 0); if (sum < R0) lots.push({ n: R0 - sum, day: S.day });
+      lots.sort((a, b) => b.day - a.day); let left = R0; const remain = [];
+      for (const l of lots) { if (left <= 0) break; const n = Math.min(l.n, left); left -= n; remain.push({ n, day: l.day }); }
+      const ok = remain.filter((l) => S.day + 1 - l.day <= maxAge(fk)), n = ok.reduce((a, l) => a + l.n, 0);
+      lost += R0 - n; if (n) { keep[fk] = n; next[fk] = ok; kept += n; }
+    }
+    S.keep = kept ? keep : null; S.frz = next;
+    if (sm) { const total = Object.values(trays).reduce((a, b) => a + Math.max(0, b), 0); sm.kept = kept; sm.left = total - kept; sm.frozen = true; }
+  } else {
+    S.frz = {}; if (S.keep) for (const [fk, n] of Object.entries(S.keep)) S.frz[fk] = [{ n, day: S.day }];
+  }
+};
+
+// ---------------------------------------------------------------- NHÂN VIÊN: Chị Ngọc thợ làm bánh
+STAFF.push({ id: 'ngoc', name: 'Chị Ngọc', role: 'Thợ làm bánh', lv: 5, wage: 85000,
+  desc: 'Theo xe ra phố làm bánh: khay nào đang bán mà hết là chị làm ngay khay mới (khoảng 25 giây một khay, tốn nguyên liệu như bạn làm). Làm được cả tiramisu và mochi.', up: 'Mỗi bậc: nhanh thêm 15%',
+  look: { id: 'st_ngoc', skin: '#F2CDB0', hair: '#2A1A14', hairStyle: 'bun', eyes: '#3A2A22', top: { type: 'shirt', color: '#FFFFFF' }, apron: '#B07A48', legs: { type: 'pants', color: '#4A4038' }, shoes: '#FFFFFF', acc: ['pearlClip'], prop: 'none' } });
+SPEED_STAFF.add('ngoc');
+const mo = STAFF.find((x) => x.id === 'mo'); if (mo) mo.desc = 'Sáng nào cũng chọn sẵn giỏ hàng theo gợi ý, mặc cả rẻ hơn 5%. Đang bán mà hết ly, hộp, topping hay nguyên liệu là chị tự chạy đi chợ mua thêm.';
+const BAKE_SEC = 25, TRIP_SEC = 20;
+function bakerTick(dt) {
+  if (!S.staff?.ngoc) return;
+  if (S.bake) {
+    S.bake.t += dt * staffK('ngoc');
+    if (S.bake.t >= BAKE_SEC) { const fk = S.bake.fk; S.trays[fk] = (S.trays[fk] ?? 0) + PORTIONS; S.today.trays = (S.today.trays || 0) + 1; addMade(fk, PORTIONS); S.bake = null; msg(`Chị Ngọc làm xong khay ${FLAVORS[fk].name}!`, '#3E7A2E'); sfx.good(); }
+    return;
+  }
+  if (S.dayLeft < 30) return;
+  S.bakeChk = (S.bakeChk || 0) + dt; if (S.bakeChk < .8) return; S.bakeChk = 0;
+  const sold = S.today.flavorSold || {}, out = Object.keys(S.trays).filter((fk) => S.trays[fk] === 0 && FLAVORS[fk]).sort((a, b) => (sold[b] || 0) - (sold[a] || 0));
+  const fk = out.find((f) => canMakeList(recipeOf(f)));
+  if (!fk) return;
+  for (const k of recipeOf(fk)) S.inv[k]--;
+  S.bake = { fk, t: 0 }; msg(`Chị Ngọc đang làm thêm khay ${FLAVORS[fk].name}…`, '#8A5A9A');
+}
+// ---------------------------------------------------------------- NHÂN VIÊN: Chị Mơ tự đi chợ khi đang bán mà hết đồ
+function moNeeds() {
+  const need = {}, start = S.today?.startInv || {};
+  for (const k of Object.keys(INGR)) {
+    if (itemLocked(k)) continue; const I = INGR[k], n = S.inv[k] ?? 0;
+    if ((start[k] || 0) > 0 && n <= (I.per >= 10 ? 1 : 0)) need[k] = I.per >= 5 ? 1 : 3;
+  }
+  if (S.staff?.ngoc && !S.bake) for (const fk of Object.keys(S.trays).filter((f) => S.trays[f] === 0 && FLAVORS[f])) {
+    const cnt = {}; for (const k of recipeOf(fk)) cnt[k] = (cnt[k] || 0) + 1;
+    for (const [k, c] of Object.entries(cnt)) if ((S.inv[k] ?? 0) < c) need[k] = Math.max(need[k] || 0, Math.ceil((c - (S.inv[k] ?? 0)) / INGR[k].per));
+  }
+  return need;
+}
+function moTick(dt) {
+  if (!S.staff?.mo) return;
+  if (S.moTrip) {
+    S.moTrip.t += dt * (1 + .15 * sLv('mo'));
+    if (S.moTrip.t >= TRIP_SEC) { for (const [k, q] of Object.entries(S.moTrip.buy)) S.inv[k] = (S.inv[k] ?? 0) + q * INGR[k].per; try { reconcileLots(); } catch { /* bỏ qua */ } msg(`Chị Mơ đi chợ về: ${Object.keys(S.moTrip.buy).map((k) => INGR[k].name).slice(0, 3).join(', ')}${Object.keys(S.moTrip.buy).length > 3 ? '…' : ''}`, '#3E7A2E'); sfx.coin(); S.moTrip = null; }
+    return;
+  }
+  if (S.dayLeft < TRIP_SEC + 10) return;
+  S.moChk = (S.moChk || 0) + dt; if (S.moChk < 1) return; S.moChk = 0;
+  const need = moNeeds(); if (!Object.keys(need).length) return;
+  const disc = M().disc || 0; let cost = 0; const buy = {};
+  for (const [k, q] of Object.entries(need)) { const c = Math.round(mktPrice(k) * q * (1 - disc)); if (S.money - cost - c < 0) continue; buy[k] = q; cost += c; }
+  if (!Object.keys(buy).length) { if (!S.moBroke) { S.moBroke = true; msg('Chị Mơ: hết tiền đi chợ rồi con ơi!', '#B5302A'); } return; }
+  S.money -= cost; S.today.spent = (S.today.spent || 0) + cost; S.today.moSpent = (S.today.moSpent || 0) + cost;
+  S.moTrip = { buy, t: 0, cost }; msg(`Chị Mơ chạy đi chợ mua thêm ${Object.keys(buy).map((k) => INGR[k].name).slice(0, 2).join(', ')}${Object.keys(buy).length > 2 ? '…' : ''} (${vnd(cost)})`, '#8A5A9A');
+}
+const _sw18 = staffWork;
+staffWork = function (dt, MM) { _sw18(dt, MM); if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } };
+const _ss18 = startStreet;
+startStreet = function () { S.bake = null; S.moTrip = null; S.moBroke = false; const r = _ss18.apply(this, arguments); if (S.today) S.today.startInv = { ...S.inv }; return r; };
+// dải trạng thái dưới khay bánh
+const _ds18 = drawStreet;
+drawStreet = function (t, dt) {
+  _ds18(t, dt);
+  if (S.scene !== 'street' || (!S.bake && !S.moTrip)) return;
+  const parts = []; if (S.bake) parts.push(`Chị Ngọc làm ${FLAVORS[S.bake.fk].name} ${Math.round(S.bake.t / BAKE_SEC * 100)}%`); if (S.moTrip) parts.push(`Chị Mơ đi chợ ${Math.max(0, Math.ceil((TRIP_SEC - S.moTrip.t) / (1 + .15 * sLv('mo'))))}s`);
+  const TR = CT.trays; fillRR(TR.x, TR.y + TR.h + 6, TR.w, 26, 13, 'rgba(255,248,236,.96)', '#D9B48E', 1.5);
+  const k = S.bake ? S.bake.t / BAKE_SEC : 0; if (S.bake) fillRR(TR.x + 2, TR.y + TR.h + 8, (TR.w - 4) * clamp(k), 22, 11, 'rgba(160,96,58,.22)');
+  text(parts.join(' · '), TR.x + TR.w / 2, TR.y + TR.h + 19, { size: 13, color: '#5A3418', weight: 800, max: TR.w - 16 });
+};
+
+// ================================================================ v19: giảm giá nhập nguyên liệu 20% · tab Thực đơn (cả món chưa mở)
+for (const I of Object.values(INGR)) I.price = Math.max(500, Math.round(I.price * .8 / 500) * 500);
+DOCK_TABS.splice(DOCK_TABS.findIndex((x) => x[0] === 'recipe'), 0, ['menu', '[[cake]]', 'Thực đơn']);
+{ const d = $('dock'); if (d) { d.remove(); buildDock(); } }
+function lockTxtLv(lv) { return level() >= lv ? '' : `Mở ở cấp ${lv}`; }
+function menuCard(o) {
+  return `<div class="card slim mn ${o.on ? 'on' : 'lock'}"><canvas class="lgc" ${o.attr} width="96" height="96"></canvas><div class="cb"><h4>${esc(o.name)} <span>${o.price}</span></h4><p>${esc(o.desc)}</p>${o.on ? '<div class="meta mnok">[[star]] Đang bán được</div>' : `<div class="lockt">[[lock]] ${esc(o.lock)}</div>`}</div></div>`;
+}
+function renderMenuAll(body, head) {
+  const kfmt = (v) => `${Math.round(v / 1000)}k`, recTxt = (list) => { const c = {}; for (const k of list) c[k] = (c[k] || 0) + 1; return Object.entries(c).map(([k, n]) => (n > 1 ? `${n} ` : '') + INGR[k].name).join(', '); };
+  const tiraKeys = BASE_FLAVORS.filter((f) => !FLAVORS[f].mochi).concat((S.rd || []).filter((r) => r.on).map((r) => 'rd' + r.id)).filter((f) => FLAVORS[f]);
+  const flav = (fk) => ({ attr: `data-prod="f:${fk}"`, name: FLAVORS[fk].name, price: kfmt(sellPrice('f:' + fk)) + (isMochi(fk) ? '/viên' : '/hộp'), desc: (isMochi(fk) ? 'Khay 6 viên · để 2 ngày (tủ đông) · ' : 'Khay 6 hộp · ') + recTxt(recipeOf(fk)), on: allTrayFlavors().includes(fk), lock: flavorLockText(fk) });
+  const sec = (title, sub, cards) => `<div class="mnsec"><b>${title}</b><small>${sub}</small></div>` + cards.join('');
+  const tops = [...new Set([...DRINK_TOPS, ...Object.keys(INGR).filter((k) => INGR[k].top)])].filter((k) => INGR[k]);
+  const opened = (arr) => arr.filter((x) => x.on).length;
+  const T = tiraKeys.map(flav), Mo = MOCHI_KEYS.map(flav);
+  const Ck = [{ attr: 'data-prod="c:cacao"', name: 'Bánh kem tiramisu nguyên ổ', price: kfmt(sellPrice('c:cacao')) + '+/ổ', desc: 'Làm từ nguyên liệu 2 khay cùng vị, khách đặt sinh nhật mua cả ổ.', on: cakeUnlocked(), lock: `Mở ở cấp ${CAKE_LV}` }];
+  const Dr = Object.keys(DRINKS).map((dk) => ({ attr: `data-prod="d:${dk}"`, name: DRINKS[dk].name, price: kfmt(sellPrice('d:' + dk)) + '/ly', desc: 'Pha tại quầy: ' + DRINKS[dk].base.map((k) => INGR[k]?.name).filter(Boolean).join(', ') + ' · size L +7k', on: drinkUnlocked(dk), lock: `Mở ở cấp ${DRINKS[dk].lv}` }));
+  const Tp = tops.map((k) => ({ attr: `data-ing="${k}"`, name: INGR[k].name, price: '+' + kfmt(TOP_PRICE), desc: 'Topping thêm vào ly nước hoặc rắc lên hộp bánh', on: level() >= topLevel(k), lock: lockTxtLv(topLevel(k)) || 'Chưa mở' }));
+  body.innerHTML = head + '<p class="note">Tất cả món của quán, kể cả món chưa mở. Lên cấp hoặc qua chương truyện để mở thêm.</p>'
+    + sec('Tiramisu', `${opened(T)}/${T.length} vị đã mở`, T.map(menuCard))
+    + sec('Mochi', `${opened(Mo)}/${Mo.length} loại đã mở · mở từ cấp ${MOCHI_LV}`, Mo.map(menuCard))
+    + sec('Bánh kem', cakeUnlocked() ? 'Đã mở' : `Mở ở cấp ${CAKE_LV}`, Ck.map(menuCard))
+    + sec('Nước uống', `${opened(Dr)}/${Dr.length} món đã mở`, Dr.map(menuCard))
+    + sec('Topping', `${opened(Tp)}/${Tp.length} loại đã mở`, Tp.map(menuCard));
+  body.querySelectorAll('canvas[data-prod]').forEach((c) => paintProduct(c, c.dataset.prod));
+  body.querySelectorAll('canvas[data-ing]').forEach((c) => { const ctx = c.getContext('2d'); ctx.clearRect(0, 0, c.width, c.height); withCtx(ctx, () => { g.save(); g.scale(c.width / 100, c.width / 100); fillRR(4, 4, 92, 92, 14, '#FFF7EE'); itemIcon(c.dataset.ing, 50, 50, .85); g.restore(); }); });
+}
+const _rmt19 = renderMenuTabs;
+renderMenuTabs = function (body, head) { if (OV.tab === 'menu') { renderMenuAll(body, head); return true; } return _rmt19(body, head); };
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
