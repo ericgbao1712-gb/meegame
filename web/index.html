@@ -114,26 +114,26 @@ html.dark-mode .soc-tiktok, html.dark-mode .soc-threads { box-shadow: 0 0 0 1px 
 .hero-text { padding-right: 0; }
 html:not(.dark-mode) .when-dark, html.dark-mode .when-light { display: none; }
 
-/* ---------- Nhóm Zalo: nằm trên cùng, xanh Zalo cho người từ Zalo nhận ra ngay ---------- */
+/* ---------- Nhóm Zalo: nằm trên cùng, màu hồng của trang ---------- */
 .zalo-top { padding-top: calc(10px + env(safe-area-inset-top)); }
 .zalo-top + .hero { padding-top: 56px; }
 .zalo-top + .hero .tools { top: 10px; }
 .zalo-cta { position: relative; overflow: hidden; display: flex; align-items: center; gap: 10px; min-height: 62px; padding: 10px 10px 10px 10px; border-radius: 18px; color: #fff;
-  background: linear-gradient(120deg, #0062F5 0%, #1E7BFF 55%, #4B9BFF 100%); box-shadow: 0 8px 22px rgba(0, 98, 245, .32); animation: zalo-glow 1.6s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
+  background: linear-gradient(120deg, #C21E5C 0%, #E0457E 55%, #F27AA4 100%); box-shadow: 0 8px 22px rgba(194, 30, 92, .32); animation: zalo-glow 1.6s ease-in-out infinite; -webkit-tap-highlight-color: transparent; }
 .zalo-cta::after { content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 45%; pointer-events: none;
   background: linear-gradient(100deg, transparent 0%, rgba(255, 255, 255, .55) 50%, transparent 100%); transform: translateX(-130%) skewX(-18deg); animation: zalo-shine 2.4s ease-in-out infinite; }
 .zalo-cta:active { transform: scale(.985); }
-.zalo-ico { position: relative; width: 42px; height: 42px; border-radius: 13px; background: #fff; color: #0062F5; display: grid; place-items: center; flex: none; }
+.zalo-ico { position: relative; width: 42px; height: 42px; border-radius: 13px; background: #fff; color: #C21E5C; display: grid; place-items: center; flex: none; }
 .zalo-ico .icon { width: 22px; height: 22px; stroke-width: 2.1; }
-.zalo-ico::after { content: ''; position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: #FF4D8D; box-shadow: 0 0 0 2px #1E7BFF; animation: zalo-blink 1s steps(2, jump-none) infinite; }
+.zalo-ico::after { content: ''; position: absolute; top: -3px; right: -3px; width: 12px; height: 12px; border-radius: 50%; background: #FFC93C; box-shadow: 0 0 0 2px #E0457E; animation: zalo-blink 1s steps(2, jump-none) infinite; }
 .zalo-text { flex: 1; min-width: 0; display: grid; gap: 1px; }
 .zalo-text b { font-size: 16px; font-weight: 700; letter-spacing: -.015em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .zalo-text small { font-size: 13px; line-height: 1.3; opacity: .92; }
-.zalo-go { flex: none; height: 38px; padding: 0 10px 0 14px; border-radius: 999px; background: #fff; color: #0062F5; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
+.zalo-go { flex: none; height: 38px; padding: 0 10px 0 14px; border-radius: 999px; background: #fff; color: #C21E5C; font-size: 14px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px; }
 .zalo-go .icon { width: 16px; height: 16px; stroke-width: 2.4; }
 /* Điện thoại hẹp: nút chỉ còn mũi tên để tên nhóm không bị cắt. */
 @media (max-width: 420px) { .zalo-go { width: 38px; padding: 0; justify-content: center; } .zalo-go > span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); } .zalo-go .icon { width: 18px; height: 18px; } }
-@keyframes zalo-glow { 0%, 100% { box-shadow: 0 8px 22px rgba(0, 98, 245, .32), 0 0 0 0 rgba(30, 123, 255, .55); } 50% { box-shadow: 0 8px 26px rgba(0, 98, 245, .45), 0 0 0 7px rgba(30, 123, 255, 0); } }
+@keyframes zalo-glow { 0%, 100% { box-shadow: 0 8px 22px rgba(194, 30, 92, .32), 0 0 0 0 rgba(224, 69, 126, .55); } 50% { box-shadow: 0 8px 26px rgba(194, 30, 92, .45), 0 0 0 7px rgba(224, 69, 126, 0); } }
 @keyframes zalo-shine { 0% { transform: translateX(-130%) skewX(-18deg); } 55%, 100% { transform: translateX(260%) skewX(-18deg); } }
 @keyframes zalo-blink { 0% { opacity: 1; } 100% { opacity: .15; } }
 
