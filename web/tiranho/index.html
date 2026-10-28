@@ -1435,7 +1435,7 @@ function drawTitle(t) {
   }
   button('settings', 'Cài đặt', 40, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[gear]]' });
   button('rank', 'Xếp hạng', W - 240, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[trophy]]' });
-  text(`Tiramisu Xe Đẩy · bản ${GAME_VER}`, W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 600 });
+  text('DEV Như Huyền - MeeGame', W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 700 });
 }
 
 // ================================================================ BẮT ĐẦU NGÀY
@@ -1923,7 +1923,7 @@ function renderOv0() {
   if (v === 'pause') { $('ovTitle').textContent = ''; return renderPause(body, foot); }
   if (v === 'rank') { $('ovTitle').textContent = 'Bảng xếp hạng'; return renderRank(body); }
   $('ovTitle').textContent = 'Quản lý quán';
-  const T2 = [['kho', '[[box]] Kho'], ['staff', '[[chef]] Nhân viên'], ['upg', '[[up]] Nâng cấp'], ['tools', '[[toolbox]] Đồ nghề'], ['mxh', '[[phone]] Mạng XH'], ['rv', '[[star]] Đánh giá'], ['bank', '[[bank]] Ngân hàng'], ['cn', '[[map]] Chi nhánh'], ['recipe', '[[ledger]] Công thức'], ['price', '[[tag]] Bảng giá'], ['rd', '[[sparkle]] Sáng chế'], ['shop', '[[shop]] Quán']];
+  const T2 = [['kho', '[[box]] Kho'], ['staff', '[[chef]] Nhân viên'], ['upg', '[[up]] Nâng cấp'], ['tools', '[[toolbox]] Đồ nghề'], ['mxh', '[[phone]] Mạng XH'], ['rv', '[[star]] Đánh giá'], ['bank', '[[bank]] Ngân hàng'], ['cn', '[[map]] Chi nhánh'], ['recipe', '[[ledger]] Công thức'], ['price', '[[tag]] Bảng giá'], ['rd', '[[sparkle]] Sáng chế'], ['rank', '[[trophy]] Xếp hạng'], ['shop', '[[shop]] Quán']];
   const keepX = tabs.scrollLeft; tabs.innerHTML = T2.map(([k, n]) => `<button data-tab="${k}" aria-pressed="${OV.tab === k}">${n}</button>`).join(''); tabs.scrollLeft = keepX; requestAnimationFrame(() => { tabs.querySelector('[aria-pressed="true"]')?.scrollIntoView({ block: 'nearest', inline: 'nearest' }); tabBarSync(); });
   const lv = levelOf();
   const head = `<div class="lvbar"><div><b>Cấp ${lv.l}</b> · ${esc(lvTitle(lv.l))}<small>${lv.cur}/${lv.need} kinh nghiệm</small></div><i><s style="width:${Math.min(100, Math.round(lv.cur / lv.need * 100))}%"></s></i><em>[[coin]] ${vnd(S.money)}</em></div>`;
@@ -2070,7 +2070,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.0.0';
+const GAME_VER = '1.0.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2138,7 +2138,7 @@ async function loadRank() {
   const r = await meeApi('GET', 'leaderboard?by=money');
   if (r.status === 200 && r.json) NET.rows = (r.json.rows || []).map((x) => ({ shop: x.shopName || 'Quán', val: Math.round((+x.value || 0) * 1000), level: x.level, me: !!x.me }));
   else NET.status = r.status === 0 ? 'Chưa kết nối được máy chủ MeeGame.' : 'Máy chủ chưa mở bảng xếp hạng cho game này.';
-  if (OV.open && OV.view === 'rank') renderOv();
+  if (OV.open && (OV.view === 'rank' || OV.tab === 'rank')) renderOv();
 }
 function renderRank(body) {
   const me = `<div class="card slim on"><canvas class="lgc" id="rkLogo" width="88" height="88"></canvas><div class="cb"><h4>${esc(S.profile.shop)}</h4><p>Cấp ${level()} · ${S.totalSold} hộp · tổng doanh thu ${vnd(S.stats?.earned || 0)}</p></div></div>`;
@@ -3665,7 +3665,8 @@ function drawSummary(t) {
 const stars = (n) => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆☆'.slice(0, 5 - Math.round(n));
 function spend(cost) { if (S.money < cost) return false; S.money -= cost; S.today && (S.today.invest = (S.today.invest || 0) + cost); return true; }
 function renderShopTabs(body, head) {
-  const tab = OV.tab, selling = S.scene === 'street';
+  const tab = OV.tab, selling = S.scene === 'street', prevTab = OV.lastTab; OV.lastTab = tab;
+  if (tab === 'rank') { if (prevTab !== 'rank') { NET.rows = null; NET.rankTried = false; NET.status = ''; } renderRank(body); return true; }
   if (tab === 'kho') {
     reconcileLots();
     const rows = Object.keys(INGR).filter((k) => (S.inv[k] ?? 0) > 0);
@@ -4420,7 +4421,7 @@ function paperOverlay() { /* vân giấy phủ bằng lớp HTML (GPU ghép), kh
 try { const c = document.createElement('canvas'); c.width = 240; c.height = 240; const x = c.getContext('2d'); x.drawImage(PAPER, 0, 0, 240, 240, 0, 0, 240, 240); document.documentElement.style.setProperty('--paper', `url(${c.toDataURL('image/png')})`); } catch { /* bỏ qua */ }
 
 // ================================================================ THANH TAB CỐ ĐỊNH (đầu ngày, chợ, bếp)
-const DOCK_TABS = [['kho', '[[box]]', 'Kho'], ['staff', '[[chef]]', 'Nhân viên'], ['upg', '[[up]]', 'Nâng cấp'], ['tools', '[[toolbox]]', 'Đồ nghề'], ['mxh', '[[phone]]', 'Mạng XH'], ['rv', '[[star]]', 'Đánh giá'], ['bank', '[[bank]]', 'Ngân hàng'], ['cn', '[[map]]', 'Chi nhánh'], ['recipe', '[[ledger]]', 'Công thức'], ['price', '[[tag]]', 'Bảng giá'], ['rd', '[[sparkle]]', 'Sáng chế'], ['shop', '[[shop]]', 'Quán']];
+const DOCK_TABS = [['kho', '[[box]]', 'Kho'], ['staff', '[[chef]]', 'Nhân viên'], ['upg', '[[up]]', 'Nâng cấp'], ['tools', '[[toolbox]]', 'Đồ nghề'], ['mxh', '[[phone]]', 'Mạng XH'], ['rv', '[[star]]', 'Đánh giá'], ['bank', '[[bank]]', 'Ngân hàng'], ['cn', '[[map]]', 'Chi nhánh'], ['recipe', '[[ledger]]', 'Công thức'], ['price', '[[tag]]', 'Bảng giá'], ['rd', '[[sparkle]]', 'Sáng chế'], ['rank', '[[trophy]]', 'Xếp hạng'], ['shop', '[[shop]]', 'Quán']];
 function buildDock() {
   const d = document.createElement('div'); d.id = 'dock'; d.hidden = true;
   d.innerHTML = `<div id="dockStrip">${DOCK_TABS.map(([k, ic, n]) => `<button data-dock="${k}">${ic}<span>${n}</span></button>`).join('')}</div><div id="dockBar"><button id="dockL" aria-label="Tab trước">◀</button><div id="dockTrack"><i id="dockThumb"></i></div><button id="dockR" aria-label="Tab sau">▶</button></div>`;
