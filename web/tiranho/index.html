@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tira Xe Đẩy</title>
+<title>Tiramisu Xe Đẩy</title>
 <meta name="theme-color" content="#FFE6DC">
 <link rel="icon" type="image/png" href="/tiranho/favicon.png">
 <link rel="apple-touch-icon" href="/tiranho/apple-touch-icon.png">
 <link rel="manifest" href="/tiranho/manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="Tira Xe Đẩy">
+<meta name="apple-mobile-web-app-title" content="Tiramisu">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@500;600;700;800&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -239,10 +239,20 @@
   #ov h2 { font-weight: 400; font-size: clamp(24px, 7.4cqw, 40px); }
   #ov .card h4 { font-weight: 400; font-size: 1.2em; }
   #ovTabs button { font-weight: 400; font-size: .9em; }
+  #titleAcct { position: absolute; left: 14%; right: 14%; top: 84.4%; z-index: 4; display: flex; justify-content: center; }
+  #titleAcct[hidden] { display: none; }
+  #titleAcct .ta-out, #titleAcct .ta-in { background: rgba(255,251,244,.95); border: 2px solid #F2A7BA; border-radius: 4cqw; padding: 1cqw 2.5cqw; box-shadow: 0 4px 14px rgba(90,50,30,.15); font: 600 3.2cqw/1.3 'Be Vietnam Pro', sans-serif; color: #5A3E2E; }
+  #titleAcct .ta-out { display: flex; flex-direction: column; align-items: center; gap: 1cqw; text-align: center; }
+  #titleAcct .gsi { min-height: 40px; max-width: 100%; text-align: center; font-size: .9em; display: flex; align-items: center; justify-content: center; }
+  #titleAcct .ta-in { display: flex; align-items: center; gap: 2cqw; }
+  #titleAcct .ta-in img { width: 8cqw; height: 8cqw; border-radius: 50%; }
+  #titleAcct .ta-in span { flex: 1; min-width: 0; }
+  #titleAcct .ta-in small { display: block; color: #8A6A5A; font-size: .82em; }
+  #titleAcct .ta-in button { border: 0; border-radius: 99px; padding: .5em .9em; background: #F6E3D6; color: #8A4B2A; font: 700 .9em 'Be Vietnam Pro', sans-serif; cursor: pointer; }
 </style>
 </head>
 <body>
-<div id="wrap"><canvas id="cv" aria-label="Game Tira Xe Đẩy"></canvas>
+<div id="wrap"><canvas id="cv" aria-label="Game Tiramisu Xe Đẩy"></canvas>
 <div id="ov" hidden><div class="sheet"><header><h2 id="ovTitle"></h2><button id="ovClose" aria-label="Đóng">✕</button></header><nav id="ovTabs"></nav><div id="ovTabBar"><button id="tabL" aria-label="Tab trước">◀</button><div id="tabTrack"><i id="tabThumb"></i></div><button id="tabR" aria-label="Tab sau">▶</button></div><div id="ovBody"></div><footer id="ovFoot"></footer></div></div>
 <div id="toast" role="status"></div><div id="lvToast" role="status"></div>
 </div>
@@ -1404,7 +1414,7 @@ function drawTitle(t) {
   g.fillStyle = 'rgba(255,240,245,.55)'; g.fillRect(0, 0, W, H);
   g.save(); g.translate(W / 2, 240 + Math.sin(t * 2) * 6);
   fillRR(-280, -110, 560, 220, 48, '#FFF7EE', '#F2A7BA', 6);
-  text('Tira', 0, -38, { size: 96, color: '#C2416B', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
+  text('Tiramisu', 0, -38, { size: 86, color: '#C2416B', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
   text('Xe Đẩy', 0, 48, { size: 72, color: '#8A4B2A', weight: 800, font: TITLE, outline: '#FFFFFF', ow: 10 });
   daisy(-230, -80, 22, t); daisy(236, 70, 18, -t); mint(250, -70, 1.6, .4);
   g.restore();
@@ -1425,7 +1435,7 @@ function drawTitle(t) {
   }
   button('settings', 'Cài đặt', 40, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[gear]]' });
   button('rank', 'Xếp hạng', W - 240, 1180, 200, 64, { t, size: 22, color: '#B07A48', icon: '[[trophy]]' });
-  text(`Tira Xe Đẩy · bản ${GAME_VER}`, W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 600 });
+  text(`Tiramisu Xe Đẩy · bản ${GAME_VER}`, W / 2, 1212, { size: 16, color: '#8A6A5A', weight: 600 });
 }
 
 // ================================================================ BẮT ĐẦU NGÀY
@@ -1813,7 +1823,7 @@ function applyProfile() {
   CAST.mee = { name: S.profile.name, look: ownerSpec() };
   for (const L of Object.values(LOCS)) { L.name0 ??= L.name; L.mood0 ??= L.mood; L.name = T(L.name0); L.mood = T(L.mood0); }
   for (const c of CHAPTERS) { c.desc0 ??= c.desc; c.desc = T(c.desc0); }
-  document.title = S.profile.shop + ' · Tira Xe Đẩy';
+  document.title = S.profile.shop + ' · Tiramisu Xe Đẩy';
 }
 
 // ================================================================ CẤP ĐỘ & KINH NGHIỆM
@@ -2086,7 +2096,7 @@ function mountGoogle(root) {
 }
 async function meeSignIn(cred) {
   if (!cred) return; const r = await meeApi('POST', 'auth/google', { credential: cred });
-  if (r.status === 200 && r.json?.player) { NET.player = r.json.player; toast(`Đã đăng nhập <b>${esc(NET.player.name || NET.player.email || '')}</b>`); if (CLOUD_READY) await cloudCheck(true); }
+  if (r.status === 200 && r.json?.player) { NET.player = r.json.player; titleAcctKey = ''; toast(`Đã đăng nhập <b>${esc(NET.player.name || NET.player.email || '')}</b>`); if (CLOUD_READY) await cloudCheck(true); }
   else toast(esc(r.json?.message || 'Đăng nhập chưa được'), 2600);
   if (OV.open) renderOv();
 }
@@ -2134,7 +2144,7 @@ function renderRank(body) {
   const me = `<div class="card slim on"><canvas class="lgc" id="rkLogo" width="88" height="88"></canvas><div class="cb"><h4>${esc(S.profile.shop)}</h4><p>Cấp ${level()} · ${S.totalSold} hộp · tổng doanh thu ${vnd(S.stats?.earned || 0)}</p></div></div>`;
   let list;
   if (!NET.server) list = '<p class="note">Bảng xếp hạng online chỉ có khi chơi trên trang MeeGame (đăng nhập Google). Ở đây bạn xem được thành tích của mình.</p>';
-  else if (!CLOUD_READY) list = '<p class="note">Bảng xếp hạng Tira Xe Đẩy sẽ mở khi máy chủ MeeGame bật lưu online cho game này.</p>';
+  else if (!CLOUD_READY) list = '<p class="note">Bảng xếp hạng Tiramisu Xe Đẩy sẽ mở khi máy chủ MeeGame bật lưu online cho game này.</p>';
   else if (!NET.rows) { list = `<p class="note">${esc(NET.status || 'Đang tải bảng xếp hạng…')}</p>`; if (!NET.rankTried) loadRank(); }
   else list = NET.rows.length ? `<ol class="rank">${NET.rows.map((x, i) => `<li class="${x.me ? 'me' : ''}"><em>${i + 1}</em><b>${esc(x.shop)}</b><span>Cấp ${x.level}</span><i>${vnd(x.val)}</i></li>`).join('')}</ol>` : '<p class="note">Chưa có ai lên bảng. Đăng nhập rồi bán một ngày để lên bảng!</p>';
   body.innerHTML = me + list;
@@ -4242,7 +4252,7 @@ function renderSettings(body) {
     : `<div class="setsec"><b>Tài khoản Google</b><small>Dùng chung tài khoản MeeGame để lưu online.</small><div data-gsi class="gsi">Đang tải nút Google…</div></div>`;
   const autos = autoBackups(), standalone = matchMedia('(display-mode: standalone)').matches || navigator.standalone;
   const sub = OV.sub;
-  body.innerHTML = `<div class="slist">
+  body.innerHTML = `${acct}<div class="slist">
     ${setRow('[[hand]]', 'Chỉ dẫn từng bước', { auto: 'Tự động', on: 'Luôn bật', off: 'Tắt' }[PREF.guide], 'sGuide')}
     ${setRow('[[clock]]', 'Thời gian bán mỗi ngày', `${PREF.dayMin} phút${S.scene !== 'title' && (S.dayMinToday || 4) !== PREF.dayMin ? ' · áp dụng từ ngày sau' : ''}`, 'sTime')}
     ${setRow('[[sparkle]]', 'Màu giao diện', THEMES[PREF.theme], 'sTheme')}
@@ -4258,7 +4268,7 @@ function renderSettings(body) {
     ${S.profile ? setRow('[[shop]]', 'Quán của bạn', esc(S.profile.shop), 'sShop') : ''}
     ${!standalone && installEvt ? setRow('[[install]]', 'Cài game như ứng dụng', 'Cài vào máy', 'sInstall') : ''}
     <button class="srow danger" id="sWipe"><span class="si">[[warn]]</span><b>Chơi lại từ đầu</b><em></em></button>
-  </div>${acct}<p class="ver">Tira Xe Đẩy · bản ${GAME_VER}</p>`;
+  </div><p class="ver">Tiramisu Xe Đẩy · bản ${GAME_VER}</p>`;
   if (NET.server && !NET.player) mountGoogle(body);
   const cyc = (arr, v) => arr[(arr.indexOf(v) + 1) % arr.length];
   $('sGuide').onclick = () => { PREF.guide = cyc(['auto', 'on', 'off'], PREF.guide); savePref(); renderOv(); };
@@ -4723,6 +4733,24 @@ miniCup = function (u, x, y, sc, t, sel) {
   if (!u.sealed || !u.straw || sel || u.spoil || S.pouring?.u === u) return _miniCup12(u, x, y, sc, t, sel);
   spr(`mc:${u.size}:${u.base}:${u.ice}:${u.tops.join('+')}:${sc.toFixed(3)}`, x - 50 * sc - 4, y - 160 * sc, 100 * sc + 8, 190 * sc + 30, () => _miniCup12(u, x, y, sc, 0, false), 6);
 };
+
+// ---- ô tài khoản Google ở màn hình chính (chỉ khi chơi trên MeeGame)
+{ const box = document.createElement('div'); box.id = 'titleAcct'; box.hidden = true; $('wrap').appendChild(box);
+  ['pointerdown', 'pointerup', 'click'].forEach((ev) => box.addEventListener(ev, (e) => e.stopPropagation())); }
+let titleAcctKey = '';
+function titleAcctSync() {
+  const box = $('titleAcct'), show = S.scene === 'title' && NET.server && !OV.open && !S.dialog;
+  if (box.hidden === !show && (!show || titleAcctKey === (NET.player?.id ?? 'out'))) return;
+  box.hidden = !show; if (!show) return;
+  titleAcctKey = NET.player?.id ?? 'out';
+  if (NET.player) {
+    box.innerHTML = `<div class="ta-in">${NET.player.picture ? `<img src="${esc(NET.player.picture)}" alt="">` : ''}<span>Xin chào <b>${esc(NET.player.name || NET.player.email || '')}</b><small>Tiến trình tự lưu online mỗi tối</small></span><button id="taOut">Đăng xuất</button></div>`;
+    $('taOut').onclick = async () => { await meeSignOut(); titleAcctKey = ''; titleAcctSync(); };
+  } else {
+    box.innerHTML = '<div class="ta-out"><div data-gsi class="gsi">Đang tải nút Google…</div></div>';
+    mountGoogle(box);
+  }
+}
 // ---- khung hình: giới hạn tốc độ, ngừng vẽ khi bảng quản lý đang mở, tự hạ độ phân giải khi máy chậm
 const _frame12 = frame;
 frame = function (now) {
@@ -4765,7 +4793,7 @@ function frame(now) {
   }
   if (S.dialog) { buttons = []; drawDialog(S.t); }
   else if (S.quests) { buttons = []; drawQuests(S.t); }
-  paperOverlay(); dockSync();
+  paperOverlay(); dockSync(); titleAcctSync();
   requestAnimationFrame(frame);
 }
 function pos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }

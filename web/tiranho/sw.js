@@ -1,4 +1,4 @@
-// Tira Xe Đẩy service worker: cho phép "Cài đặt ứng dụng" và mở được khi mất mạng.
+// Tiramisu Xe Đẩy service worker: cho phép "Cài đặt ứng dụng" và mở được khi mất mạng.
 // Ưu tiên mạng (luôn lấy bản mới nhất khi có mạng), chỉ dùng bản lưu khi mất mạng. Không bao giờ cache /api.
 // Tiến trình chơi nằm trong localStorage, file này không đụng tới.
 const CACHE = 'tiranho-v1';

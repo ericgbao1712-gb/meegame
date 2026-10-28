@@ -229,7 +229,7 @@
             <button type="button" data-game="xoailac" aria-pressed="false"><i class="dot xoai"></i>Xoài Lắc Ơi!</button>
             <button type="button" data-game="tiramee" aria-pressed="false"><i class="dot tira"></i>Tiệm TiraMee</button>
             <button type="button" data-game="banhtrang" aria-pressed="false"><i class="dot bt"></i>Bánh Tráng Nhà Mee</button>
-            <button type="button" data-game="tiranho" aria-pressed="false"><i class="dot tn"></i>Tira Xe Đẩy</button>
+            <button type="button" data-game="tiranho" aria-pressed="false"><i class="dot tn"></i>Tiramisu Xe Đẩy</button>
           </div>
           <button class="btn sm" type="button" id="reload"><svg class="icon"><use href="#i-reload" /></svg>Tải lại</button>
         </div>
@@ -293,7 +293,7 @@
               <form id="gc-form" novalidate>
                 <div class="two">
                   <label class="field">Mã *<input id="gc-code" maxlength="32" placeholder="TIKTOK1000" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><small>Chữ không dấu, số, - hoặc _.</small></label>
-                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Mọi game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option><option value="tiramee">Tiệm TiraMee</option><option value="banhtrang">Bánh Tráng Nhà Mee</option><option value="tiranho">Tira Xe Đẩy</option></select></label>
+                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Mọi game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option><option value="tiramee">Tiệm TiraMee</option><option value="banhtrang">Bánh Tráng Nhà Mee</option><option value="tiranho">Tiramisu Xe Đẩy</option></select></label>
                 </div>
                 <div class="two">
                   <label class="field">Tiền tặng (nghìn đồng)<input id="gc-money" type="number" min="0" step="1" inputmode="numeric" placeholder="0"><small id="gc-money-hint">500 = 500.000đ trong game.</small></label>
@@ -347,7 +347,7 @@
       const GAMES = { quanlau: { name: 'Lẩu Ơi!', unit: 'nồi', units: 'Nồi lẩu bán', color: 'var(--lau)' }, xoailac: { name: 'Xoài Lắc Ơi!', unit: 'phần', units: 'Phần xoài bán', color: 'var(--xoai)' },
         tiramee: { name: 'Tiệm TiraMee', unit: 'phần', units: 'Phần bánh bán', color: 'var(--tira)' },
         banhtrang: { name: 'Bánh Tráng Nhà Mee', unit: 'món', units: 'Món bánh tráng bán', color: 'var(--bt)' },
-        tiranho: { name: 'Tira Xe Đẩy', unit: 'hộp', units: 'Hộp bánh bán', color: 'var(--tn)' } };
+        tiranho: { name: 'Tiramisu Xe Đẩy', unit: 'hộp', units: 'Hộp bánh bán', color: 'var(--tn)' } };
       const DOT = { quanlau: 'lau', xoailac: 'xoai', tiramee: 'tira', banhtrang: 'bt', tiranho: 'tn' };
       const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (_) { return d; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) { } } };
       let game = GAMES[store.get('meegame_admin_game')] ? store.get('meegame_admin_game') : 'quanlau';
@@ -580,7 +580,7 @@
       }
 
       // ---------- Mã quà tặng ----------
-      const GC_GAME = { '*': 'Mọi game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee', tiranho: 'Tira Xe Đẩy' };
+      const GC_GAME = { '*': 'Mọi game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee', tiranho: 'Tiramisu Xe Đẩy' };
       const cleanCode = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
       async function loadCodes() {
         const box = $('codes'); box.textContent = '';
