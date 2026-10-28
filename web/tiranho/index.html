@@ -1486,8 +1486,8 @@ function marketBg(t) {
   fillRR(0, 300, W, 140, 0, lg(0, 300, 0, 440, ['#B97E4D', '#8A5A34']));
   for (let i = 0; i < 6; i++) { const x = 20 + i * 118; fillRR(x, 250, 104, 70, 10, '#C9935F', '#7A5A34', 3); const R = rand(i + 3); const cols = [['#FFB21A', '#FF9C0A'], ['#3D3166', '#2E2550'], ['#B5E36F', '#86C449'], ['#F6DB86', '#EBC765'], ['#E8483B', '#B5302A'], ['#7CC35A', '#4F8E3E']][i]; for (let k = 0; k < 9; k++) ell(x + 18 + (k % 5) * 18 + R() * 4, 252 - Math.floor(k / 5) * 12 + R() * 4, 11, 10, lg(0, 240, 0, 262, cols)); }
   person(CAST.coba.look, 600, 210, .62, 'happy', t);
-  fillRR(330, 150, 200, 64, 20, '#FFFFFF', '#3A2219', 3); text('Mua gì con ơi?', 430, 182, { size: 20, color: '#3A2219', weight: 800 });
-  g.fillStyle = '#3A2219'; g.beginPath(); g.moveTo(520, 190); g.lineTo(552, 204); g.lineTo(520, 204); g.fill();
+  fillRR(300, 176, 210, 58, 20, '#FFFFFF', '#3A2219', 3); text('Mua gì con ơi?', 405, 205, { size: 20, color: '#3A2219', weight: 800 });
+  g.fillStyle = '#3A2219'; g.beginPath(); g.moveTo(506, 200); g.lineTo(540, 214); g.lineTo(506, 220); g.fill();
 }
 function buyCart() {
   const tot = cartTotal(); if (tot > S.money) return;
@@ -1937,7 +1937,7 @@ function renderOv0() {
       return `<div class="card ${has ? 'on' : ''} ${locked ? 'lock' : ''}"><canvas class="por" data-staff="${x.id}" width="160" height="200"></canvas><div class="cb">
         <h4>${esc(x.name)} <span>${esc(x.role)}</span></h4><p>${esc(x.desc)}</p>
         <div class="meta">Lương ${vnd(staffWage(x))}/ngày${has ? ` · Bậc ${l + 1}/${STAFF_MAX + 1} · đã làm ${days} ngày${SPEED_STAFF.has(x.id) ? ` · thành thạo: nhanh hơn ${Math.round((expK(x.id) - 1) * 100)}%` : ''}` : SPEED_STAFF.has(x.id) ? ' · làm càng lâu càng nhanh (+5%/ngày, tối đa +100%)' : ''}</div>
-        ${locked ? `<div class="lockt">[[lock]] Mở ở cấp ${x.lv}</div>` : has ? `<div class="row">${canTrain ? `<button class="btn sm" data-train="${x.id}" ${days < needD || S.money < cost ? 'disabled' : ''}>Đào tạo lên bậc ${l + 2} · ${vnd(cost)}${days < needD ? ` (cần ${needD} ngày)` : ''}</button>` : '<span class="ok">Bậc cao nhất ✓</span>'}<button class="btn sm ghost" data-fire="${x.id}">Cho nghỉ</button></div><small class="up">${esc(x.up)}</small>`
+        ${locked ? `<div class="lockt">[[lock]] Mở ở cấp ${x.lv}</div>` : has ? `<div class="row">${canTrain ? `<button class="btn sm" data-train="${x.id}" ${days < needD || S.money < cost ? 'disabled' : ''}>${days < needD ? `Đào tạo: cần làm đủ ${needD} ngày` : `Đào tạo bậc ${l + 2} · ${vnd(cost)}`}</button>` : '<span class="ok">Bậc cao nhất ✓</span>'}<button class="btn sm ghost" data-fire="${x.id}">Cho nghỉ</button></div><small class="up">${esc(x.up)}</small>`
           : `<button class="btn" data-hire="${x.id}">Thuê</button>`}
       </div></div>`;
     }).join('');
@@ -2070,7 +2070,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.0.2';
+const GAME_VER = '1.0.3';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2409,11 +2409,11 @@ function drawMarket(t) {
   list.forEach((k, i) => {
     const c = i % 3, r = Math.floor(i / 3), x = 28 + c * 224, y = 452 + r * 154, I = INGR[k], locked = itemLocked(k), q = S.cart[k] ?? 0;
     fillRR(x, y, 212, 146, 20, locked ? '#F1E9E0' : q ? '#FFF3C4' : '#FFFFFF', q ? '#F2B632' : '#E3CDB6', 3);
-    g.globalAlpha = locked ? .35 : 1; itemIcon(k, x + 46, y + 48, .9); g.globalAlpha = 1;
+    g.globalAlpha = locked ? .35 : 1; itemIcon(k, x + 46, y + 54, .82); g.globalAlpha = 1;
     text(I.name, x + 90, y + 26, { size: 16, color: '#3A2219', weight: 800, align: 'left', max: 116 });
     text(`${Math.round(mktPrice(k) / 1000)}k/${I.unit}`, x + 90, y + 50, { size: 13, color: '#8A5A4A', weight: 700, align: 'left', max: 116 });
     text(unitsTxt(k), x + 90, y + 72, { size: 13, color: '#8A6A5A', weight: 600, align: 'left' });
-    if (SHELF[k] && !locked) { fillRR(x + 8, y + 78, 74, 20, 10, SHELF[k] <= 2 ? '#FFE3DC' : '#F1F6E8'); text(`HSD ${SHELF[k]} ngày`, x + 45, y + 88, { size: 11, color: SHELF[k] <= 2 ? '#A8402A' : '#4E7A2E', weight: 800 }); }
+    if (SHELF[k] && !locked) { fillRR(x + 10, y - 7, 80, 22, 11, SHELF[k] <= 2 ? '#FFE3DC' : '#F1F6E8', SHELF[k] <= 2 ? '#E9A99A' : '#B9D39C', 1.5); text(`HSD ${SHELF[k]} ngày`, x + 50, y + 4, { size: 11, color: SHELF[k] <= 2 ? '#A8402A' : '#4E7A2E', weight: 800 }); }
     if (todayEv().id === 'sale' && todayEv().k === k) { fillRR(x + 140, y - 8, 66, 24, 12, '#A0603A'); text('−30%', x + 173, y + 4, { size: 13, color: '#fff', weight: 800 }); }
     if (locked) { text(`[[lock]] ${itemLockText(k)}`, x + 106, y + 118, { size: 15, color: '#8A6A5A', weight: 700 }); return; }
     button(`dec:${k}`, '−', x + 12, y + 94, 52, 42, { t, size: 26, color: '#B07A48', disabled: !q });
@@ -3578,7 +3578,7 @@ function drawDayStart(t) {
   reconcileLots();
   const soon = Object.entries(S.lots || {}).filter(([, ls]) => ls.some((l) => l.exp <= S.day)).map(([k]) => INGR[k].name);
   let wy = qy + 134;
-  if (soon.length) { fillRR(50, wy - 18, W - 100, 40, 14, '#FFEDE8', '#F2B2A4', 2); text(`[[warn]] Hết hạn hôm nay: ${soon.slice(0, 3).join(', ')}${soon.length > 3 ? '…' : ''}`, W / 2, wy + 2, { size: 15, color: '#8E2414', weight: 800, max: W - 130 }); wy += 34; }
+  if (soon.length) { fillRR(50, wy - 18, W - 100, 40, 14, '#FFEDE8', '#F2B2A4', 2); text(`[[warn]] Hết hạn hôm nay: ${soon.slice(0, 2).join(', ')}${soon.length > 2 ? ` +${soon.length - 2} món` : ''} · xem Kho`, W / 2, wy + 2, { size: 15, color: '#8E2414', weight: 800, max: W - 130 }); wy += 34; }
   const bk = bank();
   if (bk.loan && wy < 1060) { text(`[[bank]] Trả góp ${vnd(bk.loan.per)}/ngày · còn nợ ${vnd(bk.loan.left)}`, W / 2, wy + 10, { size: 15, color: '#6A4A3A', weight: 700 }); wy += 30; }
   if (weekDay() === 7 && wy < 1060) { text(`[[bank]] Cuối tuần: tự trừ thuế 10% doanh thu tuần (${vnd(Math.round((bk.weekRev) * .1 / 1000) * 1000)}+)`, W / 2, wy + 10, { size: 15, color: '#6A4A3A', weight: 700, max: W - 120 }); }
