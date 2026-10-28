@@ -15,7 +15,7 @@
 <meta property="og:title" content="Tiệm TiraMee · MeeGame">
 <meta property="og:description" content="Mở tiệm tiramisu nhỏ trong hẻm, làm bánh, trang trí và phục vụ khách.">
 <meta property="og:image" content="https://www.meegame.io.vn/tiramee/app/icon-512.png?v=3">
-<script>window.__BUILD__ = 'd9ce43c590a5';</script>
+<script>window.__BUILD__ = '464d7e012943';</script>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@700;800&family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap">
 <style>
@@ -14528,5 +14528,45 @@ __req("src/main.js");
     guide();
   });
   if(android||ios)setTimeout(()=>{if(!bip){btn.textContent='📲 Cách cài game vào máy';btn.hidden=false}},2500);
+})();
+</script>
+<script>
+/* tm-announce: THÔNG BÁO ra mắt bản mới "Tiramisu Nhà Mee" (/tiranho). Hiện mỗi lần mở game (1 lần / phiên),
+   nút "Chơi bản mới" mở link mới, nút "Tiếp tục phiên bản này" đóng bảng để chơi tiếp TiraMee. */
+(function(){
+  var NEW_URL='https://www.meegame.io.vn/tiranho';
+  try{ if(sessionStorage.getItem('tm-announce-seen')) return; }catch(e){}
+  var css=document.createElement('style');
+  css.textContent='.tma-ov{position:fixed;inset:0;z-index:9998;display:flex;align-items:center;justify-content:center;padding:18px;background:rgba(40,22,14,.62);animation:tmaF .25s ease}'
+  +'.tma{width:min(420px,100%);max-height:calc(100% - 24px);overflow:auto;background:linear-gradient(#FFF8EE,#FBEAD6);color:#4A2A1E;border:4px solid #6E422C;border-radius:22px;box-shadow:0 8px 0 #4A2A1E,0 18px 40px rgba(0,0,0,.35);padding:22px 18px 18px;text-align:center;font-family:"Be Vietnam Pro",system-ui,sans-serif;animation:tmaP .35s cubic-bezier(.3,1.4,.6,1)}'
+  +'.tma-logo{width:84px;height:84px;margin:0 auto 10px;display:block;border-radius:22px;box-shadow:0 6px 16px rgba(0,0,0,.25);background:#FFF4E4}'
+  +'.tma-tag{display:inline-block;margin-bottom:8px;padding:4px 12px;border-radius:999px;background:#E8577A;color:#fff;font-weight:800;font-size:12px;letter-spacing:.06em}'
+  +'.tma h2{margin:0 0 10px;font:800 23px/1.2 "Baloo 2",system-ui,sans-serif;color:#6E422C}'
+  +'.tma p{margin:0 0 10px;font-size:15px;line-height:1.55}'
+  +'.tma-link{display:block;margin:2px 0 14px;padding:8px 10px;border-radius:12px;background:#fff;border:2px dashed #E3B98F;font-weight:700;font-size:13px;color:#A8344F;word-break:break-all}'
+  +'.tma-thanks{font-weight:700;color:#8A5A3C}'
+  +'.tma-b{display:block;width:100%;border:0;border-radius:16px;padding:14px 12px;font:800 17px "Baloo 2",system-ui,sans-serif;cursor:pointer;text-decoration:none;box-sizing:border-box}'
+  +'.tma-go{background:linear-gradient(#F48AA4,#E8577A);color:#fff;box-shadow:0 4px 0 #A8344F;margin-bottom:10px}'
+  +'.tma-stay{background:#FFF4E6;color:#6E422C;border:2px solid #E6CBAE;box-shadow:0 3px 0 #E6CBAE;font-size:15px}'
+  +'.tma-b:active{transform:translateY(2px)}'
+  +'@keyframes tmaF{from{opacity:0}}@keyframes tmaP{from{transform:scale(.88);opacity:0}}';
+  document.head.appendChild(css);
+  function show(){
+    var ov=document.createElement('div'); ov.className='tma-ov';
+    ov.innerHTML='<div class="tma" role="dialog" aria-modal="true" aria-labelledby="tma-t">'
+      +'<img class="tma-logo" src="/tiramee/app/icon-192.png?v=3" alt="">'
+      +'<span class="tma-tag">✨ THÔNG BÁO</span>'
+      +'<h2 id="tma-t">Game Tiramisu đã chính thức ra mắt phiên bản mới!</h2>'
+      +'<p>Mọi người có thể truy cập vào đường link dưới đây để chơi thử:</p>'
+      +'<a class="tma-link" href="'+NEW_URL+'">'+NEW_URL.replace('https://','')+'</a>'
+      +'<p class="tma-thanks">MeeGame xin trân trọng cảm ơn! 💗</p>'
+      +'<a class="tma-b tma-go" href="'+NEW_URL+'">🎮 Chơi phiên bản mới</a>'
+      +'<button type="button" class="tma-b tma-stay">Tiếp tục phiên bản này</button></div>';
+    function close(){ try{sessionStorage.setItem('tm-announce-seen','1')}catch(e){} ov.remove(); }
+    ov.querySelector('.tma-stay').addEventListener('click',close);
+    ov.querySelectorAll('a').forEach(function(a){ a.addEventListener('click',function(){ try{sessionStorage.setItem('tm-announce-seen','1')}catch(e){} }); });
+    document.body.appendChild(ov);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){setTimeout(show,600)}); else setTimeout(show,600);
 })();
 </script>
