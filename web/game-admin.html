@@ -30,7 +30,7 @@
       --bg: #FFF6F8; --raised: #FFFFFF; --fill: #FCEAF0; --fill-2: #F8DCE6; --line: #F4DEE5;
       --ink: #2B1820; --ink-2: #7A5864; --accent: #C21E5C; --on-accent: #FFFFFF; --tint: #FDE1EB; --on-tint: #9A1747;
       --danger: #C42318; --danger-tint: #FCE9E7; --good: #1F7A4D; --good-tint: #E3F5EA; --warn: #9A5B00; --warn-tint: #FFF1D6;
-      --lau: #D93A2B; --xoai: #5F9A1A; --tira: #8A5A3C; --bt: #E8707F;
+      --lau: #D93A2B; --xoai: #5F9A1A; --tira: #8A5A3C; --bt: #E8707F; --tn: #C2416B;
       --lift: 0 10px 30px rgba(120, 30, 64, .14), 0 1px 3px rgba(120, 30, 64, .08);
       --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
       --mono: ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
@@ -41,7 +41,7 @@
       --bg: #170F13; --raised: #22181D; --fill: #2B1F25; --fill-2: #382930; --line: #34262D;
       --ink: #FBF0F4; --ink-2: #C9A9B5; --accent: #FF8DB4; --on-accent: #3B0A1D; --tint: #3F1F2C; --on-tint: #FFB6CF;
       --danger: #FF7A6E; --danger-tint: #3A1C19; --good: #6FD69C; --good-tint: #183326; --warn: #FFC56B; --warn-tint: #3A2A10;
-      --lau: #FF7D6B; --xoai: #A9D36A; --tira: #E0B48C; --bt: #F59AA6;
+      --lau: #FF7D6B; --xoai: #A9D36A; --tira: #E0B48C; --bt: #F59AA6; --tn: #F07A9B;
       --lift: 0 12px 34px rgba(0, 0, 0, .55);
       color-scheme: dark;
     }
@@ -91,7 +91,7 @@
     .seg button { border: 0; background: none; height: 36px; padding: 0 14px; border-radius: 9px; font-weight: 700; font-size: 14px; color: var(--ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
     .seg button[aria-pressed="true"] { background: var(--raised); color: var(--ink); box-shadow: 0 1px 3px rgba(0, 0, 0, .12); }
     .dot { width: 10px; height: 10px; border-radius: 50%; }
-    .dot.lau { background: var(--lau); } .dot.xoai { background: var(--xoai); } .dot.tira { background: var(--tira); } .dot.bt { background: var(--bt); }
+    .dot.lau { background: var(--lau); } .dot.xoai { background: var(--xoai); } .dot.tira { background: var(--tira); } .dot.bt { background: var(--bt); } .dot.tn { background: var(--tn); }
     .tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); scrollbar-width: none; }
     .tabs button { border: 0; background: none; padding: 10px 14px 12px; font-weight: 600; font-size: 14px; color: var(--ink-2); cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
     .tabs button[aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
@@ -229,6 +229,7 @@
             <button type="button" data-game="xoailac" aria-pressed="false"><i class="dot xoai"></i>Xoài Lắc Ơi!</button>
             <button type="button" data-game="tiramee" aria-pressed="false"><i class="dot tira"></i>Tiệm TiraMee</button>
             <button type="button" data-game="banhtrang" aria-pressed="false"><i class="dot bt"></i>Bánh Tráng Nhà Mee</button>
+            <button type="button" data-game="tiranho" aria-pressed="false"><i class="dot tn"></i>Tira Nhỏ</button>
           </div>
           <button class="btn sm" type="button" id="reload"><svg class="icon"><use href="#i-reload" /></svg>Tải lại</button>
         </div>
@@ -292,7 +293,7 @@
               <form id="gc-form" novalidate>
                 <div class="two">
                   <label class="field">Mã *<input id="gc-code" maxlength="32" placeholder="TIKTOK1000" autocomplete="off" spellcheck="false" style="text-transform:uppercase"><small>Chữ không dấu, số, - hoặc _.</small></label>
-                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Mọi game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option><option value="tiramee">Tiệm TiraMee</option><option value="banhtrang">Bánh Tráng Nhà Mee</option></select></label>
+                  <label class="field">Dùng cho game<select id="gc-game"><option value="*">Mọi game</option><option value="quanlau">Lẩu Ơi!</option><option value="xoailac">Xoài Lắc Ơi!</option><option value="tiramee">Tiệm TiraMee</option><option value="banhtrang">Bánh Tráng Nhà Mee</option><option value="tiranho">Tira Nhỏ</option></select></label>
                 </div>
                 <div class="two">
                   <label class="field">Tiền tặng (nghìn đồng)<input id="gc-money" type="number" min="0" step="1" inputmode="numeric" placeholder="0"><small id="gc-money-hint">500 = 500.000đ trong game.</small></label>
@@ -345,8 +346,9 @@
       const $ = (id) => document.getElementById(id);
       const GAMES = { quanlau: { name: 'Lẩu Ơi!', unit: 'nồi', units: 'Nồi lẩu bán', color: 'var(--lau)' }, xoailac: { name: 'Xoài Lắc Ơi!', unit: 'phần', units: 'Phần xoài bán', color: 'var(--xoai)' },
         tiramee: { name: 'Tiệm TiraMee', unit: 'phần', units: 'Phần bánh bán', color: 'var(--tira)' },
-        banhtrang: { name: 'Bánh Tráng Nhà Mee', unit: 'món', units: 'Món bánh tráng bán', color: 'var(--bt)' } };
-      const DOT = { quanlau: 'lau', xoailac: 'xoai', tiramee: 'tira', banhtrang: 'bt' };
+        banhtrang: { name: 'Bánh Tráng Nhà Mee', unit: 'món', units: 'Món bánh tráng bán', color: 'var(--bt)' },
+        tiranho: { name: 'Tira Nhỏ', unit: 'hộp', units: 'Hộp bánh bán', color: 'var(--tn)' } };
+      const DOT = { quanlau: 'lau', xoailac: 'xoai', tiramee: 'tira', banhtrang: 'bt', tiranho: 'tn' };
       const store = { get(k, d) { try { return localStorage.getItem(k) ?? d; } catch (_) { return d; } }, set(k, v) { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (_) { } } };
       let game = GAMES[store.get('meegame_admin_game')] ? store.get('meegame_admin_game') : 'quanlau';
       let tab = 'overview';
@@ -430,7 +432,7 @@
       function syncGame() {
         document.querySelectorAll('[data-game]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.game === game)));
         document.documentElement.style.setProperty('--game', GAMES[game].color);
-        $('by-pots').textContent = { xoailac: 'Phần xoài', tiramee: 'Phần bánh', banhtrang: 'Món bánh tráng' }[game] || 'Nồi lẩu';
+        $('by-pots').textContent = { xoailac: 'Phần xoài', tiramee: 'Phần bánh', banhtrang: 'Món bánh tráng', tiranho: 'Hộp bánh' }[game] || 'Nồi lẩu';
       }
       document.querySelectorAll('[data-tab]').forEach((b) => b.addEventListener('click', () => showTab(b.dataset.tab)));
       function showTab(t, reload = true) {
@@ -578,7 +580,7 @@
       }
 
       // ---------- Mã quà tặng ----------
-      const GC_GAME = { '*': 'Mọi game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee' };
+      const GC_GAME = { '*': 'Mọi game', quanlau: 'Lẩu Ơi!', xoailac: 'Xoài Lắc Ơi!', tiramee: 'Tiệm TiraMee', banhtrang: 'Bánh Tráng Nhà Mee', tiranho: 'Tira Nhỏ' };
       const cleanCode = (v) => String(v || '').normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'D').toUpperCase().replace(/[^A-Z0-9_-]/g, '').slice(0, 32);
       async function loadCodes() {
         const box = $('codes'); box.textContent = '';

@@ -1,0 +1,20 @@
+{
+  "id": "/tiranho",
+  "name": "Tira Nhỏ",
+  "short_name": "Tira Nhỏ",
+  "description": "Game bán tiramisu xe đẩy ngoài phố: đi chợ, làm khay bánh, xắn bánh, thuê nhân viên, mở tiệm.",
+  "lang": "vi",
+  "start_url": "/tiranho",
+  "scope": "/tiranho",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFF3E6",
+  "theme_color": "#FFE6DC",
+  "categories": ["games"],
+  "icons": [
+    { "src": "/tiranho/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/tiranho/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/tiranho/maskable-192.png", "sizes": "192x192", "type": "image/png", "purpose": "maskable" },
+    { "src": "/tiranho/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

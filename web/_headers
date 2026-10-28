@@ -23,3 +23,13 @@
 /banhtrang/sw.js
   Service-Worker-Allowed: /banhtrang
   Cache-Control: no-cache
+
+/tiranho
+  Cache-Control: no-cache
+/tiranho/index.html
+  Cache-Control: no-cache
+/tiranho/manifest.json
+  Cache-Control: no-cache
+/tiranho/sw.js
+  Service-Worker-Allowed: /tiranho
+  Cache-Control: no-cache
