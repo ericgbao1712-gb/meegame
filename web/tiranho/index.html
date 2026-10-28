@@ -100,7 +100,7 @@
   #ov .sw { width: 9cqw; height: 9cqw; min-width: 34px; min-height: 34px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 0 0 2px #E3CDB6; margin: 0 6px 8px 0; cursor: pointer; color: #B5302A; font-weight: 800; }
   #ov .sw[aria-pressed="true"] { box-shadow: 0 0 0 3px #A0603A; }
   #ov .sws { margin-top: .4em; }
-  #ov .presets { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  #ov .presets { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
   #ov .pre, #ov .lg { display: flex; flex-direction: column; align-items: center; gap: 2px; border: 2px solid #E3CDB6; background: #fff; border-radius: 3cqw; padding: 4px; font: 700 .8em 'Be Vietnam Pro', sans-serif; color: #5A3E2E; cursor: pointer; }
   #ov .pre canvas { width: 100%; aspect-ratio: 120 / 150; height: auto; }
   #ov .logos { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
@@ -1576,15 +1576,25 @@ const OWNER_PRESETS = [
   { name: 'Thỏ', look: { gender: 'f', hairStyle: 'twin', hair: '#3E2A20', skin: '#F7D5BC', top: 'tee', topColor: '#D4A373', apron: '#FFFFFF', acc: [] } },
   { name: 'Bảo', look: { gender: 'm', hairStyle: 'short', hair: '#1E1612', skin: '#EBC2A0', top: 'shirt', topColor: '#F4F6FA', apron: '#5C8D6B', acc: [] } },
   { name: 'Tú', look: { gender: 'm', hairStyle: 'perm', hair: '#3E2A20', skin: '#E2AE88', top: 'tee', topColor: '#2E3B55', apron: '#B07A48', acc: ['glasses'] } },
+  { name: 'Hà', look: { gender: 'f', hairStyle: 'long', hair: '#4A2E22', skin: '#F7D5BC', top: 'dress', topColor: '#F2C14E', apron: '', shoes: '#E85D75', acc: ['daisyClip'] } },
+  { name: 'Ngân', look: { gender: 'f', hairStyle: 'bob', hair: '#1B1412', skin: '#FADFC9', top: 'offshoulder', topColor: '#7EB6D9', legs: 'skirt', legsColor: '#F4F0F8', apron: '', acc: ['earrings'] } },
+  { name: 'Khang', look: { gender: 'm', hairStyle: 'short', hair: '#2B1B15', skin: '#EEC2A0', top: 'tee', topColor: '#E85D75', apron: '#FFFFFF', legsColor: '#2E2A2E', shoes: '#2A2A30', acc: [] } },
+  { name: 'Minh', look: { gender: 'm', hairStyle: 'perm', hair: '#1B1412', skin: '#D9A07A', top: 'jacket', topColor: '#5C8D6B', apron: '', legsColor: '#4A4038', shoes: '#7A5A40', acc: ['mustache'] } },
+  { name: 'Duy', look: { gender: 'm', hairStyle: 'short', hair: '#6A3E2A', skin: '#F7D5BC', top: 'shirt', topColor: '#7EB6D9', apron: '#D4A373', legsColor: '#3E4A5E', acc: ['glasses', 'backpack'] } },
+  { name: 'Nam', look: { gender: 'm', hairStyle: 'short', hair: '#1E1612', skin: '#C68A64', top: 'aobaba', topColor: '#D4A373', apron: '', legsColor: '#2E2A2E', shoes: '#2A2A30', acc: ['nonla'] } },
 ];
+const M_HAIR = ['short', 'perm', 'bun'], F_HAIR = ['bob', 'long', 'bun', 'twin', 'short', 'perm'], F_ONLY_TOP = ['blouse', 'offshoulder', 'dress'];
 const LOOK_OPTS = {
   hairStyle: [['bob', 'Tóc bob'], ['long', 'Tóc dài'], ['bun', 'Búi cao'], ['twin', 'Buộc 2 bên'], ['short', 'Tóc ngắn'], ['perm', 'Tóc xoăn']],
   hair: ['#1B1412', '#2B1B15', '#4A2E22', '#6A3E2A', '#8A5A3A', '#B07A48', '#C9A66B', '#DCD6CE'],
   skin: ['#FADFC9', '#F7D5BC', '#EEC2A0', '#E2AE88', '#D9A07A', '#C68A64'],
-  top: [['blouse', 'Áo blouse'], ['tee', 'Áo thun'], ['shirt', 'Sơ mi'], ['aobaba', 'Bà ba'], ['offshoulder', 'Trễ vai'], ['jacket', 'Áo khoác']],
+  top: [['blouse', 'Áo blouse'], ['tee', 'Áo thun'], ['shirt', 'Sơ mi'], ['aobaba', 'Bà ba'], ['offshoulder', 'Trễ vai'], ['jacket', 'Áo khoác'], ['dress', 'Đầm liền']],
+  legs: [['pants', 'Quần dài'], ['skirt', 'Chân váy']],
+  legsColor: ['#7088AA', '#3E4A5E', '#2E2A2E', '#4A4038', '#D4A373', '#F4F0F8', '#E85D75', '#5C8D6B'],
+  shoes: ['#FFFFFF', '#2A2A30', '#7A5A40', '#E85D75', '#7EB6D9', '#F2C14E'],
   topColor: ['#FFF6E8', '#F4F6FA', '#D4A373', '#E85D75', '#F2C14E', '#8FCBB5', '#7EB6D9', '#2E3B55', '#D9C8F0', '#5C8D6B'],
   apron: ['', '#D4A373', '#E85D75', '#FFFFFF', '#F2C14E', '#5C8D6B', '#7EB6D9', '#B07A48', '#3A2A2A'],
-  acc: [['daisyClip', 'Kẹp hoa cúc'], ['pearlClip', 'Kẹp ngọc trai'], ['earrings', 'Khuyên tai'], ['glasses', 'Kính'], ['nonla', 'Nón lá'], ['scarf', 'Khăn rằn']],
+  acc: [['daisyClip', 'Kẹp hoa cúc'], ['pearlClip', 'Kẹp ngọc trai'], ['earrings', 'Khuyên tai'], ['glasses', 'Kính'], ['nonla', 'Nón lá'], ['scarf', 'Khăn rằn'], ['mustache', 'Ria mép'], ['backpack', 'Ba lô']],
 };
 /** Bộ thông số nhân vật nét D cho chủ quán từ lựa chọn của người chơi. */
 function ownerSpec(lk = S.profile.look) {
@@ -1592,7 +1602,8 @@ function ownerSpec(lk = S.profile.look) {
   return {
     id: 'owner', male, skin: lk.skin, hair: lk.hair, hairStyle: lk.hairStyle, eyes: '#5A3A2A',
     top: { type: lk.top, color: lk.topColor, stripes: lk.top === 'tee' && lk.topColor === '#2E3B55' ? '#FFFFFF' : undefined },
-    apron: lk.apron || undefined, legs: { type: 'pants', color: male ? '#3E4A5E' : '#7088AA' }, shoes: '#FFFFFF', acc: [...(lk.acc || [])], prop: 'box',
+    apron: lk.apron || undefined, legs: lk.top === 'dress' && !male ? { type: 'socks', color: '#FFFFFF' } : { type: lk.legs === 'skirt' && !male ? 'skirt' : 'pants', color: lk.legsColor || (male ? '#3E4A5E' : '#7088AA') },
+    shoes: lk.shoes || '#FFFFFF', acc: [...(lk.acc || [])], prop: 'box',
   };
 }
 
@@ -2010,12 +2021,14 @@ function renderSetup(body, foot) {
     <label class="fld">Tên chủ xe<input id="inName" maxlength="12" value="${esc(d.name)}" autocomplete="off"></label>
     <div class="grp"><h5>Xưng hô</h5><button class="chip" data-gender="f" aria-pressed="${lk.gender === 'f'}">Nữ · khách gọi “chị”</button><button class="chip" data-gender="m" aria-pressed="${lk.gender === 'm'}">Nam · khách gọi “anh”</button><small id="pron"></small></div>
     <div class="grp"><h5>Chọn nhanh nhân vật</h5><div class="presets">${OWNER_PRESETS.map((p, i) => `<button class="pre" data-pre="${i}"><canvas data-prec="${i}" width="120" height="150"></canvas>${esc(p.name)}</button>`).join('')}</div></div>
-    <div class="grp"><h5>Kiểu tóc</h5>${chips('hairStyle', LOOK_OPTS.hairStyle)}</div>
+    <div class="grp"><h5>Kiểu tóc</h5>${chips('hairStyle', LOOK_OPTS.hairStyle.filter(([v]) => (lk.gender === 'm' ? M_HAIR : F_HAIR).includes(v)))}</div>
     <div class="grp"><h5>Màu tóc</h5>${sw('hair', LOOK_OPTS.hair)}</div>
     <div class="grp"><h5>Màu da</h5>${sw('skin', LOOK_OPTS.skin)}</div>
-    <div class="grp"><h5>Áo</h5>${chips('top', LOOK_OPTS.top)}<div class="sws">${sw('topColor', LOOK_OPTS.topColor)}</div></div>
+    <div class="grp"><h5>${lk.top === 'dress' ? 'Đầm' : 'Áo'} · màu</h5>${chips('top', LOOK_OPTS.top.filter(([v]) => lk.gender !== 'm' || !F_ONLY_TOP.includes(v)))}<div class="sws">${sw('topColor', LOOK_OPTS.topColor)}</div></div>
+    ${lk.top === 'dress' && lk.gender !== 'm' ? '' : `<div class="grp"><h5>${lk.gender === 'm' ? 'Quần' : 'Quần / váy'} · màu</h5>${lk.gender === 'm' ? '' : chips('legs', LOOK_OPTS.legs)}<div class="sws">${sw('legsColor', LOOK_OPTS.legsColor)}</div></div>`}
+    <div class="grp"><h5>Giày</h5>${sw('shoes', LOOK_OPTS.shoes)}</div>
     <div class="grp"><h5>Tạp dề</h5>${sw('apron', LOOK_OPTS.apron)}</div>
-    <div class="grp"><h5>Phụ kiện</h5>${LOOK_OPTS.acc.map(([v, n]) => `<button class="chip" data-acc="${v}" aria-pressed="${lk.acc.includes(v)}">${n}</button>`).join('')}</div>
+    <div class="grp"><h5>Phụ kiện</h5>${LOOK_OPTS.acc.filter(([v]) => (lk.gender === 'm' ? !['daisyClip', 'pearlClip', 'earrings'].includes(v) : v !== 'mustache')).map(([v, n]) => `<button class="chip" data-acc="${v}" aria-pressed="${lk.acc.includes(v)}">${n}</button>`).join('')}</div>
     <div class="grp"><h5>Logo quán</h5><div class="logos">${Object.entries(LOGOS).map(([k, v]) => `<button class="lg" data-logo="${k}" aria-pressed="${d.logo === k}"><canvas data-lgc="${k}" width="88" height="88"></canvas>${esc(v.name)}</button>`).join('')}</div></div>
     <div class="grp"><h5>Màu xe đẩy</h5>${Object.entries(CART_THEMES).map(([k, v]) => `<button class="chip cartc" data-cart="${k}" aria-pressed="${d.cart === k}"><i style="background:linear-gradient(${v.c[0]},${v.c[2]})"></i>${v.name}</button>`).join('')}</div>`;
   foot.innerHTML = `${OV.mode === 'new' ? '<button class="btn ghost" id="btnSetSkip">Để mặc định</button>' : '<button class="btn ghost" id="btnSetBack">‹ Quay lại</button>'}<button class="btn go" id="btnSetOk">${OV.mode === 'new' ? 'Mở xe bánh ›' : 'Lưu'}</button>`;
@@ -2045,7 +2058,7 @@ $('ovBody').addEventListener('click', (e) => {
   if (OV.view !== 'setup' || !OV.draft) return;
   const b = e.target.closest('button'); if (!b) return; const d = OV.draft, lk = d.look, ds = b.dataset;
   if (ds.set) lk[ds.set] = ds.v;
-  else if (ds.gender) { lk.gender = ds.gender; if (ds.gender === 'm' && ['bob', 'long', 'bun', 'twin'].includes(lk.hairStyle)) lk.hairStyle = 'short'; if (ds.gender === 'f' && ['short', 'perm'].includes(lk.hairStyle)) lk.hairStyle = 'bob'; }
+  else if (ds.gender) { lk.gender = ds.gender; if (ds.gender === 'm') { if (!M_HAIR.includes(lk.hairStyle)) lk.hairStyle = 'short'; if (F_ONLY_TOP.includes(lk.top)) lk.top = 'shirt'; lk.legs = 'pants'; lk.acc = lk.acc.filter((a) => !['daisyClip', 'pearlClip', 'earrings'].includes(a)); } else { if (!F_HAIR.includes(lk.hairStyle)) lk.hairStyle = 'bob'; lk.acc = lk.acc.filter((a) => a !== 'mustache'); } }
   else if (ds.pre) { const p = OWNER_PRESETS[+ds.pre]; d.look = JSON.parse(JSON.stringify(p.look)); if (!d.name.trim() || OWNER_PRESETS.some((q) => q.name === d.name)) d.name = p.name; }
   else if (ds.acc) { const i = lk.acc.indexOf(ds.acc); if (i >= 0) lk.acc.splice(i, 1); else { if (ds.acc === 'daisyClip') lk.acc = lk.acc.filter((a) => a !== 'pearlClip'); if (ds.acc === 'pearlClip') lk.acc = lk.acc.filter((a) => a !== 'daisyClip'); lk.acc.push(ds.acc); } }
   else if (ds.logo) d.logo = ds.logo;
@@ -2076,7 +2089,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.1.0';
+const GAME_VER = '1.1.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -4714,11 +4727,12 @@ portionTop = function (fk, x, y, w, h, seed, t = 0, fill = 1) {
   spr(`pt:${fk}:${seed}`, x, y, w, h, () => _ptop12(fk, x, y, w, h, seed, 0, 1), 2);
 };
 // nhân vật: vẽ sẵn theo dáng + tâm trạng, chỉ dán lại (bỏ hiệu ứng thở rất nhẹ)
-const PCACHE = new Map();
+const PCACHE = new Map(), LKEY = new WeakMap();
+const lookKey = (L) => { let k = LKEY.get(L); if (!k) { k = (L.id ?? '') + '|' + JSON.stringify(L); LKEY.set(L, k); } return k; };
 const _person12 = person;
 person = function (L, x, y, s = 1, mood = 'wait', t = 0) {
   if (!PERF.cache || !L) return _person12(L, x, y, s, mood, t);
-  const k = s * .92, P = CHAR_STYLE.P, key = `${L.id ?? JSON.stringify(L).length}:${mood}:${s.toFixed(2)}:${DPR}`;
+  const k = s * .92, P = CHAR_STYLE.P, key = `${lookKey(L)}:${mood}:${s.toFixed(2)}:${DPR}`;
   let c = PCACHE.get(key);
   const bw = 230 * k, bh = 360 * k, ox = 115 * k, oy = 330 * k;
   if (!c) {
