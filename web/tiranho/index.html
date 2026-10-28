@@ -136,9 +136,15 @@
   #ov .chip:disabled { opacity: .4; }
   #toast, #lvToast { position: absolute; left: 50%; transform: translate(-50%, -20px); opacity: 0; pointer-events: none; transition: .25s; z-index: 9; font-family: 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; }
   #toast { top: 3cqw; background: rgba(58,34,25,.92); color: #fff; padding: .6em 1.1em; border-radius: 99px; font-size: clamp(13px, 3.4cqw, 17px); font-weight: 700; max-width: 86%; }
-  #lvToast { top: 28%; width: 78%; background: #FFF9F1; border: 4px solid #F2B632; border-radius: 5cqw; padding: 1em; box-shadow: 0 10px 40px rgba(0,0,0,.35); }
-  #lvToast b { display: block; font: 800 clamp(20px, 6.2cqw, 32px)/1.15 'Baloo 2', sans-serif; color: #7A4528; }
-  #lvToast span { display: block; margin-top: .3em; color: #5A3E2E; font-size: clamp(13px, 3.4cqw, 17px); font-weight: 600; line-height: 1.4; }
+  #lvToast { top: 13%; width: 66%; background: rgba(255,249,241,.97); border: 2px solid #E0A93A; border-radius: 4cqw; padding: .45em .8em; box-shadow: 0 6px 18px rgba(0,0,0,.22); }
+  #lvToast b { display: block; font: 800 clamp(15px, 4.4cqw, 22px)/1.15 'Baloo 2', sans-serif; color: #7A4528; }
+  #lvToast span { display: block; margin-top: .15em; color: #5A3E2E; font-size: clamp(11px, 2.9cqw, 14px); font-weight: 600; line-height: 1.35; }
+  #ov .tut p { font-size: 1.05em; min-height: 5.6em; }
+  #ov .tdots { display: flex; justify-content: center; gap: 6px; margin: .2em 0 1em; }
+  #ov .tdots i { width: 9px; height: 9px; border-radius: 50%; background: #E3CDB6; }
+  #ov .tdots i.on { background: #A0603A; width: 22px; border-radius: 5px; }
+  #ov .trow { display: flex; gap: 10px; justify-content: center; }
+  #ov .trow .btn { flex: 1; max-width: 46%; padding: .75em 1em; }
   #toast.on, #lvToast.on { opacity: 1; transform: translate(-50%, 0); }
   #lvToast.on { pointer-events: auto; cursor: pointer; }
   /* kinh doanh quán */
@@ -1515,7 +1521,7 @@ function endDay() {
   shopEndDayPre();
   let left = Object.values(S.trays).reduce((a, b) => a + b, 0);
   const rewards = [];
-  for (const q of S.daily) if (!q.claimed && dailyProg(q) >= q.n) { q.claimed = true; S.money += q.reward; S.rep = Math.min(100, S.rep + 2); rewards.push(q); gainXP(40); }
+  for (const q of S.daily) if (!q.claimed && dailyProg(q) >= q.n) { q.claimed = true; S.money += q.reward; S.rep = Math.min(100, S.rep + 2); rewards.push(q); gainXP(30); }
   // lương nhân viên + ngày công
   const wages = hired().reduce((s, x) => s + staffWage(x), 0);
   S.money = Math.max(0, S.money - wages); S.today.wages = wages;
@@ -1827,7 +1833,7 @@ function applyProfile() {
 }
 
 // ================================================================ CẤP ĐỘ & KINH NGHIỆM
-const LV_NEED = (l) => 80 + 50 * (l - 1);
+const LV_NEED = (l) => 250 + 200 * (l - 1) + 25 * (l - 1) ** 2;
 function levelOf(xp = S.xp) { let l = 1, x = xp || 0; while (l < 30 && x >= LV_NEED(l)) { x -= LV_NEED(l); l++; } return { l, cur: x, need: LV_NEED(l) }; }
 const level = () => levelOf().l;
 const LV_TITLE = ['', 'Người bán mới', 'Quen tay quen việc', 'Có khách quen', 'Xe đẩy của xóm', 'Tay xắn khéo', 'Ngôi sao chợ đêm', 'Xe đẩy hot TikTok', 'Chủ xe có tiếng', 'Bậc thầy tiramisu',
@@ -2070,7 +2076,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.0.3';
+const GAME_VER = '1.1.0';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2204,7 +2210,7 @@ const drinkUnlocked = (dk) => level() >= DRINKS[dk].lv;
 const drinksAvailable = () => Object.keys(DRINKS).filter(canMakeDrink);
 
 // ---- bánh kem nguyên ổ
-const CAKE_LV = 2;
+const CAKE_LV = 7;
 const cakeUnlocked = () => level() >= CAKE_LV;
 const cakeBasePrice = (fk) => 320000 + Math.max(0, (FLAVORS[fk]?.price ?? 35000) - 35000) * 4;
 function cakeRecipe(fk) { const r = recipeOf(fk); return [...r, ...r.filter((k) => !['coffee'].includes(k) && INGR[k].per === 1 && k !== 'hop_kem'), 'hop_kem']; }
@@ -2488,7 +2494,7 @@ const STEPS_TRAY = [
   { id: 'layer2', name: 'Xếp lớp 2', hint: 'Xếp thêm một lớp bánh lên trên lớp kem', need: 6 },
   { id: 'cream2', name: 'Phết kem 2', hint: 'Vuốt để phủ lớp kem thứ hai thật phẳng', need: .8 },
   { id: 'topping', name: 'Rải topping', hint: '', need: 14 },
-  { id: 'deco', name: 'Trang trí', hint: 'Chọn món ở thanh dưới rồi chạm lên bánh: ít nhất 6 món, 2 loại', need: 6 },
+  { id: 'deco', name: 'Trang trí', hint: 'Chọn món ở thanh dưới rồi chạm lên mặt bánh: 6 món, 2 loại trở lên', need: 6 },
   { id: 'clean', name: 'Lau viền', hint: 'Vuốt dọc 4 cạnh khay để lau sạch kem dính viền', need: .8 },
 ];
 const STEPS_CAKE = [
@@ -2500,7 +2506,7 @@ const STEPS_CAKE = [
   { id: 'cream2', name: 'Phủ & láng kem', hint: 'Vuốt vòng tròn để phủ và láng mặt kem thật mịn', need: .8 },
   { id: 'topping', name: 'Rải topping', hint: '', need: 12 },
   { id: 'pipe', name: 'Bắt bông kem', hint: 'Chạm dọc viền bánh để bắt 10 bông kem', need: 10 },
-  { id: 'deco', name: 'Trang trí', hint: 'Chọn món ở thanh dưới rồi chạm lên bánh: ít nhất 5 món, 2 loại', need: 5 },
+  { id: 'deco', name: 'Trang trí', hint: 'Chọn món ở thanh dưới rồi chạm vào trong vòng bông kem: 5 món, 2 loại', need: 5 },
   { id: 'plaque', name: 'Cắm bảng chữ', hint: 'Chạm lên bánh để cắm bảng chữ "Happy Birthday"', need: 1 },
 ];
 const DECO_TOOLS = [['daisy', 'Hoa cúc'], ['mint', 'Lá bạc hà'], ['fruit', 'Trái cây'], ['choco', 'Que socola'], ['cream', 'Bông kem']];
@@ -2612,7 +2618,7 @@ function drawPrep(t, dt) {
   fillRR(30, 196, W - 60, 120, 26, '#FFFFFF', '#D9B48E', 4);
   text(cake ? `Bánh kem ${F.name}` : `Làm khay ${F.name}`, W / 2, 230, { size: 30, color: '#7A4528', weight: 800, font: TITLE, max: W - 100 });
   text(p.done ? (cake ? 'Xong! Cất bánh vào tủ mát' : 'Xong! Cất khay vào thùng giữ lạnh') : `Bước ${p.step + 1}/${steps.length} · ${st.name}`, W / 2, 268, { size: 23, color: '#3A2219', weight: 800 });
-  text(p.done ? 'Bánh để lạnh sẽ ngon hơn khi ra phố bán.' : st.id === 'topping' ? toppingHint(p.fk) : st.hint, W / 2, 298, { size: 17, color: '#7A5A48', weight: 600, max: W - 90 });
+  if (!p.done) fillRR(44, 282, W - 88, 30, 15, '#FFF3C4', '#E0A93A', 1.5); text(p.done ? 'Bánh để lạnh sẽ ngon hơn khi ra phố bán.' : st.id === 'topping' ? toppingHint(p.fk) : st.hint, W / 2, 298, { size: 17, color: p.done ? '#7A5A48' : '#5A3418', weight: 800, max: W - 110 });
   const B = workBox(p);
   // khuôn / khay
   if (cake) {
@@ -2706,7 +2712,7 @@ function orderFor(c, R, maxN = 3) {
 // ================================================================ PHÒNG SÁNG CHẾ (tự mix món tiramisu) + CÔNG THỨC + BẢNG GIÁ
 // Món sáng chế: S.rd = [{ id, name, base, cream, tops[], dust, sweet, coffee, price, on, sold }]. Mỗi món thành một vị khay 'rd<id>'.
 // Xu hướng MXH đổi mỗi 3 ngày; món hợp xu hướng (độ "hot") được khách gọi nhiều hơn và chịu giá cao hơn.
-const RD_LV = 2, RD_MAX = 6;
+const RD_LV = 6, RD_MAX = 6;
 const RD_BASES = [['lady', 'Ladyfinger'], ['bonglan', 'Bông lan'], ['oreo', 'Bánh quy Oreo']];
 const RD_CREAMS = [['masc', 'Mascarpone', '#FFF6E4'], ['kem_cheese', 'Kem cheese', '#FFF9EF'], ['dua', 'Kem dừa', '#FFFDF6'], ['matcha', 'Kem matcha', '#E4F0CF']];
 const RD_DUSTS = [['none', 'Không rắc'], ['bot_cacao', 'Bột cacao'], ['bot_matcha', 'Bột matcha'], ['oreo', 'Vụn Oreo']];
@@ -3247,7 +3253,7 @@ function drawStreet(t, dt) {
   drawBins(t, cc);
   const cakeN = (S.cakes || []).length;
   utilItem('boxstack', 'Hộp bã mía', `còn ${S.inv.box}`, 12, CT.util.y, 168, CT.util.h, 'box');
-  utilItem('cake', 'Tủ bánh kem', cakeUnlocked() ? `còn ${cakeN} ổ` : 'Mở ở cấp 2', 188, CT.util.y, 168, CT.util.h, 'cake', !cakeUnlocked());
+  utilItem('cake', 'Tủ bánh kem', cakeUnlocked() ? `còn ${cakeN} ổ` : `Mở ở cấp ${CAKE_LV}`, 188, CT.util.y, 168, CT.util.h, 'cake', !cakeUnlocked());
   utilItem('bagstack', 'Túi giấy', `còn ${S.inv.bag}`, 364, CT.util.y, 168, CT.util.h, 'bag');
   trashCan(540, CT.util.y, 168, CT.util.h);
   // ---- hoạt ảnh
@@ -3263,16 +3269,16 @@ function drawStreet(t, dt) {
   if (S.anim?.kind === 'give') { const k = ease(S.anim.t / .7); bagDraw(lerp(MT.x + 160, 240, k), lerp(MT.y + 120, 300, k), lerp(.9, .6, k), true); }
   // ---- thanh hướng dẫn + nút
   const BY = CT.bar.y, act = cc && cc.enter > .9 && cc.leave === 0 ? nextAct(cc) : null, cant = cc && S.phase === 'order' && !S.anim && cc.enter > .9 && cc.leave === 0 && !fulfillable(cc);
-  fillRR(12, BY, 440, 96, 18, cant ? '#FFEDE8' : 'rgba(255,255,255,.9)', cant ? '#F2B2A4' : '#E3CDB6', 2);
+  fillRR(12, BY, 440, 96, 18, cant ? '#FFEDE8' : act ? '#FFF4CF' : 'rgba(255,255,255,.9)', cant ? '#F2B2A4' : act ? '#E0A93A' : '#E3CDB6', act && !cant ? 3 : 2);
   if (cant) { text('Món khách gọi đã hết hàng', 232, BY + 34, { size: 19, color: '#8E2414', weight: 800 }); text('Xin lỗi để mời khách khác', 232, BY + 64, { size: 15, color: '#8E2414', weight: 600 }); }
   else if (S.pouring) { const u = S.pouring.u; text('Đang rót… thả tay khi nước vào vùng xanh', 232, BY + 34, { size: 17, color: '#2E6A9A', weight: 800 }); fillRR(40, BY + 56, 384, 18, 9, '#EEF2F4'); fillRR(40 + 384 * POUR_LO, BY + 52, 384 * (POUR_HI - POUR_LO), 26, 6, 'rgba(124,195,90,.45)'); fillRR(40, BY + 58, 384 * clamp(u.fill), 14, 7, u.fill > POUR_HI ? '#E8553F' : DRINKS[S.pouring.dk].color); }
-  else if (act) { text('Việc tiếp theo', 32, BY + 26, { size: 13, color: '#8A6A5A', weight: 700, align: 'left' }); wrap(act[1], 400, 19, 800).slice(0, 2).forEach((l, i) => text(l, 32, BY + 52 + i * 24, { size: 19, color: '#3A2219', weight: 800, align: 'left' })); }
+  else if (act) { fillRR(26, BY + 10, 124, 24, 12, '#E0A93A'); text('VIỆC TIẾP THEO', 88, BY + 22, { size: 13, color: '#fff', weight: 800 }); const ls = wrap(act[1], 410, 20, 800).slice(0, 2); ls.forEach((l, i) => text(l, 30, BY + (ls.length > 1 ? 54 : 64) + i * 25, { size: 20, color: '#3A2219', weight: 800, align: 'left', max: 412 })); }
   else text(cc ? '' : S.dayLeft > 0 ? 'Đang chờ khách tới…' : 'Hết giờ bán', 232, BY + 48, { size: 17, color: '#8A6A5A', weight: 700 });
   if (cant) button('refuse', 'Xin lỗi, hết món', 462, BY, 246, 96, { t, pulse: true, size: 22, color: '#8A5A3A' });
   else button('cs:give', 'Giao khách', 462, BY, 246, 96, { t, pulse: S.phase === 'ready', size: 26, color: '#A0603A', icon: '[[bag]]', disabled: S.phase !== 'ready' || !!S.anim });
   if (S.phase === 'ready') R_.give = { x: 462, y: BY, w: 246, h: 96 };
   // ---- tô sáng chỗ cần chạm
-  if (act && !cant && R_[act[0]] && guideGlow()) { const r = R_[act[0]], p = .55 + .45 * Math.sin(t * 6); g.strokeStyle = `rgba(242,182,50,${p})`; g.lineWidth = 6; rr(r.x - 4, r.y - 4, r.w + 8, r.h + 8, 14); g.stroke(); }
+  if (act && !cant && R_[act[0]] && guideGlow()) { const r = R_[act[0]]; g.strokeStyle = 'rgba(255,255,255,.95)'; g.lineWidth = 9; rr(r.x - 5, r.y - 5, r.w + 10, r.h + 10, 14); g.stroke(); g.strokeStyle = '#E8A21A'; g.lineWidth = 5; rr(r.x - 5, r.y - 5, r.w + 10, r.h + 10, 14); g.stroke(); }
   hud(t, { timer: true });
   effects(dt);
 }
@@ -3464,7 +3470,7 @@ const franOk = () => shopRating() >= 4.5 && followers() >= 30000 && Object.keys(
 // ---- đơn online
 const APPS = [['MeeFood', '#A0603A'], ['Giao Liền', '#3E9A5A'], ['Ship Vèo', '#F2A54A']];
 const onlineApps = () => APPS.slice(0, Math.min(APPS.length, S.tools?.tablet || 0));
-const ONLINE_LV = 5, TABLET_PRICE = 1200000;
+const ONLINE_LV = 8, TABLET_PRICE = 1200000;
 
 // ---- gộp hiệu ứng vào M()
 const _M0 = M;
@@ -3768,7 +3774,7 @@ function renderShopTabs(body, head) {
 }
 
 // ================================================================ VẬN HÀNH LÚC BÁN: hàng chờ, đồng hồ, rót giữ tay, xô đổ, mức đá, đơn online
-const ICE_LV = 4, ICE_NAME = ['', 'Ít đá', 'Vừa đá', 'Nhiều đá'];
+const ICE_LV = 5, ICE_NAME = ['', 'Ít đá', 'Vừa đá', 'Nhiều đá'];
 const iceOn = () => level() >= ICE_LV;
 const POUR_LO = .74, POUR_HI = .9, QMAX = 4;
 const OPEN_H = 15, CLOSE_H = 22;
@@ -4024,7 +4030,7 @@ function payDone(cc, bg = false) {
   if (c.critic) tip = 0;
   if (c.online) { total = Math.round(total * .8 / 1000) * 1000; S.today.onlineRev = (S.today.onlineRev || 0) + total; S.today.online = (S.today.online || 0) + 1; }
   S.stats = S.stats || { earned: 0 }; S.stats.earned = (S.stats.earned || 0) + total + tip;
-  gainXP(c.order.length * 8 + c.drinks.length * 6 + (c.cake ? 40 : 0) + (c.mistakes ? 0 : 4));
+  gainXP(c.order.length * 3 + c.drinks.length * 2 + (c.cake ? 15 : 0) + (c.mistakes ? 0 : 2));
   S.money += total + tip; S.today.revenue += total + tip; S.today.sold += c.order.length; S.totalSold += c.order.length; S.today.served++;
   if (tip) S.today.tips++;
   for (const f of c.order) S.today.flavorSold[f] = (S.today.flavorSold[f] ?? 0) + 1;
@@ -4773,6 +4779,121 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) { mus
 applyGfx();
 
 addEventListener('resize', () => resize());
+
+// ================================================================ v13: cân bằng cấp độ, mốc mở khoá, trang trí bánh, hướng dẫn đầu game
+// ---- lịch mở khoá mới: rải đều theo cấp, bánh kem nguyên ổ mở ở cấp CAKE_LV
+{
+  const setLv = (arr, map) => { for (const x of arr) if (map[x.id] != null) x.lv = map[x.id]; };
+  setLv(STAFF, { tung: 2, mo: 3, bong: 4, hau: 5, tho: 5, tai: 6, hong: 7, khoa: ONLINE_LV, quan: 10, vy: 11 });
+  setLv(TOOLS, { ghe: 2, xeng: 3, loa: 4, led: 5, thung: 6, tem: 8, ban: 9 });
+  setLv(ADS, { tora: 2, fb: 4, kol: 7 });
+  setLv(CAMPS, { fbads: 4, tiktok: 7, kolbig: 10, billboard: 13 });
+  setLv(LOANS, { kn: 2, mr: 6, ch: 10 });
+  setLv(BRANCHES, { truong: 9, chodem: 11, kcn: 13, pdb: 15 });
+  QUAY[0].lv = 3; QUAY[1].lv = 7;
+  Object.assign(DRINKS.tra_sua, { lv: 2 }); Object.assign(DRINKS.tra_traicay, { lv: 4 }); Object.assign(DRINKS.matcha_latte, { lv: 6 });
+  INGR.bonglan.lv = CAKE_LV; INGR.hop_kem.lv = CAKE_LV;
+  for (const [k, l] of Object.entries({ tran_chau_trang: 3, sot_caramel: 3, thach_dua: 4, hanh_nhan: 5, pudding: 6, choco_chip: 6 })) if (INGR[k]) INGR[k].lv = l;
+}
+const _unl13 = unlocksAt;
+unlocksAt = function (l) {
+  const extra = [
+    ...CAMPS.filter((x) => x.lv === l).map((x) => 'Chiến dịch: ' + x.name), ...LOANS.filter((x) => x.lv === l).map((x) => x.name),
+    ...BRANCHES.filter((x) => x.lv === l).map((x) => 'Chi nhánh ' + x.name), ...QUAY.filter((x) => x.lv === l).map((x) => `Quầy order ${x.n} chỗ`),
+    ...Object.values(INGR).filter((I) => I.top && I.lv === l).map((I) => 'topping ' + I.name),
+    ...(l === ONLINE_LV ? ['Đơn online'] : []), ...(l === ICE_LV ? ['Chọn mức đá'] : []),
+  ];
+  return [..._unl13(l), ...extra];
+};
+
+// ---- lên cấp chậm hơn: kinh nghiệm cần tăng dần, mỗi khách cho ít kinh nghiệm hơn
+const OLD_NEED = (l) => 80 + 50 * (l - 1);
+function migrateXP() {
+  if (!S || S.flags?.xpV2 || S.scene === 'title') return;
+  S.flags ??= {};
+  let l = 1, x = S.xp || 0; while (l < 30 && x >= OLD_NEED(l)) { x -= OLD_NEED(l); l++; }
+  let nx = 0; for (let i = 1; i < l; i++) nx += LV_NEED(i);
+  S.xp = Math.round(nx + (l < 30 ? x / OLD_NEED(l) * LV_NEED(l) : 0));
+  S.flags.xpV2 = true;
+}
+
+// ---- thông báo lên cấp gọn: dải nhỏ phía trên, tự ẩn nhanh
+bigToast = function (title, sub) {
+  const el = $('lvToast'); el.innerHTML = `<b>${esc(title)}</b><span>${esc(sub)}</span>`; hydrateIcons(el); el.classList.add('on');
+  clearTimeout(bigToast.t); bigToast.t = setTimeout(() => el.classList.remove('on'), 3000);
+};
+gainXP = function (n) {
+  if (!n) return; migrateXP(); const a = level(); S.xp = (S.xp || 0) + n; if (S.today) S.today.xp = (S.today.xp || 0) + n; const b = level();
+  if (b > a) {
+    unlockByLevel(); const un = []; for (let l = a + 1; l <= b; l++) un.push(...unlocksAt(l));
+    bigToast(`Lên cấp ${b} · ${lvTitle(b)}`, un.length ? 'Mở: ' + (un.length > 3 ? un.slice(0, 3).join(', ') + ` +${un.length - 3}` : un.join(', ')) : 'Tay nghề lên một bậc!'); sfx.good();
+  }
+};
+
+// ---- trang trí bánh: món to rõ, có bóng, không đặt chồng lên nhau, nằm gọn trong mặt bánh
+const DECO_MAX = 14;
+drawDeco = function (d, F, fk) {
+  const [x, y, r, tool] = d;
+  ell(x + 2, y + 9, tool === 'choco' ? 26 : 18, 7, 'rgba(70,35,15,.16)');
+  if (tool !== 'cream') { ell(x, y + 5, 22, 15, '#FFF8EC', 'rgba(170,130,95,.45)', 1.5); ell(x - 6, y + 1, 7, 4, 'rgba(255,255,255,.9)'); }
+  if (tool === 'daisy') daisy(x, y, 21, r * 2);
+  else if (tool === 'mint') { mint(x - 7, y, 1.9, -.6 + r * .5); mint(x + 7, y + 2, 1.7, .7 + r * .5); }
+  else if (tool === 'fruit') { piece(fruitOf(fk), x, y - 3, 40, (r - .5) * .8, Math.floor(r * 3)); }
+  else if (tool === 'choco') { chocoStick(x - 4, y, 54, -.9 + r * .3); chocoStick(x + 6, y + 2, 48, -.55 + r * .3); }
+  else if (tool === 'cream') { rosette(x, y, 19); ell(x - 5, y - 6, 4, 3, 'rgba(255,255,255,.75)'); }
+};
+const _prepIn13 = prepInput;
+prepInput = function (x, y, drag) {
+  const p = S.prep, st = p && !p.done ? stepsOf(p)[p.step] : null;
+  if (st?.id === 'deco') {
+    if (drag) return;
+    const inside = p.kind === 'cake' ? Math.hypot(x - CK.x, y - CK.y) <= CK.r - 42 : x > PT.x + 26 && x < PT.x + PT.w - 26 && y > PT.y + 26 && y < PT.y + PT.h - 26;
+    if (!inside) { if (inWork(p, x, y)) msg('Đặt vào giữa mặt bánh, tránh sát viền', '#8A4B2A'); return; }
+    if (p.decos.length >= DECO_MAX) { msg('Bánh đã đủ đồ trang trí rồi!', '#8A4B2A'); return; }
+    if (p.decos.some(([dx, dy]) => Math.hypot(dx - x, dy - y) < 44)) { msg('Đặt cách món khác ra một chút', '#8A4B2A'); return; }
+  }
+  if (st?.id === 'plaque' && !drag && p.kind === 'cake' && Math.hypot(x - CK.x, y - CK.y) <= CK.r) {
+    x = clamp(x, CK.x - CK.r + 110, CK.x + CK.r - 110); y = clamp(y, CK.y - CK.r + 70, CK.y + CK.r - 70);
+  }
+  return _prepIn13(x, y, drag);
+};
+
+// ---- hướng dẫn chơi đầu game (tự hiện ở ngày 1, xem lại trong Cài đặt)
+const TUT = [
+  ['[[sun]]', 'Một ngày ở xe bánh', 'Đầu ngày xem thực đơn, nhiệm vụ và số khách dự kiến. Sau đó bấm <b>Đi chợ mua nguyên liệu</b>.'],
+  ['[[bag]]', 'Đi chợ', 'Bấm <b>Mua theo gợi ý</b> để game chọn đủ nguyên liệu cho số khách hôm nay. Nguyên liệu có hạn dùng (HSD), đừng mua quá nhiều.'],
+  ['[[cake]]', 'Làm bánh trong bếp', 'Chọn vị trên bảng thực đơn rồi làm khay từng bước: nhúng bánh, xếp lớp, phết kem, rải topping, trang trí. Mỗi khay được 6 hộp.'],
+  ['[[hand]]', 'Bán ngoài phố', 'Chạm vào khách ở quầy order để làm đơn. Khung vàng <b>Việc tiếp theo</b> ở dưới cho biết cần làm gì, viền vàng chỉ chỗ cần chạm.'],
+  ['[[ly]]', 'Pha nước', 'Lấy ly, <b>giữ tay</b> trên bình để rót và thả khi nước vào vùng xanh, thêm đá, dập nắp, cắm ống hút rồi bấm <b>Giao khách</b>.'],
+  ['[[heart]]', 'Giữ khách vui', 'Khách có thanh kiên nhẫn: làm nhanh, đúng món thì được tip và sao cao. Để khách chờ lâu hoặc làm sai, quán bị trừ sao.'],
+  ['[[up]]', 'Lớn mạnh dần', `Cuối ngày xem lãi lỗ. Thanh tab phía trên mở Kho, Nhân viên, Nâng cấp, Xếp hạng… Lên cấp để mở vị mới, nhân viên và bánh kem nguyên ổ (cấp ${CAKE_LV}).`],
+];
+const _rov13 = renderOv0;
+renderOv0 = function () {
+  if (OV.view !== 'tut') return _rov13();
+  const body = $('ovBody'), foot = $('ovFoot'), i = clamp(OV.page || 0, 0, TUT.length - 1), [ic, h, p] = TUT[i];
+  $('ovTabs').innerHTML = ''; foot.innerHTML = ''; $('ovTabBar').hidden = true; $('ovClose').hidden = false; $('ovTitle').textContent = 'Hướng dẫn chơi';
+  body.innerHTML = `<div class="pz tut"><div class="pzic">${ic}</div><h3>${h}</h3><p>${p}</p>
+    <div class="tdots">${TUT.map((_, k) => `<i class="${k === i ? 'on' : ''}"></i>`).join('')}</div>
+    <div class="trow">${i ? '<button class="btn ghost" id="tutPrev">Trước</button>' : '<button class="btn ghost" id="tutSkip">Bỏ qua</button>'}
+    <button class="btn ${i === TUT.length - 1 ? 'go' : ''}" id="tutNext">${i === TUT.length - 1 ? 'Bắt đầu chơi' : 'Tiếp'}</button></div></div>`;
+  $('tutNext').onclick = () => { if (i === TUT.length - 1) return closeOv(); OV.page = i + 1; renderOv(); };
+  if ($('tutPrev')) $('tutPrev').onclick = () => { OV.page = i - 1; renderOv(); };
+  if ($('tutSkip')) $('tutSkip').onclick = () => closeOv();
+};
+function openTut(back) { openOv('tut', { page: 0, after: back ? () => openOv(back) : null }); $('ov').classList.add('small'); }
+const _rset13 = renderSettings;
+renderSettings = function (body) {
+  _rset13(body);
+  const list = body.querySelector('.slist'); if (!list) return;
+  list.insertAdjacentHTML('afterbegin', setRow('[[ledger]]', 'Hướng dẫn chơi', 'Xem lại', 'sTut'));
+  hydrateIcons(list); $('sTut').onclick = () => { const back = OV.back; closeOv(); openTut(back === 'pause' ? 'pause' : null); };
+};
+const _dock13 = dockSync;
+dockSync = function () {
+  _dock13(); migrateXP();
+  if (S.scene === 'daystart' && S.day === 1 && !S.dialog && !S.quests && !OV.open && !S.flags?.tutSeen) { S.flags.tutSeen = true; save(); openTut(); }
+};
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
