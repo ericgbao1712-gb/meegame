@@ -2132,19 +2132,34 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.4.2';
+const GAME_VER = '1.5.0';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
-const NET = { server: /(^|\.)meegame\.|meegame[-.].*\.(vercel\.app|workers\.dev)$|^localhost$|^127\./.test(location.hostname) && location.protocol.startsWith('http'), player: null, rows: null, status: '', busy: false };
+const NET = { server: /(^|\.)meegame\.|meegame[-.].*\.(vercel\.app|workers\.dev)$|\.run\.app$|^localhost$|^127\./.test(location.hostname) && location.protocol.startsWith('http'), player: null, rows: null, status: '', busy: false, rankAt: 0, rankLoading: false };
 // Công tắc đăng nhập Google / máy chủ MeeGame: false = tắt hẳn (không gọi máy chủ, tiến trình chỉ lưu trong máy). Đổi thành true để bật lại.
 const LOGIN_ON = true;
 NET.onMeeGame = NET.server; if (!LOGIN_ON) NET.server = false;
-async function meeApi(method, route, body) {
+const RANK_TTL = 5 * 60000;   // nhớ bảng xếp hạng 5 phút
+let _authMeP = null, _authMeAt = 0;
+async function meeApiRaw(method, route, body) {
   const init = { method, credentials: 'same-origin', headers: {} };
   if (method !== 'GET') { init.headers['X-MeeGame'] = '1'; init.headers['Content-Type'] = 'application/json'; init.body = JSON.stringify(body || {}); }
   const [r0, q] = route.split('?');
   try { const r = await fetch(`/api/lau?g=${CLOUD_GAME}&r=${encodeURIComponent(r0)}${q ? '&' + q : ''}`, init); let json = null; try { json = await r.json(); } catch { /* không phải JSON */ } return { status: r.status, json }; } catch { return { status: 0, json: null }; }
+}
+async function meeApi(method, route, body) {
+  const now = Date.now();
+  if (NET.downUntil > now && !(method === 'POST' && route === 'auth/google')) return { status: 0, json: null, down: true };
+  if (method === 'GET' && route === 'auth/me') {
+    if (_authMeP && now - _authMeAt < 15000) return _authMeP;
+    _authMeAt = now; _authMeP = meeApiRaw(method, route, body);
+  }
+  const r = await (method === 'GET' && route === 'auth/me' ? _authMeP : meeApiRaw(method, route, body));
+  if ((r.status === 429 && !r.json) || r.status >= 500 || (r.status === 429 && r.json?.error !== 'too_fast' && r.json?.error !== 'too_many')) {
+    NET.downUntil = Date.now() + 10 * 60000; NET.downMsg = true;
+  }
+  return r;
 }
 let gisP = null, gisInit = false;
 function loadGis() {
@@ -2161,14 +2176,21 @@ function mountGoogle(root) {
 }
 async function meeSignIn(cred) {
   if (!cred) return; const r = await meeApi('POST', 'auth/google', { credential: cred });
-  if (r.status === 200 && r.json?.player) { NET.player = r.json.player; titleAcctKey = ''; toast(`Đã đăng nhập <b>${esc(NET.player.name || NET.player.email || '')}</b>`); if (CLOUD_READY) await cloudCheck(true); }
-  else toast(esc(r.json?.message || 'Đăng nhập chưa được'), 2600);
+  if (r.status === 200 && r.json?.player) {
+    NET.player = r.json.player; titleAcctKey = '';
+    toast(`Đã đăng nhập <b>${esc(NET.player.name || NET.player.email || '')}</b>`);
+    if (CLOUD_READY) await handleAuthCloudMeta(r.json.cloud, true);
+  } else toast(esc(r.json?.message || 'Đăng nhập chưa được'), 2600);
   if (OV.open) renderOv();
 }
-async function meeSignOut() { await meeApi('POST', 'auth/logout', {}); NET.player = null; toast('Đã đăng xuất'); if (OV.open) renderOv(); }
+async function meeSignOut() { await meeApi('POST', 'auth/logout', {}); NET.player = null; NET.checked = false; NET.cloud = null; NET.base = null; toast('Đã đăng xuất'); if (OV.open) renderOv(); }
 function cloudSave() {
   const lv = levelOf();
-  return { ...Object.fromEntries(PERSIST.map((k) => [k, S[k]])), v: 1, started: true, level: lv.l, shopName: S.profile.shop, avatar: 0, savedAt: Date.now(),
+  const data = Object.fromEntries(PERSIST.map((k) => [k, S[k]]));
+  // Gửi gọn hơn: bỏ lịch sử ngày dài (hist) và đánh giá cũ quá 30 mục; bản trong máy vẫn giữ đủ
+  delete data.hist;
+  if (Array.isArray(data.reviews) && data.reviews.length > 30) data.reviews = data.reviews.slice(-30);
+  return { ...data, v: 1, started: true, level: lv.l, shopName: S.profile.shop, avatar: 0, savedAt: S.savedAt || Date.now(),
     stats: { ...(S.stats || {}), moneyEarned: S.stats?.earned || 0, potsSold: S.totalSold, daysPlayed: Math.max(0, S.day - 1) } };
 }
 async function serverSync(force = false) {
@@ -2197,30 +2219,35 @@ async function redeemCode() {
   if (r.status === 200 && r.json) { const m = Math.round((+r.json.money || 0) * 1000), xp = Math.round(+r.json.xp || 0); S.money += m; gainXP(xp); save(); serverSync(); toast(`Nhận quà: ${m ? vnd(m) : ''}${m && xp ? ' + ' : ''}${xp ? xp + ' kinh nghiệm' : ''} [[gift]]`, 3000); renderOv(); }
   else toast(esc(r.json?.message || 'Mã chưa đúng'), 2600);
 }
-async function loadRank() {
-  if (!CLOUD_READY || !NET.server || NET.rankTried) return;
-  NET.rankTried = true;
+async function loadRank(force = false) {
+  if (!CLOUD_READY || !NET.server) return;
+  if (!force && NET.rows && Date.now() - (NET.rankAt || 0) < RANK_TTL) return;
+  if (!force && NET.rankTried) return;
+  NET.rankTried = true; NET.rankLoading = true; NET.status = '';
+  if (force && OV.open && (OV.view === 'rank' || OV.tab === 'rank')) renderOv();
   const r = await meeApi('GET', 'leaderboard?by=money');
-  if (r.status === 200 && r.json) NET.rows = (r.json.rows || []).map((x) => ({ shop: x.shopName || 'Quán', val: Math.round((+x.value || 0) * 1000), level: x.level, me: !!x.me }));
-  else NET.status = r.status === 0 ? 'Chưa kết nối được máy chủ MeeGame.' : 'Máy chủ chưa mở bảng xếp hạng cho game này.';
+  NET.rankLoading = false;
+  if (r.status === 200 && r.json) {
+    NET.rows = (r.json.rows || []).map((x) => ({ shop: x.shopName || 'Quán', val: Math.round((+x.value || 0) * 1000), level: x.level, me: !!x.me }));
+    NET.rankAt = Date.now();
+  } else {
+    NET.status = r.status === 0 ? 'Chưa kết nối được máy chủ MeeGame.' : 'Máy chủ chưa mở bảng xếp hạng cho game này.';
+  }
   if (OV.open && (OV.view === 'rank' || OV.tab === 'rank')) renderOv();
 }
 function renderRank(body) {
-  const me = `<div class="card slim on"><canvas class="lgc" id="rkLogo" width="88" height="88"></canvas><div class="cb"><h4>${esc(S.profile.shop)}</h4><p>Cấp ${level()} · ${S.totalSold} hộp · tổng doanh thu ${vnd(S.stats?.earned || 0)}</p></div></div>`;
+  const reloadBtn = NET.server && CLOUD_READY ? `<button class="btn sm ghost" id="btnRankReload" ${NET.rankLoading ? 'disabled' : ''}>${NET.rankLoading ? 'Đang tải…' : 'Tải lại'}</button>` : '';
+  const me = `<div class="card slim on"><canvas class="lgc" id="rkLogo" width="88" height="88"></canvas><div class="cb"><div class="row" style="justify-content:space-between"><h4>${esc(S.profile.shop)}</h4>${reloadBtn}</div><p>Cấp ${level()} · ${S.totalSold} hộp · tổng doanh thu ${vnd(S.stats?.earned || 0)}</p></div></div>`;
   let list;
   if (!NET.server && NET.onMeeGame) list = '<p class="note">Bảng xếp hạng online đang tạm tắt. Tiến trình của bạn vẫn lưu trong máy; muốn chuyển máy thì dùng Cài đặt → Sao lưu tiến trình.</p>';
   else if (!NET.server) list = '<p class="note">Bảng xếp hạng online chỉ có khi chơi trên trang MeeGame (đăng nhập Google). Ở đây bạn xem được thành tích của mình.</p>';
   else if (!CLOUD_READY) list = '<p class="note">Bảng xếp hạng Tiramisu Xe Đẩy sẽ mở khi máy chủ MeeGame bật lưu online cho game này.</p>';
-  else if (!NET.rows) { list = `<p class="note">${esc(NET.status || 'Đang tải bảng xếp hạng…')}</p>`; if (!NET.rankTried) loadRank(); }
+  else if (NET.rankLoading || !NET.rows) { list = `<p class="note">${esc(NET.status || 'Đang tải bảng xếp hạng…')}</p>`; if (!NET.rankTried) loadRank(); }
   else list = NET.rows.length ? `<ol class="rank">${NET.rows.map((x, i) => `<li class="${x.me ? 'me' : ''}"><em>${i + 1}</em><b>${esc(x.shop)}</b><span>Cấp ${x.level}</span><i>${vnd(x.val)}</i></li>`).join('')}</ol>` : '<p class="note">Chưa có ai lên bảng. Đăng nhập rồi bán một ngày để lên bảng!</p>';
   body.innerHTML = me + list;
   paintLogo($('rkLogo'), S.profile.logo);
+  if ($('btnRankReload')) $('btnRankReload').onclick = () => loadRank(true);
 }
-(async () => {
-  if (!NET.server) return;
-  const me = await meeApi('GET', 'auth/me');
-  if (me.status === 200 && me.json?.player) { NET.player = me.json.player; if (CLOUD_READY) cloudCheck(false); }
-})();
 
 
 // ================================================================ THỰC ĐƠN MỞ RỘNG: vị mới, bánh kem, nước uống, giá bán
@@ -3749,7 +3776,7 @@ const stars = (n) => '★★★★★'.slice(0, Math.round(n)) + '☆☆☆☆�
 function spend(cost) { if (S.money < cost) return false; S.money -= cost; S.today && (S.today.invest = (S.today.invest || 0) + cost); return true; }
 function renderShopTabs(body, head) {
   const tab = OV.tab, selling = S.scene === 'street', prevTab = OV.lastTab; OV.lastTab = tab;
-  if (tab === 'rank') { if (prevTab !== 'rank') { NET.rows = null; NET.rankTried = false; NET.status = ''; } renderRank(body); return true; }
+  if (tab === 'rank') { if (prevTab !== 'rank' && (!NET.rows || Date.now() - (NET.rankAt || 0) >= RANK_TTL)) { NET.rows = null; NET.rankTried = false; NET.status = ''; } renderRank(body); return true; }
   if (tab === 'kho') {
     reconcileLots();
     const rows = Object.keys(INGR).filter((k) => (S.inv[k] ?? 0) > 0);
@@ -4977,31 +5004,44 @@ dockSync = function () {
   if (S.scene === 'daystart' && S.day === 1 && !S.dialog && !S.quests && !OV.open && !S.flags?.tutSeen) { S.flags.tutSeen = true; save(); openTut(); }
 };
 
-// ================================================================ v14: tự đồng bộ tiến trình với tài khoản Google liên tục, không ghi đè mất dữ liệu
-// - Mỗi lần game lưu (save) → đánh dấu "cần đồng bộ"; cứ ~25 giây gửi 1 lần, gửi ngay khi rời trang / chuyển tab / hết ngày.
-// - Gửi kèm base = mốc lưu trên mạng mà máy này đã biết: máy khác lưu sau đó thì máy chủ trả 409 → so tiến trình rồi mới quyết định.
-// - Không bao giờ gửi khi đang ở màn hình tiêu đề hoặc chưa đọc được bản trên mạng (tránh đẩy ván trống lên đè ván thật).
-// - Bản trên mạng tiến xa hơn (ngày / kinh nghiệm) → tải về; đang bán dở thì chờ tới lúc an toàn mới tải.
-Object.assign(NET, { dirty: false, base: null, checked: false, cloud: null, pend: null, forceNext: false, lastSync: 0, lastTry: 0 });
-const SYNC_GAP = 180000;   // 3 phút/lần (ngoài ra còn lưu khi rời trang, chuyển tab, hết ngày) để không vượt hạn mức máy chủ
+// ================================================================ v14 + v1.5.0: đồng bộ theo sự kiện (offline-first), dấu vân tay bản lưu, chỉ tải khi bản trên mạng mới hơn
+// - Bỏ đồng hồ hẹn giờ 3 phút: chỉ gửi PUT save khi hết ngày, rời trang, bấm lưu tay, khôi phục, chơi mới hoặc sau khi nhận mã.
+// - Giữ "dấu vân tay" của lần lưu cuối (ngày, tiền, kinh nghiệm, số hộp đã bán, giờ lưu); trùng thì bỏ qua. Rời trang dưới 5 phút sau khi lưu cũng bỏ qua.
+// - Chỉ gọi GET save khi auth/me cho biết bản trên mạng mới hơn bản trong máy; bỏ tải lại khi quay lại tab.
+Object.assign(NET, { dirty: false, base: null, checked: false, cloud: null, pend: null, forceNext: false, lastSync: 0, lastTry: 0, lastFp: '', latestCodeAt: null });
+const LEAVE_SYNC_GAP = 5 * 60000;   // rời trang dưới 5 phút sau khi vừa lưu thì bỏ qua
 const progOf = (d) => (d ? (d.day || 0) * 1e10 + (d.xp || 0) * 10 + Math.min(9, (d.totalSold || 0) > 0 ? 1 : 0) : -1);
+const saveFp = (d = S) => `${d.day || 1}|${d.money || 0}|${d.xp || 0}|${d.totalSold || 0}|${d.savedAt || 0}`;
 const syncable = () => CLOUD_READY && NET.server && NET.player && NET.checked && S.scene !== 'title' && !(OV.open && OV.view === 'setup' && OV.mode === 'new') && S.profile && S.day >= 1;
 const safeScene = () => ['title', 'daystart', 'summary'].includes(S.scene) && !S.dialog && !(OV.open && OV.view === 'setup');
 
+let _lastLocalSnap = '';
 const _save14 = save;
-save = function () { _save14(); if (S.scene !== 'title') NET.dirty = true; };
+save = function () {
+  const snap = JSON.stringify(Object.fromEntries(PERSIST.filter((k) => k !== 'savedAt').map((k) => [k, S[k]])));
+  const changed = snap !== _lastLocalSnap;
+  if (!changed && S.savedAt) return;
+  _lastLocalSnap = snap;
+  _save14();
+  if (S.scene !== 'title') NET.dirty = true;
+};
 const _reset14 = resetProgress;
-resetProgress = function () { _reset14(); NET.forceNext = true; NET.pend = null; };
+resetProgress = function () { _reset14(); _lastLocalSnap = ''; NET.forceNext = true; NET.pend = null; };
 const _restore14 = restoreSave;
-restoreSave = function (d) { _restore14(d); NET.forceNext = true; NET.pend = null; syncCloud(); };
+restoreSave = function (d) { _restore14(d); NET.forceNext = true; NET.pend = null; syncCloud({ manual: true }); };
 
 function stripCloud(cs) { const d = { ...cs }; ['v', 'started', 'level', 'shopName', 'avatar'].forEach((k) => delete d[k]); return d; }
 function applyCloud(cs) {
+  const prev = loadSave();
   const d = stripCloud(cs); NET.pend = null;
+  if (prev && (!d.hist || !d.hist.length) && prev.hist) d.hist = prev.hist;
+  if (prev && Array.isArray(prev.reviews) && Array.isArray(d.reviews) && prev.reviews.length > d.reviews.length) {
+    d.reviews = prev.reviews.slice(0, prev.reviews.length - d.reviews.length).concat(d.reviews).slice(-150);
+  }
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(d)); } catch { /* bỏ qua */ }
   if (S.scene === 'title') { if (d.profile) { S.profile = d.profile; applyProfile(); } }
   else { Object.assign(S, freshPersist(), d); registerRD(); for (const k of Object.keys(INGR)) S.inv[k] ??= 0; applyProfile(); if (OV.open) closeOv(); startDay(); }
-  NET.dirty = false; toast(`Đã tải tiến trình từ tài khoản Google · ngày ${d.day}`, 2800);
+  NET.dirty = false; NET.lastFp = saveFp(d); toast(`Đã tải tiến trình từ tài khoản Google · ngày ${d.day}`, 2800);
 }
 function offerCloud(cs) {
   if (safeScene()) return applyCloud(cs);
@@ -5009,34 +5049,82 @@ function offerCloud(cs) {
   NET.pend = cs;
 }
 
+/** So sánh thông tin tóm tắt bản lưu trên mạng (từ auth/me) với bản trong máy để chỉ gọi GET save khi bản trên mạng thực sự mới hơn. */
+function isCloudMetaNewer(mc, local) {
+  if (!mc) return false;
+  if (!local || !local.day) return true;
+  const cd = +mc.day || 0, ld = +local.day || 0;
+  if (cd !== ld) return cd > ld;
+  if (mc.xp != null) {
+    const cx = +mc.xp || 0, lx = +local.xp || 0;
+    if (cx !== lx) return cx > lx;
+  } else if (mc.level != null) {
+    const cl = +mc.level || 1, ll = levelOf(local.xp || 0).l;
+    if (cl !== ll) return cl > ll;
+  }
+  const cAt = +(mc.savedAt || mc.updatedAt || 0), lAt = +(local.savedAt || 0);
+  return cAt > lAt + 2000;
+}
+
+async function handleAuthCloudMeta(mc, fromLogin = false) {
+  if (!CLOUD_READY || !NET.server || !NET.player) return;
+  const local = S.scene === 'title' ? loadSave() : Object.fromEntries(PERSIST.map((k) => [k, S[k]]));
+  if (mc === undefined) return cloudCheck(fromLogin);
+  if (mc === null) {
+    NET.base = null; NET.cloud = null; NET.checked = true;
+    if (local && (fromLogin || S.scene !== 'title')) { NET.dirty = true; syncCloud({ manual: fromLogin }); }
+    return;
+  }
+  NET.base = mc.updatedAt ?? null;
+  if (isCloudMetaNewer(mc, local)) {
+    await cloudCheck(fromLogin);
+  } else {
+    NET.checked = true;
+    NET.cloud = { ...(local || {}), day: mc.day, level: mc.level, xp: mc.xp ?? local?.xp ?? 0, savedAt: mc.savedAt || mc.updatedAt };
+    const sameProg = local && (+mc.day || 0) === (+local.day || 0) && (+mc.level || 1) === levelOf(local.xp || 0).l && (mc.xp == null || (+mc.xp || 0) === (+local.xp || 0));
+    if (sameProg) { NET.lastFp = saveFp(local); NET.dirty = false; }
+    else if (local && (fromLogin || S.scene !== 'title')) { NET.dirty = true; if (fromLogin) syncCloud({ manual: true }); }
+  }
+}
+
 cloudCheck = async function (fromLogin) {
   if (!CLOUD_READY || !NET.server || !NET.player) return;
   const r = await meeApi('GET', 'save'); if (r.status !== 200 || !r.json) return;
   const cs = r.json.save; NET.base = r.json.cloud?.updatedAt ?? null; NET.cloud = cs && cs.v ? cs : null; NET.checked = true;
   const local = S.scene === 'title' ? loadSave() : Object.fromEntries(PERSIST.map((k) => [k, S[k]]));
-  if (!NET.cloud) { if (local && S.scene !== 'title') syncCloud(); return; }
+  if (!NET.cloud) { if (local && S.scene !== 'title') syncCloud({ manual: !!fromLogin }); return; }
   if (!local) return applyCloud(NET.cloud);
   const pc = progOf(NET.cloud), pl = progOf(local);
   if (pc > pl || (pc === pl && (NET.cloud.savedAt || 0) > (local.savedAt || 0) + 2000)) offerCloud(NET.cloud);
-  else if (pl > pc && S.scene !== 'title') { NET.dirty = true; syncCloud(); }
+  else if (pl > pc && S.scene !== 'title') { NET.dirty = true; syncCloud({ manual: !!fromLogin }); }
+  else { NET.lastFp = saveFp(local); NET.dirty = false; }
 };
 
-async function syncCloud({ show = false, beacon = false } = {}) {
+async function syncCloud({ show = false, beacon = false, manual = false } = {}) {
   if (!syncable()) { if (show) toast(NET.player ? 'Vào ván chơi rồi lưu nha' : 'Chưa đăng nhập Google'); return; }
+  const force = NET.forceNext;
+  const fp = saveFp(S);
+  if (!manual && !show && !force) {
+    if (!NET.dirty || fp === NET.lastFp) return;
+    if (beacon && NET.lastSync && Date.now() - NET.lastSync < LEAVE_SYNC_GAP) return;
+  }
   if (NET.busy) { NET.again = true; return; }
-  const local = cloudSave(), force = NET.forceNext;
+  const local = cloudSave();
   // bản trên mạng đang tiến xa hơn mà máy này chưa tải → không đè, tải về
   if (!force && NET.cloud && progOf(NET.cloud) > progOf(local)) { offerCloud(NET.cloud); return; }
   const body = { save: local, base: NET.base, force };
   if (beacon) {
-    try { fetch(`/api/lau?g=${CLOUD_GAME}&r=save`, { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'X-MeeGame': '1', 'Content-Type': 'application/json' }, body: JSON.stringify(body) }); NET.dirty = false; } catch { /* bỏ qua */ }
+    try {
+      fetch(`/api/lau?g=${CLOUD_GAME}&r=save`, { method: 'PUT', keepalive: true, credentials: 'same-origin', headers: { 'X-MeeGame': '1', 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      NET.dirty = false; NET.lastFp = fp; NET.lastSync = Date.now();
+    } catch { /* bỏ qua */ }
     return;
   }
   NET.busy = true; NET.lastTry = Date.now();
   try {
     const r = await meeApi('PUT', 'save', body);
     if (r.status === 200) {
-      NET.base = r.json?.cloud?.updatedAt ?? Date.now(); NET.cloud = local; NET.forceNext = false; NET.lastSync = Date.now(); NET.dirty = false;
+      NET.base = r.json?.cloud?.updatedAt ?? Date.now(); NET.cloud = local; NET.forceNext = false; NET.lastSync = Date.now(); NET.lastFp = fp; NET.dirty = false;
       if (show) toast('Đã lưu lên tài khoản Google ✓');
     } else if (r.status === 409) {
       const g2 = await meeApi('GET', 'save');
@@ -5048,17 +5136,11 @@ async function syncCloud({ show = false, beacon = false } = {}) {
     else if (show) toast(esc(r.json?.message || 'Chưa lưu được, thử lại sau nha'));
   } finally { NET.busy = false; if (NET.again) { NET.again = false; setTimeout(() => syncCloud(), 9000); } }
 }
-serverSync = function (force = false) { if (force) NET.dirty = true; return syncCloud({ show: force }); };
+serverSync = function (force = false) { if (force) NET.dirty = true; return syncCloud({ show: force, manual: force }); };
 
-// nhịp đồng bộ: định kỳ, khi rời trang, khi quay lại tab
-setInterval(() => {
-  if (NET.pend && safeScene()) { const cur = Object.fromEntries(PERSIST.map((k) => [k, S[k]])); if (S.scene === 'title' || progOf(NET.pend) > progOf(cur)) return applyCloud(NET.pend); NET.pend = null; NET.cloud = null; NET.dirty = true; }
-  if (NET.player && !NET.checked && Date.now() - (NET.lastChk || 0) > 30000) { NET.lastChk = Date.now(); cloudCheck(false); }
-  if (NET.dirty && Date.now() - NET.lastTry > SYNC_GAP) syncCloud();
-}, 5000);
+// chỉ gửi nền khi rời trang / chuyển tab / tắt màn hình (bỏ hẹn giờ định kỳ, bỏ tải lại khi quay lại tab)
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) { if (NET.dirty) { _save14(); syncCloud({ beacon: true }); } }
-  else if (NET.player && NET.checked && Date.now() - (NET.lastVis || 0) > 300000) { NET.lastVis = Date.now(); cloudCheck(false); }
+  if (document.hidden && NET.dirty) { save(); syncCloud({ beacon: true }); }
 });
 addEventListener('pagehide', () => { if (NET.dirty) syncCloud({ beacon: true }); });
 
@@ -5068,7 +5150,7 @@ renderSettings = function (body) {
   _rset14(body);
   const b = $('btnSyncNow'); if (!b || !NET.player) return;
   const t = NET.lastSync ? new Date(NET.lastSync).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) : null;
-  b.insertAdjacentHTML('afterend', `<small class="syncst">${NET.dirty ? 'Có thay đổi, đang chờ đồng bộ…' : t ? `Tự động đồng bộ · lần cuối ${t}` : 'Tự động đồng bộ khi bạn chơi'}</small>`);
+  b.insertAdjacentHTML('afterend', `<small class="syncst">${NET.dirty ? 'Có thay đổi, sẽ tự lưu khi hết ngày hoặc rời trang' : t ? `Đã đồng bộ · lần cuối ${t}` : 'Tự lưu lên mạng mỗi cuối ngày hoặc khi rời trang'}</small>`);
 };
 
 // ---- chặn điện thoại tự phóng to: chụm 2 ngón, chạm đúp, và lúc gõ chữ
@@ -5127,10 +5209,21 @@ renderSettings = function (body) {
   hydrateIcons(list); $('sInstall').onclick = () => { closeOv(); doInstall(); };
 };
 
-// ================================================================ v16: chơi xong ngày 2 → yêu cầu đăng nhập Google để giữ tiến trình
+// ================================================================ v16: chơi xong ngày 2 → yêu cầu đăng nhập Google để giữ tiến trình (gộp 1 lần hỏi auth/me duy nhất lúc mở game)
 const LOGIN_GATE_DAY = 3;   // S.day >= 3 nghĩa là đã chơi xong ngày 2
 NET.authDone = !NET.server;
-(async () => { if (!NET.server) return; const me = await meeApi('GET', 'auth/me'); if (me.status === 200 && me.json?.player) NET.player ??= me.json.player; NET.authDone = me.status === 200 || (me.status === 401 && !!me.json); })();
+(async () => {
+  if (!NET.server) return;
+  const me = await meeApi('GET', 'auth/me');
+  if (me.status === 200 && me.json) {
+    if (me.json.latestCodeAt != null) NET.latestCodeAt = +me.json.latestCodeAt || 0;
+    if (me.json.player) {
+      NET.player = me.json.player;
+      if (CLOUD_READY) await handleAuthCloudMeta(me.json.cloud, false);
+    }
+  }
+  NET.authDone = me.status === 200 || (me.status === 401 && !!me.json);
+})();
 const gateOn = () => CLOUD_READY && NET.server && NET.authDone && !NET.player && !NET.gateSkip && S.scene === 'daystart' && S.day >= LOGIN_GATE_DAY && !S.dialog && !S.quests;
 const _rov16 = renderOv0;
 renderOv0 = function () {
@@ -5139,7 +5232,7 @@ renderOv0 = function () {
   body.innerHTML = `<div class="pz gate"><div class="pzic">[[heart]]</div><h3>Đăng nhập để chơi tiếp</h3>
     <p>Bạn đã bán xong <b>${S.day - 1} ngày</b> với <b>${vnd(S.money)}</b>! Đăng nhập Gmail để tiến trình được lưu lên tài khoản: đổi máy, xoá trình duyệt hay cài lại game cũng <b>không bị mất dữ liệu</b>, và được lên bảng xếp hạng.</p>
     ${INAPP ? `<p class="gwarn">Bạn đang mở game trong Facebook / Zalo / TikTok, Google không cho đăng nhập ở đây. Bấm <b>⋮</b> hoặc <b>…</b> → <b>Mở bằng trình duyệt</b> rồi đăng nhập. Tiến trình hiện tại vẫn nằm trong máy này, nên mở bằng trình duyệt <b>trên cùng điện thoại</b>.</p><button class="btn ghost wide" id="gCopy">Chép link game</button>` : '<div data-gsi class="gsi">Đang tải nút Google…</div>'}
-    <ul class="gperks"><li>[[clip]] Tự động lưu liên tục khi chơi</li><li>[[phone]] Chơi tiếp trên máy khác</li><li>[[trophy]] Đua bảng xếp hạng MeeGame</li></ul>
+    <ul class="gperks"><li>[[clip]] Tự động lưu mỗi cuối ngày & khi rời trang</li><li>[[phone]] Chơi tiếp trên máy khác</li><li>[[trophy]] Đua bảng xếp hạng MeeGame</li></ul>
     <button class="linkbtn" id="gLater" ${OV.allowSkip || INAPP ? '' : 'hidden'}>Tạm chơi tiếp, chưa đăng nhập (có thể mất dữ liệu)</button></div>`;
   if (!INAPP) mountGoogle(body);
   if ($('gCopy')) $('gCopy').onclick = async () => { const link = location.origin + '/tiranho'; try { await navigator.clipboard.writeText(link); toast('Đã chép link'); } catch { toast(esc(link), 4000); } };
@@ -5150,8 +5243,13 @@ renderOv0 = function () {
 const _dock16 = dockSync;
 dockSync = function () {
   _dock16();
+  if (NET.pend && safeScene()) {
+    const cur = Object.fromEntries(PERSIST.map((k) => [k, S[k]]));
+    if (S.scene === 'title' || progOf(NET.pend) > progOf(cur)) { applyCloud(NET.pend); return; }
+    NET.pend = null; NET.cloud = null; NET.dirty = true;
+  }
   if (!OV.open && gateOn()) { openOv('login', { allowSkip: false }); $('ov').classList.add('small'); }
-  else if (OV.open && OV.view === 'login' && NET.player) { closeOv(); toast('Đã bật lưu tiến trình lên tài khoản Google ✓', 2600); NET.dirty = true; syncCloud?.(); }
+  else if (OV.open && OV.view === 'login' && NET.player) { closeOv(); toast('Đã bật lưu tiến trình lên tài khoản Google ✓', 2600); NET.dirty = true; syncCloud?.({ manual: true }); }
 };
 
 // ================================================================ v18: Chị Mơ tự đi chợ khi hết đồ · Chị Ngọc thợ làm bánh · Tủ đông 3 ngày · Khay mochi
@@ -5469,18 +5567,39 @@ try {
   document.documentElement.style.setProperty('--paper', `url(${url})`);
 } catch { /* bỏ qua */ }
 
-// ================================================================ v21: nhập mã quà tặng + bảng báo khi có mã mới
+// ================================================================ v21 + v1.5.0: mã quà tặng hỏi theo ngày bán (tối đa 30 phút/lần), nhớ kết quả trong máy
 // Máy chủ: GET codes/active (mã còn dùng được cho game này, có cờ redeemed nếu đã đăng nhập), POST code/redeem.
 // Tiền trong mã tính theo NGHÌN đồng (500 = 500.000đ), giống Lẩu Ơi / Tiệm TiraMee.
-const GIFT = { codes: [], loaded: 0, busy: false, msg: '' };
+const GIFT_CACHE_KEY = 'tiranho-gift-cache';
+const GIFT_GAP = 30 * 60000;   // tối đa 30 phút hỏi 1 lần
+const loadGiftCache = () => {
+  try {
+    const c = JSON.parse(localStorage.getItem(GIFT_CACHE_KEY) || 'null');
+    if (c && Array.isArray(c.codes)) return { codes: c.codes, loaded: +c.loaded || 0, latestCodeAt: +c.latestCodeAt || 0 };
+  } catch { /* bỏ qua */ }
+  return { codes: [], loaded: 0, latestCodeAt: 0 };
+};
+const _gInit = loadGiftCache();
+const GIFT = { codes: _gInit.codes, loaded: _gInit.loaded, latestCodeAt: _gInit.latestCodeAt, busy: false, msg: '' };
+const saveGiftCache = () => {
+  try { localStorage.setItem(GIFT_CACHE_KEY, JSON.stringify({ codes: GIFT.codes, loaded: GIFT.loaded, latestCodeAt: GIFT.latestCodeAt || 0 })); } catch { /* bỏ qua */ }
+};
 const giftSeen = () => { try { return new Set(JSON.parse(localStorage.getItem('tiranho-gift-seen') || '[]')); } catch { return new Set(); } };
 const giftMark = (codes) => { try { const s = giftSeen(); for (const c of codes) s.add(c); localStorage.setItem('tiranho-gift-seen', JSON.stringify([...s].slice(-200))); } catch { /* bỏ qua */ } };
 const giftReward = (c) => [c.money ? '+' + vnd(c.money * 1000) : '', c.xp ? `+${c.xp} kinh nghiệm` : ''].filter(Boolean).join(' · ') || 'Quà bí mật';
 const giftExp = (c) => (c.expiresAt ? 'Hạn tới ' + new Date(c.expiresAt).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }) : 'Không giới hạn ngày') + (c.left != null ? ` · còn ${c.left} lượt` : '');
-async function loadGiftCodes() {
+async function loadGiftCodes(force = false) {
   if (!CLOUD_READY || !NET.server) return;
+  const now = Date.now();
+  if (!force && GIFT.loaded && now - GIFT.loaded < GIFT_GAP) return;
+  if (!force && GIFT.loaded && NET.latestCodeAt != null && NET.latestCodeAt > 0 && GIFT.latestCodeAt >= NET.latestCodeAt) {
+    GIFT.loaded = now; saveGiftCache(); return;
+  }
   const r = await meeApi('GET', 'codes/active'); if (r.status !== 200 || !r.json) return;
   GIFT.codes = r.json.codes || []; GIFT.loaded = Date.now();
+  const maxCreated = GIFT.codes.reduce((m, c) => Math.max(m, +c.createdAt || 0), 0);
+  GIFT.latestCodeAt = Math.max(GIFT.latestCodeAt || 0, NET.latestCodeAt || 0, maxCreated);
+  saveGiftCache();
   if (OV.open && OV.view === 'settings') renderOv();
 }
 redeemCode = async function (raw) {
@@ -5491,14 +5610,14 @@ redeemCode = async function (raw) {
   const r = await meeApi('POST', 'code/redeem', { code }); GIFT.busy = false;
   if (r.status === 200 && r.json) {
     const m = Math.round((+r.json.money || 0) * 1000), xp = Math.round(+r.json.xp || 0);
-    S.money += m; gainXP(xp); save(); NET.dirty = true; syncCloud();
+    S.money += m; gainXP(xp); save(); NET.dirty = true; syncCloud({ manual: true });
     toast(`[[gift]] Nhận quà mã <b>${esc(code)}</b>: ${[m ? '+' + vnd(m) : '', xp ? `+${xp} kinh nghiệm` : ''].filter(Boolean).join(' · ')}`, 3200); sfx.coin?.();
-    const c = GIFT.codes.find((x) => x.code === code); if (c) c.redeemed = true; giftMark([code]); loadGiftCodes();
+    const c = GIFT.codes.find((x) => x.code === code); if (c) c.redeemed = true; giftMark([code]); saveGiftCache();
     if (OV.open) renderOv(); return true;
   }
   GIFT.msg = r.json?.message || (r.status === 0 ? 'Mất mạng, thử lại sau nha.' : 'Mã chưa đúng'); toast(esc(GIFT.msg), 2600); if (OV.open) renderOv(); return false;
 };
-// ---- ô nhập mã trong Cài đặt
+// ---- ô nhập mã trong Cài đặt (dùng danh sách đã nhớ trong máy, không gọi lại máy chủ mỗi lần mở Cài đặt)
 const _rset21 = renderSettings;
 renderSettings = function (body) {
   _rset21(body);
@@ -5513,7 +5632,6 @@ renderSettings = function (body) {
   $('btnCode').onclick = () => redeemCode($('inCode').value);
   $('inCode').onkeydown = (e) => { if (e.key === 'Enter') redeemCode($('inCode').value); };
   body.querySelectorAll('[data-gcode]').forEach((b) => b.onclick = () => { $('inCode').value = b.dataset.gcode; if (NET.player) redeemCode(b.dataset.gcode); });
-  if (!GIFT.loaded || Date.now() - GIFT.loaded > 600000) loadGiftCodes();
 };
 // ---- bảng báo có mã mới
 const _rov21 = renderOv0;
@@ -5538,13 +5656,17 @@ dockSync = function () {
   if (!fresh.length) return;
   giftMark(fresh.map((c) => c.code)); openOv('gift', { gcodes: fresh }); $('ov').classList.add('small');
 };
-// tải danh sách mã lúc mở game, khi đăng nhập xong và mỗi 5 phút
-setTimeout(loadGiftCodes, 2500);
-setInterval(() => { if (!document.hidden && S.scene !== 'street') loadGiftCodes(); }, 15 * 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - GIFT.loaded > 600000) loadGiftCodes(); });
-{ const _si21 = meeSignIn; meeSignIn = async function (cred) { await _si21(cred); if (NET.player) loadGiftCodes(); }; }
+// hỏi mã quà lúc mở game và lúc bắt đầu mỗi ngày bán (tối đa 30 phút 1 lần; bỏ đồng hồ 10-15 phút)
+setTimeout(() => loadGiftCodes(), 2500);
+{ const _sd21 = startDay; startDay = function () { const r = _sd21.apply(this, arguments); loadGiftCodes(); return r; }; }
+{ const _ss21 = startStreet; startStreet = function () { const r = _ss21.apply(this, arguments); loadGiftCodes(); return r; }; }
+{ const _si21 = meeSignIn; meeSignIn = async function (cred) {
+  if (!cred) return; const before = NET.player; await _si21(cred);
+  if (!NET.player && !before && NET.downUntil > Date.now()) toast('Máy chủ MeeGame đang quá tải, tạm thời chưa đăng nhập được. Bạn cứ chơi tiếp, tiến trình vẫn lưu trong máy, thử lại sau nha.', 4200);
+  if (NET.player) loadGiftCodes();
+}; }
 
-// ================================================================ v22: đang bán vẫn nhận được thông báo mã quà mới (dải báo nhỏ, không dừng game)
+// ================================================================ v22: đang bán vẫn nhận được thông báo mã quà mới (dải báo nhỏ, hiện ở đầu ngày bán kế tiếp)
 { const el = document.createElement('div'); el.id = 'giftBar'; el.hidden = true; $('wrap').appendChild(el);
   ['pointerdown', 'pointerup'].forEach((ev) => el.addEventListener(ev, (e) => e.stopPropagation())); }
 const GB = { list: [], t: 0 };
@@ -5568,8 +5690,6 @@ dockSync = function () {
   if (!fresh.length) return;
   giftMark(fresh.map((c) => c.code)); showGiftBar(fresh);
 };
-// đang bán thì kiểm tra mã mới dày hơn (mỗi 2 phút)
-setInterval(() => { if (!document.hidden && S.scene === 'street' && Date.now() - GIFT.loaded > 600000) loadGiftCodes(); }, 60000);
 
 // ================================================================ v23: khách đông hơn · càng nhiều nhân viên khách càng đông
 const TRAFFIC_BASE = 1.3;   // tăng lượng khách chung 30%
@@ -5577,24 +5697,6 @@ const staffTraffic = () => { const n = hired().length; return 1 + .05 * n + (n >
 const staffQ = () => Math.floor(hired().length / 3);   // thêm chỗ xếp hàng khi có nhiều nhân viên
 const _traffic23 = trafficMul;
 trafficMul = function () { return _traffic23() * TRAFFIC_BASE * staffTraffic(); };
-
-// ================================================================ v24: giảm số lần gọi máy chủ + chịu được khi máy chủ quá tải
-// Máy chủ MeeGame (Cloudflare Workers gói miễn phí) có hạn mức lượt gọi mỗi ngày; vượt thì trả 429 (Error 1027) cho mọi game.
-// - Gộp các lần hỏi auth/me trùng nhau lúc mở game.
-// - Máy chủ trả 429 / 5xx / không phải JSON → tạm nghỉ gọi 10 phút (trừ khi người chơi tự bấm đăng nhập).
-const _api24 = meeApi; let authP = null, authAt = 0;
-meeApi = async function (method, route, body) {
-  const now = Date.now();
-  if (NET.downUntil > now && !(method === 'POST' && route === 'auth/google')) return { status: 0, json: null, down: true };
-  if (method === 'GET' && route === 'auth/me') { if (authP && now - authAt < 15000) return authP; authAt = now; authP = _api24(method, route, body); }
-  const r = await (method === 'GET' && route === 'auth/me' ? authP : _api24(method, route, body));
-  if (r.status === 429 && !r.json || r.status >= 500 || (r.status === 429 && r.json?.error !== 'too_fast' && r.json?.error !== 'too_many')) { NET.downUntil = Date.now() + 10 * 60000; NET.downMsg = true; }
-  return r;
-};
-{ const _si24 = meeSignIn; meeSignIn = async function (cred) {
-  if (!cred) return; const before = NET.player; await _si24(cred);
-  if (!NET.player && !before && NET.downUntil > Date.now()) toast('Máy chủ MeeGame đang quá tải, tạm thời chưa đăng nhập được. Bạn cứ chơi tiếp, tiến trình vẫn lưu trong máy, thử lại sau nha.', 4200);
-}; }
 
 // ================================================================ v25: nhân viên đứng quầy không làm trùng / làm lỗi · tối đa 3 người đứng quầy cùng lúc
 // Lỗi cũ: nhiều nhân viên (và cả người chơi) cùng làm đúng một bước trong cùng một khung hình → bấm 2 lần
@@ -5724,7 +5826,7 @@ function onButton(id) {
   if (id.startsWith('bintab:')) { S.binTab = id.slice(7); sfx.tap(); return; }
   if (id.startsWith('tier:')) { S.tier = +id.slice(5); sfx.tap(); return; }
   if (id.startsWith('slot:')) { focusSlot(S.slots?.[+id.slice(5)]); return; }
-  if (id === 'rank') { NET.rows = null; NET.rankTried = false; NET.status = ''; openOv('rank'); return; }
+  if (id === 'rank') { if (!NET.rows || Date.now() - (NET.rankAt || 0) >= RANK_TTL) { NET.rows = null; NET.rankTried = false; NET.status = ''; } openOv('rank'); return; }
   if (id === 'taiMake') { taiMakeAll(); return; }
   if (id === 'toMarket') { S.scene = 'market'; sfx.tap(); if (S.staff?.mo) { suggestCart(); msg(`Chị Mơ đã chọn sẵn giỏ hàng, rẻ hơn ${Math.round(M().disc * 100)}%`, '#3E7A2E'); } return; }
   if (id.startsWith('inc:')) { const k = id.slice(4); S.cart[k] = (S.cart[k] ?? 0) + 1; sfx.pop(); return; }

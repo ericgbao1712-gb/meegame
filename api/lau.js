@@ -36,6 +36,21 @@ const DEFAULT_SHOP = { quanlau: 'Quán Lẩu', xoailac: 'Xe Xoài Lắc', tirame
 const MAX_SAVE_BYTES = 400 * 1024;
 const MIN_PUT_GAP_MS = 8 * 1000;          // chống spam: tối đa ~1 lần lưu / 8 giây
 const KEEP_BACKUPS = 10;
+const BACKUP_MIN_GAP_MS = 6 * 3600 * 1000; // chỉ tạo bản sao lưu mới khi cách lần trước >= 6 tiếng hoặc >= 3 ngày trong game
+const BACKUP_MIN_DAY_GAP = 3;
+const CACHE_TTL_MS = 60 * 1000;            // bộ nhớ đệm 60 giây trên RAM cho bảng xếp hạng & mã quà đang mở
+const MEM_CACHE = new Map();
+function cacheGet(key) {
+  const hit = MEM_CACHE.get(key);
+  if (!hit) return null;
+  if (Date.now() - hit.at > CACHE_TTL_MS) { MEM_CACHE.delete(key); return null; }
+  return hit.val;
+}
+function cacheSet(key, val) { MEM_CACHE.set(key, { at: Date.now(), val }); return val; }
+function cacheDelPrefix(prefix) {
+  for (const k of MEM_CACHE.keys()) { if (k.startsWith(prefix)) MEM_CACHE.delete(k); }
+}
+
 // Chống gian lận (mức hợp lý, không tuyệt đối — save nằm trong trình duyệt):
 const RATE_K_PER_SEC = 2500;              // tiền kiếm được tối đa ~2,5 triệu đồng / giây thật (gồm cả 8 chi nhánh cấp tối đa)
 const GRACE_SEC = 15 * 60;
@@ -98,14 +113,42 @@ export function suspicious(prev, next, nowMs, gift = 0) {
 
 const meta = (row) => (row ? {
   savedAt: num(row.client_saved_at) || null, updatedAt: num(row.updated_at), shopName: row.shop_name,
-  level: num(row.level), moneyEarned: num(row.money_earned), potsSold: num(row.pots_sold), day: num(row.day),
+  level: num(row.level), xp: num(row.xp), moneyEarned: num(row.money_earned), potsSold: num(row.pots_sold), day: num(row.day),
 } : null);
+
+async function getActiveCodesCached(db, GAME) {
+  const key = 'codes:' + GAME;
+  let rows = cacheGet(key);
+  if (!rows) {
+    const now = Date.now();
+    const rs = await db.execute({
+      sql: `SELECT * FROM gift_codes WHERE disabled = 0 AND (game = '*' OR game = ?) AND (expires_at IS NULL OR expires_at > ?)
+            AND (max_uses IS NULL OR uses < max_uses) ORDER BY created_at DESC LIMIT 30`,
+      args: [GAME, now],
+    });
+    rows = rs.rows || [];
+    cacheSet(key, rows);
+  }
+  return rows;
+}
+
+async function getLatestCodeAt(db, GAME, email = '') {
+  const rows = await getActiveCodesCached(db, GAME);
+  const myEmail = String(email || '').toLowerCase();
+  let latest = 0;
+  for (const r of rows) {
+    if (r.for_email && (!myEmail || String(r.for_email).toLowerCase() !== myEmail)) continue;
+    const t = num(r.created_at);
+    if (t > latest) latest = t;
+  }
+  return latest;
+}
 
 async function playerOf(db, req) {
   const id = sessionPlayerId(req);
   if (!id) return null;
   let rs;
-  try { rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden, admin_pic FROM players WHERE id = ?', args: [id] }); }
+  try { rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden, admin_pic, last_redeem_at FROM players WHERE id = ?', args: [id] }); }
   catch (e) { rs = await db.execute({ sql: 'SELECT id, email, name, picture, hidden FROM players WHERE id = ?', args: [id] }); }
   return rs.rows[0] || null;
 }
@@ -161,60 +204,76 @@ export default async function handler(req, res) {
       const p = rs.rows[0];
       let cookie;
       try { cookie = makeSessionCookie(Number(p.id)); } catch (e) { console.error('[lau] session', e.message); return err(res, 503, 'config_error', 'Đăng nhập chưa được cấu hình xong.'); }
-      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, Number(p.id), GAME)) }, { 'Set-Cookie': cookie });
+      const [cRow, latestCodeAt] = await Promise.all([
+        cloudRow(db, Number(p.id), GAME),
+        getLatestCodeAt(db, GAME, p.email),
+      ]);
+      return send(res, 200, { player: publicPlayer(p), cloud: meta(cRow), latestCodeAt }, { 'Set-Cookie': cookie });
     }
     if (method === 'POST' && path === '/auth/logout') {
       return send(res, 200, { ok: true }, { 'Set-Cookie': clearSessionCookie() });
     }
 
-    // ── bảng xếp hạng (ai cũng xem được) ──
+    // ── bảng xếp hạng (ai cũng xem được; bộ nhớ đệm 60 giây cho top 50) ──
     if (method === 'GET' && path === '/leaderboard') {
       const by = BOARDS[url.searchParams.get('by')] ? url.searchParams.get('by') : 'level';
       const col = BOARD_VALUE[by];
       const where = 'g.game = ? AND g.cheat = 0 AND g.flagged = 0 AND p.hidden = 0';
-      const rs = await db.execute({
-        sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge, p.email, p.admin_pic FROM game_saves g
-              JOIN players p ON p.id = g.player_id WHERE ${where} ORDER BY ${BOARDS[by]}, g.updated_at ASC LIMIT 50`,
-        args: [GAME],
-      });
+      const lbKey = `lb:${GAME}:${by}`;
+      let topRows = cacheGet(lbKey);
+      if (!topRows) {
+        const rs = await db.execute({
+          sql: `SELECT g.player_id, g.shop_name, g.avatar, g.level, g.money_earned, g.pots_sold, g.badge, p.email, p.admin_pic FROM game_saves g
+                JOIN players p ON p.id = g.player_id WHERE ${where} ORDER BY ${BOARDS[by]}, g.updated_at ASC LIMIT 50`,
+          args: [GAME],
+        });
+        topRows = rs.rows || [];
+        cacheSet(lbKey, topRows);
+      }
       let me = null;
       const pid = sessionPlayerId(req);
       if (pid) {
-        const mine = await db.execute({ sql: `SELECT g.level, g.xp, g.money_earned, g.pots_sold, g.shop_name, g.cheat, g.flagged, p.hidden FROM game_saves g JOIN players p ON p.id = g.player_id WHERE g.player_id = ? AND g.game = ?`, args: [pid, GAME] });
-        const m = mine.rows[0];
-        if (m) {
-          const listed = !num(m.cheat) && !num(m.flagged) && !num(m.hidden);
-          let rank = null;
-          if (listed) {
-            const cond = by === 'level' ? '(g.level > ? OR (g.level = ? AND g.xp > ?))' : `g.${col} > ?`;
-            const args = by === 'level' ? [GAME, m.level, m.level, m.xp] : [GAME, m[col]];
-            const r = await db.execute({ sql: `SELECT count(*) AS n FROM game_saves g JOIN players p ON p.id = g.player_id WHERE ${where} AND ${cond}`, args });
-            rank = num(r.rows[0].n) + 1;
+        const inTopIdx = topRows.findIndex((r) => num(r.player_id) === pid);
+        if (inTopIdx >= 0) {
+          const r = topRows[inTopIdx];
+          me = { rank: inTopIdx + 1, listed: true, cheat: false, flagged: false, shopName: r.shop_name, value: num(r[col]) };
+        } else {
+          const mine = await db.execute({ sql: `SELECT g.level, g.xp, g.money_earned, g.pots_sold, g.shop_name, g.cheat, g.flagged, p.hidden FROM game_saves g JOIN players p ON p.id = g.player_id WHERE g.player_id = ? AND g.game = ?`, args: [pid, GAME] });
+          const m = mine.rows[0];
+          if (m) {
+            const listed = !num(m.cheat) && !num(m.flagged) && !num(m.hidden);
+            let rank = null;
+            if (listed) {
+              const cond = by === 'level' ? '(g.level > ? OR (g.level = ? AND g.xp > ?))' : `g.${col} > ?`;
+              const args = by === 'level' ? [GAME, m.level, m.level, m.xp] : [GAME, m[col]];
+              const r = await db.execute({ sql: `SELECT count(*) AS n FROM game_saves g JOIN players p ON p.id = g.player_id WHERE ${where} AND ${cond}`, args });
+              rank = num(r.rows[0].n) + 1;
+            }
+            me = { rank, listed, cheat: !!num(m.cheat), flagged: !!num(m.flagged), shopName: m.shop_name, value: num(m[col]) };
           }
-          me = { rank, listed, cheat: !!num(m.cheat), flagged: !!num(m.flagged), shopName: m.shop_name, value: num(m[col]) };
         }
       }
-      const rows = rs.rows.map((r, i) => ({
+      const rows = topRows.map((r, i) => ({
         rank: i + 1, shopName: r.shop_name, avatar: num(r.avatar), level: num(r.level),
         value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined, adminPic: isAdminPlayerEmail(r.email) ? (r.admin_pic || undefined) : undefined,   // không trả email ra ngoài
       }));
       return send(res, 200, { by, rows, me });
     }
 
-    // ── v1.26 mã quà tặng đang dùng được (ai cũng xem; đã đăng nhập thì đánh dấu mã mình đã nhận) ──
+    // ── v1.26 mã quà tặng đang dùng được (bộ nhớ đệm 60 giây cho danh sách mã đang mở) ──
     if (method === 'GET' && path === '/codes/active') {
-      const now = Date.now();
-      const rs = await db.execute({ sql: `SELECT * FROM gift_codes WHERE disabled = 0 AND (game = '*' OR game = ?) AND (expires_at IS NULL OR expires_at > ?)
-              AND (max_uses IS NULL OR uses < max_uses) ORDER BY created_at DESC LIMIT 30`, args: [GAME, now] });
+      const rawRows = await getActiveCodesCached(db, GAME);
       const pid = sessionPlayerId(req);
       let mine = new Set(), myEmail = '';
       if (pid) {
         const pe = await db.execute({ sql: 'SELECT email FROM players WHERE id = ?', args: [pid] });
         myEmail = String(pe.rows[0]?.email || '').toLowerCase();
-        const r2 = await db.execute({ sql: 'SELECT code FROM gift_redemptions WHERE player_id = ? AND game = ?', args: [pid, GAME] });
-        mine = new Set(r2.rows.map((r) => r.code));
+        if (rawRows.length > 0) {
+          const r2 = await db.execute({ sql: 'SELECT code FROM gift_redemptions WHERE player_id = ? AND game = ?', args: [pid, GAME] });
+          mine = new Set(r2.rows.map((r) => r.code));
+        }
       }
-      const codes = rs.rows.filter((r) => !r.for_email || (myEmail && r.for_email === myEmail)).map((r) => ({ code: r.code, forMe: !!r.for_email, money: num(r.money), xp: num(r.xp), note: r.note || '',
+      const codes = rawRows.filter((r) => !r.for_email || (myEmail && String(r.for_email).toLowerCase() === myEmail)).map((r) => ({ code: r.code, forMe: !!r.for_email, money: num(r.money), xp: num(r.xp), note: r.note || '',
         expiresAt: r.expires_at == null ? null : num(r.expires_at), left: r.max_uses == null ? null : Math.max(0, num(r.max_uses) - num(r.uses)),
         createdAt: num(r.created_at), redeemed: mine.has(r.code) }));
       return send(res, 200, { codes });
@@ -246,6 +305,7 @@ export default async function handler(req, res) {
           sql: 'INSERT INTO gift_codes (code, game, money, xp, max_uses, uses, expires_at, disabled, note, created_at, for_email) VALUES (?, ?, ?, ?, ?, 0, ?, 0, ?, ?, ?)',
           args: [code, game, money, xp, maxUses, expiresAt, String(b.note || '').slice(0, 120) || null, Date.now(), forEmail],
         });
+        cacheDelPrefix('codes:');
         const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
         return send(res, 200, { code: codeRow(rs.rows[0]) });
       }
@@ -258,8 +318,15 @@ export default async function handler(req, res) {
       if (method === 'POST' && m) {
         const b = await parseBody(req);
         const code = cleanCode(m[1]);
-        if (b.delete) { await db.execute({ sql: 'DELETE FROM gift_codes WHERE code = ?', args: [code] }); return send(res, 200, { ok: true }); }
-        if ('disabled' in b) await db.execute({ sql: 'UPDATE gift_codes SET disabled = ? WHERE code = ?', args: [b.disabled ? 1 : 0, code] });
+        if (b.delete) {
+          await db.execute({ sql: 'DELETE FROM gift_codes WHERE code = ?', args: [code] });
+          cacheDelPrefix('codes:');
+          return send(res, 200, { ok: true });
+        }
+        if ('disabled' in b) {
+          await db.execute({ sql: 'UPDATE gift_codes SET disabled = ? WHERE code = ?', args: [b.disabled ? 1 : 0, code] });
+          cacheDelPrefix('codes:');
+        }
         const rs = await db.execute({ sql: 'SELECT * FROM gift_codes WHERE code = ?', args: [code] });
         if (!rs.rows.length) return err(res, 404, 'not_found', 'Không có mã này.');
         return send(res, 200, { code: codeRow(rs.rows[0]) });
@@ -353,18 +420,18 @@ export default async function handler(req, res) {
           try { save = JSON.parse(String(b.data)); } catch { save = null; }
           const sum = saveSummary(save, GAME);
           if (!sum) return err(res, 400, 'invalid', 'Bản sao lưu này bị hỏng, không khôi phục được.');
-          const cur = await one('SELECT data, client_saved_at, level, money_earned FROM game_saves WHERE player_id = ? AND game = ?', [id, GAME]);
+          const cur = await one('SELECT data, client_saved_at, level, day, money_earned FROM game_saves WHERE player_id = ? AND game = ?', [id, GAME]);
           if (cur.data) {
-            await db.execute({ sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-              args: [id, GAME, String(cur.data), cur.client_saved_at, cur.level, cur.money_earned, nowMs] });
+            await db.execute({ sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, day, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+              args: [id, GAME, String(cur.data), cur.client_saved_at, cur.level, cur.day, cur.money_earned, nowMs] });
           }
           await db.execute({
-            sql: `INSERT INTO game_saves (player_id, game, data, client_saved_at, updated_at, shop_name, avatar, level, xp, money_earned, pots_sold, day, cheat, flagged, flag_reason)
-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
+            sql: `INSERT INTO game_saves (player_id, game, data, client_saved_at, updated_at, shop_name, avatar, level, xp, money_earned, pots_sold, day, badge, cheat, flagged, flag_reason)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 0, NULL)
                   ON CONFLICT(player_id, game) DO UPDATE SET data = excluded.data, client_saved_at = excluded.client_saved_at, updated_at = excluded.updated_at,
                     shop_name = excluded.shop_name, avatar = excluded.avatar, level = excluded.level, xp = excluded.xp, money_earned = excluded.money_earned,
-                    pots_sold = excluded.pots_sold, day = excluded.day, cheat = excluded.cheat`,
-            args: [id, GAME, String(b.data), sum.client_saved_at, nowMs, sum.shop_name, sum.avatar, sum.level, sum.xp, sum.money_earned, sum.pots_sold, sum.day, sum.cheat],
+                    pots_sold = excluded.pots_sold, day = excluded.day, badge = excluded.badge, cheat = excluded.cheat`,
+            args: [id, GAME, String(b.data), sum.client_saved_at, nowMs, sum.shop_name, sum.avatar, sum.level, sum.xp, sum.money_earned, sum.pots_sold, sum.day, sum.badge, sum.cheat],
           });
         }
         if (body.deleteSave) {
@@ -375,6 +442,7 @@ export default async function handler(req, res) {
           for (const t of ['game_save_backups', 'game_saves', 'gift_redemptions']) await db.execute({ sql: `DELETE FROM ${t} WHERE player_id = ?`, args: [id] });
           await db.execute({ sql: 'DELETE FROM players WHERE id = ?', args: [id] });
         }
+        cacheDelPrefix(`lb:${GAME}:`);
         return send(res, 200, { ok: true });
       }
       return err(res, 404, 'not_found', 'Không có địa chỉ này.');
@@ -394,11 +462,17 @@ export default async function handler(req, res) {
       const img = b && b.image == null ? null : String((b && b.image) || '');
       if (img !== null && (!/^data:image\/(jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/.test(img) || img.length > 1500000)) return err(res, 400, 'bad_image', 'Ảnh không hợp lệ hoặc quá lớn (tối đa ~1MB sau khi nén).');   // v1.25d nâng giới hạn ~100KB → ~1MB
       await db.execute({ sql: 'UPDATE players SET admin_pic = ? WHERE id = ?', args: [img, pid] });
+      cacheDelPrefix(`lb:${GAME}:`);
       return send(res, 200, { ok: true, adminPic: img || '' });
     }
 
+    // Gộp thông tin bản lưu trên mây + thời점 mã quà mới nhất vào 1 lần gọi auth/me
     if (method === 'GET' && path === '/auth/me') {
-      return send(res, 200, { player: publicPlayer(p), cloud: meta(await cloudRow(db, pid, GAME)) });
+      const [cRow, latestCodeAt] = await Promise.all([
+        cloudRow(db, pid, GAME),
+        getLatestCodeAt(db, GAME, p.email),
+      ]);
+      return send(res, 200, { player: publicPlayer(p), cloud: meta(cRow), latestCodeAt });
     }
 
     // ── v1.13: đổi mã quà tặng ──
@@ -433,6 +507,8 @@ export default async function handler(req, res) {
         await db.execute({ sql: 'UPDATE gift_codes SET uses = uses - 1 WHERE code = ?', args: [code] });
         return err(res, 409, 'redeemed', 'Bạn đã nhận quà của mã này rồi nha.');
       }
+      try { await db.execute({ sql: 'UPDATE players SET last_redeem_at = ? WHERE id = ?', args: [now, pid] }); } catch (e) { /* cột cũ chưa có */ }
+      if (c.max_uses != null && num(c.uses) + 1 >= num(c.max_uses)) cacheDelPrefix('codes:');
       return send(res, 200, { ok: true, code, money: num(c.money), xp: num(c.xp), note: c.note || '' });
     }
 
@@ -440,6 +516,7 @@ export default async function handler(req, res) {
     if (method === 'POST' && (path === '/save/delete' || path === '/auth/unlink')) {
       await db.execute({ sql: 'DELETE FROM game_save_backups WHERE player_id = ? AND game = ?', args: [pid, GAME] });
       await db.execute({ sql: 'DELETE FROM game_saves WHERE player_id = ? AND game = ?', args: [pid, GAME] });
+      cacheDelPrefix(`lb:${GAME}:`);
       if (path === '/save/delete') return send(res, 200, { ok: true, cloud: null });
       // Bảng players dùng chung cho các game MeeGame: chỉ xóa tài khoản khi không còn game nào khác lưu tiến trình.
       const other = await db.execute({ sql: 'SELECT count(*) AS n FROM game_saves WHERE player_id = ?', args: [pid] });
@@ -475,37 +552,58 @@ export default async function handler(req, res) {
       if (prev && !body.force && body.base != null && num(prev.updated_at) > num(body.base)) {
         return send(res, 409, { error: 'conflict', message: 'Trên mạng có bản mới hơn.', cloud: meta(prev) });
       }
-      const giftRow = await db.execute({
-        sql: 'SELECT COALESCE(sum(money), 0) AS m FROM gift_redemptions WHERE player_id = ? AND game = ? AND created_at > ?',
-        args: [pid, GAME, prev ? num(prev.updated_at) - 60e3 : 0],
-      });
+      // Chỉ đọc bảng gift_redemptions khi người chơi có đổi mã quà mới kể từ lần lưu trước (hoặc lần đầu lưu lên mây)
+      let giftMoney = 0;
+      const lastRedeemAt = num(p.last_redeem_at);
+      if (!prev || lastRedeemAt === 0 || lastRedeemAt > num(prev.updated_at) - 60e3) {
+        const giftRow = await db.execute({
+          sql: 'SELECT COALESCE(sum(money), 0) AS m FROM gift_redemptions WHERE player_id = ? AND game = ? AND created_at > ?',
+          args: [pid, GAME, prev ? num(prev.updated_at) - 60e3 : 0],
+        });
+        giftMoney = num(giftRow.rows[0] && giftRow.rows[0].m);
+      }
       // Tài khoản admin được tự chỉnh cấp / tiền để thử tính năng → không đánh dấu nghi gian lận, vẫn hiện trên bảng xếp hạng (kèm chữ ADMIN)
       const adminAcct = isAdminPlayerEmail(p.email);
-      const reason = adminAcct || num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs, num(giftRow.rows[0] && giftRow.rows[0].m));
+      const reason = adminAcct || num(prev && prev.flagged) ? null : suspicious(prev, sum, nowMs, giftMoney);
       const flagged = !adminAcct && (num(prev && prev.flagged) || reason) ? 1 : 0;
+
+      // Giãn cách bản sao lưu (game_save_backups): chỉ tạo bản sao lưu mới khi cách lần sao lưu gần nhất >= 6 tiếng hoặc >= 3 ngày trong game
       if (prev) {
-        await db.execute({
-          sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)',
-          args: [pid, GAME, String(prev.data), prev.client_saved_at, prev.level, prev.money_earned, nowMs],
+        const lastBkRs = await db.execute({
+          sql: 'SELECT created_at, day, level FROM game_save_backups WHERE player_id = ? AND game = ? ORDER BY id DESC LIMIT 1',
+          args: [pid, GAME],
         });
-        await db.execute({
-          sql: `DELETE FROM game_save_backups WHERE player_id = ? AND game = ? AND id NOT IN
-                (SELECT id FROM game_save_backups WHERE player_id = ? AND game = ? ORDER BY id DESC LIMIT ${KEEP_BACKUPS})`,
-          args: [pid, GAME, pid, GAME],
-        });
+        const lastBk = lastBkRs.rows[0];
+        const prevDay = num(prev.day, 1);
+        const lastBkDay = lastBk && lastBk.day != null ? num(lastBk.day, prevDay) : 0;
+        const shouldBackup = !lastBk
+          || (nowMs - num(lastBk.created_at) >= BACKUP_MIN_GAP_MS)
+          || (lastBk.day != null ? Math.abs(prevDay - lastBkDay) >= BACKUP_MIN_DAY_GAP : Math.abs(num(prev.level) - num(lastBk.level)) >= 2);
+        if (shouldBackup) {
+          await db.execute({
+            sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, day, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+            args: [pid, GAME, String(prev.data), prev.client_saved_at, prev.level, prev.day, prev.money_earned, nowMs],
+          });
+          await db.execute({
+            sql: `DELETE FROM game_save_backups WHERE player_id = ? AND game = ? AND id NOT IN
+                  (SELECT id FROM game_save_backups WHERE player_id = ? AND game = ? ORDER BY id DESC LIMIT ${KEEP_BACKUPS})`,
+            args: [pid, GAME, pid, GAME],
+          });
+        }
       }
+      // Gộp cột badge vào chung 1 lệnh INSERT ... ON CONFLICT DO UPDATE (bỏ lệnh UPDATE badge riêng lẻ)
       await db.execute({
-        sql: `INSERT INTO game_saves (player_id, game, data, client_saved_at, updated_at, shop_name, avatar, level, xp, money_earned, pots_sold, day, cheat, flagged, flag_reason)
-              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        sql: `INSERT INTO game_saves (player_id, game, data, client_saved_at, updated_at, shop_name, avatar, level, xp, money_earned, pots_sold, day, badge, cheat, flagged, flag_reason)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
               ON CONFLICT(player_id, game) DO UPDATE SET data = excluded.data, client_saved_at = excluded.client_saved_at,
                 updated_at = excluded.updated_at, shop_name = excluded.shop_name, avatar = excluded.avatar, level = excluded.level,
                 xp = excluded.xp, money_earned = excluded.money_earned, pots_sold = excluded.pots_sold, day = excluded.day,
-                cheat = MAX(game_saves.cheat, excluded.cheat), flagged = excluded.flagged,
+                badge = excluded.badge, cheat = MAX(game_saves.cheat, excluded.cheat), flagged = excluded.flagged,
                 flag_reason = COALESCE(excluded.flag_reason, game_saves.flag_reason)`,
         args: [pid, GAME, data, sum.client_saved_at, nowMs, sum.shop_name, sum.avatar, sum.level, sum.xp, sum.money_earned,
-          sum.pots_sold, sum.day, sum.cheat, flagged, reason],
+          sum.pots_sold, sum.day, sum.badge, sum.cheat, flagged, reason],
       });
-      try { await db.execute({ sql: 'UPDATE game_saves SET badge = ? WHERE player_id = ? AND game = ?', args: [sum.badge, pid, GAME] }); } catch (e) { /* cột cũ chưa có: bỏ qua */ }   // v1.18
+      cacheDelPrefix(`lb:${GAME}:`);
       return send(res, 200, { ok: true, cloud: meta({ ...sum, updated_at: nowMs }), listed: !flagged && !sum.cheat && !num(p.hidden) });
     }
 

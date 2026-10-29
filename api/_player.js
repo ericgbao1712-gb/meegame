@@ -11,20 +11,32 @@ const SESSION_DAYS = 60;
 const GOOGLE_ISS = new Set(['accounts.google.com', 'https://accounts.google.com']);
 const JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 
-// ───────────── schema (CREATE IF NOT EXISTS: chạy lại bao nhiêu lần cũng an toàn) ─────────────
+// ───────────── schema (kiểm tra phiên bản trong schema_meta: mỗi cold start chỉ tốn 1 lệnh đọc thay vì 8 lệnh DDL) ─────────────
+const SCHEMA_VER = 3;
 let schemaReady = null;
 export function ensureSchema(db) {
   if (!schemaReady) {
     schemaReady = (async () => {
+      try {
+        const vr = await db.execute({ sql: "SELECT v FROM schema_meta WHERE k = 'lau'", args: [] });
+        if (vr.rows[0] && Number(vr.rows[0].v) >= SCHEMA_VER) return;
+      } catch (e) { /* bảng schema_meta chưa có → chạy khởi tạo bên dưới */ }
+
+      await db.execute(`CREATE TABLE IF NOT EXISTS schema_meta (
+        k TEXT PRIMARY KEY,
+        v INTEGER NOT NULL
+      )`);
       await db.execute(`CREATE TABLE IF NOT EXISTS players (
-        id          INTEGER PRIMARY KEY AUTOINCREMENT,
-        google_sub  TEXT NOT NULL UNIQUE,
-        email       TEXT,
-        name        TEXT,
-        picture     TEXT,
-        hidden      INTEGER NOT NULL DEFAULT 0,
-        created_at  TEXT NOT NULL,
-        last_login  TEXT NOT NULL
+        id              INTEGER PRIMARY KEY AUTOINCREMENT,
+        google_sub      TEXT NOT NULL UNIQUE,
+        email           TEXT,
+        name            TEXT,
+        picture         TEXT,
+        hidden          INTEGER NOT NULL DEFAULT 0,
+        admin_pic       TEXT,
+        last_redeem_at  INTEGER NOT NULL DEFAULT 0,
+        created_at      TEXT NOT NULL,
+        last_login      TEXT NOT NULL
       )`);
       await db.execute(`CREATE TABLE IF NOT EXISTS game_saves (
         player_id        INTEGER NOT NULL REFERENCES players(id) ON DELETE CASCADE,
@@ -39,6 +51,7 @@ export function ensureSchema(db) {
         money_earned     REAL,
         pots_sold        INTEGER,
         day              INTEGER,
+        badge            TEXT,
         cheat            INTEGER NOT NULL DEFAULT 0,
         flagged          INTEGER NOT NULL DEFAULT 0,
         flag_reason      TEXT,
@@ -51,11 +64,11 @@ export function ensureSchema(db) {
         data             TEXT NOT NULL,
         client_saved_at  INTEGER,
         level            INTEGER,
+        day              INTEGER,
         money_earned     REAL,
         created_at       INTEGER NOT NULL
       )`);
       await db.execute('CREATE INDEX IF NOT EXISTS game_save_backups_pg ON game_save_backups (player_id, game, id)');
-      // v1.13 mã quà tặng (gift code): admin tạo mã, người chơi nhập trong Cài đặt → nhận tiền + XP, mỗi tài khoản 1 lần / mã
       await db.execute(`CREATE TABLE IF NOT EXISTS gift_codes (
         code        TEXT PRIMARY KEY,
         game        TEXT NOT NULL DEFAULT '*',
@@ -66,12 +79,14 @@ export function ensureSchema(db) {
         expires_at  INTEGER,
         disabled    INTEGER NOT NULL DEFAULT 0,
         note        TEXT,
+        for_email   TEXT,
         created_at  INTEGER NOT NULL
       )`);
-      // v1.18 thẻ thành tích (Hộp mù Lẩu Ơi) hiện trên bảng xếp hạng — thêm cột cho bảng cũ (lỗi "duplicate column" = có rồi)
       try { await db.execute('ALTER TABLE game_saves ADD COLUMN badge TEXT'); } catch (e) { /* có rồi */ }
-      try { await db.execute('ALTER TABLE players ADD COLUMN admin_pic TEXT'); } catch (e) { /* có rồi */ }   // v1.25b ảnh avatar riêng của admin
-      try { await db.execute('ALTER TABLE gift_codes ADD COLUMN for_email TEXT'); } catch (e) { /* có rồi */ }   // v1.28 mã riêng cho 1 Gmail
+      try { await db.execute('ALTER TABLE players ADD COLUMN admin_pic TEXT'); } catch (e) { /* có rồi */ }
+      try { await db.execute('ALTER TABLE players ADD COLUMN last_redeem_at INTEGER NOT NULL DEFAULT 0'); } catch (e) { /* có rồi */ }
+      try { await db.execute('ALTER TABLE game_save_backups ADD COLUMN day INTEGER'); } catch (e) { /* có rồi */ }
+      try { await db.execute('ALTER TABLE gift_codes ADD COLUMN for_email TEXT'); } catch (e) { /* có rồi */ }
       await db.execute(`CREATE TABLE IF NOT EXISTS gift_redemptions (
         code        TEXT NOT NULL,
         player_id   INTEGER NOT NULL,
@@ -81,6 +96,10 @@ export function ensureSchema(db) {
         created_at  INTEGER NOT NULL,
         PRIMARY KEY (code, player_id, game)
       )`);
+      await db.execute({
+        sql: "INSERT INTO schema_meta (k, v) VALUES ('lau', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v",
+        args: [SCHEMA_VER],
+      });
     })().catch((e) => { schemaReady = null; throw e; });
   }
   return schemaReady;
