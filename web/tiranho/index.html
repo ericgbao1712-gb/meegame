@@ -25,7 +25,7 @@
   #ov input, #ov textarea, #ov select { font-size: max(16px, 1em) !important; }
   body { display: flex; align-items: center; justify-content: center; font-family: 'Be Vietnam Pro', system-ui, sans-serif; }
   #wrap { position: relative; height: 100dvh; aspect-ratio: 9 / 16; max-width: 100vw; }
-  #cv { width: 100%; height: 100%; display: block; border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
+  #cv { touch-action: none; -webkit-touch-callout: none; width: 100%; height: 100%; display: block; border-radius: 18px; box-shadow: 0 10px 40px rgba(0,0,0,.45); }
   @media (max-width: 600px) { #cv { border-radius: 0; } #wrap { width: 100vw; height: 100dvh; aspect-ratio: auto; } }
   /* ---- lớp quản lý quán / cài đặt (HTML phủ trên canvas, co giãn theo bề rộng khung game) ---- */
   #wrap { container-type: inline-size; }
@@ -2110,7 +2110,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.2';
+const GAME_VER = '1.3.3';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2472,7 +2472,9 @@ function drawMarket(t) {
   if (MKV.max > 0) {
     const th = MKV.bot - MKV.top - 8, kh = Math.max(50, th * (MKV.bot - MKV.top) / (MKV.bot - MKV.top + MKV.max)), ky = MKV.top + 4 + (th - kh) * (off / MKV.max);
     fillRR(W - 22, MKV.top + 4, 6, th, 3, 'rgba(160,120,90,.18)'); fillRR(W - 23, ky, 8, kh, 4, '#B07A48');
-    if (off < MKV.max - 4) { const gr = g.createLinearGradient(0, MKV.bot - 46, 0, MKV.bot); gr.addColorStop(0, 'rgba(255,249,241,0)'); gr.addColorStop(1, 'rgba(255,249,241,.95)'); g.fillStyle = gr; g.fillRect(16, MKV.bot - 46, W - 44, 46); fillRR(W / 2 - 120, MKV.bot - 34, 240, 28, 14, 'rgba(122,69,40,.88)'); text('Vuốt lên để xem thêm món', W / 2, MKV.bot - 20, { size: 14, color: '#fff', weight: 800 }); }
+    if (off > 4) { button('mkup', '▲', W - 92, MKV.top + 8, 60, 50, { t, size: 22, color: '#7A4528' }); }
+    if (off < MKV.max - 4) { button('mkdn', '▼', W - 92, MKV.bot - 60, 60, 50, { t, size: 22, color: '#7A4528' }); }
+    if (off < MKV.max - 4) { const gr = g.createLinearGradient(0, MKV.bot - 46, 0, MKV.bot); gr.addColorStop(0, 'rgba(255,249,241,0)'); gr.addColorStop(1, 'rgba(255,249,241,.95)'); g.fillStyle = gr; g.fillRect(16, MKV.bot - 46, W - 44, 46); fillRR(W / 2 - 150, MKV.bot - 34, 240, 28, 14, 'rgba(122,69,40,.88)'); text('Vuốt lên hoặc bấm ▼', W / 2 - 30, MKV.bot - 20, { size: 14, color: '#fff', weight: 800 }); }
   }
   const tot = cartTotal();
   text(`Giỏ hàng: ${vnd(tot)}`, 40, 1100, { size: 26, color: '#3A2219', weight: 800, align: 'left' });
@@ -5460,11 +5462,24 @@ cv.addEventListener('pointerup', () => {
   const b = [...buttons].reverse().find((b2) => d.x >= b2.x && d.x <= b2.x + b2.w && d.y >= b2.y && d.y <= b2.y + b2.h);
   if (b && !b.disabled) onButton(b.id);
 });
-cv.addEventListener('pointercancel', () => { MKV.drag = null; });
+cv.addEventListener('pointercancel', () => { if (MKV.drag && !MKV.touch) MKV.drag = null; });
+// dự phòng cho máy chỉ gửi sự kiện chạm (touch) hoặc huỷ pointer khi vuốt
+const tpos = (t) => { const r = cv.getBoundingClientRect(); return { x: (t.clientX - r.left) / r.width * W, y: (t.clientY - r.top) / r.height * H }; };
+cv.addEventListener('touchstart', (e) => {
+  if (S.scene !== 'market' || MKV.max <= 0 || e.touches.length !== 1) return; const p = tpos(e.touches[0]); if (p.y <= MKV.top || p.y >= MKV.bot) return;
+  MKV.touch = { y0: p.y, s0: S.mkScroll || 0 }; if (!MKV.drag) MKV.drag = { y0: p.y, s0: S.mkScroll || 0, x: p.x, y: p.y, moved: false };
+}, { passive: true });
+cv.addEventListener('touchmove', (e) => {
+  if (!MKV.touch || e.touches.length !== 1) return; e.preventDefault(); const p = tpos(e.touches[0]), d = p.y - MKV.touch.y0;
+  if (Math.abs(d) > 10) { if (MKV.drag) MKV.drag.moved = true; MKV.touch.moved = true; } if (MKV.touch.moved) S.mkScroll = clamp(MKV.touch.s0 - d, 0, MKV.max);
+}, { passive: false });
+cv.addEventListener('touchend', () => { const t = MKV.touch; MKV.touch = null; if (t?.moved) MKV.drag = null; });
+cv.addEventListener('touchcancel', () => { MKV.touch = null; });
 cv.addEventListener('wheel', (e) => { if (S.scene !== 'market' || MKV.max <= 0) return; e.preventDefault(); S.mkScroll = clamp((S.mkScroll || 0) + e.deltaY * (H / cv.getBoundingClientRect().height), 0, MKV.max); }, { passive: false });
 addEventListener('pointerup', () => { dragging = false; if (S.pouring) stopPour(); });
 addEventListener('pointercancel', () => { dragging = false; if (S.pouring) stopPour(); });
 function onButton(id) {
+  if (id === 'mkup' || id === 'mkdn') { S.mkScroll = clamp((S.mkScroll || 0) + (id === 'mkdn' ? 300 : -300), 0, MKV.max); sfx.tap(); return; }
   if (id === 'dialog') return advanceDialog();
   if (id === 'quests') { S.quests = true; sfx.tap(); return; }
   if (id === 'closeQuests') { S.quests = false; sfx.tap(); return; }
