@@ -2120,7 +2120,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.5';
+const GAME_VER = '1.3.6';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -4411,11 +4411,15 @@ function buyPlan(trays) {
   const guests = expectGuests(), f = forecast();
   const portions = Math.ceil(guests * .8 * 1.6 * 1.15) + (S.party?.d === S.day ? S.party.n : 0);
   const have = Object.values(S.trays).reduce((a, b) => a + b, 0);
-  const nTray = trays ?? Math.max(2, Math.ceil(Math.max(0, portions - have) / PORTIONS));
   const pool = [...new Set([...(S.party?.d === S.day ? [S.party.fk] : []), ...f.favs, ...allTrayFlavors()])].filter((fk) => allTrayFlavors().includes(fk));
+  // mọi món đang có trên thực đơn đều phải có ít nhất 1 khay (trừ vị còn đủ bánh từ hôm qua), phần dư chia cho vị khách thích
+  const must = pool.filter((fk) => (S.trays[fk] ?? 0) < 3);
+  const demand = Math.max(2, Math.ceil(Math.max(0, portions - have) / PORTIONS));
+  const nTray = trays ?? Math.max(demand, must.length);
   const plan = {};
-  const nF = Math.min(pool.length, Math.max(2, Math.min(5, Math.ceil(nTray / 1.5))));
-  for (let i = 0; i < nTray; i++) { const fk = pool[i % nF]; plan[fk] = (plan[fk] || 0) + 1; }
+  must.slice(0, nTray).forEach((fk) => { plan[fk] = 1; });
+  const fav = pool.slice(0, Math.max(2, Math.min(5, pool.length)));
+  for (let i = 0, n = Object.keys(plan).length; n < nTray; i++, n++) { const fk = fav[i % fav.length]; plan[fk] = (plan[fk] || 0) + 1; }
   if (S.party?.d === S.day) { const need = Math.ceil(Math.max(0, S.party.n + 3 - (S.trays[S.party.fk] ?? 0)) / PORTIONS); plan[S.party.fk] = Math.max(plan[S.party.fk] || 0, need); }
   const cups = Object.keys(DRINKS).some(drinkUnlocked) ? Math.ceil(guests * .42 * 1.25 * 1.15) : 0;
   return { guests, portions, plan, cups, nTray: Object.values(plan).reduce((a, b) => a + b, 0) };
@@ -4424,10 +4428,10 @@ function needOf(P) {
   const need = {}, add = (k, n) => { if (INGR[k]) need[k] = (need[k] ?? 0) + n; };
   for (const [fk, n] of Object.entries(P.plan)) for (const k of recipeOf(fk)) add(k, n);
   const drinks = Object.keys(DRINKS).filter(drinkUnlocked);
-  if (P.cups) { add('ly', P.cups); const per = Math.ceil(P.cups / drinks.length); for (const dk of drinks) for (const k of DRINKS[dk].base) add(k, per); for (const k of DRINK_TOPS) if (topOk(k) || (level() >= (topLv[k] ?? 1))) add(k, Math.ceil(P.cups * .2)); }
+  if (P.cups) { add('ly', P.cups); const per = Math.max(4, Math.ceil(P.cups / drinks.length)); for (const dk of drinks) for (const k of DRINKS[dk].base) add(k, per); for (const k of DRINK_TOPS) if (level() >= topLevel(k)) add(k, Math.max(3, Math.ceil(P.cups * .2))); }
   const orders = Math.ceil(P.guests * 1.1) + 2;
   add('box', Math.ceil(orders * .9)); add('bag', orders); add('thia', orders);
-  for (const k of BOX_EXTRAS) if (level() >= (k === 'kem_cheese' ? 2 : 1)) add(k, Math.ceil(P.guests * .12) + 1);
+  for (const k of BOX_EXTRAS) if (level() >= topLevel(k)) add(k, Math.ceil(P.guests * .12) + 1);
   return need;
 }
 function cartFor(need) {
