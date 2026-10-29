@@ -2132,7 +2132,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.8';
+const GAME_VER = '1.3.9';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -4979,7 +4979,7 @@ dockSync = function () {
 // - Không bao giờ gửi khi đang ở màn hình tiêu đề hoặc chưa đọc được bản trên mạng (tránh đẩy ván trống lên đè ván thật).
 // - Bản trên mạng tiến xa hơn (ngày / kinh nghiệm) → tải về; đang bán dở thì chờ tới lúc an toàn mới tải.
 Object.assign(NET, { dirty: false, base: null, checked: false, cloud: null, pend: null, forceNext: false, lastSync: 0, lastTry: 0 });
-const SYNC_GAP = 25000;
+const SYNC_GAP = 180000;   // 3 phút/lần (ngoài ra còn lưu khi rời trang, chuyển tab, hết ngày) để không vượt hạn mức máy chủ
 const progOf = (d) => (d ? (d.day || 0) * 1e10 + (d.xp || 0) * 10 + Math.min(9, (d.totalSold || 0) > 0 ? 1 : 0) : -1);
 const syncable = () => CLOUD_READY && NET.server && NET.player && NET.checked && S.scene !== 'title' && !(OV.open && OV.view === 'setup' && OV.mode === 'new') && S.profile && S.day >= 1;
 const safeScene = () => ['title', 'daystart', 'summary'].includes(S.scene) && !S.dialog && !(OV.open && OV.view === 'setup');
@@ -5054,7 +5054,7 @@ setInterval(() => {
 }, 5000);
 document.addEventListener('visibilitychange', () => {
   if (document.hidden) { if (NET.dirty) { _save14(); syncCloud({ beacon: true }); } }
-  else if (NET.player && NET.checked) cloudCheck(false);
+  else if (NET.player && NET.checked && Date.now() - (NET.lastVis || 0) > 300000) { NET.lastVis = Date.now(); cloudCheck(false); }
 });
 addEventListener('pagehide', () => { if (NET.dirty) syncCloud({ beacon: true }); });
 
@@ -5126,7 +5126,7 @@ renderSettings = function (body) {
 // ================================================================ v16: chơi xong ngày 2 → yêu cầu đăng nhập Google để giữ tiến trình
 const LOGIN_GATE_DAY = 3;   // S.day >= 3 nghĩa là đã chơi xong ngày 2
 NET.authDone = !NET.server;
-(async () => { if (!NET.server) return; const me = await meeApi('GET', 'auth/me'); if (me.status === 200 && me.json?.player) NET.player ??= me.json.player; NET.authDone = me.status !== 0; })();
+(async () => { if (!NET.server) return; const me = await meeApi('GET', 'auth/me'); if (me.status === 200 && me.json?.player) NET.player ??= me.json.player; NET.authDone = me.status === 200 || (me.status === 401 && !!me.json); })();
 const gateOn = () => CLOUD_READY && NET.server && NET.authDone && !NET.player && !NET.gateSkip && S.scene === 'daystart' && S.day >= LOGIN_GATE_DAY && !S.dialog && !S.quests;
 const _rov16 = renderOv0;
 renderOv0 = function () {
@@ -5509,7 +5509,7 @@ renderSettings = function (body) {
   $('btnCode').onclick = () => redeemCode($('inCode').value);
   $('inCode').onkeydown = (e) => { if (e.key === 'Enter') redeemCode($('inCode').value); };
   body.querySelectorAll('[data-gcode]').forEach((b) => b.onclick = () => { $('inCode').value = b.dataset.gcode; if (NET.player) redeemCode(b.dataset.gcode); });
-  if (!GIFT.loaded || Date.now() - GIFT.loaded > 60000) loadGiftCodes();
+  if (!GIFT.loaded || Date.now() - GIFT.loaded > 600000) loadGiftCodes();
 };
 // ---- bảng báo có mã mới
 const _rov21 = renderOv0;
@@ -5536,8 +5536,8 @@ dockSync = function () {
 };
 // tải danh sách mã lúc mở game, khi đăng nhập xong và mỗi 5 phút
 setTimeout(loadGiftCodes, 2500);
-setInterval(() => { if (!document.hidden) loadGiftCodes(); }, 5 * 60000);
-document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - GIFT.loaded > 60000) loadGiftCodes(); });
+setInterval(() => { if (!document.hidden && S.scene !== 'street') loadGiftCodes(); }, 15 * 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - GIFT.loaded > 600000) loadGiftCodes(); });
 { const _si21 = meeSignIn; meeSignIn = async function (cred) { await _si21(cred); if (NET.player) loadGiftCodes(); }; }
 
 // ================================================================ v22: đang bán vẫn nhận được thông báo mã quà mới (dải báo nhỏ, không dừng game)
@@ -5565,7 +5565,7 @@ dockSync = function () {
   giftMark(fresh.map((c) => c.code)); showGiftBar(fresh);
 };
 // đang bán thì kiểm tra mã mới dày hơn (mỗi 2 phút)
-setInterval(() => { if (!document.hidden && S.scene === 'street' && Date.now() - GIFT.loaded > 110000) loadGiftCodes(); }, 30000);
+setInterval(() => { if (!document.hidden && S.scene === 'street' && Date.now() - GIFT.loaded > 600000) loadGiftCodes(); }, 60000);
 
 // ================================================================ v23: khách đông hơn · càng nhiều nhân viên khách càng đông
 const TRAFFIC_BASE = 1.3;   // tăng lượng khách chung 30%
@@ -5573,6 +5573,24 @@ const staffTraffic = () => { const n = hired().length; return 1 + .05 * n + (n >
 const staffQ = () => Math.floor(hired().length / 3);   // thêm chỗ xếp hàng khi có nhiều nhân viên
 const _traffic23 = trafficMul;
 trafficMul = function () { return _traffic23() * TRAFFIC_BASE * staffTraffic(); };
+
+// ================================================================ v24: giảm số lần gọi máy chủ + chịu được khi máy chủ quá tải
+// Máy chủ MeeGame (Cloudflare Workers gói miễn phí) có hạn mức lượt gọi mỗi ngày; vượt thì trả 429 (Error 1027) cho mọi game.
+// - Gộp các lần hỏi auth/me trùng nhau lúc mở game.
+// - Máy chủ trả 429 / 5xx / không phải JSON → tạm nghỉ gọi 10 phút (trừ khi người chơi tự bấm đăng nhập).
+const _api24 = meeApi; let authP = null, authAt = 0;
+meeApi = async function (method, route, body) {
+  const now = Date.now();
+  if (NET.downUntil > now && !(method === 'POST' && route === 'auth/google')) return { status: 0, json: null, down: true };
+  if (method === 'GET' && route === 'auth/me') { if (authP && now - authAt < 15000) return authP; authAt = now; authP = _api24(method, route, body); }
+  const r = await (method === 'GET' && route === 'auth/me' ? authP : _api24(method, route, body));
+  if (r.status === 429 && !r.json || r.status >= 500 || (r.status === 429 && r.json?.error !== 'too_fast' && r.json?.error !== 'too_many')) { NET.downUntil = Date.now() + 10 * 60000; NET.downMsg = true; }
+  return r;
+};
+{ const _si24 = meeSignIn; meeSignIn = async function (cred) {
+  if (!cred) return; const before = NET.player; await _si24(cred);
+  if (!NET.player && !before && NET.downUntil > Date.now()) toast('Máy chủ MeeGame đang quá tải, tạm thời chưa đăng nhập được. Bạn cứ chơi tiếp, tiến trình vẫn lưu trong máy, thử lại sau nha.', 4200);
+}; }
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
