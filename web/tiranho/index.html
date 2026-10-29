@@ -2110,7 +2110,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.3';
+const GAME_VER = '1.3.4';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5419,6 +5419,25 @@ function renderMenuAll(body, head) {
 }
 const _rmt19 = renderMenuTabs;
 renderMenuTabs = function (body, head) { if (OV.tab === 'menu') { renderMenuAll(body, head); return true; } return _rmt19(body, head); };
+
+// ================================================================ v20: vân giấy liền mạch (sửa lỗi màn hình bị tách 2 mảng đậm nhạt)
+// Ô vân giấy cũ cắt từ tờ giấy lớn có vệt loang nên mép các ô không khớp nhau → lặp lại thành ranh giới đậm/nhạt.
+// Ô mới: chỉ có hạt li ti phân bố đều, vẽ quấn qua mép (mép trái khớp mép phải, trên khớp dưới).
+const PAPER_TILE = (() => {
+  const N = 256, c = document.createElement('canvas'); c.width = c.height = N; const x = c.getContext('2d');
+  let sd = 4242; const R = () => (sd = (sd * 16807) % 2147483647) / 2147483647;
+  x.fillStyle = '#FFF8EE'; x.fillRect(0, 0, N, N);
+  const dot = (px, py, s, col) => { x.fillStyle = col; for (const dx of [-N, 0, N]) for (const dy of [-N, 0, N]) x.fillRect(px + dx, py + dy, s, s); };
+  for (let i = 0; i < 2600; i++) { const v = 200 + Math.floor(R() * 50); dot(R() * N, R() * N, 1 + R() * 1.6, `rgba(${v},${v - 20},${v - 45},${.08 + R() * .1})`); }
+  x.strokeStyle = 'rgba(170,140,110,.06)'; x.lineWidth = 1;
+  for (let i = 0; i < 40; i++) { const sx = R() * N, sy = R() * N, ex = (R() - .5) * 26, ey = (R() - .5) * 26; for (const dx of [-N, 0, N]) for (const dy of [-N, 0, N]) { x.beginPath(); x.moveTo(sx + dx, sy + dy); x.quadraticCurveTo(sx + dx + ex * .5 + 4, sy + dy + ey * .5 - 4, sx + dx + ex, sy + dy + ey); x.stroke(); } }
+  return c;
+})();
+try {
+  const url = PAPER_TILE.toDataURL('image/png'), fx = $('paperFx');
+  if (fx) { fx.style.backgroundImage = `radial-gradient(ellipse at 50% 50%, rgba(255,255,255,0) 55%, rgba(200,160,120,.22) 100%), url(${url})`; fx.style.backgroundSize = '100% 100%, 256px 256px'; }
+  document.documentElement.style.setProperty('--paper', `url(${url})`);
+} catch { /* bỏ qua */ }
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
