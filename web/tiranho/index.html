@@ -252,6 +252,18 @@
   #ovTabs button { font-weight: 400; font-size: .9em; }
   #titleAcct { position: absolute; left: 8%; right: 8%; top: 68%; height: 6%; z-index: 4; display: flex; justify-content: center; align-items: stretch; }
   #titleAcct[hidden] { display: none; }
+  #giftBar { position: absolute; left: 4%; right: 4%; top: 7%; z-index: 7; display: flex; align-items: center; gap: 2.2cqw; padding: 1.8cqw 2.4cqw; background: rgba(255,250,238,.98); border: 2px solid #E0A93A; border-radius: 4cqw; box-shadow: 0 6px 18px rgba(90,50,20,.28); font: 600 3.1cqw/1.3 'Be Vietnam Pro', sans-serif; color: #3A2219; transform: translateY(-140%); opacity: 0; transition: transform .28s ease, opacity .28s; touch-action: manipulation; }
+  #giftBar.on { transform: translateY(0); opacity: 1; }
+  #giftBar[hidden] { display: none; }
+  #giftBar .gi .icn { width: 7cqw; height: 7cqw; margin: 0; }
+  #giftBar div { flex: 1; min-width: 0; }
+  #giftBar b { display: block; font: 800 3.6cqw 'Baloo 2', sans-serif; color: #7A4528; }
+  #giftBar small { display: block; color: #3E7A2E; font-weight: 700; font-size: .9em; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  #giftBar em { font-style: normal; color: #7A4528; letter-spacing: .04em; }
+  #giftBar button { border: 0; border-radius: 99px; font: 800 3.2cqw 'Be Vietnam Pro', sans-serif; cursor: pointer; }
+  #giftBar #gbGet { background: linear-gradient(#5DB377, #3E9A5A); color: #fff; padding: .55em 1em; box-shadow: 0 3px 0 #2E7442; }
+  #giftBar #gbGet:disabled { opacity: .6; }
+  #giftBar #gbX { background: none; color: #8A6A5A; font-size: 5cqw; padding: 0 .2em; }
   #ov .giftrow { display: flex; gap: 8px; align-items: center; margin-top: .3em; }
   #ov .giftrow input { flex: 1; margin: 0; text-transform: uppercase; letter-spacing: .06em; }
   #ov .giftlist { display: grid; gap: 6px; margin-top: .6em; }
@@ -2120,7 +2132,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.6';
+const GAME_VER = '1.3.7';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5527,6 +5539,33 @@ setTimeout(loadGiftCodes, 2500);
 setInterval(() => { if (!document.hidden) loadGiftCodes(); }, 5 * 60000);
 document.addEventListener('visibilitychange', () => { if (!document.hidden && Date.now() - GIFT.loaded > 60000) loadGiftCodes(); });
 { const _si21 = meeSignIn; meeSignIn = async function (cred) { await _si21(cred); if (NET.player) loadGiftCodes(); }; }
+
+// ================================================================ v22: đang bán vẫn nhận được thông báo mã quà mới (dải báo nhỏ, không dừng game)
+{ const el = document.createElement('div'); el.id = 'giftBar'; el.hidden = true; $('wrap').appendChild(el);
+  ['pointerdown', 'pointerup'].forEach((ev) => el.addEventListener(ev, (e) => e.stopPropagation())); }
+const GB = { list: [], t: 0 };
+function showGiftBar(list) {
+  const el = $('giftBar'); GB.list = list;
+  el.innerHTML = `<span class="gi">[[gift]]</span><div><b>Có mã quà mới!</b><small>${list.map((c) => `<em>${esc(c.code)}</em> ${esc(giftReward(c))}`).join(' · ')}</small></div><button id="gbGet">${NET.player ? 'Nhận' : 'Xem'}</button><button id="gbX" aria-label="Đóng">×</button>`;
+  hydrateIcons(el); el.hidden = false; setTimeout(() => el.classList.add('on'), 30); sfx.coin?.();
+  $('gbGet').onclick = async () => {
+    if (!NET.player) { hideGiftBar(); toast('Đăng nhập Google trong Cài đặt rồi nhận mã nha', 2600); return; }
+    $('gbGet').disabled = true; for (const c of GB.list) await redeemCode(c.code); hideGiftBar();
+  };
+  $('gbX').onclick = () => { hideGiftBar(); toast('Mã vẫn nằm trong Cài đặt → Mã quà tặng', 2400); };
+  clearTimeout(GB.t); GB.t = setTimeout(hideGiftBar, 12000);
+}
+function hideGiftBar() { const el = $('giftBar'); clearTimeout(GB.t); el.classList.remove('on'); setTimeout(() => { if (!el.classList.contains('on')) el.hidden = true; }, 300); }
+const _dock22 = dockSync;
+dockSync = function () {
+  _dock22();
+  if (S.scene !== 'street' || OV.open || !GIFT.loaded || S.dialog || !$('giftBar').hidden) return;
+  const seen = giftSeen(), fresh = GIFT.codes.filter((c) => !c.redeemed && !seen.has(c.code));
+  if (!fresh.length) return;
+  giftMark(fresh.map((c) => c.code)); showGiftBar(fresh);
+};
+// đang bán thì kiểm tra mã mới dày hơn (mỗi 2 phút)
+setInterval(() => { if (!document.hidden && S.scene === 'street' && Date.now() - GIFT.loaded > 110000) loadGiftCodes(); }, 30000);
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
