@@ -4,6 +4,7 @@ window.MEEGAME_CATEGORIES = [
   { key: 'drink', vi: 'Trà, cà phê & bánh', en: 'Tea, coffee & sweets' },
   { key: 'shop',  vi: 'Tiệm & buôn bán',   en: 'Shops & business' },
   { key: 'farm',  vi: 'Nông trại & xây làng', en: 'Farms & towns' },
-  { key: 'life',  vi: 'Đời sống & câu chuyện', en: 'Life & stories' },
-  { key: 'brain', vi: 'Cờ & trí tuệ',      en: 'Chess & brain games' }
+  { key: 'life',   vi: 'Đời sống & câu chuyện', en: 'Life & stories' },
+  { key: 'brain',  vi: 'Cờ & trí tuệ',      en: 'Chess & brain games' },
+  { key: 'horror', vi: 'Kinh dị',           en: 'Horror & mystery' }
 ];

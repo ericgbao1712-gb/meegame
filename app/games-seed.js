@@ -40,7 +40,7 @@ window.MEEGAME_SEED = [
   {"name": "Một Ổ nha (bánh mì)", "url": "https://hhuync.github.io/mot-o-nha/", "category": "food"},
   {"name": "Một đời an nhiên", "url": "https://motdoianyen.com/", "added_at": "2026-10-07", "category": "life"},
   {"name": "Net cỏ Đầu Hẻm", "url": "https://net-co-test.vercel.app/", "category": "shop"},
-  {"name": "Người ở lại ngày Tết", "url": "https://minhmacg.itch.io/nguoi-o-lai-ngay-tet?utm_source=zalo&utm_medium=zalo&utm_campaign=zalo&zarsrc=31", "cover_url": "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fminhmacg.itch.io%2Fnguoi-o-lai-ngay-tet?w=600&h=420", "category": "life"},
+  {"name": "Người ở lại ngày Tết", "url": "https://minhmacg.itch.io/nguoi-o-lai-ngay-tet?utm_source=zalo&utm_medium=zalo&utm_campaign=zalo&zarsrc=31", "cover_url": "https://s.wordpress.com/mshots/v1/https%3A%2F%2Fminhmacg.itch.io%2Fnguoi-o-lai-ngay-tet?w=600&h=420", "category": "horror"},
   {"name": "Nhà có mèo", "url": "https://nhacomeo.io.vn/", "category": "life"},
   {"name": "Nhân vị trung thu", "url": "https://vietcetera.com/vn/nhan-vi?", "aliases": "nhân vị(trung thu)", "category": "life"},
   {"name": "Nhập vai", "url": "https://www.truyennhapvai.com/", "category": "life"},
@@ -110,6 +110,13 @@ window.MEEGAME_SEED = [
   {"name": "Ao Nhỏ Biển To", "url": "https://aonhobiento.pages.dev", "added_at": "2026-10-13", "cover_url": "https://s.wordpress.com/mshots/v1/https%3A%2F%2Faonhobiento.pages.dev%2F?w=600&h=420", "category": "farm"},
   {"name": "Trải Nghiệm Phỏng Vấn", "url": "https://tester-oi.pages.dev", "added_at": "2026-10-13", "cover_url": "https://s.wordpress.com/mshots/v1/https%3A%2F%2Ftester-oi.pages.dev%2F?w=600&h=420", "category": "life"},
   {"name": "Tổ Ấm Xinh", "url": "https://toamxinh.netlify.app", "aliases": "tổ ấm xinh,decor", "added_at": "2026-10-13", "cover_url": "https://s.wordpress.com/mshots/v1/https%3A%2F%2Ftoamxinh.netlify.app%2F?w=600&h=420", "category": "life"},
-  {"name": "Photo Booth - Red Button", "url": "https://redbuttonthegame.up.railway.app/studio", "aliases": "red button the game, photo, photo booth", "added_at": "2026-10-13", "category": "life"},
-  {"name": "Nợ có - Mèo Cam", "url": "https://noco.meocam.vn/", "aliases": "nợ có, mèo cam", "added_at": "2026-10-13", "category": "life"}
+  {"name": "Photo Booth - Red Button", "url": "https://redbuttonthegame.up.railway.app/studio", "aliases": "red button the game, photo, photo booth, kinh dị", "added_at": "2026-10-13", "category": "horror"},
+  {"name": "Nợ có - Mèo Cam", "url": "https://noco.meocam.vn/", "aliases": "nợ có, mèo cam", "added_at": "2026-10-13", "category": "life"},
+  {"name": "Ca Trực Cuối", "url": "https://catruccuoi.canyoutry.com/", "aliases": "ca trực cuối, bảo vệ trực đêm, kinh dị", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Đêm Hiện Trường", "url": "http://play.theuntolds.com/", "aliases": "đêm hiện trường, the untolds, kinh dị dân gian", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Nhà Tập Thể", "url": "https://dilo.com.vn/games/nhatapthe/play", "aliases": "nhà tập thể, rằm tháng bảy, kinh dị", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Phở Anh 2", "url": "https://phoanh2.com/pho-anh-hai/?", "aliases": "phở anh hai, tiệm phở của anh hai, kinh dị", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Ma sói - Chơi với bạn bè", "url": "https://gatherplay.games/games/werewolf", "aliases": "ma sói, werewolf", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Hẻm 47", "url": "http://www.hem47.asia/", "aliases": "hẻm 47, kinh dị", "added_at": "2026-10-21", "category": "horror"},
+  {"name": "Thám Tử Bàn Phím", "url": "https://thamtubanphim.netlify.app/", "aliases": "thám tử bàn phím, trinh thám, phá án", "added_at": "2026-10-21", "category": "horror"}
 ];

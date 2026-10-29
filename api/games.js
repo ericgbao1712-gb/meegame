@@ -1,4 +1,4 @@
-import { getDb, sendJson, fail, PUBLIC_COLS } from './_db.js';
+import { getDb, sendJson, fail, PUBLIC_COLS, ensureHorrorCategory } from './_db.js';
 
 export default async function handler(req, res) {
   if (req.method === 'OPTIONS') {
@@ -16,6 +16,7 @@ export default async function handler(req, res) {
 
   try {
     const db = getDb();
+    await ensureHorrorCategory(db);
     const rs = await db.execute(`SELECT ${PUBLIC_COLS.join(',')} FROM games WHERE hidden = 0 ORDER BY name COLLATE NOCASE`);
     const list = rs.rows.map(r => {
       const row = {};

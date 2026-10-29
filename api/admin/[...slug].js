@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
 import {
   getDb, sendJson, fail, parseBody, checkPassword, tokenHash, getAdminEmail,
-  cleanUrl, urlKey, nowIso, CATEGORIES, GAME_COLS
+  cleanUrl, urlKey, nowIso, CATEGORIES, GAME_COLS, ensureHorrorCategory
 } from '../_db.js';
 
 export default async function handler(req, res) {
@@ -70,6 +70,7 @@ export default async function handler(req, res) {
       const email = await getAdminEmail(db, req);
       if (!email) return fail(res, 401, 'unauthorized', 'Phiên đăng nhập đã hết. Đăng nhập lại.');
 
+      await ensureHorrorCategory(db);
       const rs = await db.execute(`SELECT ${GAME_COLS.join(',')} FROM games ORDER BY added_at IS NULL, added_at DESC, name COLLATE NOCASE`);
       const games = rs.rows.map(r => {
         const row = {};

@@ -8,10 +8,43 @@ export const CATEGORY_NAMES = {
   farm: 'Nông trại & xây làng',
   life: 'Đời sống & câu chuyện',
   brain: 'Cờ & trí tuệ',
+  horror: 'Kinh dị',
 };
 export const CATEGORIES = new Set(Object.keys(CATEGORY_NAMES));
 export const GAME_COLS = ['id', 'name', 'url', 'cover_url', 'title_en', 'aliases', 'added_at', 'category', 'hidden', 'created_at'];
 export const PUBLIC_COLS = ['name', 'url', 'cover_url', 'title_en', 'aliases', 'added_at', 'category'];
+
+export const HORROR_SEED_URLS = [
+  'https://catruccuoi.canyoutry.com/',
+  'http://play.theuntolds.com/',
+  'https://dilo.com.vn/games/nhatapthe/play',
+  'https://minhmacg.itch.io/nguoi-o-lai-ngay-tet?utm_source=zalo&utm_medium=zalo&utm_campaign=zalo&zarsrc=31',
+  'https://minhmacg.itch.io/nguoi-o-lai-ngay-tet',
+  'https://redbuttonthegame.up.railway.app/studio',
+  'https://phoanh2.com/pho-anh-hai/?',
+  'https://gatherplay.games/games/werewolf',
+  'http://www.hem47.asia/',
+  'https://thamtubanphim.netlify.app/',
+];
+
+let _horrorMigrated = false;
+export async function ensureHorrorCategory(db) {
+  if (_horrorMigrated) return;
+  _horrorMigrated = true;
+  try {
+    await db.execute('CREATE TABLE IF NOT EXISTS app_meta (k TEXT PRIMARY KEY, v TEXT)');
+    const chk = await db.execute({ sql: "SELECT v FROM app_meta WHERE k = 'horror_cat_v1'", args: [] });
+    if (chk.rows.length > 0) return;
+    const placeholders = HORROR_SEED_URLS.map(() => '?').join(',');
+    await db.execute({
+      sql: `UPDATE games SET category = 'horror' WHERE url IN (${placeholders})`,
+      args: HORROR_SEED_URLS,
+    });
+    await db.execute({ sql: "INSERT OR REPLACE INTO app_meta (k, v) VALUES ('horror_cat_v1', '1')", args: [] });
+  } catch {
+    // ignore if table not writable
+  }
+}
 
 let _client = null;
 export function getDb() {

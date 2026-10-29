@@ -60,6 +60,7 @@ CATEGORY_NAMES = {
     'farm': 'Nông trại & xây làng',
     'life': 'Đời sống & câu chuyện',
     'brain': 'Cờ & trí tuệ',
+    'horror': 'Kinh dị',
 }
 CATEGORIES = tuple(CATEGORY_NAMES)
 

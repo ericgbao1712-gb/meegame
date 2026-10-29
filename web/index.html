@@ -269,15 +269,17 @@ main { padding-bottom: 8px; }
 .group[data-cat="drink"] { --c: #B5730F; }
 .group[data-cat="shop"]  { --c: #D23A70; }
 .group[data-cat="farm"]  { --c: #2E8A44; }
-.group[data-cat="life"]  { --c: #7A4ECF; }
-.group[data-cat="brain"] { --c: #2E6ECB; }
-.group[data-cat="other"] { --c: var(--ink-2); }
-html.dark-mode .group[data-cat="food"]  { --c: #FF9C78; }
-html.dark-mode .group[data-cat="drink"] { --c: #F3B95C; }
-html.dark-mode .group[data-cat="shop"]  { --c: #FF8DB4; }
-html.dark-mode .group[data-cat="farm"]  { --c: #7FD08F; }
-html.dark-mode .group[data-cat="life"]  { --c: #B99DFF; }
-html.dark-mode .group[data-cat="brain"] { --c: #86B5FF; }
+.group[data-cat="life"]   { --c: #7A4ECF; }
+.group[data-cat="brain"]  { --c: #2E6ECB; }
+.group[data-cat="horror"] { --c: #9E1B32; }
+.group[data-cat="other"]  { --c: var(--ink-2); }
+html.dark-mode .group[data-cat="food"]   { --c: #FF9C78; }
+html.dark-mode .group[data-cat="drink"]  { --c: #F3B95C; }
+html.dark-mode .group[data-cat="shop"]   { --c: #FF8DB4; }
+html.dark-mode .group[data-cat="farm"]   { --c: #7FD08F; }
+html.dark-mode .group[data-cat="life"]   { --c: #B99DFF; }
+html.dark-mode .group[data-cat="brain"]  { --c: #86B5FF; }
+html.dark-mode .group[data-cat="horror"] { --c: #FF6B81; }
 .group + .group { margin-top: 16px; }
 .group-head { position: sticky; top: var(--bar-h); z-index: 5; display: flex; align-items: center; gap: 12px; padding: 18px 0 12px; background: var(--bg); }
 .group-head::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 2px; border-radius: 2px; background: linear-gradient(90deg, var(--c), transparent 80%); }
@@ -385,6 +387,7 @@ body.settings-open { overflow: hidden; }
   <symbol id="c-farm" viewBox="0 0 24 24"><path d="M12 20v-8"/><path d="M12 12c0-4-3-6.5-7-6.5 0 4 3 6.5 7 6.5z"/><path d="M12 10.5c0-3.5 2.5-6 6.5-6 0 3.5-2.5 6-6.5 6z"/><path d="M6.5 20.5h11"/></symbol>
   <symbol id="c-life" viewBox="0 0 24 24"><path d="M12 19.5s-7.5-4.6-7.5-10A4.2 4.2 0 0 1 12 7a4.2 4.2 0 0 1 7.5 2.5c0 5.4-7.5 10-7.5 10z"/></symbol>
   <symbol id="c-brain" viewBox="0 0 24 24"><circle cx="12" cy="6.5" r="2.6"/><path d="M9.5 11h5M10.6 11l-.9 5.8h4.6l-.9-5.8"/><path d="M7 20.5h10l-1-3.7H8z"/></symbol>
+  <symbol id="c-horror" viewBox="0 0 24 24"><path d="M12 3.5a7 7 0 0 0-7 7v9.5l2.3-2 2.3 2 2.4-2 2.4 2 2.3-2 2.3 2V10.5a7 7 0 0 0-7-7z"/><circle cx="9.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><circle cx="14.5" cy="10.5" r="1.1" fill="currentColor" stroke="none"/><path d="M10 14.5c.7.6 1.3.9 2 .9s1.3-.3 2-.9"/></symbol>
   <symbol id="i-cal" viewBox="0 0 24 24"><rect x="4" y="5.5" width="16" height="15" rx="3"/><path d="M4 10h16M8.5 3.5v4M15.5 3.5v4"/></symbol>
 </svg>
 
@@ -541,7 +544,7 @@ body.settings-open { overflow: hidden; }
       plays: n => `${n} lượt chơi`,
       random: 'Chơi đại', askTitle: 'Hôm nay muốn chơi gì?', askPh: 'Ví dụ: game nấu ăn nhẹ nhàng, hay tên một game',
       askGo: 'Tìm game', askClear: 'Xoá mô tả', jumpAsk: 'Mô tả game bạn muốn', ideasLabel: 'Gợi ý nhanh',
-      ideas: ['Nấu ăn nhẹ nhàng', 'Mở tiệm bán hàng', 'Pha trà, cà phê', 'Trồng trọt, xây làng', 'Đấu trí, chơi cờ', 'Game mới ra', 'Đang được chơi nhiều'],
+      ideas: ['Nấu ăn nhẹ nhàng', 'Mở tiệm bán hàng', 'Pha trà, cà phê', 'Trồng trọt, xây làng', 'Kinh dị, bí ẩn', 'Đấu trí, chơi cờ', 'Game mới ra', 'Đang được chơi nhiều'],
       headAsk: 'Gợi ý cho bạn', noteAsk: (n, q) => `${n} game hợp với “${q}”`,
       emptyAsk: q => `Chưa tìm ra game hợp với “${q}”. Thử kể khác đi, ví dụ “bán hàng” hay “trồng rau”.`,
       tabAll: 'Tất cả', tabNew: 'Mới', tabHot: 'Hot', tabsLabel: 'Chọn mục', barLabel: 'Tìm và lọc game',
@@ -578,7 +581,7 @@ body.settings-open { overflow: hidden; }
       plays: n => `${n} plays`,
       random: 'Surprise me', askTitle: 'What do you feel like playing?', askPh: 'E.g. a calm cooking game, or a game name',
       askGo: 'Find games', askClear: 'Clear', jumpAsk: 'Describe a game', ideasLabel: 'Quick ideas',
-      ideas: ['Calm cooking', 'Run a shop', 'Tea & coffee', 'Farm & build a town', 'Brain games & chess', 'Just released', 'Most played'],
+      ideas: ['Calm cooking', 'Run a shop', 'Tea & coffee', 'Farm & build a town', 'Horror & mystery', 'Brain games & chess', 'Just released', 'Most played'],
       headAsk: 'Picked for you', noteAsk: (n, q) => `${n} games for “${q}”`,
       emptyAsk: q => `Nothing fits “${q}” yet. Try other words, like “shop” or “farm”.`,
       tabAll: 'All', tabNew: 'New', tabHot: 'Hot', tabsLabel: 'Choose a section', barLabel: 'Search and filter games',
@@ -626,7 +629,7 @@ body.settings-open { overflow: hidden; }
   const titleOf = g => lang === 'en' ? englishTitle(g) : g.name;
 
   // ---------- Dữ liệu game ----------
-  const CACHE_KEY = 'meegame_games_cache_v1';
+  const CACHE_KEY = 'meegame_games_cache_v2';
   const PLAYED_KEY = 'meegame_played_v1';
   const RECENT_START = new Date('2026-09-06T00:00:00');
   const today = new Date(); today.setHours(0, 0, 0, 0);
@@ -644,6 +647,9 @@ body.settings-open { overflow: hidden; }
   const autoShot = url => 'https://s.wordpress.com/mshots/v1/' + encodeURIComponent(url) + '?w=720&h=504&vpw=1200&vph=840';
   // Ảnh bìa tự làm (meegame.shop/covers/x.webp) có thêm bản nhỏ x-s.webp cho hàng danh sách.
   const smallOf = src => /\/covers\/[\w-]+\.webp$/.test(src) ? src.replace(/\.webp$/, '-s.webp') : src;
+  // Thể loại dự phòng theo link, cho game trên máy chủ chưa được xếp loại (và chuyển các game kinh dị sang tab Kinh dị).
+  const SEED_CAT = {};
+  (window.MEEGAME_SEED || []).forEach(r => { const u = safeHttp(r.url); if (u && r.category) SEED_CAT[u] = r.category; });
   function normalize(rows) {
     const seen = new Set();
     return (rows || []).map(r => {
@@ -651,6 +657,8 @@ body.settings-open { overflow: hidden; }
       const name = String(r.name || '').trim();
       if (!url || !name || seen.has(url)) return null;
       seen.add(url);
+      const seedCat = SEED_CAT[url] || null;
+      const cat = seedCat === 'horror' ? 'horror' : (CAT_KEYS.has(r.category) ? r.category : seedCat);
       return {
         name, url, key: url,
         cover: safeHttp(r.cover_url) || autoShot(r.url.trim()),
@@ -658,13 +666,10 @@ body.settings-open { overflow: hidden; }
         titleEn: (r.title_en || '').trim(),
         aliases: r.aliases || '',
         added: parseDay(r.added_at),
-        cat: CAT_KEYS.has(r.category) ? r.category : (SEED_CAT[url] || null)
+        cat
       };
     }).filter(Boolean);
   }
-  // Thể loại dự phòng theo link, cho game trên máy chủ chưa được xếp loại.
-  const SEED_CAT = {};
-  (window.MEEGAME_SEED || []).forEach(r => { const u = safeHttp(r.url); if (u && r.category) SEED_CAT[u] = r.category; });
   function readCache() { try { const v = JSON.parse(store.get(CACHE_KEY) || 'null'); return Array.isArray(v) && v.length ? v : null; } catch (_) { return null; } }
 
   let games = normalize(readCache() || window.MEEGAME_SEED || []);
@@ -794,7 +799,7 @@ body.settings-open { overflow: hidden; }
         (marks.length || plays || cat) ? h('p', { class: 'entry-meta' }, cat, marks, plays) : null),
       getButton(g));
   }
-  const GROUP_ICON = { food: 'c-food', drink: 'c-drink', shop: 'c-shop', farm: 'c-farm', life: 'c-life', brain: 'c-brain', other: 'i-dice' };
+  const GROUP_ICON = { food: 'c-food', drink: 'c-drink', shop: 'c-shop', farm: 'c-farm', life: 'c-life', brain: 'c-brain', horror: 'c-horror', other: 'i-dice' };
   function groupIcon(id) {
     const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     const use = document.createElementNS('http://www.w3.org/2000/svg', 'use');
@@ -962,7 +967,8 @@ body.settings-open { overflow: hidden; }
     shop: ['ban hang', 'buon ban', 'tiem', 'cua hang', 'kinh doanh', 'lam giau', 'kiem tien', 'di cho', 'shop', 'store', 'business', 'sell', 'money', 'cam do'],
     farm: ['nong trai', 'trong', 'trong trot', 'cay', 'rau', 'vuon', 'lang', 'xay', 'xay lang', 'chan nuoi', 'nuoi ca', 'farm', 'garden', 'town', 'village', 'build'],
     life: ['doi song', 'cau chuyen', 'truyen', 'cuoc song', 'cam dong', 'tinh cam', 'meo', 'nha', 'phong van', 'life', 'story', 'cat', 'home', 'cozy'],
-    brain: ['choi co', 'co vua', 'co tuong', 'tri tue', 'dau tri', 'do vui', 'logic', 'suy nghi', 'tam ly', 'chess', 'puzzle', 'brain', 'quiz']
+    brain: ['choi co', 'co vua', 'co tuong', 'tri tue', 'dau tri', 'do vui', 'logic', 'suy nghi', 'tam ly', 'chess', 'puzzle', 'brain', 'quiz'],
+    horror: ['kinh di', 'ma', 'rung ron', 'am anh', 'tam linh', 'bi an', 'trinh tham', 'tham tu', 'pha an', 'ma soi', 'quai vat', 'bong toi', 'dem', 'horror', 'ghost', 'spooky', 'creepy', 'scary', 'mystery', 'thriller', 'werewolf']
   };
   const NEW_WORDS = ['moi', 'moi ra', 'vua ra', 'gan day', 'new', 'latest', 'just released'];
   const HOT_WORDS = ['hot', 'choi nhieu', 'nhieu nguoi', 'pho bien', 'noi tieng', 'trend', 'popular', 'most played'];
