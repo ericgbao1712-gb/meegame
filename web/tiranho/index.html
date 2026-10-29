@@ -2110,7 +2110,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.1';
+const GAME_VER = '1.3.2';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2446,8 +2446,14 @@ function drawMarket(t) {
     buttons.push({ id: 'mktab:' + id, x, y: 386, w: tw2, h: 52 });
   });
   const list = MK_TABS.find((x) => x[0] === S.mkTab)[2];
+  // danh sách cuộn được (vuốt lên / xuống) khi một nhóm có nhiều món
+  if (S.mkScrollTab !== S.mkTab) { S.mkScrollTab = S.mkTab; S.mkScroll = 0; }
+  const rowsN = Math.ceil(list.length / 3); MKV.max = Math.max(0, 452 + rowsN * 154 - 8 - MKV.bot);
+  S.mkScroll = clamp(S.mkScroll || 0, 0, MKV.max); const off = S.mkScroll, b0 = buttons.length;
+  g.save(); g.beginPath(); g.rect(14, MKV.top, W - 28, MKV.bot - MKV.top); g.clip(); g.translate(0, -off);
   list.forEach((k, i) => {
     const c = i % 3, r = Math.floor(i / 3), x = 28 + c * 224, y = 452 + r * 154, I = INGR[k], locked = itemLocked(k), q = S.cart[k] ?? 0;
+    if (y - off > MKV.bot + 10 || y - off + 146 < MKV.top - 10) return;
     fillRR(x, y, 212, 146, 20, locked ? '#F1E9E0' : q ? '#FFF3C4' : '#FFFFFF', q ? '#F2B632' : '#E3CDB6', 3);
     g.globalAlpha = locked ? .35 : 1; itemIcon(k, x + 46, y + 54, .82); g.globalAlpha = 1;
     text(I.name, x + 90, y + 26, { size: 16, color: '#3A2219', weight: 800, align: 'left', max: 116 });
@@ -2460,6 +2466,14 @@ function drawMarket(t) {
     text(String(q), x + 106, y + 115, { size: 26, color: '#3A2219', weight: 800 });
     button(`inc:${k}`, '+', x + 148, y + 94, 52, 42, { t, size: 26, color: '#A0603A', disabled: S.money < cartTotal() + I.price });
   });
+  g.restore();
+  // nút nằm ngoài vùng nhìn thấy thì không bấm được
+  for (let j = buttons.length - 1; j >= b0; j--) { const b = buttons[j]; b.y -= off; const y0 = Math.max(b.y, MKV.top), y1 = Math.min(b.y + b.h, MKV.bot); if (y1 - y0 < 8) buttons.splice(j, 1); else { b.y = y0; b.h = y1 - y0; } }
+  if (MKV.max > 0) {
+    const th = MKV.bot - MKV.top - 8, kh = Math.max(50, th * (MKV.bot - MKV.top) / (MKV.bot - MKV.top + MKV.max)), ky = MKV.top + 4 + (th - kh) * (off / MKV.max);
+    fillRR(W - 22, MKV.top + 4, 6, th, 3, 'rgba(160,120,90,.18)'); fillRR(W - 23, ky, 8, kh, 4, '#B07A48');
+    if (off < MKV.max - 4) { const gr = g.createLinearGradient(0, MKV.bot - 46, 0, MKV.bot); gr.addColorStop(0, 'rgba(255,249,241,0)'); gr.addColorStop(1, 'rgba(255,249,241,.95)'); g.fillStyle = gr; g.fillRect(16, MKV.bot - 46, W - 44, 46); fillRR(W / 2 - 120, MKV.bot - 34, 240, 28, 14, 'rgba(122,69,40,.88)'); text('Vuốt lên để xem thêm món', W / 2, MKV.bot - 20, { size: 14, color: '#fff', weight: 800 }); }
+  }
   const tot = cartTotal();
   text(`Giỏ hàng: ${vnd(tot)}`, 40, 1100, { size: 26, color: '#3A2219', weight: 800, align: 'left' });
   text(`Còn lại sau khi mua: ${vnd(S.money - tot)}${M().disc ? ` · Chị Mơ mặc cả −${Math.round(M().disc * 100)}%` : ''}`, 40, 1136, { size: 18, color: '#8A6A5A', weight: 600, align: 'left' });
@@ -5428,13 +5442,26 @@ function frame(now) {
   requestAnimationFrame(frame);
 }
 function pos(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left) / r.width * W, y: (e.clientY - r.top) / r.height * H }; }
+const MKV = { top: 444, bot: 1082, max: 0, drag: null };
 cv.addEventListener('pointerdown', (e) => {
-  const p = pos(e); dragging = true;
+  const p0 = pos(e);
+  if (S.scene === 'market' && !S.dialog && !S.quests && MKV.max > 0 && p0.y > MKV.top && p0.y < MKV.bot) { MKV.drag = { y0: p0.y, s0: S.mkScroll || 0, x: p0.x, y: p0.y, moved: false, id: e.pointerId }; try { cv.setPointerCapture(e.pointerId); } catch { /* bỏ qua */ } return; }
+  const p = p0; dragging = true;
   const b = [...buttons].reverse().find((b2) => p.x >= b2.x && p.x <= b2.x + b2.w && p.y >= b2.y && p.y <= b2.y + b2.h);
   if (b && !b.disabled) { if (b.id.startsWith('cs:disp:') && S.scene === 'street' && !S.dialog) { startPour(b.id.slice(8)); return; } onButton(b.id); return; }
   if (S.scene === 'prep' && !S.dialog && !S.quests) prepInput(p.x, p.y, false);
 });
-cv.addEventListener('pointermove', (e) => { if (dragging && S.scene === 'prep' && !S.quests) { const p = pos(e); prepInput(p.x, p.y, true); } });
+cv.addEventListener('pointermove', (e) => {
+  if (MKV.drag) { const p = pos(e), d = p.y - MKV.drag.y0; if (Math.abs(d) > 10) MKV.drag.moved = true; if (MKV.drag.moved) S.mkScroll = clamp(MKV.drag.s0 - d, 0, MKV.max); return; }
+  if (dragging && S.scene === 'prep' && !S.quests) { const p = pos(e); prepInput(p.x, p.y, true); }
+});
+cv.addEventListener('pointerup', () => {
+  const d = MKV.drag; MKV.drag = null; if (!d || d.moved) return;
+  const b = [...buttons].reverse().find((b2) => d.x >= b2.x && d.x <= b2.x + b2.w && d.y >= b2.y && d.y <= b2.y + b2.h);
+  if (b && !b.disabled) onButton(b.id);
+});
+cv.addEventListener('pointercancel', () => { MKV.drag = null; });
+cv.addEventListener('wheel', (e) => { if (S.scene !== 'market' || MKV.max <= 0) return; e.preventDefault(); S.mkScroll = clamp((S.mkScroll || 0) + e.deltaY * (H / cv.getBoundingClientRect().height), 0, MKV.max); }, { passive: false });
 addEventListener('pointerup', () => { dragging = false; if (S.pouring) stopPour(); });
 addEventListener('pointercancel', () => { dragging = false; if (S.pouring) stopPour(); });
 function onButton(id) {
