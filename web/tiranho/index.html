@@ -2152,7 +2152,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.5.3';
+const GAME_VER = '1.5.4';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -2997,10 +2997,21 @@ function fulfillable(c) {
   if (!c) return true;
   const want = {}; for (const f of need(c)) want[f] = (want[f] ?? 0) + 1;
   if (Object.entries(want).some(([f, n]) => (S.trays[f] ?? 0) < n)) return false;
-  if (!boxDone(c) && boxNeedsExtra(c).some((k) => (S.inv[k] ?? 0) < 1)) return false;
-  for (const d of pendingDrinks(c)) if (!canMakeDrink(d.dk) || d.tops.some((k) => (S.inv[k] ?? 0) < 1)) return false;
-  const u = c === S.cust ? selCup() : null; if (u && u.di != null && c.drinks[u.di]) { const d = c.drinks[u.di]; if (d.tops.some((k) => !u.tops.includes(k) && (S.inv[k] ?? 0) < 1)) return false; }
   if (c.cake && !c.gotCake && !(S.cakes || []).some((x) => x.fk === c.cake)) return false;
+  const mat = c === S.cust ? S.mat : c.mat || [], b = mat.find((x) => x.type === 'box');
+  const req = {}, add = (k) => { req[k] = (req[k] || 0) + 1; };
+  if (!boxDone(c)) for (const k of (c.extras || []).filter((x) => !(b?.extras || []).includes(x))) add(k);
+  for (const d of pendingDrinks(c)) {
+    if (!drinkUnlocked(d.dk)) return false;
+    add('ly'); for (const k of DRINKS[d.dk].base) add(k); for (const k of d.tops) add(k);
+  }
+  for (const u of mat) if (u.type === 'cup' && !u.spoil && !cupDone(u)) {
+    const d = u.di != null ? c.drinks?.[u.di] : (c.drinks || []).find((x, i) => x.size === u.size && !mat.some((m) => m.type === 'cup' && m.di === i));
+    if (!d || !drinkUnlocked(d.dk)) return false;
+    if (!u.base && !u.pb) for (const k of DRINKS[d.dk].base) add(k);
+    for (const k of d.tops) if (!u.tops.includes(k)) add(k);
+  }
+  if (Object.entries(req).some(([k, n]) => (S.inv[k] ?? 0) < n)) return false;
   return true;
 }
 function mistake(c, text) { msg(text, '#B5302A'); c.mood = 'sad'; c.mistakes++; S.today.combo = 0; S.today.mistakes++; setTimeout(() => { if (S.cust === c) c.mood = 'wait'; }, 900); sfx.bad(); }
@@ -3317,9 +3328,9 @@ function drawStreet(t, dt) {
   opsTick(dt);
   S.helperT = Math.max(0, (S.helperT || 0) - dt);
   slotTick(dt);
+  staffWork(dt, MM);
   const total = Object.values(S.trays).reduce((a, b) => a + b, 0) + (S.cakes?.length || 0) + (drinksAvailable().length ? 1 : 0) + (S.bake || S.moTrip ? 1 : 0);
   if (((!slotsBusy() && (S.dayLeft <= 0 || !total) && !S.bg?.length) || (S.cust && !total && S.phase === 'order' && !S.anim && !S.cust.got.length && !S.mat.length)) && S.phase !== 'end' && !S.dialog) { S.cust = null; S.phase = 'end'; endDay(); }
-  staffWork(dt, MM);
   if (S.anim) {
     S.anim.t += dt * 1.8 * (MM.staffSpd || 1); const a = S.anim;
     if (a.kind === 'scoop' && a.t >= MM.scoop * .7) finishScoop();
@@ -4139,8 +4150,8 @@ function trashCan(x, y, w, h) {
 
 function selCup() { const u = S.mat[S.sel]; if (u?.type === 'cup' && !cupDone(u)) return u; return S.mat.find((x) => x.type === 'cup' && !cupDone(x) && !x.spoil) ?? S.mat.find((x) => x.type === 'cup' && !cupDone(x)); }
 function pendingDrinks(c) {
-  const left = [...(c.drinks || [])];
-  for (const u of S.mat) if (u.type === 'cup' && !u.spoil) { const i = left.findIndex((d) => cupFits(u, d)); if (i >= 0) left.splice(i, 1); }
+  const left = [...(c.drinks || [])], mat = c === S.cust ? S.mat : c.mat || [];
+  for (const u of mat) if (u.type === 'cup' && !u.spoil) { const i = left.findIndex((d) => cupFits(u, d)); if (i >= 0) left.splice(i, 1); }
   return left;
 }
 /** Thu tiền một đơn. bg = đơn online Anh Khoa làm ở bàn phụ (không đụng tới quầy). */
@@ -5487,11 +5498,12 @@ function bakerTick(dt) {
   if (!S.staff?.ngoc) return;
   if (S.bake) {
     S.bake.t += dt * bakeSpd();
-    if (S.bake.t >= BAKE_SEC) { const fk = S.bake.fk; S.trays[fk] = (S.trays[fk] ?? 0) + PORTIONS; S.today.trays = (S.today.trays || 0) + 1; addMade(fk, PORTIONS); S.bake = null; msg(`Chị Ngọc làm xong khay ${FLAVORS[fk].name}!`, '#3E7A2E'); sfx.good(); }
+    if (S.bake.t >= BAKE_SEC) { const fk = S.bake.fk; S.trays[fk] = (S.trays[fk] ?? 0) + PORTIONS; S.today.trays = (S.today.trays || 0) + 1; addMade(fk, PORTIONS); S.bake = null; SPR.clear?.(); msg(`Chị Ngọc làm xong khay ${FLAVORS[fk].name}!`, '#3E7A2E'); sfx.good(); }
     return;
   }
-  if (S.dayLeft < 6) return;
-  S.bakeChk = (S.bakeChk || 0) + dt; if (S.bakeChk < .3) return; S.bakeChk = 0;
+  if (S.dayLeft < 5) return;
+  const emptyTray = Object.keys(S.trays).some((fk) => (S.trays[fk] ?? 0) <= 0 && FLAVORS[fk]);
+  S.bakeChk = (S.bakeChk || 0) + dt; if (S.bakeChk < .3 && !emptyTray) return; S.bakeChk = 0;
   const sold = S.today.flavorSold || {};
   const low = Object.keys(S.trays)
     .filter((fk) => S.trays[fk] <= 1 && FLAVORS[fk])
@@ -5503,14 +5515,33 @@ function bakerTick(dt) {
 }
 // ---------------------------------------------------------------- NHÂN VIÊN: Chị Mơ tự đi chợ khi đang bán mà hết đồ
 function moNeeds() {
-  const need = {}, start = S.today?.startInv || {};
-  for (const k of Object.keys(INGR)) {
-    if (itemLocked(k)) continue; const I = INGR[k], n = S.inv[k] ?? 0;
-    if ((start[k] || 0) > 0 && n <= (I.per >= 10 ? 2 : 1)) need[k] = I.per >= 5 ? 2 : 4;
+  const need = {}, start = S.today?.startInv || {}, openDr = Object.keys(DRINKS).filter(drinkUnlocked);
+  const urgent = new Set();
+  for (const c of [...(S.slots || []), ...(S.queue || [])]) if (c && !c.leave) {
+    for (const d of c.drinks || []) { urgent.add('ly'); for (const k of DRINKS[d.dk]?.base || []) urgent.add(k); for (const k of d.tops || []) urgent.add(k); }
+    for (const k of c.extras || []) urgent.add(k);
   }
+  // Ưu tiên 1: Ly & nguyên liệu pha nước đã mở khoá (mua ngay khi vơi/hết, kể cả đầu ngày quên mua)
+  if (openDr.length) {
+    if ((S.inv.ly ?? 0) <= 3) need.ly = 2;
+    for (const dk of openDr) for (const k of DRINKS[dk].base) {
+      if (itemLocked(k)) continue;
+      if ((S.inv[k] ?? 0) <= 2) need[k] = Math.max(need[k] || 0, INGR[k].per >= 5 ? 2 : 3);
+    }
+  }
+  // Ưu tiên 2: Topping nước, topping hộp bánh & bao bì đã mở khoá
+  for (const k of DRINK_TOPS) if (!itemLocked(k) && level() >= topLevel(k) && (S.inv[k] ?? 0) <= 2 && ((start[k] || 0) > 0 || urgent.has(k) || (S.inv[k] ?? 0) === 0)) need[k] = Math.max(need[k] || 0, 2);
+  for (const k of BOX_EXTRAS) if (!itemLocked(k) && level() >= topLevel(k) && (S.inv[k] ?? 0) <= 1 && ((start[k] || 0) > 0 || urgent.has(k) || (S.inv[k] ?? 0) === 0)) need[k] = Math.max(need[k] || 0, 2);
+  for (const k of ['box', 'bag', 'thia']) if (!itemLocked(k) && (S.inv[k] ?? 0) <= 2) need[k] = Math.max(need[k] || 0, 2);
+  // Ưu tiên 3: Nguyên liệu làm bánh cho Chị Ngọc khi khay vơi/hết
   if (S.staff?.ngoc) for (const fk of Object.keys(S.trays).filter((f) => S.trays[f] <= 1 && FLAVORS[f])) {
     const cnt = {}; for (const k of recipeOf(fk)) cnt[k] = (cnt[k] || 0) + 1;
     for (const [k, c] of Object.entries(cnt)) if ((S.inv[k] ?? 0) < c) need[k] = Math.max(need[k] || 0, Math.ceil((c * 2 - (S.inv[k] ?? 0)) / INGR[k].per));
+  }
+  // Ưu tiên 4: Các nguyên liệu khác có từ đầu ngày đang cạn
+  for (const k of Object.keys(INGR)) {
+    if (itemLocked(k) || need[k]) continue; const I = INGR[k], n = S.inv[k] ?? 0;
+    if (((start[k] || 0) > 0 || urgent.has(k)) && n <= (I.per >= 10 ? 2 : 1)) need[k] = I.per >= 5 ? 2 : 4;
   }
   return need;
 }
@@ -5518,20 +5549,26 @@ function moTick(dt) {
   if (!S.staff?.mo) return;
   if (S.moTrip) {
     S.moTrip.t += dt * moSpd();
-    if (S.moTrip.t >= TRIP_SEC) { for (const [k, q] of Object.entries(S.moTrip.buy)) S.inv[k] = (S.inv[k] ?? 0) + q * INGR[k].per; try { reconcileLots(); } catch { /* bỏ qua */ } msg(`Chị Mơ đi chợ về: ${Object.keys(S.moTrip.buy).map((k) => INGR[k].name).slice(0, 3).join(', ')}${Object.keys(S.moTrip.buy).length > 3 ? '…' : ''}`, '#3E7A2E'); sfx.coin(); S.moTrip = null; }
+    if (S.moTrip.t >= TRIP_SEC) { for (const [k, q] of Object.entries(S.moTrip.buy)) S.inv[k] = (S.inv[k] ?? 0) + q * INGR[k].per; try { reconcileLots(); } catch { /* bỏ qua */ } SPR.clear?.(); msg(`Chị Mơ đi chợ về: ${Object.keys(S.moTrip.buy).map((k) => INGR[k].name).slice(0, 3).join(', ')}${Object.keys(S.moTrip.buy).length > 3 ? '…' : ''}`, '#3E7A2E'); sfx.coin(); S.moTrip = null; S.moBroke = false; }
     return;
   }
-  if (S.dayLeft < 5) return;
-  S.moChk = (S.moChk || 0) + dt; if (S.moChk < .35) return; S.moChk = 0;
+  if (S.dayLeft < 4) return;
+  const drinkOut = Object.keys(DRINKS).some((dk) => drinkUnlocked(dk) && jarCups(dk) <= 0) || (S.cust && !fulfillable(S.cust));
+  S.moChk = (S.moChk || 0) + dt; if (S.moChk < .35 && !drinkOut) return; S.moChk = 0;
   const need = moNeeds(); if (!Object.keys(need).length) return;
   const disc = M().disc || 0; let cost = 0; const buy = {};
-  for (const [k, q] of Object.entries(need)) { const c = Math.round(mktPrice(k) * q * (1 - disc)); if (S.money - cost - c < 0) continue; buy[k] = q; cost += c; }
+  for (const [k, q] of Object.entries(need)) {
+    let q2 = q, c = Math.round(mktPrice(k) * q2 * (1 - disc));
+    while (q2 > 1 && S.money - cost - c < 0) { q2--; c = Math.round(mktPrice(k) * q2 * (1 - disc)); }
+    if (S.money - cost - c < 0) continue;
+    buy[k] = q2; cost += c;
+  }
   if (!Object.keys(buy).length) { if (!S.moBroke) { S.moBroke = true; msg('Chị Mơ: hết tiền đi chợ rồi con ơi!', '#B5302A'); } return; }
-  S.money -= cost; S.today.spent = (S.today.spent || 0) + cost; S.today.moSpent = (S.today.moSpent || 0) + cost;
+  S.moBroke = false; S.money -= cost; S.today.spent = (S.today.spent || 0) + cost; S.today.moSpent = (S.today.moSpent || 0) + cost;
   S.moTrip = { buy, t: 0, cost }; msg(`Chị Mơ chạy đi chợ mua thêm ${Object.keys(buy).map((k) => INGR[k].name).slice(0, 2).join(', ')}${Object.keys(buy).length > 2 ? '…' : ''} (${vnd(cost)})`, '#8A5A9A');
 }
 const _sw18 = staffWork;
-staffWork = function (dt, MM) { _sw18(dt, MM); if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } };
+staffWork = function (dt, MM) { if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } _sw18(dt, MM); };
 const _ss18 = startStreet;
 startStreet = function () { S.bake = null; S.moTrip = null; S.moBroke = false; const r = _ss18.apply(this, arguments); if (S.today) S.today.startInv = { ...S.inv }; return r; };
 // dải trạng thái dưới khay bánh
@@ -5741,11 +5778,45 @@ function fixDuty() {
   if (on.length > DUTY_MAX) S.dutyOff = [...(S.dutyOff || []), ...on.slice(DUTY_MAX)];
 }
 const ST_GAP = { quan: .08, hau: .22, bong: .22, linh: .20, hong: .15 };
+function canWaitRestock(c) {
+  if (!c || c.patience < .28) return false;
+  if (c.cake && !c.gotCake && !(S.cakes || []).some((x) => x.fk === c.cake)) return false;
+  const want = {}; for (const f of need(c)) want[f] = (want[f] ?? 0) + 1;
+  const canMo = !!(S.moTrip || (S.staff?.mo && !S.moBroke && S.dayLeft >= 4 && S.money >= 6000));
+  for (const [f, n] of Object.entries(want)) if ((S.trays[f] ?? 0) < n) {
+    const canNgoc = !!(S.staff?.ngoc && S.trays[f] != null && (S.bake?.fk === f || (S.dayLeft >= 5 && (canMakeList(recipeOf(f)) || canMo))));
+    if (!canNgoc) return false;
+  }
+  const mat = c === S.cust ? S.mat : c.mat || [], b = mat.find((x) => x.type === 'box');
+  const req = {}, add = (k) => { req[k] = (req[k] || 0) + 1; };
+  if (!boxDone(c)) for (const k of (c.extras || []).filter((x) => !(b?.extras || []).includes(x))) add(k);
+  for (const d of pendingDrinks(c)) { add('ly'); for (const k of DRINKS[d.dk]?.base || []) add(k); for (const k of d.tops) add(k); }
+  for (const u of mat) if (u.type === 'cup' && !u.spoil && !cupDone(u)) {
+    const d = u.di != null ? c.drinks?.[u.di] : (c.drinks || []).find((x, i) => x.size === u.size && !mat.some((m) => m.type === 'cup' && m.di === i));
+    if (d) { if (!u.base && !u.pb) for (const k of DRINKS[d.dk]?.base || []) add(k); for (const k of d.tops) if (!u.tops.includes(k)) add(k); }
+  }
+  if (Object.entries(req).some(([k, n]) => (S.inv[k] ?? 0) < n) && !canMo) return false;
+  return true;
+}
 function counterWork(dt, MM) {
-  const c = S.cust; if (!c || S.dialog || c.enter < .6 || c.leave > 0) return;
+  let c = S.cust; if (!c || S.dialog || c.enter < .6 || c.leave > 0) return;
   fixDuty(); const duty = onDuty(), spd = MM.staffSpd || 1;
   S.stCool = Math.max(0, (S.stCool || 0) - dt);
   if (performance.now() - (S.lastTap || 0) < 180 || S.stCool > 0 || S.anim || S.pouring) return;
+  if (duty.length && S.phase === 'order' && !fulfillable(c)) {
+    if (!canWaitRestock(c)) {
+      if (c.enter < .85) return;
+      const id = duty[0], gap = (ST_GAP[id] || .2) / staffK(id) / spd;
+      S.stRefT = (S.stRefT || 0) + dt;
+      if (S.stRefT >= gap) {
+        S.stRefT = 0; if (S.stT) for (const k of duty) S.stT[k] = 0;
+        refuseCustomer(); S.helper = id; S.helperT = .9; S.stCool = .06;
+      }
+      return;
+    }
+    const alt = (S.slots || []).find((x) => x && x !== c && !x.leave && x.enter > .75 && (fulfillable(x) || !canWaitRestock(x)));
+    if (alt) { focusSlot(alt); c = S.cust; }
+  } else S.stRefT = 0;
   const act = nextAct(c)?.[0];
   const can = {
     tho: () => S.phase === 'order' && need(c).some((k) => S.trays[k] > 0),
@@ -5768,7 +5839,7 @@ function counterWork(dt, MM) {
     return;
   }
 }
-staffWork = function (dt, MM) { counterWork(dt, MM); if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } };
+staffWork = function (dt, MM) { if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } counterWork(dt, MM); };
 // ---- tab Nhân viên: bật / tắt đứng quầy (tối đa 5 người)
 const _rov25 = renderOv0;
 renderOv0 = function () {
