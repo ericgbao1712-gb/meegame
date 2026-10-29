@@ -2132,7 +2132,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.5.0';
+const GAME_VER = '1.5.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5453,22 +5453,28 @@ endDay = function () {
 
 // ---------------------------------------------------------------- NHÂN VIÊN: Chị Ngọc thợ làm bánh
 STAFF.push({ id: 'ngoc', name: 'Chị Ngọc', role: 'Thợ làm bánh', lv: 5, wage: 85000,
-  desc: 'Theo xe ra phố làm bánh: khay nào đang bán mà hết là chị làm ngay khay mới (khoảng 25 giây một khay, tốn nguyên liệu như bạn làm). Làm được cả tiramisu và mochi.', up: 'Mỗi bậc: nhanh thêm 15%',
+  desc: 'Theo xe ra phố làm bánh: khay nào đang bán mà vơi hoặc hết là chị làm ngay khay mới (khoảng 8 giây một khay, tốn nguyên liệu như bạn làm). Làm được cả tiramisu và mochi.', up: 'Mỗi bậc: nhanh thêm 15%',
   look: { id: 'st_ngoc', skin: '#F2CDB0', hair: '#2A1A14', hairStyle: 'bun', eyes: '#3A2A22', top: { type: 'shirt', color: '#FFFFFF' }, apron: '#B07A48', legs: { type: 'pants', color: '#4A4038' }, shoes: '#FFFFFF', acc: ['pearlClip'], prop: 'none' } });
 SPEED_STAFF.add('ngoc');
-const mo = STAFF.find((x) => x.id === 'mo'); if (mo) mo.desc = 'Sáng nào cũng chọn sẵn giỏ hàng theo gợi ý, mặc cả rẻ hơn 5%. Đang bán mà hết ly, hộp, topping hay nguyên liệu là chị tự chạy đi chợ mua thêm.';
-const BAKE_SEC = 25, TRIP_SEC = 20;
+SPEED_STAFF.add('mo');
+const mo = STAFF.find((x) => x.id === 'mo'); if (mo) mo.desc = 'Sáng nào cũng chọn sẵn giỏ hàng theo gợi ý, mặc cả rẻ hơn 5%. Đang bán mà sắp hết ly, hộp, topping hay nguyên liệu là chị chạy vèo đi chợ mua thêm (~6 giây/chuyến).';
+const BAKE_SEC = 8, TRIP_SEC = 6;
+const bakeSpd = () => staffK('ngoc') * (M().staffSpd || 1);
+const moSpd = () => staffK('mo') * (M().staffSpd || 1);
 function bakerTick(dt) {
   if (!S.staff?.ngoc) return;
   if (S.bake) {
-    S.bake.t += dt * staffK('ngoc');
+    S.bake.t += dt * bakeSpd();
     if (S.bake.t >= BAKE_SEC) { const fk = S.bake.fk; S.trays[fk] = (S.trays[fk] ?? 0) + PORTIONS; S.today.trays = (S.today.trays || 0) + 1; addMade(fk, PORTIONS); S.bake = null; msg(`Chị Ngọc làm xong khay ${FLAVORS[fk].name}!`, '#3E7A2E'); sfx.good(); }
     return;
   }
-  if (S.dayLeft < 30) return;
-  S.bakeChk = (S.bakeChk || 0) + dt; if (S.bakeChk < .8) return; S.bakeChk = 0;
-  const sold = S.today.flavorSold || {}, out = Object.keys(S.trays).filter((fk) => S.trays[fk] === 0 && FLAVORS[fk]).sort((a, b) => (sold[b] || 0) - (sold[a] || 0));
-  const fk = out.find((f) => canMakeList(recipeOf(f)));
+  if (S.dayLeft < 6) return;
+  S.bakeChk = (S.bakeChk || 0) + dt; if (S.bakeChk < .3) return; S.bakeChk = 0;
+  const sold = S.today.flavorSold || {};
+  const low = Object.keys(S.trays)
+    .filter((fk) => S.trays[fk] <= 1 && FLAVORS[fk])
+    .sort((a, b) => (S.trays[a] - S.trays[b]) || ((sold[b] || 0) - (sold[a] || 0)));
+  const fk = low.find((f) => canMakeList(recipeOf(f)));
   if (!fk) return;
   for (const k of recipeOf(fk)) S.inv[k]--;
   S.bake = { fk, t: 0 }; msg(`Chị Ngọc đang làm thêm khay ${FLAVORS[fk].name}…`, '#8A5A9A');
@@ -5478,23 +5484,23 @@ function moNeeds() {
   const need = {}, start = S.today?.startInv || {};
   for (const k of Object.keys(INGR)) {
     if (itemLocked(k)) continue; const I = INGR[k], n = S.inv[k] ?? 0;
-    if ((start[k] || 0) > 0 && n <= (I.per >= 10 ? 1 : 0)) need[k] = I.per >= 5 ? 1 : 3;
+    if ((start[k] || 0) > 0 && n <= (I.per >= 10 ? 2 : 1)) need[k] = I.per >= 5 ? 2 : 4;
   }
-  if (S.staff?.ngoc && !S.bake) for (const fk of Object.keys(S.trays).filter((f) => S.trays[f] === 0 && FLAVORS[f])) {
+  if (S.staff?.ngoc) for (const fk of Object.keys(S.trays).filter((f) => S.trays[f] <= 1 && FLAVORS[f])) {
     const cnt = {}; for (const k of recipeOf(fk)) cnt[k] = (cnt[k] || 0) + 1;
-    for (const [k, c] of Object.entries(cnt)) if ((S.inv[k] ?? 0) < c) need[k] = Math.max(need[k] || 0, Math.ceil((c - (S.inv[k] ?? 0)) / INGR[k].per));
+    for (const [k, c] of Object.entries(cnt)) if ((S.inv[k] ?? 0) < c) need[k] = Math.max(need[k] || 0, Math.ceil((c * 2 - (S.inv[k] ?? 0)) / INGR[k].per));
   }
   return need;
 }
 function moTick(dt) {
   if (!S.staff?.mo) return;
   if (S.moTrip) {
-    S.moTrip.t += dt * (1 + .15 * sLv('mo'));
+    S.moTrip.t += dt * moSpd();
     if (S.moTrip.t >= TRIP_SEC) { for (const [k, q] of Object.entries(S.moTrip.buy)) S.inv[k] = (S.inv[k] ?? 0) + q * INGR[k].per; try { reconcileLots(); } catch { /* bỏ qua */ } msg(`Chị Mơ đi chợ về: ${Object.keys(S.moTrip.buy).map((k) => INGR[k].name).slice(0, 3).join(', ')}${Object.keys(S.moTrip.buy).length > 3 ? '…' : ''}`, '#3E7A2E'); sfx.coin(); S.moTrip = null; }
     return;
   }
-  if (S.dayLeft < TRIP_SEC + 10) return;
-  S.moChk = (S.moChk || 0) + dt; if (S.moChk < 1) return; S.moChk = 0;
+  if (S.dayLeft < 5) return;
+  S.moChk = (S.moChk || 0) + dt; if (S.moChk < .35) return; S.moChk = 0;
   const need = moNeeds(); if (!Object.keys(need).length) return;
   const disc = M().disc || 0; let cost = 0; const buy = {};
   for (const [k, q] of Object.entries(need)) { const c = Math.round(mktPrice(k) * q * (1 - disc)); if (S.money - cost - c < 0) continue; buy[k] = q; cost += c; }
@@ -5511,7 +5517,7 @@ const _ds18 = drawStreet;
 drawStreet = function (t, dt) {
   _ds18(t, dt);
   if (S.scene !== 'street' || (!S.bake && !S.moTrip)) return;
-  const parts = []; if (S.bake) parts.push(`Chị Ngọc làm ${FLAVORS[S.bake.fk].name} ${Math.round(S.bake.t / BAKE_SEC * 100)}%`); if (S.moTrip) parts.push(`Chị Mơ đi chợ ${Math.max(0, Math.ceil((TRIP_SEC - S.moTrip.t) / (1 + .15 * sLv('mo'))))}s`);
+  const parts = []; if (S.bake) parts.push(`Chị Ngọc làm ${FLAVORS[S.bake.fk].name} ${Math.round(S.bake.t / BAKE_SEC * 100)}%`); if (S.moTrip) parts.push(`Chị Mơ đi chợ ${Math.max(0, Math.ceil((TRIP_SEC - S.moTrip.t) / moSpd()))}s`);
   const TR = CT.trays; fillRR(TR.x, TR.y + TR.h + 6, TR.w, 26, 13, 'rgba(255,248,236,.96)', '#D9B48E', 1.5);
   const k = S.bake ? S.bake.t / BAKE_SEC : 0; if (S.bake) fillRR(TR.x + 2, TR.y + TR.h + 8, (TR.w - 4) * clamp(k), 22, 11, 'rgba(160,96,58,.22)');
   text(parts.join(' · '), TR.x + TR.w / 2, TR.y + TR.h + 19, { size: 13, color: '#5A3418', weight: 800, max: TR.w - 16 });
