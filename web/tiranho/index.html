@@ -2132,7 +2132,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.4.1';
+const GAME_VER = '1.4.2';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -5595,6 +5595,63 @@ meeApi = async function (method, route, body) {
   if (!cred) return; const before = NET.player; await _si24(cred);
   if (!NET.player && !before && NET.downUntil > Date.now()) toast('Máy chủ MeeGame đang quá tải, tạm thời chưa đăng nhập được. Bạn cứ chơi tiếp, tiến trình vẫn lưu trong máy, thử lại sau nha.', 4200);
 }; }
+
+// ================================================================ v25: nhân viên đứng quầy không làm trùng / làm lỗi · tối đa 3 người đứng quầy cùng lúc
+// Lỗi cũ: nhiều nhân viên (và cả người chơi) cùng làm đúng một bước trong cùng một khung hình → bấm 2 lần
+// (2 lần rót, 2 lần topping, 2 ly…) → ly hỏng phải đổ, khách bị tính lỗi liên tục.
+// Giờ: mỗi lần chỉ 1 người làm 1 bước, bước kế tiếp được tính lại; người chơi vừa chạm thì nhân viên chờ một nhịp.
+const COUNTER_STAFF = ['quan', 'tho', 'hau', 'bong', 'hong'];
+const DUTY_MAX = 3;
+if (!PERSIST.includes('dutyOff')) PERSIST.push('dutyOff');
+const onDuty = () => COUNTER_STAFF.filter((id) => S.staff?.[id] && !(S.dutyOff || []).includes(id)).slice(0, DUTY_MAX);
+function fixDuty() { const on = COUNTER_STAFF.filter((id) => S.staff?.[id] && !(S.dutyOff || []).includes(id)); if (on.length > DUTY_MAX) S.dutyOff = [...(S.dutyOff || []), ...on.slice(DUTY_MAX)]; }
+const ST_GAP = { quan: .5 / 3, hau: .5, bong: .5, hong: .32 };
+function counterWork(dt, MM) {
+  const c = S.cust; if (!c || S.dialog || c.enter < .9 || c.leave > 0) return;
+  fixDuty(); const duty = onDuty(), spd = MM.staffSpd || 1;
+  S.stCool = Math.max(0, (S.stCool || 0) - dt);
+  if (performance.now() - (S.lastTap || 0) < 350 || S.stCool > 0 || S.anim || S.pouring) return;
+  const act = nextAct(c)?.[0];
+  const can = {
+    tho: () => S.phase === 'order' && need(c).some((k) => S.trays[k] > 0),
+    hau: () => act && (DRINK_ACT(act) || (act === 'bin:kem_cheese' && selCup())),
+    hong: () => act === 'bin:thia' || act === 'mat:box' || act === 'give',
+    bong: () => act && /^bin:/.test(act) && !['bin:da', 'bin:thia', 'bin:ong_hut'].includes(act),
+    quan: () => !!act,
+  };
+  S.stT ??= {};
+  for (const id of duty) {
+    if (!can[id]()) { S.stT[id] = 0; continue; }
+    S.stT[id] = (S.stT[id] || 0) + dt;
+    const gap = id === 'tho' ? MM.thoEvery : ST_GAP[id] / staffK(id) / spd;
+    if (S.stT[id] < gap) continue;
+    for (const k of duty) S.stT[k] = 0;   // một bước chỉ một người làm
+    if (id === 'tho') { const f = need(c).find((k) => S.trays[k] > 0); S.helperNow = 'tho'; tapTray(f); S.helperNow = null; }
+    else doAct(act);
+    S.helper = id; S.helperT = .9; S.stCool = .12;
+    return;
+  }
+}
+staffWork = function (dt, MM) { counterWork(dt, MM); if (S.scene === 'street' && dt > 0 && S.phase !== 'end') { moTick(dt); bakerTick(dt); } };
+// ---- tab Nhân viên: bật / tắt đứng quầy (tối đa 3 người)
+const _rov25 = renderOv0;
+renderOv0 = function () {
+  const r = _rov25(); if (OV.view !== 'manage' || OV.tab !== 'staff') return r;
+  fixDuty(); const body = $('ovBody'), on = onDuty();
+  body.querySelector('.note')?.insertAdjacentHTML('beforeend', ` Quầy chỉ đủ chỗ cho <b>${DUTY_MAX} người đứng làm cùng lúc</b> (Anh Quân, Bé Thơ, Bé Hậu, Bé Bông, Chị Hồng) · đang đứng quầy ${on.length}/${DUTY_MAX}.`);
+  for (const id of COUNTER_STAFF) {
+    if (!S.staff?.[id]) continue; const cv = body.querySelector(`canvas[data-staff="${id}"]`), row = cv?.closest('.card')?.querySelector('.row'); if (!row) continue;
+    const isOn = on.includes(id);
+    row.insertAdjacentHTML('afterbegin', `<button class="btn sm ${isOn ? 'go' : 'ghost'}" data-duty="${id}">${isOn ? 'Đứng quầy ✓' : 'Cho đứng quầy'}</button>`);
+  }
+  body.querySelectorAll('[data-duty]').forEach((b) => b.onclick = (e) => {
+    e.stopPropagation(); const id = b.dataset.duty, cur = onDuty(); S.dutyOff = (S.dutyOff || []).filter((x) => x !== id);
+    if (cur.includes(id)) S.dutyOff.push(id);
+    else if (cur.length >= DUTY_MAX) { S.dutyOff.push(id); toast(`Quầy chỉ đủ chỗ cho ${DUTY_MAX} người, cho 1 người nghỉ quầy trước nha`, 2600); return; }
+    save(); sfx.tap(); renderOv();
+  });
+  return r;
+};
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
