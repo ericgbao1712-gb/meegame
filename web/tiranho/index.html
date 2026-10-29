@@ -2132,13 +2132,13 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.4.0';
+const GAME_VER = '1.4.1';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
 const NET = { server: /(^|\.)meegame\.|meegame[-.].*\.(vercel\.app|workers\.dev)$|^localhost$|^127\./.test(location.hostname) && location.protocol.startsWith('http'), player: null, rows: null, status: '', busy: false };
 // Công tắc đăng nhập Google / máy chủ MeeGame: false = tắt hẳn (không gọi máy chủ, tiến trình chỉ lưu trong máy). Đổi thành true để bật lại.
-const LOGIN_ON = false;
+const LOGIN_ON = true;
 NET.onMeeGame = NET.server; if (!LOGIN_ON) NET.server = false;
 async function meeApi(method, route, body) {
   const init = { method, credentials: 'same-origin', headers: {} };
