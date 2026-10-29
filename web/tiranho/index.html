@@ -1991,7 +1991,7 @@ function renderOv0() {
   if (renderMenuTabs(body, head)) return;
   if (OV.tab === 'staff') {
     const wages = hired().reduce((s, x) => s + staffWage(x), 0);
-    body.innerHTML = head + `<p class="note">Lương trả mỗi tối lúc tổng kết${wages ? ` · hiện tại <b>${vnd(wages)}/ngày</b>` : ''}. Làm đủ ngày thì đào tạo lên bậc: giỏi hơn, lương cao hơn 15%.</p>` + STAFF.map((x) => {
+    body.innerHTML = head + `<p class="note">Lương trả mỗi tối lúc tổng kết${wages ? ` · hiện tại <b>${vnd(wages)}/ngày</b>` : ''}. Làm đủ ngày thì đào tạo lên bậc: giỏi hơn, lương cao hơn 15%. Quán càng đông nhân viên càng hút khách: mỗi người <b>+5% khách</b>, đủ cả đội thêm <b>+25%</b>${hired().length ? ` · hiện tại <b>+${Math.round((staffTraffic() - 1) * 100)}% khách</b>` : ''}.</p>` + STAFF.map((x) => {
       const has = !!S.staff?.[x.id], locked = level() < x.lv, l = sLv(x.id), days = S.staffDays?.[x.id] || 0;
       const canTrain = has && l < STAFF_MAX, needD = TRAIN_DAYS[l], cost = TRAIN_COST[l];
       return `<div class="card ${has ? 'on' : ''} ${locked ? 'lock' : ''}"><canvas class="por" data-staff="${x.id}" width="160" height="200"></canvas><div class="cb">
@@ -2132,7 +2132,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.3.7';
+const GAME_VER = '1.3.8';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -3904,7 +3904,7 @@ function opsTick(dt) {
     S.arriveT = (S.arriveT || 0) + dt;
     if (S.arriveT >= (S.nextGap ?? 3)) {
       S.arriveT = 0; S.nextGap = BASE_GAP / trafficMul() * (.6 + Math.random() * .8);
-      if (S.queue.length < QMAX + (S.tools?.ban ? 1 : 0)) {
+      if (S.queue.length < QMAX + (S.tools?.ban ? 1 : 0) + staffQ()) {
         const c = spawnGuest();
         if (c) {
           if (c.online && S.staff?.khoa && consumeOrder(c)) { S.bg = [...(S.bg || []), { c, t: 6.5 }]; msg(`[[scooter]] Anh Khoa nhận đơn ${c.online}`, '#2E6A9A'); }
@@ -5566,6 +5566,13 @@ dockSync = function () {
 };
 // đang bán thì kiểm tra mã mới dày hơn (mỗi 2 phút)
 setInterval(() => { if (!document.hidden && S.scene === 'street' && Date.now() - GIFT.loaded > 110000) loadGiftCodes(); }, 30000);
+
+// ================================================================ v23: khách đông hơn · càng nhiều nhân viên khách càng đông
+const TRAFFIC_BASE = 1.3;   // tăng lượng khách chung 30%
+const staffTraffic = () => { const n = hired().length; return 1 + .05 * n + (n >= STAFF.length ? .25 : 0); };
+const staffQ = () => Math.floor(hired().length / 3);   // thêm chỗ xếp hàng khi có nhiều nhân viên
+const _traffic23 = trafficMul;
+trafficMul = function () { return _traffic23() * TRAFFIC_BASE * staffTraffic(); };
 
 // ================================================================ vòng lặp & điều khiển
 let last = performance.now(), dragging = false;
