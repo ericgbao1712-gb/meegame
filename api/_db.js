@@ -2,13 +2,13 @@ import crypto from 'node:crypto';
 import { createClient } from '@libsql/client/web';
 
 export const CATEGORY_NAMES = {
+  horror: 'Kinh dị',
   food: 'Quán ăn, nấu ăn',
   drink: 'Trà, cà phê & bánh',
   shop: 'Tiệm & buôn bán',
   farm: 'Nông trại & xây làng',
   life: 'Đời sống & câu chuyện',
   brain: 'Cờ & trí tuệ',
-  horror: 'Kinh dị',
 };
 export const CATEGORIES = new Set(Object.keys(CATEGORY_NAMES));
 export const GAME_COLS = ['id', 'name', 'url', 'cover_url', 'title_en', 'aliases', 'added_at', 'category', 'hidden', 'created_at'];
