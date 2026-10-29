@@ -1,7 +1,7 @@
 // Tiramisu Xe Đẩy service worker: cho phép "Cài đặt ứng dụng" và mở được khi mất mạng.
 // Ưu tiên mạng (luôn lấy bản mới nhất khi có mạng), chỉ dùng bản lưu khi mất mạng. Không bao giờ cache /api.
 // Tiến trình chơi nằm trong localStorage, file này không đụng tới.
-const CACHE = 'tiranho-v1.5.2';
+const CACHE = 'tiranho-v1.5.3';
 const HOME = '/tiranho';
 const CORE = [HOME, '/tiranho/manifest.json', '/tiranho/icon-192.png'];
 self.addEventListener('install', (e) => {

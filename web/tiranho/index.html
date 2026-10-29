@@ -140,9 +140,9 @@
   #ov .chip:disabled { opacity: .4; }
   #toast, #lvToast { position: absolute; left: 50%; transform: translate(-50%, -20px); opacity: 0; pointer-events: none; transition: .25s; z-index: 9; font-family: 'Be Vietnam Pro', system-ui, sans-serif; text-align: center; }
   #toast { top: 3cqw; background: rgba(58,34,25,.92); color: #fff; padding: .6em 1.1em; border-radius: 99px; font-size: clamp(13px, 3.4cqw, 17px); font-weight: 700; max-width: 86%; }
-  #lvToast { top: 13%; width: 66%; background: rgba(255,249,241,.97); border: 2px solid #E0A93A; border-radius: 4cqw; padding: .45em .8em; box-shadow: 0 6px 18px rgba(0,0,0,.22); }
-  #lvToast b { display: block; font: 800 clamp(15px, 4.4cqw, 22px)/1.15 'Baloo 2', sans-serif; color: #7A4528; }
-  #lvToast span { display: block; margin-top: .15em; color: #5A3E2E; font-size: clamp(11px, 2.9cqw, 14px); font-weight: 600; line-height: 1.35; }
+  #lvToast { left: auto; right: 2%; top: 5.8%; width: auto; max-width: 48%; transform: translate(0, -14px); background: rgba(255,249,241,.97); border: 2px solid #E0A93A; border-radius: 3cqw; padding: .3em .65em; box-shadow: 0 4px 12px rgba(0,0,0,.18); text-align: right; }
+  #lvToast b { display: block; font: 800 clamp(12px, 3.2cqw, 16px)/1.15 'Baloo 2', sans-serif; color: #7A4528; }
+  #lvToast span { display: block; margin-top: .1em; color: #5A3E2E; font-size: clamp(10px, 2.4cqw, 12px); font-weight: 600; line-height: 1.25; }
   #ov .tut p { font-size: 1.05em; min-height: 5.6em; }
   #ov .syncst { display: block; margin-top: .4em; color: #7A5A48; font-size: .85em; }
   #ov .tdots { display: flex; justify-content: center; gap: 6px; margin: .2em 0 1em; }
@@ -150,8 +150,8 @@
   #ov .tdots i.on { background: #A0603A; width: 22px; border-radius: 5px; }
   #ov .trow { display: flex; gap: 10px; justify-content: center; }
   #ov .trow .btn { flex: 1; max-width: 46%; padding: .75em 1em; }
-  #toast.on, #lvToast.on { opacity: 1; transform: translate(-50%, 0); }
-  #lvToast.on { pointer-events: auto; cursor: pointer; }
+  #toast.on { opacity: 1; transform: translate(-50%, 0); }
+  #lvToast.on { opacity: 1; transform: translate(0, 0); pointer-events: auto; cursor: pointer; }
   /* kinh doanh quán */
   #ov .sec { margin: 1em 0 .5em; font-size: .95em; color: #7A4528; }
   #ov .stats.s3 { grid-template-columns: repeat(3, 1fr); margin: .5em 0; }
@@ -1554,9 +1554,29 @@ const canMake = (fk) => canMakeList(recipeOf(fk));
 function need(c) { const left = [...c.order]; for (const f of c.got) { const i = left.indexOf(f); if (i >= 0) left.splice(i, 1); } return left; }
 function msg(s, col = '#3A2219') { S.msgs.push({ s, col, t: 0 }); }
 function effects(dt) {
-  S.coins = S.coins.filter((o) => (o.t += dt) < 1.2); for (const o of S.coins) { o.vy += 900 * dt; o.x += o.vx * dt; o.y += o.vy * dt; ell(o.x, o.y, 14, 14, rg(o.x - 4, o.y - 4, 1, 16, ['#FFF2A8', '#F2B632', '#C98A12']), '#9A6A0A', 2); }
-  S.hearts = S.hearts.filter((o) => (o.t += dt) < 1.4); for (const o of S.hearts) { g.globalAlpha = 1 - o.t / 1.4; text('[[heart]]', o.x + Math.sin(o.t * 6 + o.r * 9) * 16, o.y - o.t * 160, { size: 40, color: '#A0603A' }); g.globalAlpha = 1; }
-  S.msgs = S.msgs.filter((m) => (m.t += dt) < 1.8); const MY = S.scene === 'street' ? 340 : 560; S.msgs.slice(-3).forEach((m, i) => { g.globalAlpha = clamp(1.8 - m.t); fillRR(W / 2 - 280, MY - i * 56 - m.t * 20, 560, 48, 24, 'rgba(255,255,255,.96)', m.col, 3); text(m.s, W / 2, MY + 24 - i * 56 - m.t * 20, { size: 21, color: m.col, weight: 800, max: 540 }); g.globalAlpha = 1; });
+  S.coins = S.coins.filter((o) => (o.t += dt) < 1.2); for (const o of S.coins) { o.vy += 900 * dt; o.x += o.vx * dt; o.y += o.vy * dt; ell(o.x, o.y, 12, 12, rg(o.x - 3, o.y - 3, 1, 14, ['#FFF2A8', '#F2B632', '#C98A12']), '#9A6A0A', 1.8); }
+  S.hearts = S.hearts.filter((o) => (o.t += dt) < 1.4); for (const o of S.hearts) { g.globalAlpha = 1 - o.t / 1.4; text('[[heart]]', o.x + Math.sin(o.t * 6 + o.r * 9) * 14, o.y - o.t * 140, { size: 28, color: '#A0603A' }); g.globalAlpha = 1; }
+  S.msgs = S.msgs.filter((m) => (m.t += dt) < 1.8);
+  if (S.scene === 'street') {
+    S.msgs.slice(-3).forEach((m, i) => {
+      g.globalAlpha = clamp(1.8 - m.t);
+      const sz = 12.5, h = 24;
+      g.font = `800 ${sz}px ${FONT}`;
+      const tw = String(m.s).split(/\[\[(\w+)\]\]/).reduce((a, p, k) => a + (k % 2 ? sz * 1.48 : g.measureText(p).width), 0);
+      const bw = clamp(Math.ceil(tw) + 18, 96, 286), bx = W - 10 - bw, by = 72 + i * 26 - m.t * 4;
+      fillRR(bx, by, bw, h, 12, 'rgba(255,252,247,.95)', m.col, 1.8);
+      text(m.s, bx + bw / 2, by + h / 2, { size: sz, color: m.col, weight: 800, max: bw - 14 });
+      g.globalAlpha = 1;
+    });
+  } else {
+    const MY = 560;
+    S.msgs.slice(-3).forEach((m, i) => {
+      g.globalAlpha = clamp(1.8 - m.t);
+      fillRR(W / 2 - 280, MY - i * 56 - m.t * 20, 560, 48, 24, 'rgba(255,255,255,.96)', m.col, 3);
+      text(m.s, W / 2, MY + 24 - i * 56 - m.t * 20, { size: 21, color: m.col, weight: 800, max: 540 });
+      g.globalAlpha = 1;
+    });
+  }
 }
 
 // ================================================================ TỔNG KẾT NGÀY
@@ -2132,7 +2152,7 @@ function freshPersist() {
 // ---- Bảng xếp hạng & máy chủ MeeGame (/api/lau, dùng chung tài khoản Google với các game khác)
 // Máy chủ chỉ nhận các game có trong danh sách GAMES của api/lau.js; mã game lạ sẽ bị đổi thành Lẩu Ơi,
 // nên MỌI thao tác ghi (lưu, mã quà) chỉ chạy khi CLOUD_READY = true (máy chủ đã có mã 'tiranho').
-const GAME_VER = '1.5.2';
+const GAME_VER = '1.5.3';
 const CLOUD_GAME = 'tiranho';
 const CLOUD_READY = true;
 const GOOGLE_CLIENT_ID = '279939367302-00kng42nrsribd2fg2vku14f17dv2snl.apps.googleusercontent.com';
@@ -4295,12 +4315,14 @@ function drawQueue(t) {
 }
 function staffChips(t) {
   const list = hired(); if (!list.length) return;
+  g.save(); if (S.msgs?.length) g.globalAlpha = .22;
   list.forEach((x, i) => {
-    const cx = W - 32 - i * 48, cy = 98, act = S.helper === x.id && S.helperT > 0;
-    ell(cx, cy, 21, 21, act ? '#FFF3C4' : 'rgba(255,255,255,.92)', act ? '#F2B632' : '#D9B48E', act ? 3.5 : 2);
-    g.save(); g.beginPath(); g.arc(cx, cy, 19, 0, TAU); g.clip(); person(x.look, cx, cy + 19, .27, act ? 'happy' : 'wait', t + i); g.restore();
-    if (act) text(x.name.split(' ').pop(), cx, cy + 30, { size: 12, color: '#3A2219', weight: 800, outline: '#fff', ow: 4 });
+    const cx = W - 28 - i * 38, cy = 96, act = S.helper === x.id && S.helperT > 0;
+    ell(cx, cy, 17, 17, act ? '#FFF3C4' : 'rgba(255,255,255,.92)', act ? '#F2B632' : '#D9B48E', act ? 3 : 1.8);
+    g.save(); g.beginPath(); g.arc(cx, cy, 15.5, 0, TAU); g.clip(); person(x.look, cx, cy + 16, .22, act ? 'happy' : 'wait', t + i); g.restore();
+    if (act) text(x.name.split(' ').pop(), cx, cy + 25, { size: 11, color: '#3A2219', weight: 800, outline: '#fff', ow: 3 });
   });
+  g.restore();
 }
 
 // ================================================================ HUD: nút cài đặt & tạm dừng
