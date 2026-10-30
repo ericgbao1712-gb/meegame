@@ -2067,6 +2067,18 @@ function tenantAva(t,m){return t.look2?`<div class="ava duo">${charSVG(t.look,m,
 function rollCands(){const z=ZONES.find(z=>z.id===UI.zone),g=BD().couple?genCouple:genTenant;UI.cands=[g(z),g(z)];}
 
 document.addEventListener('click',e=>{
+  
+  const streetEl = e.target.closest('.street');
+  if(streetEl && !e.target.closest('#landlord')){
+    const rect = streetEl.getBoundingClientRect();
+    const pct = clamp(Math.round(((e.clientX - rect.left) / rect.width) * 100), 6, 86);
+    walkLandlordTo(pct, ()=>{
+      toast('Chủ trọ đã đến đây! 👋','yel');
+      snd('tap');
+    });
+    return;
+  }
+
   const a=e.target.closest('[data-act]');if(!a)return;
   const [act,arg]=a.dataset.act.split(':');
   if(ext(act,arg,a,e))return;
@@ -2409,13 +2421,39 @@ function renderLandlord(){
   if(!S.player){el.hidden=true;return;}
   el.hidden=false;el.innerHTML=`<span class="nm">${esc(S.player.name)}</span><div class="flipw">${charSVG(S.player.look,'happy')}</div>`;
 }
+function walkLandlordTo(targetPct, onDone){
+  const el=$('#landlord');if(!el||el.hidden)return;
+  const cur=parseFloat(el.style.left)||20;
+  const dist=Math.abs(targetPct-cur);
+  if(dist < 1.5){ if(onDone) onDone(); return; }
+  el.classList.toggle('left', targetPct < cur);
+  el.classList.remove('idle','phone','hop');
+  el.classList.add('walk');
+  const dur = Math.max(.6, dist / 22);
+  el.style.transitionDuration = dur + 's';
+  el.style.left = targetPct + '%';
+  clearTimeout(el._t);
+  el._t = setTimeout(()=>{
+    el.classList.remove('walk');
+    el.classList.add('idle');
+    if(onDone) onDone();
+    else if(Math.random() < .5){
+      el.classList.add('hop');
+      setTimeout(()=>el.classList.remove('hop'), 900);
+    }
+  }, dur * 1000);
+}
 function landlordMove(){
   const el=$('#landlord');if(!el||el.hidden||paused)return;
-  if(Math.random()<.4){el.classList.remove('walk');el.classList.add(Math.random()<.3?'phone':'idle');return;}
-  const cur=parseFloat(el.style.left)||20,nx=rand(4,82);
-  el.classList.toggle('left',nx<cur);el.classList.remove('idle','phone');el.classList.add('walk');
-  el.style.transitionDuration=Math.max(1,Math.abs(nx-cur)/9)+'s';el.style.left=nx+'%';
-  clearTimeout(el._t);el._t=setTimeout(()=>{el.classList.remove('walk');el.classList.add('idle');},Math.max(1,Math.abs(nx-cur)/9)*1000);
+  // Chủ trọ tự đi dạo thường xuyên, đổi dáng linh hoạt, không bị đứng đơ 1 chỗ
+  const cur=parseFloat(el.style.left)||20;
+  if(Math.random() < .25){
+    el.classList.remove('walk');
+    el.classList.add(Math.random() < .5 ? 'phone' : 'idle');
+    return;
+  }
+  const nx = rand(8, 80);
+  walkLandlordTo(nx);
 }
 
 /* ---------- máy chủ (db + user) ---------- */
@@ -3166,13 +3204,13 @@ function shopPeople(sh){
 }
 
 /* ---------- khu giải trí phía nam ---------- */
-function southSVG(){
+function southSVG(isNight = false){
   const tree=(x,y,k)=>`<g><rect x="${x-2}" y="${y}" width="4" height="9" fill="#a86c42"/><circle cx="${x}" cy="${y-2}" r="${9+(k%3)*2}" fill="${k%2?'#5fcf72':'#7ad66a'}" stroke="${INK}" stroke-width="1.8"/></g>`;
   const spokes=Array.from({length:8},(_,k)=>{const a=k*Math.PI/4;return `<path d="M0 0L${(Math.cos(a)*42).toFixed(1)} ${(Math.sin(a)*42).toFixed(1)}" stroke="${INK}" stroke-width="1.6"/>`;}).join('');
   const cabins=Array.from({length:8},(_,k)=>{const a=k*Math.PI/4;return `<g transform="translate(${(Math.cos(a)*42).toFixed(1)} ${(Math.sin(a)*42).toFixed(1)})"><g class="cabin"><rect x="-6" y="0" width="12" height="9" rx="3" fill="${['#ff5f8f','#ffd447','#5ec8ff','#7be0a0'][k%4]}" stroke="${INK}" stroke-width="1.4"/></g></g>`;}).join('');
   return `
-   <rect y="720" width="400" height="380" fill="#c3ec9f"/>
-   <text x="18" y="738" font-family="Baloo 2,sans-serif" font-weight="800" font-size="12" fill="#3e6b2e">KHU GIẢI TRÍ PHÍA NAM</text>
+   <rect y="720" width="400" height="380" fill="${isNight?'#3a3747':'#c3ec9f'}"/>
+   <text x="18" y="738" font-family="Baloo 2,sans-serif" font-weight="800" font-size="12" fill="${isNight?'#ffd447':'#3e6b2e'}">KHU GIẢI TRÍ PHÍA NAM</text>
    ${[[30,760],[20,900],[380,880],[380,1030],[240,900],[150,890]].map(([x,y],k)=>tree(x,y,k)).join('')}
    <g data-act="mshop:cinema" class="mshop" role="button" tabindex="0" aria-label="Rạp Mee Cinema">
      <ellipse cx="300" cy="822" rx="62" ry="7" fill="rgba(0,0,0,.18)"/>
@@ -3200,7 +3238,7 @@ function southSVG(){
 }
 
 /* ---------- bản đồ thành phố ---------- */
-const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[236,452],[316,98],[70,96],[200,390]];
+const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[246,440],[316,98],[70,96],[170,700]];
 const MAP={open:false,sel:null};
 function treesSVG(){
   const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
@@ -3220,15 +3258,11 @@ function tinyPed(look, flip = false){
   </svg>`;
 }
 function mapPedestrians(isNight){
-  // 4 walking animated lanes along sidewalk paths with tiny, adorable people
-  return lane(152, 'goR', 22, 0, tinyPed(randomLook()), false, 1.0) +
-    lane(488, 'goL', 20, -5, tinyPed(randomLook(), true), true, 1.0) +
-    lane(624, 'goR', 24, -10, tinyPed(randomLook()), false, 1.0) +
-    lane(822, 'goL', 21, -3, tinyPed(randomLook(), true), true, 1.0) +
-    `<g transform="translate(182 220)">${tinyPed(randomLook())}</g>
-     <g transform="translate(242 450)">${tinyPed(randomLook(), true)}</g>
-     <g transform="translate(142 660)">${tinyPed(randomLook())}</g>
-     <g transform="translate(272 820)">${tinyPed(randomLook(), true)}</g>`;
+  // Dòng người đi bộ tí hon (15x23px) di chuyển nhịp nhàng liên tục dọc các tuyến phố, không có ai bị đứng đơ 1 chỗ
+  return lane(152, 'goR', 20, 0, tinyPed(randomLook()), false, 1.0) +
+    lane(488, 'goL', 18, -6, tinyPed(randomLook(), true), true, 1.0) +
+    lane(624, 'goR', 22, -11, tinyPed(randomLook()), false, 1.0) +
+    lane(822, 'goL', 19, -4, tinyPed(randomLook(), true), true, 1.0);
 }
 function pinSVG(t){
   const D=BRANCHES[t],[cx,by]=MAPPOS[t],bi=S.branches.findIndex(b=>b.t===t),own=bi>=0,cur=own&&bi===S.cur,lock=!own&&(S.lv<D.star||!chapOK(D));
@@ -3251,23 +3285,28 @@ function mapSVG(){
   const h = (S && typeof S.min === 'number') ? (S.min / 60) : 12;
   const isNight = h >= 18 || h < 6;
   const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
-  const mapBg = isNight ? '#0e142b' : (s.id === 'winter' ? '#d8eefe' : s.id === 'autumn' ? '#eae0b5' : '#b9e89a');
-  const riverCol = isNight ? '#0d2442' : '#7fd3ff';
+  // Trời chuyển chiều, hoàng hôn tím ấm áp và ban đêm lên đèn lung linh (ấm áp, không bị đen thui u ám)
+  const mapBg = isNight ? '#3d2b52' : (s.id === 'winter' ? '#d8eefe' : s.id === 'autumn' ? '#eae0b5' : '#b9e89a');
+  const riverCol = isNight ? '#2d425f' : '#7fd3ff';
+  const hillCol = isNight ? '#483561' : (s.id === 'winter' ? '#c2d9e8' : s.id === 'autumn' ? '#d1b88a' : '#a9dd8a');
   const road = (d, w = 32) => `
     <!-- 3D Curb Extrusion Below Road -->
-    <path d="${d}" fill="none" stroke="${isNight ? '#1a1824' : '#7c7685'}" stroke-width="${w+6}" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${d}" fill="none" stroke="${isNight ? '#322642' : '#7c7685'}" stroke-width="${w+6}" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- 3D Road Asphalt Surface -->
-    <path d="${d}" fill="none" stroke="${isNight ? '#2e2b3d' : '#9c95a6'}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="${d}" fill="none" stroke="${isNight ? '#4d415e' : '#9c95a6'}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>
     <!-- Center Line -->
-    <path d="${d}" fill="none" stroke="${isNight ? '#ffeaa7' : '#fff'}" stroke-width="1.8" stroke-dasharray="8 8" opacity="${isNight ? '.5' : '.85'}"/>
+    <path d="${d}" fill="none" stroke="${isNight ? '#fef08a' : '#fff'}" stroke-width="1.8" stroke-dasharray="8 8" opacity="${isNight ? '.65' : '.85'}"/>
   `;
   const R1 = 'M0 170H400', R2 = 'M0 505H400', R3 = 'M0 640H400', RV = 'M200 0V1100', R4 = 'M0 840H400', R5 = 'M0 1000H400', RS = 'M200 300Q260 380 236 452';
-  const nightGlow = isNight ? `<defs><radialGradient id="lampGlow"><stop offset="0%" stop-color="#ffeaa7" stop-opacity=".7"/><stop offset="100%" stop-color="#ffeaa7" stop-opacity="0"/></radialGradient></defs><g opacity=".5">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[200,300],[200,840],[200,1000]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="34" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
+  const nightGlow = isNight ? `<defs>
+  <radialGradient id="lampGlow"><stop offset="0%" stop-color="#ffd447" stop-opacity=".75"/><stop offset="60%" stop-color="#f59e0b" stop-opacity=".3"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
+</defs>
+<g opacity=".65">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[200,300],[200,840],[200,1000]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="38" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
   return `<svg viewBox="0 0 400 1100" class="mapsvg ${isNight ? 'night-active' : ''}" aria-label="Bản đồ thành phố">
    ${nightGlow}
    <rect width="400" height="1100" fill="${mapBg}"/>
-   ${southSVG()}
-   <g fill="${isNight ? '#162b1b' : (s.id==='winter'?'#c2d9e8':s.id==='autumn'?'#d1b88a':'#a9dd8a')}">${[[60,380],[300,420],[120,700],[350,620],[260,250]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="40"/>`).join('')}</g>
+   ${southSVG(isNight)}
+   <g fill="${hillCol}">${[[60,380],[300,420],[120,700],[350,620],[260,250]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="40"/>`).join('')}</g>
    <path d="M0 0H190Q170 70 135 105Q95 150 0 160Z" fill="${riverCol}" stroke="${INK}" stroke-width="2.5"/>
    <path d="M20 30q10-6 20 0M110 40q10-6 20 0M40 130q10-6 20 0" stroke="#fff" stroke-width="2" fill="none" class="wave"/>
    <ellipse cx="70" cy="92" rx="54" ry="26" fill="${isNight ? '#3a3328' : '#ffe9a8'}" stroke="${INK}" stroke-width="2.5"/>

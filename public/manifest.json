@@ -1,0 +1,12 @@
+{
+  "name": "Nhật Ký Chủ Trọ",
+  "short_name": "Chủ Trọ",
+  "start_url": "/nhatkychutro/",
+  "display": "standalone",
+  "background_color": "#bfe9a5",
+  "theme_color": "#ffd447",
+  "icons": [
+    { "src": "/nhatkychutro/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/nhatkychutro/icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
