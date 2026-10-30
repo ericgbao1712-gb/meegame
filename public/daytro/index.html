@@ -95,12 +95,12 @@
   z-index: 5; border-radius: 4px; pointer-events: none; text-shadow: 0 0 6px #ff2d87;
 }
 
-/* ===== ĐỒNG BỘ TRỜI TỐI CHO BẢN ĐỒ ===== */
+/* ===== ĐỒNG BỘ TRỜI TỐI CHO BẢN ĐỒ (SÁNG RỰC ÁNH ĐÈN PHỐ ĐÊM) ===== */
 #cmap.night-map {
-  background: #0d1226 !important;
+  background: #251e3e !important;
 }
 #cmap.night-map .mapsvg {
-  filter: brightness(.78) contrast(1.18);
+  filter: drop-shadow(0 0 2px rgba(255,255,255,0.1));
 }
 #cmap.night-map .mhead {
   background: #1c2140 !important; color: #fff !important; border-bottom-color: #ffd447;
@@ -108,7 +108,7 @@
 #cmap.night-map .mhead h2 { color: #ffd447; }
 #cmap.night-map .mhead p { color: #9fd8f5; }
 #cmap.night-map .mcard {
-  background: #151a33; color: #fff; border-top-color: #ffd447;
+  background: #1c2140; color: #fff; border-top-color: #ffd447;
 }
 #cmap.night-map .mcard .hint { color: #9a94bd; }
 
@@ -2598,56 +2598,146 @@ function landlordMove(){
 /* ---------- máy chủ (db + user) ---------- */
 const CLOUD={db:null,user:null,uid:null,me:null,on:false,canAdmin:false,cfg:{},writeOK:true,lastJson:'',lastRow:'',giftsAll:[],giftsMe:[],busy:false,warned:false};
 async function cloudInit(){
-  if(!window.claude||typeof window.claude.use!=='function')return;
+  // 1. Nếu mở trong môi trường Claude sandbox
+  if(window.claude&&typeof window.claude.use==='function'){
+    try{
+      const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
+      CLOUD.db=db;CLOUD.user=user;
+      if(user){CLOUD.me=await user.me();CLOUD.uid=CLOUD.me.id;CLOUD.canAdmin=!!CLOUD.me.canEdit;}
+      if(db){
+        db.doc('config/global').onSnapshot(s=>{CLOUD.cfg=s.exists?{...s.data()}:{};hud();if(paused&&SCR.querySelector('.title-scr'))showTitle();if(ADM.open)renderAdmin();},()=>{});
+        db.doc('gifts/all').onSnapshot(s=>{CLOUD.giftsAll=s.exists?(s.data().items||[]):[];if(!paused)checkGifts();},()=>{});
+      }
+      if(db&&CLOUD.uid&&S.cloudLogin)await cloudLogin(true);
+      if(paused&&SCR.querySelector('.title-scr'))showTitle();
+      if(location.hash==='#admin')openAdmin();
+      return;
+    }catch(e){}
+  }
+
+  // 2. Môi trường web / AI Studio / mobile: Kết nối máy chủ MeeGame
   try{
-    const [db,user]=await Promise.all([window.claude.use('db'),window.claude.use('user')]);
-    CLOUD.db=db;CLOUD.user=user;
-    if(user){CLOUD.me=await user.me();CLOUD.uid=CLOUD.me.id;CLOUD.canAdmin=!!CLOUD.me.canEdit;}
-    if(db){
-      db.doc('config/global').onSnapshot(s=>{CLOUD.cfg=s.exists?{...s.data()}:{};hud();if(paused&&SCR.querySelector('.title-scr'))showTitle();if(ADM.open)renderAdmin();},()=>{});
-      db.doc('gifts/all').onSnapshot(s=>{CLOUD.giftsAll=s.exists?(s.data().items||[]):[];if(!paused)checkGifts();},()=>{});
-    }
-    if(db&&CLOUD.uid&&S.cloudLogin)await cloudLogin(true);
-    if(paused&&SCR.querySelector('.title-scr'))showTitle();
-    if(location.hash==='#admin')openAdmin();
-  }catch(e){}
-}
-async function cloudLogin(silent){
-  if(!CLOUD.db||!CLOUD.uid){if(!silent)loginHelp();return;}
-  try{
-    const ref=CLOUD.db.doc('data/users/'+CLOUD.uid+'/save');
-    const snap=await ref.get();
-    if(snap.exists){
-      const d=snap.data();
-      if(d.json&&(d.updated||0)>(S.updated||0)){
-        try{const s=JSON.parse(d.json);if(s&&s.v===2){S=s;migRent();buildScene();sky();hud();renderLandlord();toast('Đã tải tiến trình từ máy chủ','yel');}}catch(e){}
+    const res = await fetch('/api/lau/auth/me?g=nhatkychutro', { credentials: 'include' });
+    if(res.ok){
+      const data = await res.json();
+      if(data && data.player){
+        CLOUD.me = { name: data.player.name, avatarUrl: data.player.picture || '', id: data.player.id };
+        CLOUD.uid = 'p_' + data.player.id;
+        CLOUD.on = true;
+        CLOUD.canAdmin = Boolean(data.player.email && data.player.email.includes('admin'));
+        if(data.cloud && data.cloud.updatedAt > (S.updated || 0)){
+          const sRes = await fetch('/api/lau/save?g=nhatkychutro', { credentials: 'include' });
+          if(sRes.ok){
+            const sData = await sRes.json();
+            if(sData && sData.save && sData.save.data && sData.save.data.v === 2){
+              S = sData.save.data;
+              migRent(); buildScene(); sky(); hud(); renderLandlord();
+              toast('Đã đồng bộ tiến trình từ máy chủ MeeGame','yel');
+            }
+          }
+        }
       }
     }
-    CLOUD.on=true;S.cloudLogin=true;
-    CLOUD.db.doc('gifts/'+CLOUD.uid).onSnapshot(s=>{CLOUD.giftsMe=s.exists?(s.data().items||[]):[];if(!paused)checkGifts();},()=>{});
-    if(!silent){snd('gift');toast('Đăng nhập thành công! Tiến trình sẽ lưu lên máy chủ.','yel');}
-    await cloudSync(true);
-    if(paused&&SCR.querySelector('.title-scr'))showTitle();
-    if(UI.modal)renderModal();
-  }catch(e){if(!silent)toast('Chưa kết nối được máy chủ, thử lại sau nha','pink');}
+  }catch(e){}
+  hud();
+  if(paused&&SCR.querySelector('.title-scr'))showTitle();
+}
+async function cloudLogin(silent, directName){
+  if(CLOUD.db&&CLOUD.uid){
+    try{
+      const ref=CLOUD.db.doc('data/users/'+CLOUD.uid+'/save');
+      const snap=await ref.get();
+      if(snap.exists){
+        const d=snap.data();
+        if(d.json&&(d.updated||0)>(S.updated||0)){
+          try{const s=JSON.parse(d.json);if(s&&s.v===2){S=s;migRent();buildScene();sky();hud();renderLandlord();toast('Đã tải tiến trình từ máy chủ','yel');}}catch(e){}
+        }
+      }
+      CLOUD.on=true;S.cloudLogin=true;
+      CLOUD.db.doc('gifts/'+CLOUD.uid).onSnapshot(s=>{CLOUD.giftsMe=s.exists?(s.data().items||[]):[];if(!paused)checkGifts();},()=>{});
+      if(!silent){snd('gift');toast('Đăng nhập thành công! Tiến trình sẽ lưu lên máy chủ.','yel');}
+      await cloudSync(true);
+      if(paused&&SCR.querySelector('.title-scr'))showTitle();
+      if(UI.modal)renderModal();
+      return;
+    }catch(e){}
+  }
+
+  // Kết nối máy chủ MeeGame
+  try{
+    const playerName = directName || S.player?.name || 'Chủ trọ Mee';
+    const res = await fetch('/api/lau/auth/login?g=nhatkychutro', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include',
+      body: JSON.stringify({ name: playerName, guestId: localStorage.getItem('mee_guest_id') || '' })
+    });
+    if(res.ok){
+      const data = await res.json();
+      CLOUD.on = true;
+      S.cloudLogin = true;
+      CLOUD.me = { name: data.player.name, avatarUrl: data.player.picture || '', id: data.player.id };
+      CLOUD.uid = 'p_' + data.player.id;
+      if(data.token) localStorage.setItem('mee_token', data.token);
+      if(!silent){snd('gift');toast('Đã kết nối máy chủ! Đang tự động lưu đám mây.','yel');}
+      await cloudSync(true);
+      if(paused&&SCR.querySelector('.title-scr'))showTitle();
+      if(UI.modal)renderModal();
+      return;
+    }
+  }catch(e){}
+  if(!silent) loginHelp();
 }
 function loginHelp(){
   UI.modal='loginhelp';
-  shell('Đăng nhập','Lưu tiến trình lên máy chủ',`<div class="kv">Trang này chưa nhận ra tài khoản của bạn. Hãy mở game khi đã đăng nhập Claude, hoặc nhờ chủ game chia sẻ quyền <b>Cộng tác viên</b> để lưu được tiến trình.</div><p class="hint">Bạn vẫn chơi bình thường được, tiến trình được lưu trên máy này.</p><div class="row end"><button class="btn" data-act="close">Đã hiểu</button></div>`);
+  const defName = S.player?.name || 'Chủ trọ Mee';
+  shell('Kết nối máy chủ MeeGame','Lưu đám mây & Đua top',`
+    <div class="kv">Kết nối máy chủ để tự động lưu tiến trình lên đám mây, chống mất dữ liệu khi đổi thiết bị và tham gia bảng xếp hạng toàn server!</div>
+    <label class="fl" for="loginNameInp" style="margin-top:10px">Tên hiển thị chủ trọ
+      <input class="inp" id="loginNameInp" maxlength="24" value="${esc(defName)}" placeholder="Nhập tên của bạn">
+    </label>
+    <div class="row end" style="margin-top:12px">
+      <button class="btn white" data-act="close">Để sau</button>
+      <button class="btn" data-act="do-quick-login">Kết nối ngay</button>
+    </div>
+  `);
 }
 async function cloudSync(force){
   if(!CLOUD.on||!CLOUD.writeOK||CLOUD.busy||!S.player)return;
   CLOUD.busy=true;
   try{
     const json=JSON.stringify(S);
-    if(force||json!==CLOUD.lastJson){
-      await CLOUD.db.doc('data/users/'+CLOUD.uid+'/save').set({v:2,json,updated:S.updated||Date.now()});
-      CLOUD.lastJson=json;
+    if(CLOUD.db){
+      if(force||json!==CLOUD.lastJson){
+        await CLOUD.db.doc('data/users/'+CLOUD.uid+'/save').set({v:2,json,updated:S.updated||Date.now()});
+        CLOUD.lastJson=json;
+      }
+      const tenants=S.branches.reduce((a,br)=>a+br.rooms.filter(r=>r.tenant).length,0);
+      const row={name:S.player.name,house:brName(S.branches[0]),lv:S.lv,money:Math.round(S.money),branches:S.branches.length,tenants,day:S.day,look:S.player.look,home:homeScore()};
+      const rs=JSON.stringify(row);
+      if(force||rs!==CLOUD.lastRow){await CLOUD.db.doc('players/'+CLOUD.uid).set({...row,updated:Date.now()});CLOUD.lastRow=rs;}
+    } else {
+      if(force||json!==CLOUD.lastJson){
+        const tenants=S.branches.reduce((a,br)=>a+br.rooms.filter(r=>r.tenant).length,0);
+        await fetch('/api/lau/save?g=nhatkychutro', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify({
+            shopName: S.player?.name ? brName(S.branches[0]) : 'Dãy Trọ Mee',
+            avatar: S.player?.look?.i || 1,
+            level: S.lv || 1,
+            xp: S.xp || 0,
+            day: S.day || 1,
+            moneyEarned: Math.round(S.money || 0),
+            potsSold: tenants,
+            data: S,
+            force: Boolean(force),
+          })
+        });
+        CLOUD.lastJson = json;
+      }
     }
-    const tenants=S.branches.reduce((a,br)=>a+br.rooms.filter(r=>r.tenant).length,0);
-    const row={name:S.player.name,house:brName(S.branches[0]),lv:S.lv,money:Math.round(S.money),branches:S.branches.length,tenants,day:S.day,look:S.player.look,home:homeScore()};
-    const rs=JSON.stringify(row);
-    if(force||rs!==CLOUD.lastRow){await CLOUD.db.doc('players/'+CLOUD.uid).set({...row,updated:Date.now()});CLOUD.lastRow=rs;}
   }catch(e){
     if(e&&e.code==='invalid_argument'){CLOUD.writeOK=false;if(!CLOUD.warned){CLOUD.warned=true;toast('Tài khoản này chỉ có quyền xem. Tiến trình lưu trên máy này.','pink');}}
   }
@@ -2684,10 +2774,26 @@ async function redeem(raw){
       }
     }catch(e){}
   }
+  if(!R){
+    try{
+      const res = await fetch('/api/lau/code/redeem?g=nhatkychutro', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ code })
+      });
+      const data = await res.json();
+      if(res.ok && data.ok){
+        R = { money: data.money || 0, xp: data.xp || 0, note: data.note || 'Quà máy chủ MeeGame' };
+      } else if(data && data.message){
+        return done(data.message);
+      }
+    }catch(e){}
+  }
   if(!R)return done('Mã không đúng hoặc chưa có trên máy chủ. Kiểm tra lại nha.');
   S.redeemed.push(code);S.money+=R.money;if(R.xp)addXp(R.xp);snd('gift');save();hud();
   done(`Nhận thành công: +${fmt(R.money)} tiền${R.xp?` · +${R.xp} kinh nghiệm`:''}. ${R.note}`,true);
-  if(CLOUD.on&&CLOUD.writeOK){try{const ref=CLOUD.db.doc('claims/'+CLOUD.uid);const g=await ref.get();const body=g.exists?{...g.data()}:{};body[code]=Date.now();await ref.set(body);}catch(e){}}
+  if(CLOUD.on&&CLOUD.writeOK&&CLOUD.db){try{const ref=CLOUD.db.doc('claims/'+CLOUD.uid);const g=await ref.get();const body=g.exists?{...g.data()}:{};body[code]=Date.now();await ref.set(body);}catch(e){}}
 }
 
 /* ---------- các bảng mới ---------- */
@@ -2695,8 +2801,8 @@ function profileModal(){
   const p=S.player||{name:'Chủ trọ',look:PRESETS[0]};
   const tenants=S.branches.reduce((a,br)=>a+br.rooms.filter(r=>r.tenant).length,0);
   const acct=CLOUD.on
-    ?`<div class="card row"><img src="${CLOUD.me.avatarUrl}" alt="" style="width:32px;height:32px;border-radius:50%;border:2px solid ${INK}"><div class="kv" style="flex:1;min-width:0"><b>${esc(CLOUD.me.name||'Tài khoản của bạn')}</b><br><span class="hint">${CLOUD.writeOK?'Đang lưu tiến trình lên máy chủ':'Chỉ có quyền xem · lưu trên máy này'}</span></div><button class="btn white sm" data-act="logout">Đăng xuất</button></div>`
-    :`<div class="card row"><div class="kv" style="flex:1"><b>Đang chơi với tư cách khách</b><br><span class="hint">Tiến trình chỉ lưu trên máy này.</span></div><button class="btn sm" data-act="login">Đăng nhập</button></div>`;
+    ?`<div class="card row"><img src="${CLOUD.me?.avatarUrl||''}" alt="" style="width:32px;height:32px;border-radius:50%;border:2px solid ${INK};background:#ffe08a"><div class="kv" style="flex:1;min-width:0"><b>${esc(CLOUD.me?.name||'Tài khoản của bạn')}</b><br><span class="hint" style="color:#1f9e67;font-weight:700">● Đã kết nối máy chủ · tự động lưu</span></div><button class="btn white sm" data-act="logout">Đăng xuất</button></div>`
+    :`<div class="card row"><div class="kv" style="flex:1"><b>Đang chơi với tư cách khách</b><br><span class="hint">Kết nối máy chủ để lưu đám mây và đua top.</span></div><button class="btn sm" data-act="login">Đăng nhập</button></div>`;
   shell('Hồ sơ chủ trọ','',`<div class="card tenant"><div class="ava">${charSVG(p.look,'happy',{head:true})}</div><div class="kv"><div class="sectit" style="font-size:20px">${esc(p.name)}</div>Chủ ${esc(brName(S.branches[0]))}<br>★${S.lv} · Ngày ${S.day} · ${S.branches.length} chi nhánh · ${tenants} khách</div></div>
     ${acct}
     <div class="row"><button class="btn yel" data-act="edit-char">Đổi nhân vật</button><button class="btn yel" data-act="open:rename">Đổi tên dãy trọ</button></div>
@@ -2713,9 +2819,32 @@ function codeModal(){
 const RANK={rows:null,err:''};
 async function loadRank(){
   RANK.rows=null;RANK.err='';
-  if(!CLOUD.db){RANK.err='Bảng xếp hạng cần kết nối máy chủ. Hãy mở game khi đã đăng nhập.';if(UI.modal==='rank')renderModal();return;}
-  try{const q=await CLOUD.db.collection('players').orderBy(RANK.by||'money','desc').limit(30).get();RANK.rows=q.docs.map(d=>({id:d.id,...d.data()}));}
-  catch(e){RANK.err='Chưa tải được bảng xếp hạng.';}
+  if(CLOUD.db){
+    try{const q=await CLOUD.db.collection('players').orderBy(RANK.by||'money','desc').limit(30).get();RANK.rows=q.docs.map(d=>({id:d.id,...d.data()}));}
+    catch(e){RANK.err='Chưa tải được bảng xếp hạng.';}
+  } else {
+    try{
+      const byParam = RANK.by === 'money' ? 'money' : 'level';
+      const res = await fetch(`/api/lau/leaderboard?g=nhatkychutro&by=${byParam}`, { credentials: 'include' });
+      if(res.ok){
+        const data = await res.json();
+        RANK.rows = (data.rows || []).map((r, i) => ({
+          id: r.me ? CLOUD.uid : 'p_' + i,
+          name: r.shopName,
+          house: r.badge ? `[${r.badge.toUpperCase()}]` : 'Dãy trọ',
+          lv: r.level,
+          money: r.value,
+          home: r.level * 10,
+          look: null,
+          me: r.me,
+        }));
+      } else {
+        RANK.err = 'Không thể tải bảng xếp hạng.';
+      }
+    }catch(e){
+      RANK.err = 'Chưa kết nối được máy chủ bảng xếp hạng.';
+    }
+  }
   if(UI.modal==='rank')renderModal();
 }
 function rankModal(){
@@ -2723,9 +2852,9 @@ function rankModal(){
   if(RANK.err)body=`<div class="empty">${esc(RANK.err)}</div>`;
   else if(!RANK.rows)body=`<div class="empty">Đang tải...</div>`;
   else if(!RANK.rows.length)body=`<div class="empty">Chưa có ai trên bảng. Đăng nhập để trở thành người đầu tiên!</div>`;
-  else body=RANK.rows.map((r,i)=>`<div class="lb ${r.id===CLOUD.uid?'me1':''}"><span class="rk">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><div class="ava">${r.look?charSVG(r.look,'happy',{head:true}):''}</div><div><b>${esc(r.name||'Chủ trọ')}</b><small>${esc(r.house||'')} · ★${+r.lv||1} · ${+r.branches||1} chi nhánh</small></div><b class="good">${RANK.by==='home'?fmtN(+r.home||0)+' điểm':fmt(+r.money||0)}</b></div>`).join('');
-  body=`<div class="tabs" style="margin:0 0 8px"><button class="tab ${RANK.by!=='home'?'on':''}" data-act="rankby:money">Giàu nhất</button><button class="tab ${RANK.by==='home'?'on':''}" data-act="rankby:home">Nhà đẹp nhất</button></div>`+body;
-  shell('Bảng xếp hạng',RANK.by==='home'?'Gác mái được trang trí đẹp nhất':'Những chủ trọ giàu nhất',body+(CLOUD.on?'':'<p class="hint">Đăng nhập để tên bạn xuất hiện trên bảng.</p>'));
+  else body=RANK.rows.map((r,i)=>`<div class="lb ${r.me||r.id===CLOUD.uid?'me1':''}"><span class="rk">${i<3?['🥇','🥈','🥉'][i]:i+1}</span><div class="ava">${r.look?charSVG(r.look,'happy',{head:true}):`<span style="font-size:22px">🏡</span>`}</div><div><b>${esc(r.name||'Chủ trọ')}</b><small>${esc(r.house||'')} · ★${+r.lv||1}</small></div><b class="good">${RANK.by==='home'?fmtN(+r.home||0)+' điểm':(RANK.by==='money'?fmt(+r.money||0):'Cấp '+r.lv)}</b></div>`).join('');
+  body=`<div class="tabs" style="margin:0 0 8px"><button class="tab ${RANK.by!=='money'?'on':''}" data-act="rankby:level">Cấp độ</button><button class="tab ${RANK.by==='money'?'on':''}" data-act="rankby:money">Giàu nhất</button></div>`+body;
+  shell('Bảng xếp hạng',RANK.by==='money'?'Những chủ trọ giàu nhất':'Những chủ trọ cấp cao nhất',body+(CLOUD.on?'':'<p class="hint">Đăng nhập để tên bạn xuất hiện trên bảng.</p>'));
 }
 function giftModal(){
   const g=pendingGifts();
@@ -2776,8 +2905,13 @@ function ext(act,arg,a,e){
     case 'st-next':snd('page');if(ST.i>=(ST.mode==='replay'?4:5))finishStory();else story(ST.i+1);return true;
     case 'st-skip':if(ST.mode==='replay'){enterGame();}else story(5);return true;
     case 'tut-next':S.tut++;if(S.tut>=TUT.length)endTut(true);else{TT.base={...S.c};renderTut();}return true;
-    case 'tut-skip':endTut(false);return true;
     case 'login':cloudLogin(false);return true;
+    case 'do-quick-login':{
+      const nm=($('#loginNameInp')?.value||'').trim()||S.player?.name||'Chủ trọ Mee';
+      cloudLogin(false,nm);
+      close();
+      return true;
+    }
     case 'logout':CLOUD.on=false;S.cloudLogin=false;save();toast('Đã đăng xuất. Tiến trình lưu trên máy này.','pink');renderModal();return true;
     case 'edit-char':close();creator('edit');return true;
     case 'rename-save':{const v=($('#renameInp')?.value||'').trim();if(!v){toast('Tên không được để trống','pink');return true;}B().name=v;buildScene();save();close();toast('Đã đổi tên thành '+v,'yel');return true;}
