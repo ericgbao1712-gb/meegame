@@ -1125,7 +1125,7 @@ body.settings-open { overflow: hidden; }
   });
 
   // ---------- Máy chủ ----------
-  const api = (path, opts = {}) => fetch(API + path, { cache: 'no-store', ...opts });
+  const api = (path, opts = {}) => fetch(API + path, opts);
   async function loadGames() {
     if (!apiReady) return;
     try {
@@ -1205,7 +1205,16 @@ body.settings-open { overflow: hidden; }
   loadGames();
   loadGlobalCounts();
   registerVisitor();
-  setInterval(() => { refreshVisitorCount().catch(err => console.warn('MeeGame visitor refresh failed:', err)); }, 30000);
+
+  // Tối ưu DB Turso: Loại bỏ polling 30s liên tục gây tốn hàng trăm triệu Rows Read.
+  // Chỉ làm mới số liệu khi người dùng chuyển tab quay lại sau ít nhất 10 phút.
+  let lastVisitorCheck = Date.now();
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'visible' && Date.now() - lastVisitorCheck > 600000) {
+      lastVisitorCheck = Date.now();
+      refreshVisitorCount().catch(() => {});
+    }
+  });
 })();
 </script>
 </body>

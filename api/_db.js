@@ -46,6 +46,34 @@ export async function ensureHorrorCategory(db) {
   }
 }
 
+let _statsReady = false;
+export async function ensureSiteStats(db) {
+  if (_statsReady) return;
+  _statsReady = true;
+  try {
+    await db.execute('CREATE TABLE IF NOT EXISTS site_stats (k TEXT PRIMARY KEY, v INTEGER NOT NULL DEFAULT 0)');
+    // Khởi tạo số liệu counter từ dữ liệu hiện tại (chỉ chạy 1 lần duy nhất)
+    const chk = await db.execute({ sql: "SELECT v FROM site_stats WHERE k = 'total_visitors'", args: [] });
+    if (!chk.rows.length) {
+      const vRs = await db.execute('SELECT count(*) as count FROM visitors');
+      const vCount = Number(vRs.rows[0]?.count || 0);
+      await db.execute({ sql: "INSERT OR REPLACE INTO site_stats (k, v) VALUES ('total_visitors', ?)", args: [vCount] });
+    }
+    const chkPlays = await db.execute({ sql: "SELECT v FROM site_stats WHERE k = 'total_plays'", args: [] });
+    if (!chkPlays.rows.length) {
+      const pRs = await db.execute('SELECT COALESCE(sum(play_count), 0) as total FROM plays');
+      const pCount = Number(pRs.rows[0]?.total || 0);
+      await db.execute({ sql: "INSERT OR REPLACE INTO site_stats (k, v) VALUES ('total_plays', ?)", args: [pCount] });
+    }
+    // Tạo Composite Indexes tối ưu để chuyển Full Table Scan thành Index Seek
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_games_url ON games (url)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_games_hidden ON games (hidden)');
+    await db.execute('CREATE INDEX IF NOT EXISTS idx_plays_url ON plays (game_url)');
+  } catch {
+    // ignore if read-only
+  }
+}
+
 let _client = null;
 export function getDb() {
   if (!_client) {

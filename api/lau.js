@@ -257,7 +257,10 @@ export default async function handler(req, res) {
         rank: i + 1, shopName: r.shop_name, avatar: num(r.avatar), level: num(r.level),
         value: num(r[col]), me: pid != null && num(r.player_id) === pid, badge: r.badge || null, admin: isAdminPlayerEmail(r.email) || undefined, adminPic: isAdminPlayerEmail(r.email) ? (r.admin_pic || undefined) : undefined,   // không trả email ra ngoài
       }));
-      return send(res, 200, { by, rows, me });
+      const lbHeaders = pid != null
+        ? { 'Cache-Control': 'private, no-store' }
+        : { 'Cache-Control': 'public, max-age=30, s-maxage=60, stale-while-revalidate=120' };
+      return send(res, 200, { by, rows, me }, lbHeaders);
     }
 
     // ── v1.26 mã quà tặng đang dùng được (bộ nhớ đệm 60 giây cho danh sách mã đang mở) ──
@@ -584,11 +587,18 @@ export default async function handler(req, res) {
             sql: 'INSERT INTO game_save_backups (player_id, game, data, client_saved_at, level, day, money_earned, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
             args: [pid, GAME, String(prev.data), prev.client_saved_at, prev.level, prev.day, prev.money_earned, nowMs],
           });
-          await db.execute({
-            sql: `DELETE FROM game_save_backups WHERE player_id = ? AND game = ? AND id NOT IN
-                  (SELECT id FROM game_save_backups WHERE player_id = ? AND game = ? ORDER BY id DESC LIMIT ${KEEP_BACKUPS})`,
-            args: [pid, GAME, pid, GAME],
+          // Tối ưu #3: Xóa backup cũ bằng indexed offset, tránh subquery quét toàn bảng
+          const cutoffRs = await db.execute({
+            sql: 'SELECT id FROM game_save_backups WHERE player_id = ? AND game = ? ORDER BY id DESC LIMIT 1 OFFSET ?',
+            args: [pid, GAME, KEEP_BACKUPS - 1]
           });
+          if (cutoffRs.rows.length) {
+            const cutoffId = Number(cutoffRs.rows[0].id);
+            await db.execute({
+              sql: 'DELETE FROM game_save_backups WHERE player_id = ? AND game = ? AND id < ?',
+              args: [pid, GAME, cutoffId]
+            });
+          }
         }
       }
       // Gộp cột badge vào chung 1 lệnh INSERT ... ON CONFLICT DO UPDATE (bỏ lệnh UPDATE badge riêng lẻ)

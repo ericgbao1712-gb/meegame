@@ -88,7 +88,7 @@ function makeRes() {
     return res;
 }
 
-async function handleApi(request, url) {
+async function handleApi(request, url, ctx) {
     let pathname = url.pathname.replace(/\/+$/, '') || '/';
     let search = new URLSearchParams(url.search);
     // vercel.json cũ: /api/lau/(.*) → /api/lau?r=$1
@@ -100,13 +100,35 @@ async function handleApi(request, url) {
         pathname = '/api/lau';
         search = merged;
     }
+
+    // Cloudflare Edge Cache: Phục vụ trực tiếp từ CDN Edge nếu là GET có cache hợp lệ
+    const cache = typeof caches !== 'undefined' && caches.default ? caches.default : null;
+    if (cache && request.method === 'GET') {
+        const cached = await cache.match(request);
+        if (cached) return cached;
+    }
+
     const hit = matchRoute(pathname.split('/').filter(Boolean).slice(1));
     if (!hit || typeof hit.mod.default !== 'function') return jsonResponse(404, { error: 'not_found', message: 'Không có địa chỉ này.' });
     const req = await makeReq(request, new URL(pathname, url), search, hit.query);
     const res = makeRes();
     try {
         await hit.mod.default(req, res);
-        return res.toResponse();
+        const response = res.toResponse();
+
+        // Tự động lưu cache tại Edge Cloudflare cho các phản hồi công khai thành công
+        if (cache && request.method === 'GET' && response.status === 200) {
+            const cc = response.headers.get('cache-control') || '';
+            if (cc.includes('public') && !cc.includes('no-store')) {
+                if (ctx && typeof ctx.waitUntil === 'function') {
+                    ctx.waitUntil(cache.put(request, response.clone()));
+                } else {
+                    cache.put(request, response.clone()).catch(() => {});
+                }
+            }
+        }
+
+        return response;
     } catch (e) {
         console.error('[api] lỗi không bắt được:', pathname, e && e.stack || e);
         return jsonResponse(500, { error: 'server_error', message: 'Máy chủ gặp lỗi. Thử lại sau nha.' });
@@ -114,11 +136,11 @@ async function handleApi(request, url) {
 }
 
 export default {
-    async fetch(request, env) {
+    async fetch(request, env, ctx) {
         const url = new URL(request.url);
         const p = url.pathname.replace(/\/+$/, '');
         if (p === '/admin/games') return env.ASSETS.fetch(new Request(new URL('/game-admin', url), request));
-        if (p === '/api' || p.startsWith('/api/')) return handleApi(request, url);
+        if (p === '/api' || p.startsWith('/api/')) return handleApi(request, url, ctx);
         return env.ASSETS.fetch(request);
     },
 };

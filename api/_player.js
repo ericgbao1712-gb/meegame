@@ -12,7 +12,7 @@ const GOOGLE_ISS = new Set(['accounts.google.com', 'https://accounts.google.com'
 const JWKS_URL = 'https://www.googleapis.com/oauth2/v3/certs';
 
 // ───────────── schema (kiểm tra phiên bản trong schema_meta: mỗi cold start chỉ tốn 1 lệnh đọc thay vì 8 lệnh DDL) ─────────────
-const SCHEMA_VER = 3;
+const SCHEMA_VER = 4;
 let schemaReady = null;
 export function ensureSchema(db) {
   if (!schemaReady) {
@@ -96,6 +96,14 @@ export function ensureSchema(db) {
         created_at  INTEGER NOT NULL,
         PRIMARY KEY (code, player_id, game)
       )`);
+
+      // Composite indexes giúp câu lệnh Leaderboard chuyển từ Full Scan thành Index Seek
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_game_saves_rank_level ON game_saves (game, cheat, flagged, level DESC, xp DESC)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_game_saves_rank_money ON game_saves (game, cheat, flagged, money_earned DESC)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_game_saves_rank_pots ON game_saves (game, cheat, flagged, pots_sold DESC)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_redemptions_player_game ON gift_redemptions (player_id, game, created_at)');
+      await db.execute('CREATE INDEX IF NOT EXISTS idx_players_hidden ON players (hidden)');
+
       await db.execute({
         sql: "INSERT INTO schema_meta (k, v) VALUES ('lau', ?) ON CONFLICT(k) DO UPDATE SET v = excluded.v",
         args: [SCHEMA_VER],
