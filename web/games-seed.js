@@ -2,6 +2,7 @@
 // Trang chính ưu tiên đọc danh sách trên máy chủ MeeGame (SQLite); file này chỉ dùng khi chưa nối máy chủ hoặc mất mạng,
 // và để nhập game cũ vào máy chủ một lần: python3 server/meegame_api.py import-seed games-seed.js
 window.MEEGAME_SEED = [
+  {"name": "Nhật Ký Chủ Trọ", "url": "https://meegame.io.vn/nhatkychutro/", "aliases": "nhật ký chủ trọ, nhatkychutro, daytro, meegame", "cover_url": "/nhatkychutro/icon-512.png", "added_at": "2026-10-30", "category": "life"},
   {"name": "A bit Saigon", "url": "https://abitsaigon.com/vi/", "category": "life"},
   {"name": "Bánh cuốn", "url": "https://banh-cuon-di.banh-cuon-di.workers.dev/", "category": "food"},
   {"name": "Bánh mì bé xíu", "url": "https://banhmi.miku.us.kg/", "category": "food"},
