@@ -137,3 +137,33 @@ export function serveAct(G) {
 }
 
 export { DRINK };
+
+
+export function autoFillTray(G) {
+  let t = trayTicket(G);
+  if (!t) {
+    t = G.world.tickets.find((x) => x.status === 'new');
+    if (!t) return fail('noTicket', 'Chưa có phiếu nào để làm nha!');
+    selectTicket(G, t.id);
+  }
+  const miss = missingIngredients(t);
+  let addedAny = false;
+  for (const ing of miss) {
+    if ((G.state.inventory[ing] || 0) > 0) {
+      consumeIngredient(G, ing, 1);
+      t.added[ing] = 1;
+      addedAny = true;
+    }
+  }
+  if (t.drinks.length && !t.drinksAdded) {
+    t.drinksAdded = true;
+    addedAny = true;
+  }
+  if (addedAny) bumpCook(G);
+  const complete = ticketComplete(t);
+  if (complete) {
+    serveAct(G);
+    return { ok: true, complete: true, ticketId: t.id };
+  }
+  return { ok: true, complete: false, ticketId: t.id };
+}

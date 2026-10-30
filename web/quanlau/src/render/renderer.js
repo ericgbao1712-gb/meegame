@@ -139,7 +139,7 @@ export function createRenderer(canvas, game) {
     if (destroyed) return;
     const r = canvas.getBoundingClientRect();
     const w = Math.round(r.width), h = Math.round(r.height);
-    const d = Math.min(3, window.devicePixelRatio || 1);
+    const d = Math.min(2, window.devicePixelRatio || 1);
     if (w === cssW && h === cssH && d === dpr) return;
     cssW = w; cssH = h; dpr = d;
     refit(false);

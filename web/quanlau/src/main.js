@@ -70,7 +70,7 @@ async function boot() {
   renderer.onTap = (hit) => {
     try { audio.unlock(); } catch (e) { /* audio is optional */ }
     if (!hit) { ui.onScenePick(null); return; }
-    if (hit.type === 'coins') game.act.collect(hit.tableIdx);
+    if (hit.type === 'coins') { if (game.act.collectAll) game.act.collectAll(); else game.act.collect(hit.tableIdx); }
     // v1.15: chạm cô bán vé số → UI mở bảng mua vé (ui/lottery.js), không mua ngay nữa
     ui.onScenePick(hit);
   };

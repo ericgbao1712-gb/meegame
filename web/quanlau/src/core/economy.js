@@ -615,3 +615,48 @@ export function staffSalary(G, m, tier = G.state.tier) {
   return Math.max(1, Math.round(sal));
 }
 export function salaryTotal(G) { let t = 0; for (const m of G.state.staff) t += staffSalary(G, m); return t; }
+
+
+/** Tối ưu: Tự động nhập nhanh nguyên liệu bán chạy cho menu hôm nay */
+export function buyAllNeeded(G) {
+  const s = G.state;
+  const wanted = wantedIngs(G);
+  const { used, cap } = khoInfo(G);
+  let free = cap - used;
+  if (free <= 0) return { ok: false, reason: 'full', msg: 'Kho đã đầy rồi! Bán bớt hoặc nâng cấp kho nha.' };
+
+  const items = Array.from(wanted).filter(id => isIngUnlocked(G, id)).map(id => ({
+    id,
+    have: s.inventory[id] || 0,
+    price: buyPrice(G, id)
+  })).sort((a, b) => a.have - b.have);
+
+  if (!items.length) return { ok: false, reason: 'none', msg: 'Không có món nào cần nhập.' };
+
+  let totalBought = 0;
+  let totalCost = 0;
+  let loops = 0;
+  while (free > 0 && loops < 200) {
+    loops++;
+    let boughtInLoop = false;
+    for (const it of items) {
+      if (free <= 0) break;
+      if (s.money < it.price) continue;
+      const res = buyIngredient(G, it.id, 1);
+      if (res && res.ok && res.bought > 0) {
+        totalBought += res.bought;
+        totalCost += res.cost;
+        free -= res.bought;
+        it.have += res.bought;
+        boughtInLoop = true;
+      }
+    }
+    if (!boughtInLoop) break;
+  }
+
+  if (totalBought === 0) {
+    return { ok: false, reason: 'money', msg: 'Không đủ tiền để nhập thêm nguyên liệu.' };
+  }
+  G.toast(`Đã nhập nhanh ${totalBought} phần nguyên liệu (-${fmtMoney(totalCost)})! ⚡`, 'good', 'ui_kho');
+  return { ok: true, bought: totalBought, cost: totalCost };
+}

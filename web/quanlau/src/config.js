@@ -648,7 +648,7 @@ export const LEVEL = {
 // Feature flags unlocked by level (hotpots/ingredients/drinks unlock by their own unlockLv).
 export const FEATURES = {
   hire_phucvu: 2, hire_daubep: 3, deco: 4, daily: 4, reservations: 6, mkt_reviewer: 6,
-  hire_thungan: 9, mkt_livestream: 10, hire_quankho: 17, speed2: 5, manageMode: 9, extras: 3, lottery: 7,
+  hire_thungan: 9, mkt_livestream: 10, hire_quankho: 17, speed2: 1, speed4: 1, manageMode: 9, extras: 3, lottery: 7,
   // v1.16 sắp xếp lại (Lv 3 quá dồn): giá bán Lv 6, vé số Lv 7, ship Lv 11, thuế Lv 13
   pricing: 6,   // v1.14 Thực đơn ▸ Giá bán: tự đặt giá từng món / cả thực đơn (mang từ Xoài Lắc)
   tax: 13,      // v1.14 đóng thuế theo kỳ (quán đã làm ăn ổn định)

@@ -140,6 +140,7 @@ export function mountDock(root, sceneUi) {
   const trayHead = span('thead', '');
   const traySlots = div('tslots');
   trayBox.append(trayHead, traySlots);
+  onPress(trayBox, () => { act('quickCook'); sfx('pop'); tickNow(); });
   let traySig = '';
   const slotEls = {};
   const trayTicket = () => {
@@ -182,7 +183,20 @@ export function mountDock(root, sceneUi) {
 
   // ------------------------------------------------------------- actions
   const drinkBtn = h('button', { class: 'btn night body dbtn', dataset: { tut: 'drink-btn' } }, ico('drk_trada', 32, 'dico'), span('dl', 'Nước'));
+  const quickBtn = h('button', { class: 'btn gold quickcook', 'aria-label': 'Nấu nhanh' }, span('', '⚡ NẤU NHANH'));
   const serveBtn = h('button', { class: 'btn red serve', dataset: { tut: 'serve-btn' } }, span('', 'PHỤC VỤ'));
+  onPress(quickBtn, () => {
+    const r = act('quickCook');
+    if (r.ok === false) {
+      if (r.msg) ctx.toast(r.msg, 'bad');
+      sfx('error');
+    } else {
+      sfx('pop');
+      vibrate(12);
+      ctx.toast(r.complete ? 'Đã nấu & sẵn sàng phục vụ! 🍲' : 'Đã soạn nhanh các món có sẵn!', 'good');
+    }
+    tickNow();
+  });
   onPress(drinkBtn, () => {
     const r = act('addDrinks');
     if (r.ok !== false) {
@@ -286,7 +300,7 @@ export function mountDock(root, sceneUi) {
   }
 
   // ------------------------------------------------------------- assemble
-  const actionRow = div('arow', trayBox, drinkBtn, serveBtn);
+  const actionRow = div('arow', trayBox, drinkBtn, quickBtn, serveBtn);
   lower.append(brothRow, actionRow, keys);
   play.append(toggle, strip, lower);
   root.appendChild(play);

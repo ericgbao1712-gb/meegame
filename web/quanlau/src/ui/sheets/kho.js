@@ -105,6 +105,19 @@ export const khoSheet = {
       div('cap-top', ico('ui_kho', 32), div('cap-t', h('b', null, khoName), span('muted', free === 0 ? 'Kho đầy rồi nha! Bán bớt hàng cũ ở tab Thanh lý.' : `Còn trống ${free} phần`)),
         div('cap-n', span('num', String(info.used)), span('num dim', '/' + info.cap))),
       div('bar ' + (pct >= 100 ? 'red' : pct > 80 ? '' : 'leaf'), h('i', { style: { '--p': pct } }))));
+    if (free > 0 && s.money > 10) {
+      const qkBtn = h('button', { class: 'btn jade quick-buy-btn' },
+        ico('eq_truck', 18), span('', `⚡ Nhập nhanh nguyên liệu bán chạy (${free} chỗ)`));
+      qkBtn.addEventListener('click', () => {
+        const r = act('buyAllNeeded');
+        if (r && r.ok !== false) {
+          celebrate(qkBtn, { sound: 'cash' });
+          ctx.flashMoney?.();
+          api.rerender();
+        }
+      });
+      body.appendChild(qkBtn);
+    }
 
     // ---- notes
     if (open) body.appendChild(noteBox('ui_info', 'Đang bán vẫn **nhập thêm được** — sắp hết món nào thì mua bổ sung món đó nha!', 'gold'));

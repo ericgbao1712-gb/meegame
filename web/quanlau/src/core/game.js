@@ -6,7 +6,7 @@ import { createRng } from './rng.js';
 import { migrate } from './state.js';
 import { createWorld, syncLayout } from './world.js';
 import {
-  UP, DECO_BY_ID, POT, tierDef, decoSlotKind, decoMoreInfo, builtFun, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
+  UP, DECO_BY_ID, POT, tierDef, decoSlotKind, decoMoreInfo, builtFun, mods, addMoney, addXp, setLevel, isPotUnlocked, featureUnlocked, buyIngredient, buyAllNeeded, builtTables, builtStoves, syncLots, quankhoTick, extendFrozenLots, liquidate, priceBounds, payTax, potPrice,
 } from './economy.js';
 import * as kitchen from './kitchen.js';
 import * as customers from './customers.js';
@@ -216,6 +216,21 @@ export function createGame(save, opts = {}) {
     addDrinks: wrap(() => kitchen.addDrinksAct(G)),
     serve: wrap(() => kitchen.serveAct(G)),
     collect: wrap((tableIdx) => customers.collectCoins(G, tableIdx, 'player')),
+    collectAll: wrap(() => {
+      let total = 0, count = 0;
+      for (const tb of world.tables) {
+        if (tb.coins) {
+          const res = customers.collectCoins(G, tb.idx, 'player');
+          if (res && res.ok) { total += res.amount; count++; }
+        }
+      }
+      if (count > 0) {
+        G.toast(`Đã gom tiền ${count} bàn (+${fmtMoney(total)})! 💰`, 'good', 'ui_coin');
+      }
+      return { ok: true, count, total };
+    }),
+    quickCook: wrap(() => kitchen.autoFillTray(G)),
+    buyAllNeeded: wrap(() => buyAllNeeded(G)),
     buyIngredient: wrap((ing, qty) => buyIngredient(G, ing, qty)),
     // v1.13 / v2.9: quà từ mã quà tặng (máy chủ đã kiểm tra mã). XP cộng đúng số ghi trên mã (không nhân xpGainMult).
     redeemReward: wrap((money, xp) => {
@@ -406,7 +421,6 @@ export function createGame(save, opts = {}) {
     setSpeed: wrap((v) => {
       v = Number(v);
       if (![1, 2, 4, 8].includes(v)) return fail('unknown', 'Tốc độ này không có.');
-      if (v === 2 && !featureUnlocked(G, 'speed2')) return fail('locked', `Tốc độ ×2 mở ở Lv ${C.FEATURES.speed2} nha!`);
       state.speed = v;
       return { ok: true, speed: v };
     }),

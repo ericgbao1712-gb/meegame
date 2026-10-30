@@ -1791,3 +1791,8 @@ button.hchip:active { transform: translateY(2px); }
 .splash .mg-dev { margin-top: 10px; }
 .mg-dev-abs { position: absolute; left: 0; right: 0; bottom: calc(6px + env(safe-area-inset-bottom, 0px)); z-index: 3; }
 .cl-gate-card .mg-dev { margin-top: 6px; opacity: .55; }
+
+
+.btn.gold { --fill: #f59e0b; --depth: #d97706; --fg: #fff; --ts: 0 2px 0 rgba(120, 60, 10, .5); --hi: rgba(255, 255, 255, .4); }
+.quickcook { min-width: 60px; min-height: 48px; font-size: 11.5px; font-weight: 800; padding: 4px 6px; white-space: nowrap; margin-right: 4px; }
+.quick-buy-btn { margin: 8px 0 12px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 800; font-size: 13.5px; }
