@@ -3148,8 +3148,19 @@ function southSVG(){
 const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[236,452],[316,98],[70,96],[200,760]];
 const MAP={open:false,sel:null};
 function treesSVG(){
+  const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
   const T=[[20,200],[40,330],[150,210],[160,250],[380,250],[30,470],[380,470],[20,640],[380,660],[260,600],[150,380],[350,190],[100,700],[350,705],[160,610]];
-  return T.map(([x,y],k)=>`<g><rect x="${x-2}" y="${y}" width="4" height="9" fill="#a86c42"/><circle cx="${x}" cy="${y-2}" r="${8+(k%3)*2}" fill="${k%2?'#5fcf72':'#7ad66a'}" stroke="${INK}" stroke-width="1.8"/></g>`).join('');
+  const colors = s.id === 'spring' ? ['#ff9ebd','#ff7aa2','#ffb8d0']
+    : s.id === 'summer' ? ['#38c98a','#2eaa70','#5fcf72']
+    : s.id === 'autumn' ? ['#f59e0b','#ea580c','#f97316']
+    : ['#e2e8f0','#cbd5e1','#94a3b8'];
+  return T.map(([x,y],k)=>`<g><rect x="${x-2}" y="${y}" width="4" height="9" fill="#a86c42"/><circle cx="${x}" cy="${y-2}" r="${8+(k%3)*2}" fill="${colors[k%colors.length]}" stroke="${INK}" stroke-width="1.8"/>${s.id==='winter'?`<path d="M${x-6} ${y-6}q6-4 12 0" stroke="#fff" stroke-width="2.5" fill="none"/>`:''}</g>`).join('');
+}
+function mapPedestrians(isNight){
+  return lane(182,'goR',18,0,charSVG(randomLook(),'happy',{head:true}),false,.45)+
+    lane(518,'goL',16,-4,charSVG(randomLook(),'happy',{head:true}),true,.45)+
+    lane(652,'goR',19,-8,charSVG(randomLook(),'happy',{head:true}),false,.45)+
+    lane(852,'goL',17,-2,charSVG(randomLook(),'happy',{head:true}),true,.45);
 }
 function pinSVG(t){
   const D=BRANCHES[t],[cx,by]=MAPPOS[t],bi=S.branches.findIndex(b=>b.t===t),own=bi>=0,cur=own&&bi===S.cur,lock=!own&&(S.lv<D.star||!chapOK(D));
@@ -3169,25 +3180,32 @@ function pinSVG(t){
   </g>`;
 }
 function mapSVG(){
-  const road=(d,w=30)=>`<path d="${d}" fill="none" stroke="#a9a3b3" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="#fff" stroke-width="1.6" stroke-dasharray="8 8" opacity=".8"/>`;
-  const R1='M0 170H400',R2='M0 505H400',R3='M0 640H400',RV='M200 0V1100',R4='M0 840H400',R5='M0 1000H400',RS='M200 300Q260 380 236 452';
-  return `<svg viewBox="0 0 400 1100" class="mapsvg" aria-label="Bản đồ thành phố">
-   <rect width="400" height="1100" fill="#b9e89a"/>
+  const h = (S && typeof S.min === 'number') ? (S.min / 60) : 12;
+  const isNight = h >= 18 || h < 6;
+  const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
+  const mapBg = isNight ? '#0e142b' : (s.id === 'winter' ? '#d8eefe' : s.id === 'autumn' ? '#eae0b5' : '#b9e89a');
+  const riverCol = isNight ? '#0d2442' : '#7fd3ff';
+  const road = (d, w = 30) => `<path d="${d}" fill="none" stroke="${isNight ? '#2e2b3d' : '#a9a3b3'}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${isNight ? '#ffeaa7' : '#fff'}" stroke-width="1.6" stroke-dasharray="8 8" opacity="${isNight ? '.45' : '.8'}"/>`;
+  const R1 = 'M0 170H400', R2 = 'M0 505H400', R3 = 'M0 640H400', RV = 'M200 0V1100', R4 = 'M0 840H400', R5 = 'M0 1000H400', RS = 'M200 300Q260 380 236 452';
+  const nightGlow = isNight ? `<defs><radialGradient id="lampGlow"><stop offset="0%" stop-color="#ffeaa7" stop-opacity=".7"/><stop offset="100%" stop-color="#ffeaa7" stop-opacity="0"/></radialGradient></defs><g opacity=".5">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[200,300],[200,840],[200,1000]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="34" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
+  return `<svg viewBox="0 0 400 1100" class="mapsvg ${isNight ? 'night-active' : ''}" aria-label="Bản đồ thành phố">
+   ${nightGlow}
+   <rect width="400" height="1100" fill="${mapBg}"/>
    ${southSVG()}
-   <g fill="#a9dd8a">${[[60,380],[300,420],[120,700],[350,620],[260,250]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="40"/>`).join('')}</g>
-   <path d="M0 0H190Q170 70 135 105Q95 150 0 160Z" fill="#7fd3ff" stroke="${INK}" stroke-width="2.5"/>
+   <g fill="${isNight ? '#162b1b' : (s.id==='winter'?'#c2d9e8':s.id==='autumn'?'#d1b88a':'#a9dd8a')}">${[[60,380],[300,420],[120,700],[350,620],[260,250]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="40"/>`).join('')}</g>
+   <path d="M0 0H190Q170 70 135 105Q95 150 0 160Z" fill="${riverCol}" stroke="${INK}" stroke-width="2.5"/>
    <path d="M20 30q10-6 20 0M110 40q10-6 20 0M40 130q10-6 20 0" stroke="#fff" stroke-width="2" fill="none" class="wave"/>
-   <ellipse cx="70" cy="92" rx="54" ry="26" fill="#ffe9a8" stroke="${INK}" stroke-width="2.5"/>
+   <ellipse cx="70" cy="92" rx="54" ry="26" fill="${isNight ? '#3a3328' : '#ffe9a8'}" stroke="${INK}" stroke-width="2.5"/>
    <g><path d="M118 70v22" stroke="#a86c42" stroke-width="3"/><path d="M118 70q-12-6-18 2M118 70q12-6 18 2M118 70q-4-12-12-14M118 70q4-12 12-14" stroke="#38c98a" stroke-width="4" fill="none" stroke-linecap="round"/></g>
    <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="${INK}" stroke-width="40" stroke-linecap="round"/>
-   <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="#7fd3ff" stroke-width="35" stroke-linecap="round"/>
+   <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="${riverCol}" stroke-width="35" stroke-linecap="round"/>
    <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 14" opacity=".8" class="flow"/>
-   <ellipse cx="96" cy="266" rx="88" ry="44" fill="#ffc6dc" stroke="${INK}" stroke-width="2.5"/><ellipse cx="96" cy="250" rx="54" ry="22" fill="#ffd9e8"/>
+   <ellipse cx="96" cy="266" rx="88" ry="44" fill="${isNight ? '#3d2035' : '#ffc6dc'}" stroke="${INK}" stroke-width="2.5"/><ellipse cx="96" cy="250" rx="54" ry="22" fill="${isNight ? '#4d2943' : '#ffd9e8'}"/>
    ${road(R1)}${road(R2)}${road(R3)}${road(R4)}${road(R5)}${road(RV)}
    <path d="M180 0V0" />
    <g><rect x="186" y="304" width="28" height="40" rx="3" fill="#c98b5a" stroke="${INK}" stroke-width="2"/><path d="M186 312h28M186 336h28" stroke="${INK}" stroke-width="1.5"/></g>
    <g stroke="${INK}" stroke-width="2"><path d="M210 52H400M210 62H400" /></g><g stroke="#a86c42" stroke-width="3">${Array.from({length:16},(_,k)=>`<path d="M${214+k*12} 48v18"/>`).join('')}</g>
-   <path d="M236 470l-38-38a24 24 0 0138-30a24 24 0 0138 30z" fill="#ffb3c8" stroke="${INK}" stroke-width="2.5"/>
+   <path d="M236 470l-38-38a24 24 0 0138-30a24 24 0 0138 30z" fill="${isNight ? '#3a1f33' : '#ffb3c8'}" stroke="${INK}" stroke-width="2.5"/>
    <g stroke="#ff8fab" stroke-width="1.2" fill="none">${[280,300,320,340,360].map(x=>`<path d="M${x-12} 530q12 8 24 0"/>`).join('')}</g>
    ${[268,292,316,340,364].map((x,k)=>`<ellipse cx="${x}" cy="${534}" rx="4" ry="5" fill="${k%2?'#ffd447':'#ff5f5f'}" stroke="${INK}" stroke-width="1.2"/>`).join('')}
    ${[[50,600],[70,612],[140,598],[150,616],[34,624]].map(([x,y],k)=>`<circle cx="${x}" cy="${y}" r="5" fill="${['#ff5f8f','#ff9e5e','#b79bff','#ff5f8f','#ffd447'][k]}" stroke="${INK}" stroke-width="1.2"/>`).join('')}
