@@ -2000,9 +2000,53 @@ function unlockModal(){
 }
 function menuModal(){return newMenuModal();}
 function miniBuilding(D,dim){
-  const win=(x,y)=>`<rect x="${x}" y="${y}" width="12" height="9" rx="2" fill="${dim?'#ddd':'#bfeaff'}" stroke="${INK}" stroke-width="1.4"/>`;
-  let w='';for(let f=0;f<4;f++)for(const x of [10,32])w+=win(x,18+f*12);
-  return `<svg class="mini" viewBox="0 0 54 76" aria-hidden="true"><rect x="5" y="12" width="44" height="54" rx="3" fill="${dim?'#cfc6d2':D.brick}" stroke="${INK}" stroke-width="2"/><rect x="2" y="6" width="50" height="9" rx="3" fill="${dim?'#b8adbb':D.deep}" stroke="${INK}" stroke-width="2"/>${w}<rect x="20" y="66" width="14" height="8" fill="#fff" stroke="${INK}" stroke-width="1.6"/><rect x="0" y="72" width="54" height="4" fill="#8b8796"/></svg>`;
+  const isSleepless = D.sleepless;
+  const cFront = dim ? '#cfc6d2' : D.brick;
+  const cSide = dim ? '#a79cae' : D.deep;
+  const cRoof = dim ? '#dfd8e3' : (isSleepless ? '#482570' : '#f0d3bc');
+  
+  if (isSleepless) {
+    // 3D Cyber High-Rise Tower for Phố Không Ngủ
+    return `<svg class="mini" viewBox="0 0 64 96" aria-hidden="true" style="overflow:visible">
+      <ellipse cx="32" cy="88" rx="28" ry="7" fill="rgba(0,0,0,.22)"/>
+      <!-- 3D Front Wall -->
+      <polygon points="10,28 40,28 40,86 10,86" fill="${cFront}" stroke="${INK}" stroke-width="2"/>
+      <!-- 3D Side Wall -->
+      <polygon points="40,28 54,18 54,76 40,86" fill="${cSide}" stroke="${INK}" stroke-width="2"/>
+      <!-- 3D Top Roof -->
+      <polygon points="10,28 24,18 54,18 40,28" fill="${cRoof}" stroke="${INK}" stroke-width="2"/>
+      <!-- Spire on top -->
+      <line x1="32" y1="2" x2="32" y2="18" stroke="#ff2d87" stroke-width="2.5"/>
+      <circle cx="32" cy="3" r="3" fill="#ffd447" stroke="${INK}" stroke-width="1.2"/>
+      <!-- 3D Neon Windows Front -->
+      ${[0,1,2,3,4].map(f=>`<rect x="15" y="${34+f*10}" width="9" height="6" rx="1.5" fill="${dim?'#aaa':'#ffd447'}" opacity=".95"/><rect x="27" y="${34+f*10}" width="9" height="6" rx="1.5" fill="${dim?'#888':'#ff2d87'}" opacity=".95"/>`).join('')}
+      <!-- 3D Neon Windows Side -->
+      ${[0,1,2,3,4].map(f=>`<polygon points="43,${25+f*10} 49,${21+f*10} 49,${27+f*10} 43,${31+f*10}" fill="${dim?'#777':'#5ec8ff'}" opacity=".95"/>`).join('')}
+      <!-- 24H Neon Entrance Sign -->
+      <rect x="16" y="76" width="18" height="10" rx="3" fill="#ff2d87" stroke="${INK}" stroke-width="1.4"/>
+      <text x="25" y="84" text-anchor="middle" font-size="6.5" font-weight="900" fill="#fff" font-family="Nunito,sans-serif">24H</text>
+    </svg>`;
+  }
+
+  // 3D Isometric Boarding House Block
+  return `<svg class="mini" viewBox="0 0 60 84" aria-hidden="true" style="overflow:visible">
+    <ellipse cx="30" cy="78" rx="26" ry="6" fill="rgba(0,0,0,.2)"/>
+    <!-- Front Face -->
+    <polygon points="6,24 38,24 38,76 6,76" fill="${cFront}" stroke="${INK}" stroke-width="2"/>
+    <!-- Side Wall (3D Depth) -->
+    <polygon points="38,24 50,16 50,68 38,76" fill="${cSide}" stroke="${INK}" stroke-width="2"/>
+    <!-- Top Roof (3D Roof) -->
+    <polygon points="6,24 18,16 50,16 38,24" fill="${cRoof}" stroke="${INK}" stroke-width="2"/>
+    <!-- Roof parapet ledge -->
+    <polygon points="4,22 16,14 52,14 40,22" fill="${cSide}" stroke="${INK}" stroke-width="1.5"/>
+    <!-- Front Windows with 3D depth -->
+    ${[0,1,2].map(f=>`<rect x="10" y="${30+f*14}" width="10" height="9" rx="2" fill="${dim?'#ccc':'#bfeaff'}" stroke="${INK}" stroke-width="1.2"/><rect x="24" y="${30+f*14}" width="10" height="9" rx="2" fill="${dim?'#ccc':'#bfeaff'}" stroke="${INK}" stroke-width="1.2"/>`).join('')}
+    <!-- Side Windows -->
+    ${[0,1,2].map(f=>`<polygon points="41,${22+f*14} 47,${18+f*14} 47,${25+f*14} 41,${29+f*14}" fill="${dim?'#aaa':'#9fd8f5'}" stroke="${INK}" stroke-width="1"/>`).join('')}
+    <!-- 3D Entrance Door with canopy -->
+    <rect x="17" y="62" width="10" height="14" rx="2" fill="#fff6e0" stroke="${INK}" stroke-width="1.4"/>
+    <polygon points="14,62 18,58 29,58 25,62" fill="#ffd447" stroke="${INK}" stroke-width="1"/>
+  </svg>`;
 }
 function branchesModal(){
   const total=S.branches.reduce((a,br)=>a+brStats(br).inc,0);
@@ -2787,15 +2831,26 @@ function itemIcon(it){
 }
 function shopFacade(sh){
   const [x,y]=sh.pos;
+  const isNight=(S&&S.min&&((S.min/60)>=18||(S.min/60)<6));
   return `<g class="mshop" data-act="mshop:${sh.id}" role="button" tabindex="0" aria-label="${esc(sh.name)}">
-   <ellipse cx="${x}" cy="${y+1}" rx="27" ry="5" fill="rgba(0,0,0,.18)"/>
-   <rect x="${x-22}" y="${y-30}" width="44" height="30" rx="2" fill="${sh.wall}" stroke="${INK}" stroke-width="2"/>
-   <rect x="${x-6}" y="${y-17}" width="12" height="17" rx="1.5" fill="#c98b5a" stroke="${INK}" stroke-width="1.6"/><circle cx="${x+3}" cy="${y-8}" r="1" fill="${INK}"/>
-   <rect x="${x-19}" y="${y-22}" width="10" height="9" rx="1.5" fill="#bfeaff" stroke="${INK}" stroke-width="1.3"/><rect x="${x+9}" y="${y-22}" width="10" height="9" rx="1.5" fill="#bfeaff" stroke="${INK}" stroke-width="1.3"/>
-   <path d="M${x-25} ${y-32}h50l-3 8h-44z" fill="${sh.col}" stroke="${INK}" stroke-width="1.8" stroke-linejoin="round"/>
-   ${[-15,-3,9].map(d=>`<path d="M${x+d} ${y-32}h6l-1 8h-6z" fill="#fff" opacity=".9"/>`).join('')}
-   <rect x="${x-26}" y="${y-46}" width="52" height="13" rx="5" fill="#fff" stroke="${INK}" stroke-width="1.8"/>
-   ${fitText(x,y-36.5,sh.short,46,8,sh.col==='#ffd447'?'#d68a2e':sh.col)}
+   <!-- 3D Ground Shadow -->
+   <ellipse cx="${x+4}" cy="${y+2}" rx="30" ry="7" fill="rgba(0,0,0,.22)"/>
+   <!-- 3D Front Wall -->
+   <polygon points="${x-22},${y-28} ${x+20},${y-28} ${x+20},${y} ${x-22},${y}" fill="${sh.wall}" stroke="${INK}" stroke-width="2"/>
+   <!-- 3D Side Wall Depth -->
+   <polygon points="${x+20},${y-28} ${x+30},${y-35} ${x+30},${y-7} ${x+20},${y}" fill="${sh.wall}" filter="brightness(.78)" stroke="${INK}" stroke-width="2"/>
+   <!-- 3D Roof -->
+   <polygon points="${x-22},${y-28} ${x-12},${y-35} ${x+30},${y-35} ${x+20},${y-28}" fill="#fcf6ec" stroke="${INK}" stroke-width="2"/>
+   <!-- 3D Awning with depth -->
+   <polygon points="${x-25},${y-28} ${x+22},${y-28} ${x+19},${y-20} ${x-28},${y-20}" fill="${sh.col}" stroke="${INK}" stroke-width="1.8"/>
+   <polygon points="${x+22},${y-28} ${x+30},${y-33} ${x+27},${y-25} ${x+19},${y-20}" fill="${sh.col}" filter="brightness(.7)" stroke="${INK}" stroke-width="1.8"/>
+   ${[-16,-4,8].map(d=>`<polygon points="${x+d},${y-28} ${x+d+6},${y-28} ${x+d+5},${y-20} ${x+d-1},${y-20}" fill="#fff" opacity=".9"/>`).join('')}
+   <!-- Door & Window -->
+   <rect x="${x-6}" y="${y-17}" width="12" height="17" rx="1.5" fill="#c98b5a" stroke="${INK}" stroke-width="1.5"/>
+   <rect x="${x-18}" y="${y-18}" width="9" height="8" rx="1.5" fill="${isNight?'#ffd447':'#bfeaff'}" stroke="${INK}" stroke-width="1.2"/>
+   <!-- 3D Floating Signboard -->
+   <rect x="${x-26}" y="${y-44}" width="52" height="13" rx="5" fill="#fff" stroke="${INK}" stroke-width="1.8" filter="drop-shadow(0 2px 0 var(--ink))"/>
+   ${fitText(x,y-34.5,sh.short,46,8,sh.col==='#ffd447'?'#d68a2e':sh.col)}
   </g>`;
 }
 const SI={id:null,msg:'',ok:true,hop:0};
@@ -3145,7 +3200,7 @@ function southSVG(){
 }
 
 /* ---------- bản đồ thành phố ---------- */
-const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[236,452],[316,98],[70,96],[200,760]];
+const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[236,452],[316,98],[70,96],[200,390]];
 const MAP={open:false,sel:null};
 function treesSVG(){
   const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
@@ -3156,11 +3211,24 @@ function treesSVG(){
     : ['#e2e8f0','#cbd5e1','#94a3b8'];
   return T.map(([x,y],k)=>`<g><rect x="${x-2}" y="${y}" width="4" height="9" fill="#a86c42"/><circle cx="${x}" cy="${y-2}" r="${8+(k%3)*2}" fill="${colors[k%colors.length]}" stroke="${INK}" stroke-width="1.8"/>${s.id==='winter'?`<path d="M${x-6} ${y-6}q6-4 12 0" stroke="#fff" stroke-width="2.5" fill="none"/>`:''}</g>`).join('');
 }
+function tinyPed(look, flip = false){
+  // Generates a tiny, cute chibi pedestrian (14x22px) with explicit SVG dimensions so it never blows up
+  return `<svg width="15" height="23" viewBox="-2 -6 44 72" style="overflow:visible;vertical-align:bottom">
+    <g class="walk${flip?' left':''}">
+      ${charSVG(look, 'happy').replace(/<svg[^>]*>/, '').replace(/<\/svg>$/, '')}
+    </g>
+  </svg>`;
+}
 function mapPedestrians(isNight){
-  return lane(182,'goR',18,0,charSVG(randomLook(),'happy',{head:true}),false,.45)+
-    lane(518,'goL',16,-4,charSVG(randomLook(),'happy',{head:true}),true,.45)+
-    lane(652,'goR',19,-8,charSVG(randomLook(),'happy',{head:true}),false,.45)+
-    lane(852,'goL',17,-2,charSVG(randomLook(),'happy',{head:true}),true,.45);
+  // 4 walking animated lanes along sidewalk paths with tiny, adorable people
+  return lane(152, 'goR', 22, 0, tinyPed(randomLook()), false, 1.0) +
+    lane(488, 'goL', 20, -5, tinyPed(randomLook(), true), true, 1.0) +
+    lane(624, 'goR', 24, -10, tinyPed(randomLook()), false, 1.0) +
+    lane(822, 'goL', 21, -3, tinyPed(randomLook(), true), true, 1.0) +
+    `<g transform="translate(182 220)">${tinyPed(randomLook())}</g>
+     <g transform="translate(242 450)">${tinyPed(randomLook(), true)}</g>
+     <g transform="translate(142 660)">${tinyPed(randomLook())}</g>
+     <g transform="translate(272 820)">${tinyPed(randomLook(), true)}</g>`;
 }
 function pinSVG(t){
   const D=BRANCHES[t],[cx,by]=MAPPOS[t],bi=S.branches.findIndex(b=>b.t===t),own=bi>=0,cur=own&&bi===S.cur,lock=!own&&(S.lv<D.star||!chapOK(D));
@@ -3185,7 +3253,14 @@ function mapSVG(){
   const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
   const mapBg = isNight ? '#0e142b' : (s.id === 'winter' ? '#d8eefe' : s.id === 'autumn' ? '#eae0b5' : '#b9e89a');
   const riverCol = isNight ? '#0d2442' : '#7fd3ff';
-  const road = (d, w = 30) => `<path d="${d}" fill="none" stroke="${isNight ? '#2e2b3d' : '#a9a3b3'}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/><path d="${d}" fill="none" stroke="${isNight ? '#ffeaa7' : '#fff'}" stroke-width="1.6" stroke-dasharray="8 8" opacity="${isNight ? '.45' : '.8'}"/>`;
+  const road = (d, w = 32) => `
+    <!-- 3D Curb Extrusion Below Road -->
+    <path d="${d}" fill="none" stroke="${isNight ? '#1a1824' : '#7c7685'}" stroke-width="${w+6}" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- 3D Road Asphalt Surface -->
+    <path d="${d}" fill="none" stroke="${isNight ? '#2e2b3d' : '#9c95a6'}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round"/>
+    <!-- Center Line -->
+    <path d="${d}" fill="none" stroke="${isNight ? '#ffeaa7' : '#fff'}" stroke-width="1.8" stroke-dasharray="8 8" opacity="${isNight ? '.5' : '.85'}"/>
+  `;
   const R1 = 'M0 170H400', R2 = 'M0 505H400', R3 = 'M0 640H400', RV = 'M200 0V1100', R4 = 'M0 840H400', R5 = 'M0 1000H400', RS = 'M200 300Q260 380 236 452';
   const nightGlow = isNight ? `<defs><radialGradient id="lampGlow"><stop offset="0%" stop-color="#ffeaa7" stop-opacity=".7"/><stop offset="100%" stop-color="#ffeaa7" stop-opacity="0"/></radialGradient></defs><g opacity=".5">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[200,300],[200,840],[200,1000]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="34" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
   return `<svg viewBox="0 0 400 1100" class="mapsvg ${isNight ? 'night-active' : ''}" aria-label="Bản đồ thành phố">
