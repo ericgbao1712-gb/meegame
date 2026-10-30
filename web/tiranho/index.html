@@ -1043,40 +1043,34 @@ const LOCS = {
   chodem:  { name: 'Góc chợ đêm', time: 150, patience: 78, night: true, mood: 'Chợ đêm đông vui, đèn lồng sáng rực' },
   phodibo: { name: 'Phố đi bộ cuối tuần', time: 170, patience: 72, night: true, mood: 'Phố đi bộ, khách du lịch & giới trẻ' },
 };
-const streetCache = {};
 function street(t, loc = 'hem') {
-  const L = LOCS[loc];
-  if (!streetCache[loc]) {
-    const cvs = document.createElement('canvas'); cvs.width = W * 2; cvs.height = 640 * 2;
-    const old = g; g = cvs.getContext('2d'); g.scale(2, 2);
-    g.fillStyle = L.night ? lg(0, 0, 0, 380, loc === 'phodibo' ? ['#2A2350', '#5B3E78', '#C9708A'] : ['#141A3A', '#2C2F62', '#5A4A7A']) : lg(0, 0, 0, 360, ['#9FD3F0', '#CFE9F2', '#FCE3C2']);
-    g.fillRect(0, 0, W, 400);
-    if (L.night) { const R = rand(9); for (let i = 0; i < 60; i++) ell(R() * W, R() * 200, 1 + R() * 1.4, 1 + R() * 1.4, `rgba(255,255,240,${.4 + R() * .5})`); ell(600, 70, 30, 30, '#FFF6D8'); ell(590, 64, 30, 30, loc === 'phodibo' ? '#2A2350' : '#141A3A'); }
-    else for (const [x, y, r] of [[120, 70, 30], [160, 60, 36], [205, 72, 28], [520, 110, 26], [560, 100, 32], [600, 112, 24]]) ell(x, y, r * 1.4, r, 'rgba(255,255,255,.85)');
-    let x = -30;
-    const list = SHOPS[loc];
-    for (let i = 0; x < W + 40; i++) {
-      const s = list[i % list.length], top = 360 - s.h + 40;
-      g.fillStyle = s.c; g.fillRect(x, top, s.w, s.h);
-      g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(x + s.w - 10, top, 10, s.h);
-      for (let fy = top + 30; fy < 300; fy += 64) for (let fx = x + 18; fx < x + s.w - 30; fx += 46) {
-        const lit = L.night && hsh(`${loc}${fx}${fy}`) % 3 !== 0;
-        fillRR(fx, fy, 30, 40, 3, lit ? '#FFD98A' : '#9CC4D8', L.night ? '#3A3550' : '#FFFFFF', 3);
-        g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(fx + 4, fy + 4, 6, 30);
-      }
-      fillRR(x + 8, 300, s.w - 16, 34, 6, s.sc); text(s.sign, x + s.w / 2, 317, { size: 17, color: '#FFFFFF', weight: 800, max: s.w - 26 });
-      g.fillStyle = shade(s.sc, .8); for (let ax = x + 6; ax < x + s.w - 6; ax += 18) { g.beginPath(); g.moveTo(ax, 338); g.lineTo(ax + 18, 338); g.lineTo(ax + 9, 352); g.closePath(); g.fill(); }
-      fillRR(x + 14, 352, s.w - 28, 48, 2, '#5C4A40'); g.fillStyle = L.night ? 'rgba(255,214,140,.65)' : 'rgba(255,240,200,.35)'; g.fillRect(x + 18, 356, s.w - 36, 40);
-      x += s.w + 6;
+  const L = LOCS[loc], wc0 = WC.on; WC.on = false;
+  g.fillStyle = L.night ? lg(0, 0, 0, 380, loc === 'phodibo' ? ['#2A2350', '#5B3E78', '#C9708A'] : ['#141A3A', '#2C2F62', '#5A4A7A']) : lg(0, 0, 0, 360, ['#9FD3F0', '#CFE9F2', '#FCE3C2']);
+  g.fillRect(0, 0, W, 400);
+  if (L.night) { const R = rand(9); for (let i = 0; i < 60; i++) ell(R() * W, R() * 200, 1 + R() * 1.4, 1 + R() * 1.4, `rgba(255,255,240,${.4 + R() * .5})`); ell(600, 70, 30, 30, '#FFF6D8'); ell(590, 64, 30, 30, loc === 'phodibo' ? '#2A2350' : '#141A3A'); }
+  else for (const [x, y, r] of [[120, 70, 30], [160, 60, 36], [205, 72, 28], [520, 110, 26], [560, 100, 32], [600, 112, 24]]) ell(x, y, r * 1.4, r, 'rgba(255,255,255,.85)');
+  let x = -30;
+  const list = SHOPS[loc];
+  for (let i = 0; x < W + 40; i++) {
+    const s = list[i % list.length], top = 360 - s.h + 40;
+    g.fillStyle = s.c; g.fillRect(x, top, s.w, s.h);
+    g.fillStyle = 'rgba(0,0,0,.08)'; g.fillRect(x + s.w - 10, top, 10, s.h);
+    for (let fy = top + 30; fy < 300; fy += 64) for (let fx = x + 18; fx < x + s.w - 30; fx += 46) {
+      const lit = L.night && hsh(`${loc}${fx}${fy}`) % 3 !== 0;
+      fillRR(fx, fy, 30, 40, 3, lit ? '#FFD98A' : '#9CC4D8', L.night ? '#3A3550' : '#FFFFFF', 3);
+      g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(fx + 4, fy + 4, 6, 30);
     }
-    if (!L.night || loc === 'phodibo') for (const tx of [90, 410, 690]) { fillRR(tx - 6, 250, 12, 160, 5, '#6B4A33'); for (const [dx, dy, r] of [[0, 220, 54], [-40, 240, 40], [40, 236, 44], [0, 190, 40]]) ell(tx + dx, dy, r, r * .85, lg(0, dy - r, 0, dy + r, L.night ? ['#4E7A5A', '#2C4A3A'] : ['#8CC66A', '#4F8E3E'])); }
-    g.fillStyle = L.night ? '#8E8698' : '#D9D2C7'; g.fillRect(0, 400, W, 40); g.fillStyle = 'rgba(0,0,0,.1)'; for (let px2 = 0; px2 < W; px2 += 40) g.fillRect(px2, 400, 2, 40);
-    g.fillStyle = loc === 'phodibo' ? lg(0, 440, 0, 640, ['#B7A8A0', '#9A8C86']) : lg(0, 440, 0, 640, L.night ? ['#4A4C58', '#3A3C46'] : ['#7C8086', '#62666C']); g.fillRect(0, 440, W, 200);
-    if (loc === 'phodibo') { g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2; for (let yy = 460; yy < 640; yy += 30) { g.beginPath(); g.moveTo(0, yy); g.lineTo(W, yy); g.stroke(); } }
-    else { g.fillStyle = '#F2F2EE'; for (let px2 = 20; px2 < W; px2 += 120) g.fillRect(px2, 520, 70, 6); }
-    g = old; streetCache[loc] = cvs;
+    fillRR(x + 8, 300, s.w - 16, 34, 6, s.sc); text(s.sign, x + s.w / 2, 317, { size: 17, color: '#FFFFFF', weight: 800, max: s.w - 26 });
+    g.fillStyle = shade(s.sc, .8); for (let ax = x + 6; ax < x + s.w - 6; ax += 18) { g.beginPath(); g.moveTo(ax, 338); g.lineTo(ax + 18, 338); g.lineTo(ax + 9, 352); g.closePath(); g.fill(); }
+    fillRR(x + 14, 352, s.w - 28, 48, 2, '#5C4A40'); g.fillStyle = L.night ? 'rgba(255,214,140,.65)' : 'rgba(255,240,200,.35)'; g.fillRect(x + 18, 356, s.w - 36, 40);
+    x += s.w + 6;
   }
-  g.drawImage(streetCache[loc], 0, 0, W, 640);
+  if (!L.night || loc === 'phodibo') for (const tx of [90, 410, 690]) { fillRR(tx - 6, 250, 12, 160, 5, '#6B4A33'); for (const [dx, dy, r] of [[0, 220, 54], [-40, 240, 40], [40, 236, 44], [0, 190, 40]]) ell(tx + dx, dy, r, r * .85, lg(0, dy - r, 0, dy + r, L.night ? ['#4E7A5A', '#2C4A3A'] : ['#8CC66A', '#4F8E3E'])); }
+  g.fillStyle = L.night ? '#8E8698' : '#D9D2C7'; g.fillRect(0, 400, W, 40); g.fillStyle = 'rgba(0,0,0,.1)'; for (let px2 = 0; px2 < W; px2 += 40) g.fillRect(px2, 400, 2, 40);
+  g.fillStyle = loc === 'phodibo' ? lg(0, 440, 0, 640, ['#B7A8A0', '#9A8C86']) : lg(0, 440, 0, 640, L.night ? ['#4A4C58', '#3A3C46'] : ['#7C8086', '#62666C']); g.fillRect(0, 440, W, 200);
+  if (loc === 'phodibo') { g.strokeStyle = 'rgba(255,255,255,.12)'; g.lineWidth = 2; for (let yy = 460; yy < 640; yy += 30) { g.beginPath(); g.moveTo(0, yy); g.lineTo(W, yy); g.stroke(); } }
+  else { g.fillStyle = '#F2F2EE'; for (let px2 = 20; px2 < W; px2 += 120) g.fillRect(px2, 520, 70, 6); }
+  WC.on = wc0;
   if (L.night) {
     // dây đèn lồng
     for (let i = 0; i < 12; i++) { const lx = 30 + i * 60, ly = 150 + Math.sin(i * .8) * 14; g.strokeStyle = 'rgba(40,20,20,.5)'; g.lineWidth = 1.5; if (i) { g.beginPath(); g.moveTo(lx - 60, 150 + Math.sin((i - 1) * .8) * 14); g.quadraticCurveTo(lx - 30, ly + 16, lx, ly); g.stroke(); } ell(lx, ly + 12, 11, 14, i % 2 ? '#E8483B' : '#F2B632'); ell(lx, ly + 12, 22, 22, `rgba(255,190,90,${.15 + .08 * Math.sin(t * 3 + i)})`); }
@@ -4131,9 +4125,11 @@ function miniCup(u, x, y, sc, t, sel) {
   }
   if (u.straw) { const sx = x + 8 * sc, sy = top - 2; g.save(); g.translate(sx, sy); g.rotate(.25); fillRR(-3.5 * sc, -42 * sc, 7 * sc, 46 * sc, 3 * sc, lg(-4, 0, 4, 0, ['#B8784A', '#7A4528'])); g.fillStyle = 'rgba(255,255,255,.5)'; for (let i = 0; i < 4; i++) g.fillRect(-3.5 * sc, -38 * sc + i * 10 * sc, 7 * sc, 3 * sc); g.restore(); }
   if (u.spoil) { fillRR(x - 30, top + h * .35, 60, 24, 12, '#E8553F'); text('Hỏng', x, top + h * .35 + 12, { size: 13, color: '#fff', weight: 800 }); }
-  const lab = u.size + (u.ice && u.ice !== true && S.cust?.drinks?.[u.di]?.ice ? ` · đá ${u.ice}` : '');
-  g.font = `800 12px ${FONT}`; const lw = Math.max(26, g.measureText(lab).width + 14);
-  fillRR(x - lw / 2, y + 6, lw, 18, 9, '#FFFFFF', '#C9A88A', 1.5); text(lab, x, y + 15, { size: 12, color: '#3A2219', weight: 800 });
+  if (!u.noTag) {
+    const lab = u.size + (u.ice && u.ice !== true && S.cust?.drinks?.[u.di]?.ice ? ` · đá ${u.ice}` : '');
+    g.font = `800 12px ${FONT}`; const lw = Math.max(26, g.measureText(lab).width + 14);
+    fillRR(x - lw / 2, y + 6, lw, 18, 9, '#FFFFFF', '#C9A88A', 1.5); text(lab, x, y + 15, { size: 12, color: '#3A2219', weight: 800 });
+  }
 }
 // ---- xô inox đổ ly
 function trashCan(x, y, w, h) {
@@ -4263,31 +4259,48 @@ function slotCells(c) {
   if (c.cake) cells.push({ type: 'c', k: c.cake, n: 1, ok: c.gotCake, name: 'Bánh kem' });
   return cells;
 }
-function slotBubbleH(c, w) { const n = slotCells(c).length, per = Math.max(2, Math.floor((w - 16) / 70)), rows = Math.ceil(n / per), cs = Math.min(72, Math.floor((w - 16) / Math.min(per, n || 1)) - 6, rows > 1 ? 54 : 72); return 30 + rows * (cs + 22) + 18; }
+const ICE_ORD = ['', 'đá ít', 'đá vừa', 'đá nhiều'];
+function slotRowExtraH(rowCells) {
+  let ex = 4;
+  for (const cl of rowCells) if (cl.type === 'd') ex = Math.max(ex, cl.d.tops?.length ? 26 : 16);
+  return ex;
+}
+function slotBubbleH(c, w) {
+  const cells = slotCells(c), n = cells.length, per = Math.max(2, Math.floor((w - 16) / 70)), rows = Math.ceil(n / per);
+  const cs = Math.min(72, Math.floor((w - 16) / Math.min(per, n || 1)) - 6, rows > 1 ? 56 : 72);
+  let h = 34;
+  for (let r = 0; r < rows; r++) h += cs + slotRowExtraH(cells.slice(r * per, (r + 1) * per));
+  return h + 16;
+}
 function slotBubble(c, x, y, w, t, focus) {
   const cells = slotCells(c), per = Math.max(2, Math.floor((w - 16) / 70)), rows = Math.ceil(cells.length / per);
-  const cs = Math.min(72, Math.floor((w - 16) / Math.min(per, cells.length || 1)) - 6, rows > 1 ? 54 : 72);
-  const bh = 30 + rows * (cs + 22) + 18, by = y, col = c.special || c.critic ? '#7A4528' : c.online ? c.appCol : focus ? '#E8A21A' : '#3A2219';
+  const cs = Math.min(72, Math.floor((w - 16) / Math.min(per, cells.length || 1)) - 6, rows > 1 ? 56 : 72);
+  const rowY = [34];
+  for (let r = 0; r < rows; r++) rowY.push(rowY[r] + cs + slotRowExtraH(cells.slice(r * per, (r + 1) * per)));
+  const bh = rowY[rows] + 16, by = y, col = c.special || c.critic ? '#7A4528' : c.online ? c.appCol : focus ? '#E8A21A' : '#3A2219';
   fillRR(x, by, w, bh, 18, '#FFFFFF', col, focus ? 4 : 2.5);
   g.fillStyle = '#FFFFFF'; g.beginPath(); g.moveTo(x + w / 2 - 14, by + bh - 2); g.lineTo(x + w / 2, by + bh + 16); g.lineTo(x + w / 2 + 14, by + bh - 2); g.fill();
   g.strokeStyle = col; g.lineWidth = focus ? 4 : 2.5; g.beginPath(); g.moveTo(x + w / 2 - 14, by + bh); g.lineTo(x + w / 2, by + bh + 16); g.lineTo(x + w / 2 + 14, by + bh); g.stroke();
   if (c.name) { g.font = `800 14px ${FONT}`; const nw = Math.min(w - 10, g.measureText(c.name).width + 20); fillRR(x + 8, by - 13, nw, 24, 12, c.online ? c.appCol : '#7A4528'); text(c.name, x + 8 + nw / 2, by - 1, { size: 14, color: '#fff', weight: 800, max: nw - 10 }); }
   text(c.line, x + w / 2, by + 20, { size: 14, color: '#5A3E2E', weight: 700, max: w - 18 });
-  const rowW = Math.min(per, cells.length) * (cs + 6) - 6;
   cells.forEach((cl, i) => {
     const r = Math.floor(i / per), inRow = Math.min(per, cells.length - r * per), rw = inRow * (cs + 6) - 6;
-    const ix = x + (w - rw) / 2 + (i % per) * (cs + 6), iy = by + 34 + r * (cs + 22);
+    const ix = x + (w - rw) / 2 + (i % per) * (cs + 6), iy = by + rowY[r];
     fillRR(ix, iy, cs, cs - 4, 8, cl.type === 'f' ? '#C9D0D6' : '#F6EEF2');
     if (cl.type === 'f') portionTop(cl.k, ix + 2, iy + 2, cs - 4, cs - 8, hsh(cl.k), t);
-    else if (cl.type === 'd') miniCup({ size: cl.d.size, base: cl.k, ice: true, tops: cl.d.tops, sealed: true, straw: true }, ix + cs / 2, iy + cs - 12, cs / 140, t, false);
+    else if (cl.type === 'd') miniCup({ size: cl.d.size, base: cl.k, ice: true, tops: cl.d.tops, sealed: true, straw: true, noTag: true }, ix + cs / 2, iy + cs - 6, cs / 128, t, false);
     else if (cl.type === 'x') { g.save(); g.beginPath(); g.arc(ix + cs / 2, iy + cs / 2 - 2, cs * .36, 0, TAU); g.clip(); binArt(cl.k, ix + cs * .14, iy + cs * .12, cs * .72, cs * .72); g.restore(); }
     else cakeTop(cl.k, ix + cs / 2, iy + cs / 2 - 2, cs * .38, t);
     fillRR(ix + cs - 28, iy - 7, 30, 20, 10, cl.ok ? '#4E9A3C' : '#A0603A'); text(cl.ok ? '✓' : `×${cl.n}`, ix + cs - 13, iy + 3, { size: 12, color: '#fff', weight: 800 });
-    const sub = cl.type === 'd' && (cl.d.ice || cl.d.tops.length) ? [cl.d.ice ? ICE_NAME[cl.d.ice] : '', ...cl.d.tops.map((k) => '+' + BIN_NAME[k].toLowerCase())].filter(Boolean).join(' ') : '';
-    text(cl.name, ix + cs / 2, iy + cs + 4, { size: 11, color: '#3A2219', weight: 800, max: cs + 4 });
-    if (sub) text(sub, ix + cs / 2, iy + cs + 16, { size: 10, color: '#6E3E22', weight: 800, max: cs + 4 });
+    if (cl.type === 'd') {
+      const dTxt = `sz ${cl.d.size}${cl.d.ice ? ', ' + ICE_ORD[cl.d.ice] : ''}`;
+      text(dTxt, ix + cs / 2, iy + cs + 4, { size: 10.5, color: '#3A2219', weight: 800, max: cs + 8 });
+      if (cl.d.tops?.length) {
+        const topTxt = cl.d.tops.map((k) => '+' + BIN_NAME[k].toLowerCase()).join(' ');
+        text(topTxt, ix + cs / 2, iy + cs + 15, { size: 9.5, color: '#6E3E22', weight: 800, max: cs + 8 });
+      }
+    }
   });
-  void rowW;
   fillRR(x + 12, by + bh - 12, w - 24, 6, 3, '#F1E6DA'); fillRR(x + 12, by + bh - 12, (w - 24) * c.patience, 6, 3, c.patience > .4 ? '#7CC35A' : '#E8762C');
   return bh;
 }
@@ -4471,7 +4484,7 @@ function paperMenu(x, y, w, h, t) {
     fillRR(ix, iy, tw, th, 12, it.t === 'd' ? '#F2F8FB' : '#FFFFFF', it.t === 'd' ? '#CFE3EE' : '#F1DCC6', 1.5);
     const s = th - 12;
     if (it.t === 'f') { g.save(); rr(ix + 6, iy + 6, s, s, 8); g.clip(); portionTop(it.k, ix + 6, iy + 6, s, s, hsh(it.k), t); g.restore(); }
-    else { g.save(); rr(ix + 2, iy + 2, s + 8, th - 4, 10); g.clip(); miniCup({ size: 'M', base: it.k, ice: true, tops: it.k === 'tra_sua' ? ['tran_chau'] : [], sealed: true, straw: true }, ix + 6 + s / 2, iy + th - 4, s / 100, t, false); g.restore(); }
+    else { g.save(); rr(ix + 2, iy + 2, s + 8, th - 4, 10); g.clip(); miniCup({ size: 'M', base: it.k, ice: true, tops: it.k === 'tra_sua' ? ['tran_chau'] : [], sealed: true, straw: true, noTag: true }, ix + 6 + s / 2, iy + th - 4, s / 100, t, false); g.restore(); }
     const tx = ix + s + 12, mw = tw - s - 16;
     text(it.n, tx, iy + th / 2 - 11, { size: 17, color: '#3A2219', weight: 800, align: 'left', max: mw });
     fillRR(tx, iy + th - 28, 54, 22, 11, it.t === 'd' ? '#7EB6D9' : '#A0603A'); text(`${Math.round(it.p / 1000)}k`, tx + 27, iy + th - 17, { size: 15, color: '#fff', weight: 800 });
@@ -4757,18 +4770,28 @@ function bin(k, x, y, w, h, grp = 'ly') {
 function drawBins(t, cc) {
   const B = CT.bins, tabW = 50, bx = B.x + tabW + 6, bw = (B.w - tabW - 6 - 3 * 6) / 4, rh = B.rh;
   const tg = cc && cc.enter > .9 && !cc.leave ? nextAct(cc)?.[0] : null;
-  if (tg !== S.binFor) { S.binFor = tg; if (tg?.startsWith('bin:')) { const k = tg.slice(4), cur = BIN_TABS.find((b) => b[0] === (S.binTab || 'ly')); if (!cur[3].includes(k)) S.binTab = BIN_TABS.find((b) => b[3].includes(k))?.[0] ?? S.binTab; } }
+  if (tg !== S.binFor) {
+    S.binFor = tg;
+    if (tg?.startsWith('bin:')) {
+      const k = tg.slice(4), forBox = cc && !boxDone(cc) && (BOX_EXTRAS.includes(k) || k === 'thia');
+      if (forBox) S.binTab = 'banh';
+      else {
+        const cur = BIN_TABS.find((b) => b[0] === (S.binTab || 'ly'));
+        if (!cur[3].includes(k)) S.binTab = BIN_TABS.find((b) => b[3].includes(k))?.[0] ?? S.binTab;
+      }
+    }
+  }
   S.binTab ??= 'ly';
+  const curList = BIN_TABS.find((b) => b[0] === S.binTab)?.[3] || [];
   // nếu đang làm ly nước thì ưu tiên nhóm Ly, đang làm hộp bánh thì nhóm Bánh
   BIN_TABS.forEach(([id, name, ic, list], i) => {
-    const on = S.binTab === id, y = B.y + i * (rh + 4), need = tg?.startsWith('bin:') && list.includes(tg.slice(4)) && !on;
+    const on = S.binTab === id, y = B.y + i * (rh + 4), need = tg?.startsWith('bin:') && !curList.includes(tg.slice(4)) && list.includes(tg.slice(4)) && !on;
     fillRR(B.x, y, tabW, rh, 14, on ? BOWL_RIM[id] : 'rgba(255,255,255,.85)', on ? shade(BOWL_RIM[id], .8) : '#E3CDB6', 2);
     text(ic, B.x + tabW / 2, y + rh / 2 - 12, { size: 26 }); text(name, B.x + tabW / 2, y + rh / 2 + 20, { size: 13, color: '#3A2219', weight: 800 });
     if (need) { ell(B.x + tabW - 6, y + 6, 8, 8, '#E8553F', '#fff', 2); text('!', B.x + tabW - 6, y + 7, { size: 11, color: '#fff', weight: 800 }); }
     buttons.push({ id: 'bintab:' + id, x: B.x, y, w: tabW, h: rh });
   });
-  const list = BIN_TABS.find((b) => b[0] === S.binTab)[3];
-  list.forEach((k, i) => bin(k, bx + (i % 4) * (bw + 6), B.y + Math.floor(i / 4) * (rh + 4), bw, rh, S.binTab));
+  curList.forEach((k, i) => bin(k, bx + (i % 4) * (bw + 6), B.y + Math.floor(i / 4) * (rh + 4), bw, rh, S.binTab));
 }
 // ---- vẽ topping mới trong ly và trong hộp
 function drawNewCupTops(u, x, y, sc) {
@@ -4814,6 +4837,12 @@ resize = function () {
 
 // ---- bộ nhớ đệm hình: vẽ 1 lần vào canvas phụ, các khung sau chỉ dán lại
 const SPR = new Map();
+const _sprClear0 = SPR.clear.bind(SPR);
+SPR.clear = function () {
+  for (const e of SPR.values()) if (e?.c) e.c.width = e.c.height = 0;
+  _sprClear0();
+  if (typeof PCACHE !== 'undefined') { for (const c of PCACHE.values()) if (c) c.width = c.height = 0; PCACHE.clear(); }
+};
 function spr(key, x, y, w, h, fn, pad = 18) {
   if (!PERF.cache) return fn();
   const k = key + '|' + x + '|' + y + '|' + w + '|' + h;
@@ -4825,7 +4854,7 @@ function spr(key, x, y, w, h, fn, pad = 18) {
     const rec = [], r0 = reg, b0 = buttons; buttons = [];
     reg = (...a) => rec.push(a);
     try { withCtx(ctx, fn); } finally { e = { c, rec, pushed: buttons }; buttons = b0; reg = r0; }
-    SPR.set(k, e); if (SPR.size > 400) SPR.delete(SPR.keys().next().value);
+    SPR.set(k, e); if (SPR.size > 60) { const fk = SPR.keys().next().value, old = SPR.get(fk); if (old?.c) old.c.width = old.c.height = 0; SPR.delete(fk); }
   }
   g.drawImage(e.c, x - pad, y - pad, w + pad * 2, h + pad * 2);
   for (const a of e.rec) reg(...a);
@@ -4867,7 +4896,7 @@ person = function (L, x, y, s = 1, mood = 'wait', t = 0) {
     c = document.createElement('canvas'); c.width = Math.ceil(bw * DPR); c.height = Math.ceil(bh * DPR);
     const ctx = c.getContext('2d'); ctx.setTransform(DPR, 0, 0, DPR, ox * DPR, oy * DPR); ctx.scale(k, k);
     CHARS.drawCharacter(ctx, L, CHAR_STYLE, MOOD_MAP[mood] ?? 'smile', (L.id?.length ?? 0) * .7);
-    PCACHE.set(key, c); if (PCACHE.size > 160) PCACHE.delete(PCACHE.keys().next().value);
+    PCACHE.set(key, c); if (PCACHE.size > 40) { const fk = PCACHE.keys().next().value, old = PCACHE.get(fk); if (old) old.width = old.height = 0; PCACHE.delete(fk); }
   }
   const fx = x, fy = y - P.shoulderY * k + 14 * s;
   g.drawImage(c, fx - ox, fy - oy, bw, bh);
@@ -4880,7 +4909,7 @@ itemIcon = function (k, x, y, s = 1) { spr(`ic:${k}:${s}`, x - 50 * s, y - 50 * 
 const _miniCup12 = miniCup;
 miniCup = function (u, x, y, sc, t, sel) {
   if (!u.sealed || !u.straw || sel || u.spoil || S.pouring?.u === u) return _miniCup12(u, x, y, sc, t, sel);
-  spr(`mc:${u.size}:${u.base}:${u.ice}:${u.tops.join('+')}:${sc.toFixed(3)}`, x - 50 * sc - 4, y - 160 * sc, 100 * sc + 8, 190 * sc + 30, () => _miniCup12(u, x, y, sc, 0, false), 6);
+  spr(`mc:${u.size}:${u.base}:${u.ice}:${u.tops.join('+')}:${sc.toFixed(3)}:${u.noTag ? 1 : 0}:${!u.noTag && S.cust?.drinks?.[u.di]?.ice || 0}`, x - 50 * sc - 4, y - 160 * sc, 100 * sc + 8, 190 * sc + 30, () => _miniCup12(u, x, y, sc, 0, false), 6);
 };
 
 // ---- ô tài khoản Google ở màn hình chính (chỉ khi chơi trên MeeGame)
@@ -4917,7 +4946,7 @@ frame = function (now) {
   if (PERF.ema > 1000 / cap * .7 && PERF.dprCap > 1.01) { if (++PERF.slowN > 90) { PERF.slowN = 0; PERF.ema = 0; PERF.dprCap = Math.max(1, +(Math.min(PERF.dprCap, DPR) - .25).toFixed(2)); resize(); if (!PERF.drops++) toast('Máy hơi chậm, game đã tự giảm độ nét để mượt và mát hơn'); } } else PERF.slowN = 0;
   requestAnimationFrame(frame);
 };
-document.addEventListener('visibilitychange', () => { if (document.hidden) { musicStop?.(); } else if (PREF.music) musicStart?.(); });
+document.addEventListener('visibilitychange', () => { if (document.hidden) { musicStop?.(); } else { SPR.clear?.(); if (PREF.music) musicStart?.(); } });
 applyGfx();
 
 addEventListener('resize', () => resize());
@@ -5821,9 +5850,9 @@ function counterWork(dt, MM) {
   const can = {
     tho: () => S.phase === 'order' && need(c).some((k) => S.trays[k] > 0),
     hau: () => act && (DRINK_ACT(act) || (act === 'bin:kem_cheese' && selCup())),
-    hong: () => act === 'bin:thia' || act === 'mat:box' || act === 'give',
+    hong: () => act === 'bin:thia' || act === 'mat:box' || act === 'give' || (act && !boxDone(c) && act.startsWith('bin:')),
     bong: () => act && /^bin:/.test(act) && !['bin:da', 'bin:thia', 'bin:ong_hut'].includes(act),
-    linh: () => act && (/^(cup:|sealer$|cake$|give$|mat:box$|bin:(da|ong_hut|thia)$)/.test(act)),
+    linh: () => act && (/^(cup:|sealer$|cake$|give$|mat:box$|bin:(da|ong_hut|thia)$)/.test(act) || (!boxDone(c) && act.startsWith('bin:'))),
     quan: () => !!act,
   };
   S.stT ??= {};
@@ -5865,6 +5894,7 @@ let last = performance.now(), dragging = false;
 function frame(now) {
   let dt = Math.min(.05, (now - last) / 1000); last = now; S.t += dt;
   g.setTransform(DPR, 0, 0, DPR, 0, 0); g.imageSmoothingEnabled = true;
+  g.clearRect(0, 0, W, H);
   buttons = [];
   if (S.quests || OV.open) dt = 0;
   switch (S.scene) {
