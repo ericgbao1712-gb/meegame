@@ -567,8 +567,18 @@ label.fl{display:flex;flex-direction:column;gap:4px;font-weight:800;font-size:13
 .mapsvg .goR{animation-name:goR}.mapsvg .goL{animation-name:goL}.mapsvg .goD{animation-name:goD}.mapsvg .goU{animation-name:goU}.mapsvg .goTrain{animation-name:goTrain}.mapsvg .goBoat{animation-name:goBoat}
 @keyframes goR{from{transform:translateX(-70px)}to{transform:translateX(470px)}}
 @keyframes goL{from{transform:translateX(470px)}to{transform:translateX(-70px)}}
-@keyframes goD{from{transform:translateY(-40px)}to{transform:translateY(1140px)}}
-@keyframes goU{from{transform:translateY(1140px)}to{transform:translateY(-40px)}}
+@keyframes goD{from{transform:translateY(-40px)}to{transform:translateY(1480px)}}
+@keyframes goU{from{transform:translateY(1480px)}to{transform:translateY(-40px)}}
+.street-walkers{position:absolute;inset:0;pointer-events:auto;overflow:visible;z-index:2}
+.tenant-stroller{position:absolute;bottom:4px;width:38px;height:52px;z-index:3;cursor:pointer;transition:left 3s cubic-bezier(.45,.05,.55,.95),opacity .4s}
+.tenant-stroller svg{display:block;width:100%;height:auto;overflow:visible}
+.tenant-stroller.left .flipw{transform:scaleX(-1)}
+.tenant-stroller .nm{position:absolute;top:-18px;left:50%;transform:translateX(-50%);white-space:nowrap;font-family:var(--f-display);font-weight:800;font-size:9.5px;background:#ffd447;color:var(--ink);border:1.8px solid var(--ink);border-radius:7px;padding:0 5px;line-height:1.3;box-shadow:0 2px 4px rgba(0,0,0,.15)}
+.tenant-stroller .say-bub{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:8px;background:#fff;border:2px solid var(--ink);border-radius:10px;padding:3px 8px;font-family:var(--f-body);font-size:10.5px;font-weight:800;color:var(--ink);white-space:nowrap;box-shadow:0 3px 6px rgba(0,0,0,.18);animation:pop .25s ease-out;pointer-events:none;z-index:5}
+.tenant-stroller .say-bub::after{content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);border:5px solid transparent;border-top-color:#fff}
+.map-tenant-spot{cursor:pointer;transition:transform .15s ease}
+.map-tenant-spot:hover{transform:scale(1.08)}
+.map-tenant-spot:active{transform:scale(.95)}
 @keyframes goTrain{from{transform:translateX(150px)}to{transform:translateX(470px)}}
 @keyframes goBoat{0%{transform:translate(-60px,408px)}50%{transform:translate(180px,296px)}100%{transform:translate(430px,148px)}}
 .mapsvg .smoke circle{animation:smoke 1.6s ease-out infinite;transform-box:fill-box;transform-origin:center}
@@ -649,7 +659,7 @@ label.fl{display:flex;flex-direction:column;gap:4px;font-weight:800;font-size:13
     <div class="cloud" style="top:40px;width:70px;height:22px;animation-duration:48s"></div>
     <div class="cloud" style="top:130px;width:90px;height:26px;animation-duration:64s;animation-delay:-30s"></div>
     <div class="building" id="building"></div>
-    <div class="street"><div class="landlord idle" id="landlord" data-act="open:profile" hidden></div></div>
+    <div class="street"><div class="street-walkers" id="streetWalkers"></div><div class="landlord idle" id="landlord" data-act="open:profile" hidden></div></div>
   </div>
   <div class="hud">
     <button class="me" id="hMe" data-act="open:profile" aria-label="Hồ sơ chủ trọ"></button>
@@ -1835,7 +1845,136 @@ function walker(k){
   el.appendChild(w);requestAnimationFrame(()=>requestAnimationFrame(()=>{w.style.left='42%'}));
   setTimeout(()=>{floatAt(el,'+'+SHOPS[k].price*B().shops[k].lv);w.style.opacity='0'},2900);setTimeout(()=>w.remove(),3400);
 }
+
+/* ---------- HỆ THỐNG KHÁCH TRỌ ĐI MUA ĐỒ, ĐI CHƠI ---------- */
+let lastTenantOutingTime = 0;
+function checkTenantOuting(){
+  if(paused) return;
+  const now = Date.now();
+  if(now - lastTenantOutingTime < 18000) return; // mỗi 18-25s có một khách đi chơi/mua sắm
+  lastTenantOutingTime = now;
+  
+  const occ = [];
+  B().rooms.forEach((r, i)=>{
+    if(r.tenant && agents[i] && agents[i].state !== 'sleep' && agents[i].state !== 'away'){
+      occ.push(i);
+    }
+  });
+  if(!occ.length) return;
+  
+  const i = pick(occ);
+  tenantGoShopping(i);
+}
+
+function tenantGoShopping(roomIdx){
+  const r = B().rooms[roomIdx];
+  if(!r || !r.tenant) return;
+  const t = r.tenant;
+  const f = Math.floor(roomIdx / (BD().couple ? 1 : 2)) + 1; // Tầng 1 đến 4
+  const quotes = [
+    { text: 'Tớ đi mua trà sữa trân châu đây! 🧋', spot: 32, item: '🧋', gain: 35 },
+    { text: 'Ghé tiệm bánh mì mua bữa sáng 🥖', spot: 46, item: '🥖', gain: 25 },
+    { text: 'Đi dạo phố sắm đồ xinh nha 👗', spot: 68, item: '🛍️', gain: 45 },
+    { text: 'Đói bụng ghé quán ăn nạp năng lượng 🍲', spot: 24, item: '🍲', gain: 40 },
+    { text: 'Tối nay lên Phố Không Ngủ quẩy nhé! 🌃✨', spot: 78, item: '✨', gain: 60 },
+    { text: 'Ra rạp Mee Cinema xem phim giải trí 🎬', spot: 55, item: '🍿', gain: 50 },
+    { text: 'Đi dạo công viên ngắm cảnh 🦆', spot: 72, item: '💖', gain: 30 },
+  ];
+  const q = pick(quotes);
+
+  // Hiển thị bóng thoại tại phòng khách trọ
+  const rEl = roomEl(roomIdx);
+  if(rEl){
+    rEl.querySelector('.bubble')?.remove();
+    const b = document.createElement('div');
+    b.className = 'bubble outing-bubble';
+    b.textContent = q.text;
+    b.style.left = '32%';
+    rEl.appendChild(b);
+    setTimeout(()=>b.remove(), 3500);
+  }
+
+  // Khách đi ra thang máy, thang máy đón khách xuống T1
+  moveElevator(f, null);
+  setTimeout(()=>{
+    moveElevator(1, t.look); // Thang máy đưa khách xuống T1
+    setTimeout(()=>{
+      moveElevator(randInt(2, 4), null);
+      // Khách xuất hiện trên vỉa hè / đường phố đi mua đồ!
+      spawnStreetTenant(t, q, roomIdx);
+    }, 1500);
+  }, 1000);
+}
+
+function spawnStreetTenant(t, q, roomIdx){
+  const stWrap = $('#streetWalkers');
+  if(!stWrap) return;
+  const walker = document.createElement('div');
+  walker.className = 'tenant-stroller walk';
+  walker.style.left = '6%';
+  walker.innerHTML = `
+    <span class="nm">${esc(t.name)}</span>
+    <div class="flipw">${charSVG(t.look, 'happy')}</div>
+  `;
+  stWrap.appendChild(walker);
+  
+  // Khách đi bộ tới vị trí quán ăn / tiệm quà
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    walker.style.left = q.spot + '%';
+  }));
+
+  // Sau khi tới nơi (khoảng 3s)
+  setTimeout(()=>{
+    walker.classList.remove('walk');
+    walker.classList.add('hop');
+    snd('tap');
+    
+    // Bóng thoại thông báo món đồ đã mua
+    const bub = document.createElement('div');
+    bub.className = 'say-bub';
+    bub.textContent = `${q.item} +${fmt(q.gain)}`;
+    walker.appendChild(bub);
+    
+    // Tiền thưởng và cộng độ hài lòng cho khách trọ
+    S.money += q.gain;
+    if(B().rooms[roomIdx] && B().rooms[roomIdx].tenant){
+      B().rooms[roomIdx].tenant.bonus = Math.min(30, (B().rooms[roomIdx].tenant.bonus || 0) + 5);
+      renderRoom(roomIdx);
+    }
+    hud();
+    
+    // Tương tác chạm vào khách đang đi dạo trên phố
+    walker.onclick = (e)=>{
+      e.stopPropagation();
+      walker.classList.remove('hop');
+      void walker.offsetWidth;
+      walker.classList.add('hop');
+      toast(`${t.name}: "Em chào chủ trọ! Đi dạo xíu em về phòng liền ạ! 👋"`, 'yel');
+      snd('tap');
+    };
+
+    // Sau khi mua sắm, khách quay trở về tòa nhà trọ
+    setTimeout(()=>{
+      bub.remove();
+      walker.classList.remove('hop');
+      walker.classList.add('walk', 'left');
+      walker.style.left = '4%';
+      setTimeout(()=>{
+        walker.style.opacity = '0';
+        setTimeout(()=>walker.remove(), 400);
+        // Khách vào thang máy lên lại tầng của mình
+        const f = Math.floor(roomIdx / (BD().couple ? 1 : 2)) + 1;
+        moveElevator(1, t.look);
+        setTimeout(()=>{
+          moveElevator(f, null);
+        }, 1400);
+      }, 3000);
+    }, 4000);
+  }, 3200);
+}
+
 function tick(){
+  checkTenantOuting();
   if(paused)return;
   S.min+=10;
   if(S.min%120===0)checkGifts();
@@ -2801,9 +2940,13 @@ function mapVehicles(){
    ${lane(509,'goL',12,-5,scooterSVG('#6d7bff','#ffd447'),1)}
    ${lane(626,'goR',13,-1,carSVG('#b79bff'))}
    ${lane(642,'goL',17,-9,busSVG('#ff9e5e'),1)}
-   ${lane(826,'goR',12,-4,carSVG('#ff9e5e',1))}${lane(842,'goL',14,-8,busSVG('#5ec8ff'),1)}${lane(986,'goR',11,-2,scooterSVG('#7be0a0','#ff5f8f'))}${lane(1002,'goL',13,-6,carSVG('#ff7aa2'),1)}
-   ${vlane(189,'goD',18,-4,topCarSVG('#ff7aa2'))}${vlane(189,'goD',18,-13,topCarSVG('#ffd447'))}
-   ${vlane(202,'goU',20,-2,topCarSVG('#5ec8ff'))}${vlane(202,'goU',20,-11,topCarSVG('#7be0a0'))}
+   ${lane(826,'goR',12,-4,carSVG('#ff9e5e',1))}${lane(842,'goL',14,-8,busSVG('#5ec8ff'),1)}
+   ${lane(986,'goR',11,-2,scooterSVG('#7be0a0','#ff5f8f'))}${lane(1002,'goL',13,-6,carSVG('#ff7aa2'),1)}
+   <!-- Xe thể thao và taxi đêm rực rỡ ở Đại Lộ Không Ngủ -->
+   ${lane(1136,'goR',10,-3,carSVG('#ff2d87',1))}${lane(1152,'goL',12,-7,scooterSVG('#5ec8ff','#ffd447'),1)}
+   ${lane(1316,'goR',11,-5,carSVG('#ffd447'))}${lane(1332,'goL',13,-1,carSVG('#ff7aa2',1),1)}
+   ${vlane(189,'goD',22,-4,topCarSVG('#ff7aa2'))}${vlane(189,'goD',22,-13,topCarSVG('#ffd447'))}
+   ${vlane(202,'goU',24,-2,topCarSVG('#5ec8ff'))}${vlane(202,'goU',24,-11,topCarSVG('#7be0a0'))}
    <g transform="translate(0 30)">${veh('goTrain',14,-3,trainSVG())}</g>
    ${veh('goBoat',22,-6,boatSVG())}`;
 }
@@ -2819,7 +2962,7 @@ const MSHOPS=[
  {id:'banhtrang',name:'Xe Bánh Tráng Mee',short:'BÁNH TRÁNG',kind:'food',pos:[290,668],col:'#ff5f8f',wall:'#e2f6ff',keeper:{skin:'#ffdcbf',hair:'#3b2b2b',style:1,shirt:'#ffd447',bottom:'pants',pants:'#4a5a8a',glasses:1,hat:'none',neck:'none'},
   say:'Chiếc xe năm xưa giờ do Mít trông giúp. Ăn một bịch là nhớ nghề ngày trước.',
   items:[{id:'btt',n:'Bánh tráng trộn',p:20,ic:'plate',c:'#ff9e5e',buff:6,h:4,xp:20},{id:'btn',n:'Bánh tráng nướng',p:30,ic:'plate',c:'#ffd447',buff:8,h:4,xp:10},{id:'melac',n:'Me lắc',p:15,ic:'cup',c:'#c98b5a',buff:4,h:2,xp:3},{id:'btcuon',n:'Bánh tráng cuộn',p:25,ic:'plate',c:'#9fd86b',buff:7,h:4,xp:4},{id:'tratac',n:'Trà tắc',p:10,ic:'cup',c:'#ffd447',buff:3,h:2,xp:1}]},
- {id:'ao',name:'Tiệm Áo Xinh',short:'ÁO XINH',kind:'fashion',pos:[358,436],col:'#ff7aa2',wall:'#ffe9f2',keeper:{skin:'#eab48d',hair:'#2d2d5a',style:4,shirt:'#ff7aa2',bottom:'skirt',pants:'#3d3a4a',glasses:2,gcol:'#ff5f8f',hat:'none',neck:'necklace',ncol:'#ffd447'},
+ {id:'ao',name:'Tiệm Áo Xinh',short:'ÁO XINH',kind:'fashion',pos:[358,380],col:'#ff7aa2',wall:'#ffe9f2',keeper:{skin:'#eab48d',hair:'#2d2d5a',style:4,shirt:'#ff7aa2',bottom:'skirt',pants:'#3d3a4a',glasses:2,gcol:'#ff5f8f',hat:'none',neck:'necklace',ncol:'#ffd447'},
   say:'Đồ ở đây chỉ bán tại tiệm. Mua xong là mặc ngay được.',
   items:[{id:'hat:nonla',n:'Nón lá',p:300},{id:'hat:wreath',n:'Vòng hoa',p:400},{id:'hat:helmet',n:'Mũ bảo hiểm',p:250},{id:'hat:witch',n:'Mũ phù thủy',p:500},{id:'neck:khanran',n:'Khăn rằn',p:200},{id:'glasses:5',n:'Kính ngôi sao',p:350}]},
  {id:'cafe',name:'Cà Phê Mây',short:'CÀ PHÊ',kind:'food',pos:[66,812],col:'#a86c42',wall:'#f6eadb',keeper:{skin:'#ffdcbf',hair:'#3b2b2b',style:0,shirt:'#3d3a4a',bottom:'pants',pants:'#3d3a4a',glasses:1,gcol:'#4a3350',hat:'beanie',hcol:'#a86c42',neck:'none'},
@@ -3237,8 +3380,111 @@ function southSVG(isNight = false){
    <g><rect x="282" y="1030" width="96" height="52" rx="3" fill="#7ad66a" stroke="${INK}" stroke-width="2"/><path d="M330 1030v52M282 1056h96" stroke="#fff" stroke-width="2"/><circle cx="330" cy="1056" r="9" fill="none" stroke="#fff" stroke-width="2"/><circle cx="312" cy="1048" r="3" fill="#fff" stroke="${INK}"/><text x="330" y="1094" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="8" fill="#3e6b2e">Sân bóng</text></g>`;
 }
 
+
+/* ---------- khu đại lộ thành phố không ngủ 24/7 ---------- */
+function sleeplessDistrictSVG(isNight){
+  return `
+  <!-- KHU PHỐ KHÔNG NGỦ 24/7 (SLEEPLESS CITY DISTRICT) -->
+  <g class="sleepless-district">
+    <!-- Nền gạch Cyber Plaza tím hoàng hôn & đêm huyền ảo -->
+    <rect y="1110" width="400" height="330" fill="${isNight ? '#221233' : '#2b1b3d'}"/>
+    <!-- Cyber Grid Lines -->
+    <g stroke="${isNight ? '#ff2d87' : '#9b5de5'}" stroke-width="1" opacity=".18">
+      ${[1150, 1190, 1230, 1270, 1310, 1350, 1390, 1430].map(y => `<path d="M0 ${y}h400"/>`).join('')}
+      ${Array.from({length:10}, (_,k) => `<path d="M${40*k} 1110v330"/>`).join('')}
+    </g>
+
+    <!-- Cổng Chào Đại Lộ Phố Không Ngủ Hoành Tráng -->
+    <g class="sleepless-arch" transform="translate(0 1115)">
+      <!-- Trụ 2 bên -->
+      <rect x="96" y="8" width="14" height="42" rx="3" fill="#1c0e2e" stroke="${INK}" stroke-width="2"/>
+      <rect x="290" y="8" width="14" height="42" rx="3" fill="#1c0e2e" stroke="${INK}" stroke-width="2"/>
+      <!-- Vòm cầu vồng neon rực rỡ -->
+      <path d="M104 22 Q200 -8 296 22" fill="none" stroke="#ff2d87" stroke-width="10" stroke-linecap="round"/>
+      <path d="M104 22 Q200 -8 296 22" fill="none" stroke="#5ec8ff" stroke-width="5" stroke-linecap="round"/>
+      <path d="M104 22 Q200 -8 296 22" fill="none" stroke="#ffd447" stroke-width="2" stroke-linecap="round"/>
+      <!-- Biển hiệu phát sáng -->
+      <rect x="110" y="2" width="180" height="24" rx="12" fill="#140824" stroke="#ff2d87" stroke-width="2.4"/>
+      <text x="200" y="18" text-anchor="middle" font-family="Baloo 2,sans-serif" font-weight="900" font-size="11" fill="#ffd447">★ THÀNH PHỐ KHÔNG NGỦ ★</text>
+      <!-- Đèn nhấp nháy trên cổng -->
+      ${[120, 140, 160, 180, 200, 220, 240, 260, 280].map((x,k)=>`<circle cx="${x}" cy="4" r="2" fill="${k%2?'#ff2d87':'#5ec8ff'}" class="blink" style="animation-delay:${k*.15}s"/>`).join('')}
+    </g>
+
+    <!-- 3D Tòa Nhà Bên Trái: NEON CLUB 24H -->
+    <g transform="translate(24 1175)">
+      <ellipse cx="44" cy="68" rx="42" ry="8" fill="rgba(0,0,0,.35)"/>
+      <!-- Front Wall -->
+      <polygon points="4,16 54,16 54,66 4,66" fill="#381b52" stroke="${INK}" stroke-width="2"/>
+      <!-- Side Wall (3D) -->
+      <polygon points="54,16 72,6 72,56 54,66" fill="#251038" stroke="${INK}" stroke-width="2"/>
+      <!-- Roof (3D) -->
+      <polygon points="4,16 22,6 72,6 54,16" fill="#4d2470" stroke="${INK}" stroke-width="2"/>
+      <!-- Neon Signboard -->
+      <rect x="10" y="22" width="38" height="15" rx="3" fill="#ff2d87" stroke="${INK}" stroke-width="1.5"/>
+      <text x="29" y="33" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="7.5" fill="#fff">CLUB 24H</text>
+      <!-- Cocktail Glass Neon Icon -->
+      <path d="M22 44l7 7v7M29 44l-7 7M25 58h8" stroke="#5ec8ff" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <circle cx="29" cy="42" r="2" fill="#ffd447"/>
+      <!-- Floating Music Notes -->
+      <text x="56" y="32" font-size="12" fill="#ffd447" class="bob">♪</text>
+      <text x="64" y="44" font-size="10" fill="#ff2d87" class="bob">♫</text>
+    </g>
+
+    <!-- Quầy Chợ Đêm Ẩm Thực (Bên Trái Dưới) -->
+    <g transform="translate(22 1285)">
+      <ellipse cx="45" cy="52" rx="40" ry="7" fill="rgba(0,0,0,.3)"/>
+      <rect x="8" y="18" width="70" height="32" rx="3" fill="#ffd447" stroke="${INK}" stroke-width="2"/>
+      <polygon points="2,18 14,4 82,4 78,18" fill="#e05a5a" stroke="${INK}" stroke-width="2"/>
+      <!-- Lồng đèn đỏ treo -->
+      ${[16, 36, 56, 74].map(x=>`<circle cx="${x}" cy="22" r="4.5" fill="#ff2d87" stroke="${INK}" stroke-width="1.2"/><path d="M${x} 26v4" stroke="#ffd447" stroke-width="1.2"/>`).join('')}
+      <rect x="14" y="30" width="58" height="12" rx="3" fill="#fff" stroke="${INK}" stroke-width="1.2"/>
+      <text x="43" y="39" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="7" fill="#b91c1c">CHỢ ĐÊM ẨM THỰC</text>
+    </g>
+
+    <!-- 3D Tòa Nhà Bên Phải: CYBER KARAOKE & LOUNGE -->
+    <g transform="translate(305 1175)">
+      <ellipse cx="44" cy="68" rx="42" ry="8" fill="rgba(0,0,0,.35)"/>
+      <!-- Front Wall -->
+      <polygon points="4,16 54,16 54,66 4,66" fill="#1b2e52" stroke="${INK}" stroke-width="2"/>
+      <!-- Side Wall (3D) -->
+      <polygon points="54,16 72,6 72,56 54,66" fill="#0f1f38" stroke="${INK}" stroke-width="2"/>
+      <!-- Roof (3D) -->
+      <polygon points="4,16 22,6 72,6 54,16" fill="#29457a" stroke="${INK}" stroke-width="2"/>
+      <!-- Neon Signboard -->
+      <rect x="8" y="22" width="42" height="15" rx="3" fill="#5ec8ff" stroke="${INK}" stroke-width="1.5"/>
+      <text x="29" y="33" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="900" font-size="7.5" fill="#111827">KARAOKE</text>
+      <!-- Soundwave & Mic -->
+      <path d="M16 48q4-6 8 0t8 0" fill="none" stroke="#ffd447" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="44" cy="46" r="3" fill="#ff2d87"/>
+      <text x="60" y="30" font-size="12" fill="#5ec8ff" class="bob">♫</text>
+    </g>
+
+    <!-- Lounge Ngoài Trời & Cây Dừa Neon Bên Phải -->
+    <g transform="translate(305 1285)">
+      <ellipse cx="42" cy="50" rx="38" ry="7" fill="rgba(0,0,0,.3)"/>
+      <!-- Bàn tròn & Ghế neon -->
+      <ellipse cx="30" cy="44" rx="14" ry="5" fill="#5ec8ff" stroke="${INK}" stroke-width="1.6"/>
+      <path d="M30 46v10M22 56h16" stroke="${INK}" stroke-width="2"/>
+      <ellipse cx="58" cy="44" rx="14" ry="5" fill="#ff2d87" stroke="${INK}" stroke-width="1.6"/>
+      <path d="M58 46v10M50 56h16" stroke="${INK}" stroke-width="2"/>
+      <!-- Cây Dừa Neon -->
+      <path d="M72 50 Q66 24 60 4" fill="none" stroke="#8a5a3a" stroke-width="4"/>
+      <path d="M60 4 Q44 0 38 12M60 4 Q74 -6 82 8M60 4 Q50 -12 56 -18" fill="none" stroke="#38c98a" stroke-width="3.5" stroke-linecap="round"/>
+      <!-- Dây đèn quấn thân cây dừa -->
+      ${[40, 30, 20, 10].map((y,k)=>`<circle cx="${68-k*2}" cy="${y}" r="2" fill="${k%2?'#ffd447':'#ff2d87'}"/>`).join('')}
+    </g>
+
+    <!-- Quảng Trường Trung Tâm Phố Không Ngủ (Grand Sleepless Plaza) -->
+    <g transform="translate(200 1280)">
+      <ellipse cx="0" cy="0" rx="74" ry="24" fill="none" stroke="#ff2d87" stroke-width="2.5" opacity=".7" class="pulse"/>
+      <ellipse cx="0" cy="0" rx="52" ry="17" fill="none" stroke="#5ec8ff" stroke-width="2" opacity=".6"/>
+      <ellipse cx="0" cy="0" rx="32" ry="11" fill="#341b52" stroke="#ffd447" stroke-width="2.5"/>
+    </g>
+  </g>`;
+}
+
 /* ---------- bản đồ thành phố ---------- */
-const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[246,440],[316,98],[70,96],[170,700]];
+const MAPPOS=[[100,568],[318,568],[96,262],[318,312],[318,450],[316,98],[70,96],[200,1280]];
 const MAP={open:false,sel:null};
 function treesSVG(){
   const s = typeof getSeason === 'function' ? getSeason() : { id: 'spring' };
@@ -3258,11 +3504,45 @@ function tinyPed(look, flip = false){
   </svg>`;
 }
 function mapPedestrians(isNight){
-  // Dòng người đi bộ tí hon (15x23px) di chuyển nhịp nhàng liên tục dọc các tuyến phố, không có ai bị đứng đơ 1 chỗ
-  return lane(152, 'goR', 20, 0, tinyPed(randomLook()), false, 1.0) +
+  // 1. Dòng người đi bộ tí hon (15x23px) di chuyển nhịp nhàng liên tục dọc các tuyến phố
+  let h = lane(152, 'goR', 20, 0, tinyPed(randomLook()), false, 1.0) +
     lane(488, 'goL', 18, -6, tinyPed(randomLook(), true), true, 1.0) +
     lane(624, 'goR', 22, -11, tinyPed(randomLook()), false, 1.0) +
-    lane(822, 'goL', 19, -4, tinyPed(randomLook(), true), true, 1.0);
+    lane(822, 'goL', 19, -4, tinyPed(randomLook(), true), true, 1.0) +
+    lane(1132, 'goR', 17, -2, tinyPed(randomLook()), false, 1.0) +
+    lane(1312, 'goL', 19, -8, tinyPed(randomLook(), true), true, 1.0);
+
+  // 2. KHÁCH THUÊ TRỌ ĐI MUA ĐỒ, ĐI CHƠI TRONG THÀNH PHỐ!
+  const allTenants = S.branches.flatMap(b => b.rooms.filter(r => r.tenant).map(r => r.tenant));
+  const spots = [
+    { x: 120, y: 448, act: 'trasua', bub: 'Trà sữa ngon quá! 🧋', item: '🧋' },
+    { x: 260, y: 658, act: 'banhtrang', bub: 'Bánh tráng Mee đỉnh! 🥖', item: '🥖' },
+    { x: 338, y: 368, act: 'ao', bub: 'Áo mới xinh xỉu! 👗', item: '👗' },
+    { x: 260, y: 808, act: 'cinema', bub: 'Phim hay quá trời! 🍿', item: '🎬' },
+    { x: 165, y: 1338, act: 'sleepless', bub: 'Phố Không Ngủ quẩy tới sáng! 🌃✨', item: '✨' },
+    { x: 60, y: 1045, act: 'park', bub: 'Ngắm hồ vịt bình yên 🦆', item: '🦆' },
+  ];
+
+  spots.forEach((sp, idx) => {
+    const tenant = (allTenants.length > 0 && allTenants[idx % allTenants.length]) ? allTenants[idx % allTenants.length] : { name: 'Khách trọ ' + (idx + 1), look: randomLook() };
+    h += `<g class="map-tenant-spot" data-act="mtenant:${idx}" role="button" tabindex="0" aria-label="Gặp ${esc(tenant.name)}">
+      <ellipse cx="${sp.x}" cy="${sp.y+2}" rx="14" ry="4" fill="rgba(0,0,0,.22)"/>
+      <g transform="translate(${sp.x-8} ${sp.y-22}) scale(.8)">
+        <g class="bob">${charSVG(tenant.look, 'happy').replace(/<svg[^>]*>/, '').replace(/<\/svg>$/, '')}</g>
+      </g>
+      <!-- Bong bóng lời thoại khách trọ đi chơi/mua đồ -->
+      <g transform="translate(${sp.x} ${sp.y-26})">
+        <rect x="-42" y="-14" width="84" height="15" rx="7.5" fill="#fff" stroke="${INK}" stroke-width="1.4"/>
+        <path d="M-3 1l3 4 3-4z" fill="#fff" stroke="${INK}" stroke-width="1.2"/>
+        <text x="0" y="-3.5" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="6.5" fill="${INK}">${sp.bub}</text>
+      </g>
+      <!-- Bảng tên khách trọ -->
+      <rect x="${sp.x-24}" y="${sp.y+4}" width="48" height="12" rx="6" fill="#ffd447" stroke="${INK}" stroke-width="1.2"/>
+      <text x="${sp.x}" y="${sp.y+13}" text-anchor="middle" font-family="Nunito,sans-serif" font-weight="800" font-size="6.5" fill="${INK}">${esc(tenant.name)}</text>
+    </g>`;
+  });
+
+  return h;
 }
 function pinSVG(t){
   const D=BRANCHES[t],[cx,by]=MAPPOS[t],bi=S.branches.findIndex(b=>b.t===t),own=bi>=0,cur=own&&bi===S.cur,lock=!own&&(S.lv<D.star||!chapOK(D));
@@ -3297,15 +3577,16 @@ function mapSVG(){
     <!-- Center Line -->
     <path d="${d}" fill="none" stroke="${isNight ? '#fef08a' : '#fff'}" stroke-width="1.8" stroke-dasharray="8 8" opacity="${isNight ? '.65' : '.85'}"/>
   `;
-  const R1 = 'M0 170H400', R2 = 'M0 505H400', R3 = 'M0 640H400', RV = 'M200 0V1100', R4 = 'M0 840H400', R5 = 'M0 1000H400', RS = 'M200 300Q260 380 236 452';
+  const R1 = 'M0 170H400', R2 = 'M0 505H400', R3 = 'M0 640H400', RV = 'M200 0V1440', R4 = 'M0 840H400', R5 = 'M0 1000H400', R6 = 'M0 1150H400', R7 = 'M0 1330H400';
   const nightGlow = isNight ? `<defs>
   <radialGradient id="lampGlow"><stop offset="0%" stop-color="#ffd447" stop-opacity=".75"/><stop offset="60%" stop-color="#f59e0b" stop-opacity=".3"/><stop offset="100%" stop-color="#f59e0b" stop-opacity="0"/></radialGradient>
 </defs>
-<g opacity=".65">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[200,300],[200,840],[200,1000]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="38" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
-  return `<svg viewBox="0 0 400 1100" class="mapsvg ${isNight ? 'night-active' : ''}" aria-label="Bản đồ thành phố">
+<g opacity=".65">${[[60,170],[160,170],[260,170],[360,170],[60,505],[160,505],[260,505],[360,505],[60,640],[160,640],[260,640],[360,640],[60,840],[160,840],[260,840],[360,840],[60,1000],[160,1000],[260,1000],[360,1000],[60,1150],[160,1150],[260,1150],[360,1150],[60,1330],[160,1330],[260,1330],[360,1330],[200,300],[200,740],[200,1070],[200,1240]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="38" fill="url(#lampGlow)"/>`).join('')}</g>` : '';
+  return `<svg viewBox="0 0 400 1440" class="mapsvg ${isNight ? 'night-active' : ''}" aria-label="Bản đồ thành phố">
    ${nightGlow}
-   <rect width="400" height="1100" fill="${mapBg}"/>
+   <rect width="400" height="1440" fill="${mapBg}"/>
    ${southSVG(isNight)}
+   ${sleeplessDistrictSVG(isNight)}
    <g fill="${hillCol}">${[[60,380],[300,420],[120,700],[350,620],[260,250]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="40"/>`).join('')}</g>
    <path d="M0 0H190Q170 70 135 105Q95 150 0 160Z" fill="${riverCol}" stroke="${INK}" stroke-width="2.5"/>
    <path d="M20 30q10-6 20 0M110 40q10-6 20 0M40 130q10-6 20 0" stroke="#fff" stroke-width="2" fill="none" class="wave"/>
@@ -3315,7 +3596,7 @@ function mapSVG(){
    <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="${riverCol}" stroke-width="35" stroke-linecap="round"/>
    <path d="M402 178C320 206 270 280 205 322S70 392 -4 430" fill="none" stroke="#fff" stroke-width="1.5" stroke-dasharray="6 14" opacity=".8" class="flow"/>
    <ellipse cx="96" cy="266" rx="88" ry="44" fill="${isNight ? '#3d2035' : '#ffc6dc'}" stroke="${INK}" stroke-width="2.5"/><ellipse cx="96" cy="250" rx="54" ry="22" fill="${isNight ? '#4d2943' : '#ffd9e8'}"/>
-   ${road(R1)}${road(R2)}${road(R3)}${road(R4)}${road(R5)}${road(RV)}
+   ${road(R1)}${road(R2)}${road(R3)}${road(R4)}${road(R5)}${road(R6)}${road(R7)}${road(RV)}
    <path d="M180 0V0" />
    <g><rect x="186" y="304" width="28" height="40" rx="3" fill="#c98b5a" stroke="${INK}" stroke-width="2"/><path d="M186 312h28M186 336h28" stroke="${INK}" stroke-width="1.5"/></g>
    <g stroke="${INK}" stroke-width="2"><path d="M210 52H400M210 62H400" /></g><g stroke="#a86c42" stroke-width="3">${Array.from({length:16},(_,k)=>`<path d="M${214+k*12} 48v18"/>`).join('')}</g>
@@ -3351,7 +3632,7 @@ function renderMap(){
     <div class="mbody">${mapSVG()}</div>${mapCard()}`;
   const mb=el.querySelector('.mbody');
   if(sc!=null)mb.scrollTop=sc;
-  else{const [,y]=MAPPOS[S.branches[S.cur].t];requestAnimationFrame(()=>{const h=mb.scrollHeight;mb.scrollTop=Math.max(0,y/1100*h-mb.clientHeight/2);});}
+  else{const [,y]=MAPPOS[S.branches[S.cur].t];requestAnimationFrame(()=>{const h=mb.scrollHeight;mb.scrollTop=Math.max(0,y/1440*h-mb.clientHeight/2);});}
 }
 function openMap(){MAP.open=true;MAP.sel=null;const el=$('#cmap');el.hidden=false;el.innerHTML='';renderMap();}
 function closeMap(){MAP.open=false;SI.id=null;$('#cmap').hidden=true;}
@@ -3360,6 +3641,27 @@ function mapAct(act,arg){
   if(act==='mapclose'){closeMap();return true;}
   if(act==='maplist'){closeMap();UI.modal='branches';renderModal();return true;}
   if(act==='mapstart'){toast('Chiếc xe bánh tráng năm xưa vẫn đậu trước cổng trường…','yel');return true;}
+  if(act==='mtenant'){
+    const idx = +arg;
+    const allTenants = S.branches.flatMap(b => b.rooms.filter(r => r.tenant).map(r => r.tenant));
+    const tenant = (allTenants.length > 0 && allTenants[idx % allTenants.length]) ? allTenants[idx % allTenants.length] : { name: 'Khách trọ' };
+    const gifts = [
+      { t: 'Trà sữa', coin: 250, msg: `${tenant.name}: "Em vừa mua ly trà sữa ngon tuyệt, tặng chủ trọ ít lì xì nè! Cảm ơn phòng trọ tuyệt vời! 💕"` },
+      { t: 'Bánh tráng', coin: 200, msg: `${tenant.name}: "Bánh tráng giòn thơm béo ngậy, mời chủ trọ ăn chung nha! 😋"` },
+      { t: 'Áo xinh', coin: 350, msg: `${tenant.name}: "Chủ trọ ơi, em vừa mua áo mới siêu hợp luôn! Tặng chủ trọ tiền tiêu vặt nè! 👗"` },
+      { t: 'Xem phim', coin: 400, msg: `${tenant.name}: "Phim Mee Cinema chiếu hay chấn động luôn chủ trọ ơi! Lấy tiền cà phê nhé! 🎬"` },
+      { t: 'Phố Đêm', coin: 600, msg: `${tenant.name}: "Phố Không Ngủ quẩy tới sáng vui náo nhiệt hết nấc! Gửi chủ trọ tiền may mắn! 🌃✨"` },
+      { t: 'Hồ Vịt', coin: 300, msg: `${tenant.name}: "Hồ vịt chiều nay gió mát quá, em gửi chủ trọ ít hoa quả tươi! 🦆"` },
+    ];
+    const g = gifts[idx % gifts.length];
+    S.money += g.coin;
+    addXp(15);
+    snd('coin');
+    toast(`+${fmt(g.coin)}: ${g.msg}`, 'yel');
+    hud();
+    save();
+    return true;
+  }
   if(act==='mapgo'){const t=+arg,bi=S.branches.findIndex(b=>b.t===t);
     if(bi>=0){closeMap();if(bi!==S.cur)switchBranch(bi);else toast('Bạn đang ở '+brName(),'yel');return true;}
     MAP.sel=t;renderMap();return true;}
